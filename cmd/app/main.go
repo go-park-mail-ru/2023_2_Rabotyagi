@@ -4,7 +4,7 @@ import (
 	"log"
 
 	rabotyagi "github.com/go-park-mail-ru/2023_2_Rabotyagi"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport"
+	handler "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/handlers"
 )
 
 func main() {
