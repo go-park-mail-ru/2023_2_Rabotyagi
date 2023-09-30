@@ -7,7 +7,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
 )
 
-
 func GenerateJwtToken(user *storage.User, secret []byte) (string, error) {
     token := jwt.New(jwt.SigningMethodHS256)
 
