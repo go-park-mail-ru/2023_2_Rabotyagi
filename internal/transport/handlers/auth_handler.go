@@ -17,15 +17,22 @@ type AuthHandler struct {
 
 func (h *AuthHandler) InitRoutes() http.Handler {
 	router := http.NewServeMux()
-	authHandler := AuthHandler{}
+
+	storageMap := storage.NewAuthStorageMap()
+	authHandler := &AuthHandler{
+		storage: storageMap,
+	}
+
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Вы на дефолтной странице")
+	})
 
 	router.HandleFunc("/signin/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		switch r.Method {
-		case http.MethodPost:
+		if r.Method == http.MethodPost {
 			authHandler.signInHandler(w, r)
-		default:
+		} else {
 			http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 		}
 	})
@@ -33,10 +40,9 @@ func (h *AuthHandler) InitRoutes() http.Handler {
 	router.HandleFunc("/signup/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		switch r.Method {
-		case http.MethodPost:
+		if r.Method == http.MethodPost {
 			authHandler.signUpHandler(w, r)
-		default:
+		} else {
 			http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 		}
 	})
@@ -51,7 +57,6 @@ var secret = []byte("super-secret")
 func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	// декодим json из реквеста в storage.PreUser
 	decoder := json.NewDecoder(r.Body)
 
 	newUser := new(storage.PreUser)
@@ -70,7 +75,7 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("{}"))
 		return
 	}
-
+	
 	// создаем юзера
 	h.storage.CreateUser(newUser)
 
@@ -88,7 +93,7 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("{}"))
 		return
 	}
-
+	
 	w.Header().Set("Content-Type", "application/json")
 
 	// выставляем куку

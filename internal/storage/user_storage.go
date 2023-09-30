@@ -33,6 +33,13 @@ type AuthStorageMap struct {
 	users        map[string]User
 }
 
+func NewAuthStorageMap() *AuthStorageMap {
+	return &AuthStorageMap{
+		counterUsers: 0,
+		users: make(map[string]User),
+	}
+}
+
 func (a *AuthStorageMap) generateIDCurUser() uint64 {
 	a.counterUsers++
 
