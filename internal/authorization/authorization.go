@@ -3,16 +3,16 @@ package authorization
 import (
 	"time"
 
-	rabotyagi "github.com/go-park-mail-ru/2023_2_Rabotyagi"
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
 )
 
 
-func GenerateJwtToken(user *rabotyagi.User, secret []byte) (string, error) {
+func GenerateJwtToken(user *storage.User, secret []byte) (string, error) {
     token := jwt.New(jwt.SigningMethodHS256)
 
     claims := token.Claims.(jwt.MapClaims)
-    //claims["userID"] = user.Id
+    claims["userID"] = user.ID
     claims["username"] = user.Name
     claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // Токен будет действителен в течение 24 часов
 

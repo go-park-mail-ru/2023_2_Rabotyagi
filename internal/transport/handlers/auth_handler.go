@@ -13,13 +13,13 @@ import (
 )
 
 type AuthHandler struct {
-	storage *storage.AuthStorage
+	storage *storage.AuthStorageMap
 }
 
-type RegRequest struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-}
+// type RegRequest struct {
+// 	Name     string `json:"name"`
+// 	Password string `json:"password"`
+// }
 
 func (h *AuthHandler) InitRoutes() http.Handler {
 	router := http.NewServeMux()
@@ -59,7 +59,7 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 
-	newUser := new(storage.User)
+	newUser := new(storage.PreUser)
 	err := decoder.Decode(newUser)
 	if err != nil {
 		log.Printf("error while unmarshalling JSON: %s", err)
@@ -74,18 +74,22 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	// 	id = h.storage.users[len(h.storage.users)-1].Id + 1
 	// }
 
-	if _, exists := h.storage.users[newUser.Name]; exists {
+	if h.storage.IsUserExist(newUser.Name) {
 		log.Printf("%s", errUserExists)
 		w.Write([]byte("{}"))
 		return
 	}
 
-	h.storage.users[newUser.Name] = rabotyagi.User{
-		Name:     newUser.Name,
-		Password: newUser.Password,
+	h.storage.CreateUser(newUser)
+
+	userWithId, err := h.storage.GetUser(newUser.Name)
+	if err != nil {
+		log.Printf("error while getting user: %s", err)
+		w.Write([]byte("{}"))
+		return
 	}
 
-	jwtStr, err := auth.GenerateJwtToken(newUser, secret)
+	jwtStr, err := auth.GenerateJwtToken(userWithId, secret)
 	if err != nil {
 		log.Printf("%s", err)
 		w.Write([]byte("{}"))
@@ -94,18 +98,16 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
+	cookie := &http.Cookie{
+		Name:  "session_id",
+		Value: jwtStr,
+	}
+
+	http.SetCookie(w, cookie)
+
 	// Отправляем токен как строку в теле ответа
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(jwtStr))
-}
-
-type LoginRequest struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-}
-
-type LoginResponse struct {
-	AccessToken string `json:"access_token"`
 }
 
 var (
@@ -127,15 +129,36 @@ func (h *AuthHandler) signInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//fmt.Println(user)
+	if !h.storage.IsUserExist(user.Name) {
+		log.Printf("user is not exists")
+		w.Write([]byte("{}"))
+		return
+	}
 
-	//user, exists := h.storage.users[user.Name]
-	//// Если пользователь не найден, возвращаем ошибку
-	//if !exists {
-	//    return errBadCredentials
-	//}
-	//// Если пользователь найден, но у него другой пароль, возвращаем ошибку
-	//if user.password != regReq.Password {
-	//    return errBadCredentials
-	//}
+	userWithId, err := h.storage.GetUser(user.Name)
+	if err != nil || user.Password != userWithId.Password {
+		log.Printf("error while getting user: %s", err)
+		w.Write([]byte("{}"))
+		return
+	}
+
+	jwtStr, err := auth.GenerateJwtToken(userWithId, secret)
+	if err != nil {
+		log.Printf("%s", err)
+		w.Write([]byte("{}"))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	cookie := &http.Cookie{
+		Name:  "session_id",
+		Value: jwtStr,
+	}
+
+	http.SetCookie(w, cookie)
+
+	// Отправляем токен как строку в теле ответа
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(jwtStr))
 }
