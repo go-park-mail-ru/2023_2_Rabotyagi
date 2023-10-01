@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	handler := new(handler.AuthHandler)
+	handler := new(handler.Handler)
 
 	srv := new(rabotyagi.Server)
 	if err := srv.Run("8080", handler.InitRoutes()); err != nil {

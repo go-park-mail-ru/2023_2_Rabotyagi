@@ -13,51 +13,16 @@ import (
 // TODO from config
 var secret = []byte("super-secret")
 
-type AuthHandler struct {
-	storage *storage.AuthStorageMap
-}
-
-func (h *AuthHandler) InitRoutes() http.Handler {
-	router := http.NewServeMux()
-
-	storageMap := storage.NewAuthStorageMap()
-	authHandler := &AuthHandler{
-		storage: storageMap,
-	}
-
-	router.HandleFunc("/api/v1/signup/", authHandler.signUpHandler)
-
-	return router
-}
-
-func sendErr(w http.ResponseWriter, errResponse ErrorResponse) {
-	response, err := json.Marshal(errResponse)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-
-	_, err = w.Write(response)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-}
-
-func sendResponse(w http.ResponseWriter, response Response) {
-	responseSend, err := json.Marshal(response)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-
-	_, err = w.Write(responseSend)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-}
-
+// signUpHandler godoc
+//
+//  @Summary    register user
+//  @Description  register new user
+//  @Accept      json
+//  @Produce    json
+//  @Param      user  body    preUser  true  "User"
+//  @Success    200  {object}  myError
+//  @Failure    500  {object}  myError
+//  @Router      /signup/ [post]
 func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -126,54 +91,68 @@ var (
 	errBadCredentials = errors.New("email or password is incorrect")
 )
 
+// signInHandler godoc
+//
+//  @Summary    login user
+//  @Description  login user
+//  @Accept      json
+//  @Produce    json
+//  @Param      user  body    preUser  true  "User"
+//  @Success    200  {object}  myError
+//  @Failure    500  {object}  myError
+//  @Router      /signin/ [post]
 func (h *AuthHandler) signInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-
-	// декодим json из реквеста в storage.PreUser
+  
+	if r.Method != http.MethodPost {
+	  http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+  
 	decoder := json.NewDecoder(r.Body)
-
-	user := new(storage.PreUser)
-	err := decoder.Decode(user)
+  
+	preUser := new(storage.PreUser)
+  
+	if err := decoder.Decode(preUser); err != nil {
+	  log.Printf("%v\n", err)
+	  sendErr(w, ErrBadRequest)
+  
+	  return
+	}
+  
+	if !h.storage.IsUserExist(preUser.Email) {
+	  log.Printf("user is not exists %v\n", preUser)
+	  sendErr(w, ErrWrongCredentials)
+  
+	  return
+	}
+  
+	user, err := h.storage.GetUser(preUser.Email)
+	if err != nil || preUser.Password != user.Password {
+	  log.Printf("%v\n", err)
+	  sendErr(w, ErrWrongCredentials)
+  
+	  return
+	}
+  
+	jwtStr, err := auth.GenerateJwtToken(user, secret)
 	if err != nil {
-		log.Printf("error while unmarshalling JSON: %s", err)
-		w.Write([]byte("{}"))
-		return
+	  log.Printf("%v\n", err)
+	  sendErr(w, ErrInternalServer)
+  
+	  return
 	}
-
-	// нет юзера с таким именем
-	if !h.storage.IsUserExist(user.Email) {
-		log.Printf("user is not exists")
-		w.Write([]byte("{}"))
-		return
-	}
-
-	// неправильный пароль
-	userWithId, err := h.storage.GetUser(user.Email)
-	if err != nil || user.Password != userWithId.Password {
-		log.Printf("error while getting user: %s", err)
-		w.Write([]byte("{}"))
-		return
-	}
-
-	// генерируем jwt токен из юзера
-	jwtStr, err := auth.GenerateJwtToken(userWithId, secret)
-	if err != nil {
-		log.Printf("%s", err)
-		w.Write([]byte("{}"))
-		return
-	}
-
+  
 	w.Header().Set("Content-Type", "application/json")
-
-	// выставляем куку
-	cookie := &http.Cookie{
-		Name:  "session_id",
-		Value: jwtStr,
+  
+	cookie := &http.Cookie{ //nolint:exhaustruct,exhaustivestruct
+	  Name:  "session_id",
+	  Value: jwtStr,
 	}
-
+  
 	http.SetCookie(w, cookie)
-
-	// Отправляем токен как строку в теле ответа
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(jwtStr))
-}
+  
+	sendResponse(w, ResponseSuccessfulSignIn)
+  
+	log.Printf("sign user: %v", user)
+  }
