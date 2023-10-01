@@ -23,11 +23,10 @@ func (h *AuthHandler) InitRoutes() http.Handler {
 		storage: storageMap,
 	}
 
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Вы на дефолтной странице")
-	})
+	router.HandleFunc("/api/v1/signin/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Вы на логине")
+		log.Println(r.URL.Path)
 
-	router.HandleFunc("/signin/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if r.Method == http.MethodPost {
@@ -37,7 +36,9 @@ func (h *AuthHandler) InitRoutes() http.Handler {
 		}
 	})
 
-	router.HandleFunc("/signup/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/api/v1/signup/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.URL.Path)
+		
 		w.Header().Set("Content-Type", "application/json")
 
 		if r.Method == http.MethodPost {
@@ -70,7 +71,7 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(newUser)
 
 	// уже есть юзер с таким именем
-	if h.storage.IsUserExist(newUser.Name) {
+	if h.storage.IsUserExist(newUser.Email) {
 		log.Printf("%s", errUserExists)
 		w.Write([]byte("{}"))
 		return
@@ -79,7 +80,7 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	// создаем юзера
 	h.storage.CreateUser(newUser)
 
-	userWithId, err := h.storage.GetUser(newUser.Name)
+	userWithId, err := h.storage.GetUser(newUser.Email)
 	if err != nil {
 		log.Printf("error while getting user: %s", err)
 		w.Write([]byte("{}"))
@@ -128,14 +129,14 @@ func (h *AuthHandler) signInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// нет юзера с таким именем
-	if !h.storage.IsUserExist(user.Name) {
+	if !h.storage.IsUserExist(user.Email) {
 		log.Printf("user is not exists")
 		w.Write([]byte("{}"))
 		return
 	}
 
 	// неправильный пароль
-	userWithId, err := h.storage.GetUser(user.Name)
+	userWithId, err := h.storage.GetUser(user.Email)
 	if err != nil || user.Password != userWithId.Password {
 		log.Printf("error while getting user: %s", err)
 		w.Write([]byte("{}"))

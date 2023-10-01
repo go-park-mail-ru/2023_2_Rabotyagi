@@ -12,7 +12,7 @@ func GenerateJwtToken(user *storage.User, secret []byte) (string, error) {
 
     claims := token.Claims.(jwt.MapClaims)
     claims["userID"] = user.ID
-    claims["username"] = user.Name
+    claims["email"] = user.Email
     claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // Токен будет действителен в течение 24 часов
 
     // Подписываем токен используя переданный секретный ключ

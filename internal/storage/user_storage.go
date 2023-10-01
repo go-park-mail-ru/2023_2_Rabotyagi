@@ -13,12 +13,12 @@ var (
 
 type User struct {
 	ID       uint64
-	Name     string `json:"name"`
+	Email     string `json:"email"`
 	Password string `json:"password"`
 }
 
 type PreUser struct {
-	Name     string `json:"name"`
+	Email     string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -46,28 +46,28 @@ func (a *AuthStorageMap) generateIDCurUser() uint64 {
 	return a.counterUsers
 }
 
-func (a *AuthStorageMap) GetUser(username string) (*User, error) {
-	if !a.IsUserExist(username) {
-		return nil, fmt.Errorf("username ==%s %w", username, ErrUserNotExist)
+func (a *AuthStorageMap) GetUser(email string) (*User, error) {
+	if !a.IsUserExist(email) {
+		return nil, fmt.Errorf("username ==%s %w", email, ErrUserNotExist)
 	}
 
-	user := a.users[username]
+	user := a.users[email]
 
 	return &user, nil
 }
 
 func (a *AuthStorageMap) CreateUser(user *PreUser) error {
-	if a.IsUserExist(user.Name) {
-		return fmt.Errorf("username ==%s %w", user.Name, ErrUserAlreadyExist)
+	if a.IsUserExist(user.Email) {
+		return fmt.Errorf("email ==%s %w", user.Email, ErrUserAlreadyExist)
 	}
 
-	a.users[user.Name] = User{ID: a.generateIDCurUser(), Name: user.Name, Password: user.Password}
+	a.users[user.Email] = User{ID: a.generateIDCurUser(), Email: user.Email, Password: user.Password}
 
 	return nil
 }
 
-func (a *AuthStorageMap) IsUserExist(username string) bool {
-	_, ok := a.users[username]
+func (a *AuthStorageMap) IsUserExist(email string) bool {
+	_, ok := a.users[email]
 
 	return ok
 }
