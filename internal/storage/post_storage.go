@@ -31,6 +31,7 @@ type PrePost struct {
 
 type PostStorage interface {
 	GetPost(postID uint64) (*Post, error)
+	GetAllPosts()(*[]Post)
 	AddPost(user *PreUser) 
 }
 
@@ -55,7 +56,7 @@ func (a *PostStorageMap) generatePostID() uint64 {
 func (a *PostStorageMap) GetPost(postID uint64) (*Post, error) {
 	post, exists := a.posts[postID]
 	
-	if exists{
+	if exists {
 		return &post, nil
 	}
 
@@ -71,3 +72,15 @@ func (a *PostStorageMap) AddPost(post *PrePost) {
 		Delivery: post.Delivery, City: post.City,
 	}
 }
+
+func (a *PostStorageMap) GetAllPosts() *[]Post {
+	bookSlice := make([]Post, 0, len(a.posts))
+
+	for _, value := range a.posts {
+		bookSlice = append(bookSlice, value)
+	}
+
+	return &bookSlice
+}
+
+
