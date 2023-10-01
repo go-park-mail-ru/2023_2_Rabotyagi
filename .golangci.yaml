@@ -123,3 +123,16 @@ linters:
     - style
     - test
     - unused
+
+linters-settings:
+  depguard:
+    rules:
+      main:
+        files:
+          - $all
+        allow:
+          - $gostd
+          - github.com/go-park-mail-ru/2023_2_Rabotyagi
+        deny:
+          - pkg: "github.com/pkg/errors"
+            desc: Should be replaced by standard lib errors package
