@@ -133,6 +133,7 @@ linters-settings:
         allow:
           - $gostd
           - github.com/go-park-mail-ru/2023_2_Rabotyagi
+          - github.com/dgrijalva/jwt-go
         deny:
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package
