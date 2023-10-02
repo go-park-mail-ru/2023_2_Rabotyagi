@@ -40,6 +40,10 @@ func NewAuthStorageMap() *AuthStorageMap {
 	}
 }
 
+func (a *AuthStorageMap) GetUsersCount() int {
+	return len(a.users)
+}
+
 func (a *AuthStorageMap) generateIDCurUser() uint64 {
 	a.counterUsers++
 
