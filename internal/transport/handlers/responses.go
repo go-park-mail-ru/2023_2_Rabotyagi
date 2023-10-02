@@ -49,6 +49,8 @@ var (
 	ResponseSuccessfulSignUp = Response{Status: StatusResponseSuccessful, Body: ResponseBody{Message: "Successful sign up"}}
 	ResponseSuccessfulSignIn = Response{Status: StatusResponseSuccessful, Body: ResponseBody{Message: "Successful sign in"}}
 	ResponseSuccessfulLogOut = Response{Status: StatusResponseSuccessful, Body: ResponseBody{Message: "Successful log out"}}
+
+	ResponseSuccessfulAddPost = Response{Status: StatusResponseSuccessful, Body: ResponseBody{Message: "Successful add post"}}
   
 	ErrInternalServer   = ErrorResponse{Status: StatusErrServerError, Body: ResponseBodyError{Error: "Error in server"}}
 	ErrBadRequest       = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "Wrong request"}}
@@ -59,20 +61,6 @@ var (
 	ErrPostNotExist = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "Post not exists"}}
 	ErrNoSuchCountOfPosts = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "n > posts count"}}
 )
-
-func sendErr(w http.ResponseWriter, errResponse ErrorResponse) {
-	response, err := json.Marshal(errResponse)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-
-	_, err = w.Write(response)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-}
 
 func sendResponse(w http.ResponseWriter, response any) {
 	responseSend, err := json.Marshal(response)

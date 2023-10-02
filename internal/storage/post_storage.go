@@ -48,6 +48,10 @@ func NewPostStorageMap() *PostStorageMap {
 	}
 }
 
+func (a *PostStorageMap) GetPostsCount() int {
+	return len(a.posts)
+}
+
 func (a *PostStorageMap) generatePostID() uint64 {
 	a.counterPosts++
 

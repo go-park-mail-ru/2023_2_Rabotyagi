@@ -16,8 +16,8 @@ import (
 //  @Accept      json
 //  @Produce    json
 //  @Param      post  path    prePost  true  "Post"
-//  @Success    200  {object}  myError
-//  @Failure    400  {object}  myError
+//  @Success    200  Response
+//  @Failure    400  string
 //  @Router      /post/add [post]
 func (h *PostHandler) addPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -31,7 +31,7 @@ func (h *PostHandler) addPostHandler(w http.ResponseWriter, r *http.Request) {
 	prePost := new(storage.PrePost)
 	if err := decoder.Decode(prePost); err != nil {
 		log.Printf("%v\n", err)
-		sendErr(w, ErrBadRequest)
+		sendResponse(w, ErrBadRequest)
 
 		return
 	}
@@ -42,7 +42,7 @@ func (h *PostHandler) addPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
-	sendResponse(w, ResponseSuccessfulSignUp)
+	sendResponse(w, ResponseSuccessfulAddPost)
 
 	log.Printf("added user: %v", prePost)
 }
@@ -54,8 +54,8 @@ func (h *PostHandler) addPostHandler(w http.ResponseWriter, r *http.Request) {
 //  @Accept      json
 //  @Produce    json
 //  @Param      id  path    uint64  true  "Post ID"
-//  @Success    200  {object}  myError
-//  @Failure    400  {object}  myError
+//  @Success    200  Response
+//  @Failure    400  string
 //  @Router      /post/get/ [get]
 func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -73,7 +73,7 @@ func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	postID := new(jsonID)
 	if err := decoder.Decode(postID); err != nil {
 		log.Printf("%v\n", err)
-		sendErr(w, ErrBadRequest)
+		sendResponse(w, ErrBadRequest)
 
 		return
 	}
@@ -81,7 +81,7 @@ func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	post, err := h.storage.GetPost(postID.id)
 	if err != nil {
 		log.Printf("post with this id is not exists %v\n", postID )
-		sendErr(w, ErrPostNotExist)
+		sendResponse(w, ErrPostNotExist)
 	
 		return
 	}
@@ -107,8 +107,8 @@ func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
 //  @Accept      json
 //  @Produce    json
 //  @Param      count  path    int  true  "Posts count"
-//  @Success    200  {object}  myError
-//  @Failure    400  {object}  myError
+//  @Success    200  Response
+//  @Failure    400  string
 //  @Router      /post/get_list [get]
 func (h *PostHandler) getPostsListHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -126,7 +126,7 @@ func (h *PostHandler) getPostsListHandler(w http.ResponseWriter, r *http.Request
 	postsCount := new(count)
 	if err := decoder.Decode(postsCount); err != nil {
 		log.Printf("%v\n", err)
-		sendErr(w, ErrBadRequest)
+		sendResponse(w, ErrBadRequest)
 
 		return
 	}
@@ -134,7 +134,7 @@ func (h *PostHandler) getPostsListHandler(w http.ResponseWriter, r *http.Request
 	posts, err := h.storage.GetNPosts(int(postsCount.count))
 	if err != nil {
 		log.Printf("n > posts count %v\n", postsCount.count )
-		sendErr(w, ErrPostNotExist)
+		sendResponse(w, ErrPostNotExist)
 	
 		return
 	}
