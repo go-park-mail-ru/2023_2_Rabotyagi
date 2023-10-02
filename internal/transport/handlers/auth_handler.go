@@ -12,39 +12,6 @@ import (
 
 const timeTokenLife = 24 * time.Hour
 
-type AuthHandler struct {
-	storage *storage.AuthStorageMap
-}
-
-func (h *AuthHandler) InitRoutes() http.Handler {
-	router := http.NewServeMux()
-
-	storageMap := storage.NewAuthStorageMap()
-	authHandler := &AuthHandler{
-		storage: storageMap,
-	}
-
-	router.HandleFunc("/api/v1/signup/", authHandler.signUpHandler)
-	router.HandleFunc("/api/v1/signin/", authHandler.signInHandler)
-	router.HandleFunc("/api/v1/logout/", authHandler.logOut)
-
-	return router
-}
-
-func sendResponse(w http.ResponseWriter, response any) {
-	responseSend, err := json.Marshal(response)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-
-	_, err = w.Write(responseSend)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-}
-
 func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
