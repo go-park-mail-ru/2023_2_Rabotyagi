@@ -17,10 +17,6 @@ type ErrorResponse struct {
 	Body   ResponseBodyError
 }
 
-func NewErrorResponse(status int, error string) ErrorResponse {
-	return ErrorResponse{Status: status, Body: ResponseBodyError{Error: error}}
-}
-
 type ResponseBody struct {
 	Message string `json:"message"`
 }

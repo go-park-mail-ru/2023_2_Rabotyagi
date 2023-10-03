@@ -100,11 +100,11 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    200  {object} ErrorResponse
-//	@Router      /signin [get]
+//	@Router      /signin [post]
 func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	if r.Method != http.MethodGet {
+	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
 		return
@@ -141,7 +141,8 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	jwtStr, err := jwt.GenerateJwtToken(&jwt.UserJwtPayload{
 		UserID: user.ID,
 		Email:  user.Email,
-		Expire: expire.Unix()},
+		Expire: expire.Unix(),
+	},
 		jwt.Secret,
 	)
 	if err != nil {

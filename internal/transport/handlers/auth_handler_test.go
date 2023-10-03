@@ -105,7 +105,7 @@ func TestSignInHandlerSuccessful(t *testing.T) {
 				t.Fatalf("Failed to marshal request body: %v", err)
 			}
 
-			req := httptest.NewRequest(http.MethodGet, "/api/v1/signin", bytes.NewBuffer(reqBody))
+			req := httptest.NewRequest(http.MethodPost, "/api/v1/signin", bytes.NewBuffer(reqBody))
 
 			w := httptest.NewRecorder()
 
