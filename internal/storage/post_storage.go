@@ -85,8 +85,8 @@ func (a *PostStorageMap) GetNPosts(n int) ([]Post, error) {
 
 	postSlice := make([]Post, 0, n)
 
-	for i := 0; i < n; i++ {
-		postSlice = append(postSlice, a.posts[uint64(i)])
+	for _, v := range a.posts {
+		postSlice = append(postSlice, v)
 	}
 
 	return postSlice, nil

@@ -9,6 +9,10 @@ Backend репозиторий команды Работяги
 
 `swag init -g cmd/app/main.go`
 
+### Тестирование 
+
+`mkdir -p bin && go test -v  -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html`
+
 ## Docker image build
 
 ### Local

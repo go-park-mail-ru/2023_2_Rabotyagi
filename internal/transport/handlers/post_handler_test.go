@@ -1,42 +1,42 @@
 package handler_test
 
 import (
-	"testing"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
-	"encoding/json"
-	"bytes"
-	"io"
-
+	"reflect"
+	"testing"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
 	handler "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/handlers"
 )
 
 type TestCase struct {
-	Post       *storage.PrePost
-	Response   []byte
+	Post     *storage.PrePost
+	Response []byte
 }
 
 func TestAddPostHandler(t *testing.T) {
 	prePost := &storage.PrePost{
-        AuthorID:        1,
-        Title:           "Test Post",
-        Description:     "This is a test post",
-        Price:           100,
-        SafeTransaction: true,
-        Delivery:        true,
-        City:            "Moscow",
-    }
-
-	expectedResponse, _ := json.Marshal(handler.ResponseSuccessfulAddPost) 
-	
-	var testCase TestCase = TestCase{
-		Post:        prePost,
-		Response:    expectedResponse,
+		AuthorID:        1,
+		Title:           "Test Post",
+		Description:     "This is a test post",
+		Price:           100,
+		SafeTransaction: true,
+		Delivery:        true,
+		City:            "Moscow",
 	}
 
-	
+	expectedResponse, _ := json.Marshal(handler.ResponseSuccessfulAddPost)
+
+	var testCase TestCase = TestCase{
+		Post:     prePost,
+		Response: expectedResponse,
+	}
+
 	reqBody, err := json.Marshal(&prePost)
 	if err != nil {
 		t.Fatalf("Failed to marshal request body: %v", err)
@@ -53,7 +53,7 @@ func TestAddPostHandler(t *testing.T) {
 	postHandler := &handler.PostHandler{
 		Storage: postStorageMap,
 	}
-	
+
 	postHandler.AddPostHandler(w, req)
 
 	resp := w.Result()
@@ -71,36 +71,36 @@ func TestAddPostHandler(t *testing.T) {
 
 func TestGetPostHandler(t *testing.T) {
 	prePost := &storage.PrePost{
-        AuthorID:        1,
-        Title:           "Test Post",
-        Description:     "This is a test post",
-        Price:           100,
-        SafeTransaction: true,
-        Delivery:        true,
-        City:            "Moscow",
-    }
+		AuthorID:        1,
+		Title:           "Test Post",
+		Description:     "This is a test post",
+		Price:           100,
+		SafeTransaction: true,
+		Delivery:        true,
+		City:            "Moscow",
+	}
 
 	post := &storage.Post{
-		ID: 1,
-        AuthorID:        1,
-        Title:           "Test Post",
-        Description:     "This is a test post",
-        Price:           100,
-        SafeTransaction: true,
-        Delivery:        true,
-        City:            "Moscow",
-    }
+		ID:              1,
+		AuthorID:        1,
+		Title:           "Test Post",
+		Description:     "This is a test post",
+		Price:           100,
+		SafeTransaction: true,
+		Delivery:        true,
+		City:            "Moscow",
+	}
 
 	ResponseSuccessfulGetPost := handler.PostResponse{
 		Status: handler.StatusResponseSuccessful,
 		Body:   *post,
 	}
 
-	expectedResponse, _ := json.Marshal(ResponseSuccessfulGetPost) 
-	
+	expectedResponse, _ := json.Marshal(ResponseSuccessfulGetPost)
+
 	var testCase TestCase = TestCase{
-		Post:        prePost,
-		Response:    expectedResponse,
+		Post:     prePost,
+		Response: expectedResponse,
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/post/get/1", nil)
@@ -113,13 +113,13 @@ func TestGetPostHandler(t *testing.T) {
 	}
 
 	postHandler.Storage.AddPost(prePost)
-	
+
 	postHandler.GetPostHandler(w, req)
-	
+
 	resp := w.Result()
 
 	defer resp.Body.Close()
-	
+
 	body, _ := io.ReadAll(resp.Body)
 
 	bodyStr := string(body)
@@ -129,5 +129,84 @@ func TestGetPostHandler(t *testing.T) {
 	}
 }
 
+//nolint:funlen
+func TestGetPostsListHandlerSuccessful(t *testing.T) {
+	t.Parallel()
 
+	type TestCase struct {
+		name             string
+		inputParamCount  int
+		handler          *handler.PostHandler
+		postsForStorage  []storage.PrePost
+		expectedResponse handler.PostsListResponse
+	}
 
+	testCases := [...]TestCase{
+		{
+			name:            "test basic work",
+			inputParamCount: 1,
+			handler:         &handler.PostHandler{Storage: storage.NewPostStorageMap()},
+			postsForStorage: []storage.PrePost{{
+				AuthorID:        1,
+				Title:           "Test Post",
+				Description:     "This is a test post",
+				Price:           100,
+				SafeTransaction: true,
+				Delivery:        true,
+				City:            "Moscow",
+			}},
+			expectedResponse: handler.PostsListResponse{
+				Status: handler.StatusResponseSuccessful,
+				Body: []storage.Post{{
+					ID:              1,
+					AuthorID:        1,
+					Title:           "Test Post",
+					Description:     "This is a test post",
+					Price:           100,
+					SafeTransaction: true,
+					Delivery:        true,
+					City:            "Moscow",
+				}},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			for _, v := range testCase.postsForStorage {
+				testCase.handler.Storage.AddPost(&v)
+			}
+
+			req := httptest.NewRequest(http.MethodGet,
+				fmt.Sprintf("/api/v1/post/get_list?count=%d", testCase.inputParamCount), nil)
+
+			w := httptest.NewRecorder()
+
+			testCase.handler.GetPostsListHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			var resultResponse handler.PostsListResponse
+
+			err = json.Unmarshal(receivedResponse, &resultResponse)
+			if err != nil {
+				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
+			}
+
+			if !reflect.DeepEqual(testCase.expectedResponse, resultResponse) {
+				t.Errorf("wrong Response: got %+v, expected %+v",
+					resultResponse, testCase.expectedResponse)
+			}
+		})
+	}
+}
