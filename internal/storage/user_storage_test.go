@@ -21,7 +21,7 @@ func TestUserStorageMapGetUser(t *testing.T) {
     assert.Equal(t, expectedID, storageMap.GetUsersCount())
     
 	userInMap, _ := storageMap.GetUser(preUser.Email)
-    // Проверяем, что добавление существующего поста заменяет его значениями нового поста
+    
     assert.Equal(t, uint64(1), userInMap.ID)
 	assert.Equal(t, preUser.Email, userInMap.Email)
 	assert.Equal(t, preUser.Password, userInMap.Password)

@@ -71,19 +71,19 @@ func TestPostStorageMapGetList(t *testing.T) {
     storageMap.AddPost(prePost1)
 
 	prePost2 := &storage.PrePost{
-        AuthorID:        1,
-        Title:           "Test Post",
-        Description:     "This is a test post",
-        Price:           100,
-        SafeTransaction: true,
-        Delivery:        true,
-        City:            "Moscow",
+        AuthorID:        2,
+        Title:           "Test Post2",
+        Description:     "This is a test post2",
+        Price:           10000,
+        SafeTransaction: false,
+        Delivery:        false,
+        City:            "City",
     }
 
 	storageMap.AddPost(prePost2)
     
 	postInMap1, _ := storageMap.GetPost(uint64(1))
-    // Проверяем, что добавление существующего поста заменяет его значениями нового поста
+    
     assert.Equal(t, uint64(1), postInMap1.ID)
 	assert.Equal(t, prePost1.AuthorID, postInMap1.AuthorID)
 	assert.Equal(t, prePost1.Description, postInMap1.Description)
@@ -94,7 +94,7 @@ func TestPostStorageMapGetList(t *testing.T) {
 	assert.Equal(t, prePost1.City, postInMap1.City)
 
 	postInMap2, _ := storageMap.GetPost(uint64(2))
-    // Проверяем, что добавление существующего поста заменяет его значениями нового поста
+
     assert.Equal(t, uint64(2), postInMap2.ID)
 	assert.Equal(t, prePost2.AuthorID, postInMap2.AuthorID)
 	assert.Equal(t, prePost2.Description, postInMap2.Description)
