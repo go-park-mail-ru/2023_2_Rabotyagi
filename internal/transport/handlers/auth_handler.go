@@ -24,7 +24,7 @@ const timeTokenLife = 24 * time.Hour
 //	@Failure    500  {string} string
 //	@Failure    200  {object} ErrorResponse
 //	@Router      /signup [post]
-func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.Method != http.MethodPost {
@@ -43,14 +43,14 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.storage.IsUserExist(preUser.Email) {
+	if h.Storage.IsUserExist(preUser.Email) {
 		log.Printf("already exist user %v\n", preUser)
 		sendResponse(w, ErrUserAlreadyExist)
 
 		return
 	}
 
-	err := h.storage.CreateUser(preUser)
+	err := h.Storage.CreateUser(preUser)
 	if err != nil {
 		log.Printf("%v", err)
 		sendResponse(w, ErrInternalServer)
@@ -58,7 +58,7 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.storage.GetUser(preUser.Email)
+	user, err := h.Storage.GetUser(preUser.Email)
 	if err != nil {
 		log.Printf("%v", err)
 		sendResponse(w, ErrInternalServer)
@@ -89,7 +89,7 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("added user: %v", user)
 }
 
-// signInHandler godoc
+// SignInHandler godoc
 //
 //	@Summary    signin
 //	@Description  signin in app
@@ -101,7 +101,7 @@ func (h *AuthHandler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    200  {object} ErrorResponse
 //	@Router      /signin [get]
-func (h *AuthHandler) signInHandler(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.Method != http.MethodGet {
@@ -121,14 +121,14 @@ func (h *AuthHandler) signInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.storage.IsUserExist(preUser.Email) {
+	if !h.Storage.IsUserExist(preUser.Email) {
 		log.Printf("user is not exists %v\n", preUser)
 		sendResponse(w, ErrWrongCredentials)
 
 		return
 	}
 
-	user, err := h.storage.GetUser(preUser.Email)
+	user, err := h.Storage.GetUser(preUser.Email)
 	if err != nil || preUser.Password != user.Password {
 		log.Printf("%v\n", err)
 		sendResponse(w, ErrWrongCredentials)
@@ -138,7 +138,12 @@ func (h *AuthHandler) signInHandler(w http.ResponseWriter, r *http.Request) {
 
 	expire := time.Now().Add(timeTokenLife)
 
-	jwtStr, err := jwt.GenerateJwtToken(&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.Secret)
+	jwtStr, err := jwt.GenerateJwtToken(&jwt.UserJwtPayload{
+		UserID: user.ID,
+		Email:  user.Email,
+		Expire: expire.Unix()},
+		jwt.Secret,
+	)
 	if err != nil {
 		log.Printf("%v\n", err)
 		sendResponse(w, ErrInternalServer)
@@ -158,7 +163,7 @@ func (h *AuthHandler) signInHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("signin user: %v", user)
 }
 
-// logOutHandler godoc
+// LogOutHandler godoc
 //
 //	@Summary    logout
 //	@Description  logout in app
@@ -169,7 +174,7 @@ func (h *AuthHandler) signInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    200  {object} ErrorResponse
 //	@Router      /logout [post]
-func (h *AuthHandler) logOutHandler(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.Method != http.MethodPost {

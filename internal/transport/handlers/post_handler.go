@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
 )
 
-// addPostHandler godoc
+// AddPostHandler godoc
 //
 //	@Summary    add post
 //	@Description  add post by data
@@ -21,7 +21,7 @@ import (
 //	@Failure    500  {string} string
 //	@Failure    200  {object} ErrorResponse
 //	@Router      /post/add [post]
-func (h *PostHandler) addPostHandler(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.Method != http.MethodPost {
@@ -38,13 +38,13 @@ func (h *PostHandler) addPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.storage.AddPost(prePost)
+	h.Storage.AddPost(prePost)
 	w.Header().Set("Content-Type", "application/json")
 	sendResponse(w, ResponseSuccessfulAddPost)
 	log.Printf("added user: %v", prePost)
 }
 
-// getPostHandler godoc
+// GetPostHandler godoc
 //
 //	@Summary    get post
 //	@Description  get post by id
@@ -56,7 +56,7 @@ func (h *PostHandler) addPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    200  {object} ErrorResponse
 //	@Router      /post/get/{id} [get]
-func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.Method != http.MethodGet {
@@ -73,7 +73,7 @@ func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.storage.GetPost(uint64(postID))
+	post, err := h.Storage.GetPost(uint64(postID))
 	if err != nil {
 		log.Printf("post with this id is not exists %v\n", postID)
 		sendResponse(w, ErrPostNotExist)
@@ -95,7 +95,7 @@ func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("added user: %v", post)
 }
 
-// getPostsListHandler godoc
+// GetPostsListHandler godoc
 //
 //	@Summary    get posts
 //	@Description  get posts by count
@@ -107,7 +107,7 @@ func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    200  {object} ErrorResponse
 //	@Router      /post/get_list [get]
-func (h *PostHandler) getPostsListHandler(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.Method != http.MethodGet {
@@ -124,7 +124,7 @@ func (h *PostHandler) getPostsListHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	posts, err := h.storage.GetNPosts(count)
+	posts, err := h.Storage.GetNPosts(count)
 	if err != nil {
 		log.Printf("n > posts count %v\n", count)
 		sendResponse(w, ErrPostNotExist)

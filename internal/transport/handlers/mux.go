@@ -14,11 +14,11 @@ import (
 )
 
 type AuthHandler struct {
-	storage *storage.AuthStorageMap
+	Storage *storage.AuthStorageMap
 }
 
 type PostHandler struct {
-	storage *storage.PostStorageMap
+	Storage *storage.PostStorageMap
 }
 
 type Handler struct {
@@ -31,21 +31,21 @@ func (h *Handler) InitRoutes() http.Handler {
 
 	authStorageMap := storage.NewAuthStorageMap()
 	authHandler := &AuthHandler{
-		storage: authStorageMap,
+		Storage: authStorageMap,
 	}
 
 	postStorageMap := storage.NewPostStorageMap()
 	postHandler := &PostHandler{
-		storage: postStorageMap,
+		Storage: postStorageMap,
 	}
 
-	router.HandleFunc("/api/v1/signup", authHandler.signUpHandler)
-	router.HandleFunc("/api/v1/signin", authHandler.signInHandler)
-	router.HandleFunc("/api/v1/logout", authHandler.logOutHandler)
+	router.HandleFunc("/api/v1/signup", authHandler.SignUpHandler)
+	router.HandleFunc("/api/v1/signin", authHandler.SignInHandler)
+	router.HandleFunc("/api/v1/logout", authHandler.LogOutHandler)
 
-	router.HandleFunc("/api/v1/post/add", postHandler.addPostHandler)
-	router.HandleFunc("/api/v1/post/get/", postHandler.getPostHandler)
-	router.HandleFunc("/api/v1/post/get_list", postHandler.getPostsListHandler)
+	router.HandleFunc("/api/v1/post/add", postHandler.AddPostHandler)
+	router.HandleFunc("/api/v1/post/get/", postHandler.GetPostHandler)
+	router.HandleFunc("/api/v1/post/get_list", postHandler.GetPostsListHandler)
 
 	return router
 }
