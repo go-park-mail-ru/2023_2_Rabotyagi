@@ -9,7 +9,7 @@ package handler
 
 import (
 	"net/http"
-	
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
 )
 
@@ -22,8 +22,8 @@ type PostHandler struct {
 }
 
 type Handler struct {
-    AuthHandler *AuthHandler
-    PostHandler *PostHandler
+	AuthHandler *AuthHandler
+	PostHandler *PostHandler
 }
 
 func (h *Handler) InitRoutes() http.Handler {
@@ -37,13 +37,14 @@ func (h *Handler) InitRoutes() http.Handler {
 	postStorageMap := storage.NewPostStorageMap()
 	postHandler := &PostHandler{
 		storage: postStorageMap,
-	}	
+	}
 
-	router.HandleFunc("/api/v1/signup/", authHandler.signUpHandler)
-	router.HandleFunc("/api/v1/signin/", authHandler.signInHandler)
+	router.HandleFunc("/api/v1/signup", authHandler.signUpHandler)
+	router.HandleFunc("/api/v1/signin", authHandler.signInHandler)
+	router.HandleFunc("/api/v1/logout", authHandler.logOutHandler)
 
 	router.HandleFunc("/api/v1/post/add", postHandler.addPostHandler)
-	router.HandleFunc("/api/v1/post/get", postHandler.getPostHandler)
+	router.HandleFunc("/api/v1/post/get/", postHandler.getPostHandler)
 	router.HandleFunc("/api/v1/post/get_list", postHandler.getPostsListHandler)
 
 	return router

@@ -17,6 +17,10 @@ type ErrorResponse struct {
 	Body   ResponseBodyError
 }
 
+func NewErrorResponse(status int, error string) ErrorResponse {
+	return ErrorResponse{Status: status, Body: ResponseBodyError{Error: error}}
+}
+
 type ResponseBody struct {
 	Message string `json:"message"`
 }
@@ -50,6 +54,8 @@ var (
 	ResponseSuccessfulSignIn = Response{Status: StatusResponseSuccessful, Body: ResponseBody{Message: "Successful sign in"}}
 	ResponseSuccessfulLogOut = Response{Status: StatusResponseSuccessful, Body: ResponseBody{Message: "Successful log out"}}
 
+	ResponseSuccessfulAddPost = Response{Status: StatusResponseSuccessful, Body: ResponseBody{Message: "Successful add post"}}
+
 	ErrInternalServer   = ErrorResponse{Status: StatusErrServerError, Body: ResponseBodyError{Error: "Error in server"}}
 	ErrBadRequest       = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "Wrong request"}}
 	ErrUserAlreadyExist = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "User with same email already exist"}}
@@ -60,25 +66,13 @@ var (
 	ErrNoSuchCountOfPosts = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "n > posts count"}}
 )
 
-func sendErr(w http.ResponseWriter, errResponse ErrorResponse) {
-	response, err := json.Marshal(errResponse)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-
-	_, err = w.Write(response)
-	if err != nil {
-		log.Printf("%v\n", err)
-		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
-	}
-}
-
 func sendResponse(w http.ResponseWriter, response any) {
 	responseSend, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("%v\n", err)
 		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
+
+		return
 	}
 
 	_, err = w.Write(responseSend)

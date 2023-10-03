@@ -3,3 +3,7 @@ Backend репозиторий команды Работяги
 
 ### Наши контакты:
 Владислав Ильинский: https://github.com/Vilinvil и тг https://t.me/Vilin0
+
+### Сгенерировать swagger документацию
+
+`swag init -g cmd/app/main.go`
