@@ -27,6 +27,19 @@ func TestUserStorageMapGetUser(t *testing.T) {
 	assert.Equal(t, preUser.Password, userInMap.Password)
 }
 
+func TestUserStorageMapGetUserError(t *testing.T) {
+    storageMap := storage.NewAuthStorageMap()
+    preUser := &storage.PreUser {
+        Email: "test@gmail.com",
+		Password: "testpassword",
+    }
+
+    _ = storageMap.CreateUser(preUser)
+
+	_, err := storageMap.GetUser("non-existen-email@gmail.com")
+    assert.NotNil(t, err)
+}
+
 func TestUserStorageMapIsUserExist(t *testing.T) {
     storageMap := storage.NewAuthStorageMap()
     preUser := &storage.PreUser{
@@ -37,4 +50,25 @@ func TestUserStorageMapIsUserExist(t *testing.T) {
     _ = storageMap.CreateUser(preUser)
 
     assert.Equal(t, true, storageMap.IsUserExist("test@gmail.com"))
+}
+
+
+
+func TestUserStorageMapCreateUserError(t *testing.T) {
+    storageMap := storage.NewAuthStorageMap()
+    preUser1 := &storage.PreUser {
+        Email: "test@gmail.com",
+		Password: "testpassword",
+    }
+
+    _ = storageMap.CreateUser(preUser1)
+
+    preUser2 := &storage.PreUser {
+        Email: "test@gmail.com",
+		Password: "newpassword",
+    }
+
+    err := storageMap.CreateUser(preUser2)
+
+    assert.NotNil(t, err)
 }
