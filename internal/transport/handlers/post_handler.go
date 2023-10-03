@@ -1,25 +1,27 @@
 package handler
 
 import (
-	"net/http"
 	"encoding/json"
 	"log"
+	"net/http"
+	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
 )
 
-
 // addPostHandler godoc
 //
-//  @Summary    add post
-//  @Description  add post by data
-//  @Accept      json
-//  @Produce    json
-//  @Param      post  path    prePost  true  "Post"
-//  @Success    200  Response
-//  @Failure    400  string
-//  @Router      /post/add [post]
-func (h *PostHandler) addPostHandler(w http.ResponseWriter, r *http.Request) {
+//	@Summary    add post
+//	@Description  add post by data
+//	@Accept      json
+//	@Produce    json
+//	@Param      post  body storage.PrePost true  "post data for adding"
+//	@Success    200  {object} Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    200  {object} ErrorResponse
+//	@Router      /post/add [post]
+func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.Method != http.MethodPost {
@@ -36,59 +38,52 @@ func (h *PostHandler) addPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.Storage.AddPost(prePost)
 	w.Header().Set("Content-Type", "application/json")
-
-	h.storage.AddPost(prePost)
-
-	w.WriteHeader(http.StatusOK)
-
 	sendResponse(w, ResponseSuccessfulAddPost)
-
 	log.Printf("added user: %v", prePost)
 }
 
 // getPostHandler godoc
 //
-//  @Summary    get post
-//  @Description  get post by id
-//  @Accept      json
-//  @Produce    json
-//  @Param      id  path    uint64  true  "Post ID"
-//  @Success    200  Response
-//  @Failure    400  string
-//  @Router      /post/get/ [get]
-func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
+//	@Summary    get post
+//	@Description  get post by id
+//	@Accept      json
+//	@Produce    json
+//	@Param      id  path uint64 true  "post id"
+//	@Success    200  {object} Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    200  {object} ErrorResponse
+//	@Router      /post/get/{id} [get]
+func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 	}
 
-	type jsonID struct {
-		id uint64
-	} 
-	
-	decoder := json.NewDecoder(r.Body)
+	postIDStr := getPathParam(r.URL.Path)
 
-	postID := new(jsonID)
-	if err := decoder.Decode(postID); err != nil {
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
 		log.Printf("%v\n", err)
 		sendResponse(w, ErrBadRequest)
 
 		return
 	}
 
-	post, err := h.storage.GetPost(postID.id)
+	post, err := h.Storage.GetPost(uint64(postID))
 	if err != nil {
-		log.Printf("post with this id is not exists %v\n", postID )
+		log.Printf("post with this id is not exists %v\n", postID)
 		sendResponse(w, ErrPostNotExist)
-	
+
 		return
 	}
 
 	ResponseSuccessfulGetPost := PostResponse{
-		Status: StatusResponseSuccessful, 
-		Body: *post,
+		Status: StatusResponseSuccessful,
+		Body:   *post,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -102,53 +97,47 @@ func (h *PostHandler) getPostHandler(w http.ResponseWriter, r *http.Request) {
 
 // getPostsListHandler godoc
 //
-//  @Summary    get posts list
-//  @Description  get posts by count
-//  @Accept      json
-//  @Produce    json
-//  @Param      count  path    int  true  "Posts count"
-//  @Success    200  Response
-//  @Failure    400  string
-//  @Router      /post/get_list [get]
-func (h *PostHandler) getPostsListHandler(w http.ResponseWriter, r *http.Request) {
+//	@Summary    get posts
+//	@Description  get posts by count
+//	@Accept      json
+//	@Produce    json
+//	@Param      count  query uint64 true  "count posts"
+//	@Success    200  {object} PostsListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    200  {object} ErrorResponse
+//	@Router      /post/get_list [get]
+func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 	}
 
-	type count struct {
-		count uint64
-	} 
-	
-	decoder := json.NewDecoder(r.Body)
+	countStr := r.URL.Query().Get("count")
 
-	postsCount := new(count)
-	if err := decoder.Decode(postsCount); err != nil {
+	count, err := strconv.Atoi(countStr)
+	if err != nil {
 		log.Printf("%v\n", err)
 		sendResponse(w, ErrBadRequest)
 
 		return
 	}
-	
-	posts, err := h.storage.GetNPosts(int(postsCount.count))
+
+	posts, err := h.Storage.GetNPosts(count)
 	if err != nil {
-		log.Printf("n > posts count %v\n", postsCount.count )
+		log.Printf("n > posts count %v\n", count)
 		sendResponse(w, ErrPostNotExist)
-	
+
 		return
 	}
 
 	ResponseSuccessfulGetPostsList := PostsListResponse{
-		Status: StatusResponseSuccessful, 
-		Body: *posts,
+		Status: StatusResponseSuccessful,
+		Body:   posts,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
-	w.WriteHeader(http.StatusOK)
-
 	sendResponse(w, ResponseSuccessfulGetPostsList)
-
+	w.Header().Set("Content-Type", "application/json")
 	log.Printf("added user: %v", posts)
 }

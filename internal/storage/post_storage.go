@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	ErrPostNotExist = errors.NewError("post not exist")
+	ErrPostNotExist       = errors.NewError("post not exist")
 	ErrNoSuchCountOfPosts = errors.NewError("n > posts count")
 )
 
@@ -78,16 +78,16 @@ func (a *PostStorageMap) AddPost(post *PrePost) {
 	}
 }
 
-func (a *PostStorageMap) GetNPosts(n int) (*[]Post, error) {
+func (a *PostStorageMap) GetNPosts(n int) ([]Post, error) {
 	if n > int(a.counterPosts) {
 		return nil, ErrNoSuchCountOfPosts
 	}
-	
+
 	postSlice := make([]Post, 0, n)
 
 	for i := 0; i < n; i++ {
 		postSlice = append(postSlice, a.posts[uint64(i)])
 	}
 
-	return &postSlice, nil
+	return postSlice, nil
 }

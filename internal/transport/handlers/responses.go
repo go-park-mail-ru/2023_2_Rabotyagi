@@ -17,6 +17,10 @@ type ErrorResponse struct {
 	Body   ResponseBodyError
 }
 
+func NewErrorResponse(status int, error string) ErrorResponse {
+	return ErrorResponse{Status: status, Body: ResponseBodyError{Error: error}}
+}
+
 type ResponseBody struct {
 	Message string `json:"message"`
 }
@@ -28,12 +32,12 @@ type Response struct {
 
 type PostResponse struct {
 	Status int `json:"status"`
-	Body storage.Post
+	Body   storage.Post
 }
 
 type PostsListResponse struct {
 	Status int `json:"status"`
-	Body []storage.Post
+	Body   []storage.Post
 }
 
 const (
@@ -51,27 +55,29 @@ var (
 	ResponseSuccessfulLogOut = Response{Status: StatusResponseSuccessful, Body: ResponseBody{Message: "Successful log out"}}
 
 	ResponseSuccessfulAddPost = Response{Status: StatusResponseSuccessful, Body: ResponseBody{Message: "Successful add post"}}
-  
+
 	ErrInternalServer   = ErrorResponse{Status: StatusErrServerError, Body: ResponseBodyError{Error: "Error in server"}}
 	ErrBadRequest       = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "Wrong request"}}
 	ErrUserAlreadyExist = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "User with same email already exist"}}
 	ErrWrongCredentials = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "Uncorrect login or password"}}
 	ErrUnauthorized     = ErrorResponse{Status: StatusUnauthorized, Body: ResponseBodyError{Error: "You unauthorized"}}
 
-	ErrPostNotExist = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "Post not exists"}}
+	ErrPostNotExist       = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "Post not exists"}}
 	ErrNoSuchCountOfPosts = ErrorResponse{Status: StatusErrBadRequest, Body: ResponseBodyError{Error: "n > posts count"}}
 )
 
 func sendResponse(w http.ResponseWriter, response any) {
 	responseSend, err := json.Marshal(response)
 	if err != nil {
-	  log.Printf("%v\n", err)
-	  http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
+		log.Printf("%v\n", err)
+		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
+
+		return
 	}
-  
+
 	_, err = w.Write(responseSend)
 	if err != nil {
-	  log.Printf("%v\n", err)
-	  http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
+		log.Printf("%v\n", err)
+		http.Error(w, ErrInternalServer.Body.Error, http.StatusInternalServerError)
 	}
 }
