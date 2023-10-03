@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
 )
 
-// addPostHandler godoc
+// AddPostHandler godoc
 //
 //	@Summary    add post
 //	@Description  add post by data
@@ -44,7 +44,7 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("added user: %v", prePost)
 }
 
-// getPostHandler godoc
+// GetPostHandler godoc
 //
 //	@Summary    get post
 //	@Description  get post by id
@@ -95,7 +95,7 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("added user: %v", post)
 }
 
-// getPostsListHandler godoc
+// GetPostsListHandler godoc
 //
 //	@Summary    get posts
 //	@Description  get posts by count

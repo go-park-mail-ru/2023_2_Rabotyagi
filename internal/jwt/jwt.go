@@ -8,12 +8,13 @@ import (
 )
 
 // TODO from config and reset her every some time
-var secret = []byte("super-secret")
+var Secret = []byte("super-secret")
 
 var (
 	ErrNilToken           = errors.NewError("get nil token")
 	ErrWrongSigningMethod = errors.NewError("unexpected signing method")
 	ErrInvalidToken       = errors.NewError("invalid token")
+	ErrParseToken         = errors.NewError("error parsing token")
 )
 
 type UserJwtPayload struct {
@@ -22,7 +23,7 @@ type UserJwtPayload struct {
 	Email  string
 }
 
-func NewUserJwtPayload(rawJwt string) (*UserJwtPayload, error) {
+func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) {
 	tokenDuplicity, err := jwt.Parse(rawJwt, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("method == %v %w", token.Header["alg"], ErrWrongSigningMethod)
@@ -31,7 +32,7 @@ func NewUserJwtPayload(rawJwt string) (*UserJwtPayload, error) {
 		return secret, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf(errors.ErrTemplate, err)
+		return nil, fmt.Errorf("%s %w", err.Error(), ErrParseToken)
 	}
 
 	if claims, ok := tokenDuplicity.Claims.(jwt.MapClaims); ok && tokenDuplicity.Valid {
@@ -43,15 +44,15 @@ func NewUserJwtPayload(rawJwt string) (*UserJwtPayload, error) {
 			return nil, fmt.Errorf("error with claims: %v %w", claims, ErrInvalidToken)
 		}
 
-		userID, ok1 := interfaceUserID.(uint64)
-		expire, ok2 := interfaceExpire.(int64)
+		userID, ok1 := interfaceUserID.(float64)
+		expire, ok2 := interfaceExpire.(float64)
 		email, ok3 := interfaceEmail.(string)
 
 		if !(ok1 && ok2 && ok3) {
 			return nil, fmt.Errorf("error with casting claims: %v %w", claims, ErrInvalidToken)
 		}
 
-		return &UserJwtPayload{UserID: userID, Expire: expire, Email: email}, nil
+		return &UserJwtPayload{UserID: uint64(userID), Expire: int64(expire), Email: email}, nil
 	}
 
 	return nil, fmt.Errorf(errors.ErrTemplate, ErrInvalidToken)
@@ -67,7 +68,7 @@ func (u *UserJwtPayload) getMapClaims() jwt.MapClaims {
 	return result
 }
 
-func GenerateJwtToken(userToken *UserJwtPayload) (string, error) {
+func GenerateJwtToken(userToken *UserJwtPayload, secret []byte) (string, error) {
 	if userToken == nil {
 		return "", fmt.Errorf(errors.ErrTemplate, ErrNilToken)
 	}
@@ -75,7 +76,6 @@ func GenerateJwtToken(userToken *UserJwtPayload) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, userToken.getMapClaims())
 
 	tokenString, err := token.SignedString(secret)
-
 	if err != nil {
 		return "", fmt.Errorf(errors.ErrTemplate, err)
 	}

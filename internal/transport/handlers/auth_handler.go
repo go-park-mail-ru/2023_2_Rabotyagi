@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	auth "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
 )
 
@@ -68,8 +68,8 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	expire := time.Now().Add(timeTokenLife)
 
-	jwtStr, err := auth.GenerateJwtToken(
-		&auth.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()})
+	jwtStr, err := jwt.GenerateJwtToken(
+		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.Secret)
 	if err != nil {
 		log.Printf("%v", err)
 		sendResponse(w, ErrInternalServer)
@@ -89,7 +89,7 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("added user: %v", user)
 }
 
-// signInHandler godoc
+// SignInHandler godoc
 //
 //	@Summary    signin
 //	@Description  signin in app
@@ -138,7 +138,12 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	expire := time.Now().Add(timeTokenLife)
 
-	jwtStr, err := auth.GenerateJwtToken(&auth.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()})
+	jwtStr, err := jwt.GenerateJwtToken(&jwt.UserJwtPayload{
+		UserID: user.ID,
+		Email:  user.Email,
+		Expire: expire.Unix()},
+		jwt.Secret,
+	)
 	if err != nil {
 		log.Printf("%v\n", err)
 		sendResponse(w, ErrInternalServer)
@@ -158,7 +163,7 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("signin user: %v", user)
 }
 
-// logOutHandler godoc
+// LogOutHandler godoc
 //
 //	@Summary    logout
 //	@Description  logout in app

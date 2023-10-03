@@ -30,12 +30,13 @@ func (h *Handler) InitRoutes() http.Handler {
 	router := http.NewServeMux()
 
 	authStorageMap := storage.NewAuthStorageMap()
-	authHandler := &AuthHandler {
+
+	authHandler := &AuthHandler{
 		Storage: authStorageMap,
 	}
 
 	postStorageMap := storage.NewPostStorageMap()
-	postHandler := &PostHandler {
+	postHandler := &PostHandler{
 		Storage: postStorageMap,
 	}
 
