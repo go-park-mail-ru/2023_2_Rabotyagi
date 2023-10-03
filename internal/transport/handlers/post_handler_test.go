@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"encoding/json"
 	"bytes"
-	"io/ioutil"
+	"io"
 
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
@@ -37,30 +37,30 @@ func TestAddPostHandler(t *testing.T) {
 	}
 
 	
-	// Преобразование JSON-объекта в байты
 	reqBody, err := json.Marshal(&prePost)
 	if err != nil {
 		t.Fatalf("Failed to marshal request body: %v", err)
 	}
 
-	// Создание POST-запроса с тестовым JSON-объектом
-	req, err := http.NewRequest(http.MethodPost, "/api/v1/post/add", bytes.NewBuffer(reqBody))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/post/add", bytes.NewBuffer(reqBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
 
-	// Создание ResponseRecorder для записи ответа сервера
-	rec := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	postStorageMap := storage.NewPostStorageMap()
 	postHandler := &handler.PostHandler{
 		Storage: postStorageMap,
 	}
 	
-	postHandler.AddPostHandler(rec, req)
+	postHandler.AddPostHandler(w, req)
 
-	resp := rec.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	resp := w.Result()
+
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
 
 	bodyStr := string(body)
 	if bodyStr != string(testCase.Response) {
@@ -68,3 +68,66 @@ func TestAddPostHandler(t *testing.T) {
 			bodyStr, testCase.Response)
 	}
 }
+
+func TestGetPostHandler(t *testing.T) {
+	prePost := &storage.PrePost{
+        AuthorID:        1,
+        Title:           "Test Post",
+        Description:     "This is a test post",
+        Price:           100,
+        SafeTransaction: true,
+        Delivery:        true,
+        City:            "Moscow",
+    }
+
+	post := &storage.Post{
+		ID: 1,
+        AuthorID:        1,
+        Title:           "Test Post",
+        Description:     "This is a test post",
+        Price:           100,
+        SafeTransaction: true,
+        Delivery:        true,
+        City:            "Moscow",
+    }
+
+	ResponseSuccessfulGetPost := handler.PostResponse{
+		Status: handler.StatusResponseSuccessful,
+		Body:   *post,
+	}
+
+	expectedResponse, _ := json.Marshal(ResponseSuccessfulGetPost) 
+	
+	var testCase TestCase = TestCase{
+		Post:        prePost,
+		Response:    expectedResponse,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/post/get/1", nil)
+
+	w := httptest.NewRecorder()
+
+	postStorageMap := storage.NewPostStorageMap()
+	postHandler := &handler.PostHandler{
+		Storage: postStorageMap,
+	}
+
+	postHandler.Storage.AddPost(prePost)
+	
+	postHandler.GetPostHandler(w, req)
+	
+	resp := w.Result()
+
+	defer resp.Body.Close()
+	
+	body, _ := io.ReadAll(resp.Body)
+
+	bodyStr := string(body)
+	if bodyStr != string(testCase.Response) {
+		t.Errorf("wrong Response: got %+v, expected %+v",
+			bodyStr, testCase.Response)
+	}
+}
+
+
+
