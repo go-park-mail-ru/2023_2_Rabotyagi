@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/errors"
 )
 
@@ -41,11 +42,26 @@ type PostStorageMap struct {
 	posts        map[uint64]Post
 }
 
-func NewPostStorageMap() *PostStorageMap {
-	return &PostStorageMap{
-		counterPosts: 0,
-		posts:        make(map[uint64]Post),
+func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
+	for i := 1; i <= 40; i++ {
+		postID := postStorageMap.generatePostID()
+		postStorageMap.posts[postID] = Post{
+			ID:              postID,
+			AuthorID:        1,
+			Title:           fmt.Sprintf("post %d", postID),
+			Description:     fmt.Sprintf("description of post %d", postID),
+			Price:           int(100 * postID),
+			SafeTransaction: true,
+			Delivery:        true,
+			City:            "Moscow",
+		}
 	}
+
+	return postStorageMap
+}
+
+func NewPostStorageMap() *PostStorageMap {
+	return &PostStorageMap{counterPosts: 0, posts: make(map[uint64]Post)}
 }
 
 func (a *PostStorageMap) GetPostsCount() int {
