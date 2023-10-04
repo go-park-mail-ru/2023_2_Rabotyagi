@@ -23,9 +23,9 @@ import (
 //	@Router      /post/add [post]
 func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	setupCORS(&w, r)
+	setupCORS(&w)
 
-	if (*r).Method == "OPTIONS" {
+	if r.Method == http.MethodOptions {
 		return
 	}
 
@@ -63,9 +63,9 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /post/get/{id} [get]
 func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	setupCORS(&w, r)
+	setupCORS(&w)
 
-	if (*r).Method == "OPTIONS" {
+	if r.Method == http.MethodOptions {
 		return
 	}
 
@@ -119,9 +119,9 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /post/get_list [get]
 func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	setupCORS(&w, r)
+	setupCORS(&w)
 
-	if (*r).Method == "OPTIONS" {
+	if r.Method == http.MethodOptions {
 		return
 	}
 
