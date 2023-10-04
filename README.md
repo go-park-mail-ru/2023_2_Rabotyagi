@@ -5,6 +5,25 @@ Backend репозиторий команды Работяги
 
 Владислав Ильинский: https://github.com/Vilinvil и тг https://t.me/Vilin0
 
+Никита Демирев: 'https://github.com/NickDemiman' и тг https://t.me/NikDemiman
+
+Алексей Красноперов: 'https://github.com/SanExpett' и тг https://t.me/SanExpet
+
+Таня Емельянова: 'https://github.com/TanyaEmka' и тг https://t.me/jupi_abri
+
+### Репа фронт
+https://github.com/frontend-park-mail-ru/2023_2_Rabotyagi/tree/minimal-front
+
+### Фигма
+https://www.figma.com/file/YLSZ9uY9gVn6bMDJchrEzD?node-id=23:2127&mode=design#567544444
+
+### Приложение
+http://84.23.53.28/
+
+### Документация 
+
+
+
 ### Запуск локально
 
 `go run cmd/app/main.go`
@@ -14,8 +33,8 @@ Backend репозиторий команды Работяги
 `mkdir -p bin && go test -v  -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html`
 
 ## Документация
-
- Посмотреть информацию по ручками api можжно в docs/swagger.yaml 
+ Ссылка https://app.swaggerhub.com/apis/IVN15072002/yula-project_api/1.0
+ Также посмотреть информацию по ручками api можно в docs/swagger.yaml 
 
 ### Сгенерировать swagger документацию
 

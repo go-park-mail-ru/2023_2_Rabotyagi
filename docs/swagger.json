@@ -1,4 +1,7 @@
 {
+    "schemes": [
+        "http"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "This is a server of YULA server.",
@@ -6,7 +9,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "127.0.0.1:8080",
+    "host": "84.23.53.28:8080",
     "basePath": "/api/v1",
     "paths": {
         "/logout": {
