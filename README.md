@@ -9,13 +9,18 @@ Backend репозиторий команды Работяги
 
 `go run cmd/app/main.go`
 
+### Тестирование 
+
+`mkdir -p bin && go test -v  -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html`
+
+## Документация
+
+ Посмотреть информацию по ручками api можжно в docs/swagger.yaml 
+
 ### Сгенерировать swagger документацию
 
 `swag init -g cmd/app/main.go`
 
-### Тестирование 
-
-`mkdir -p bin && go test -v  -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html`
 
 ## Docker image build
 
@@ -39,4 +44,4 @@ rabotyagi/backend   latest    25dbaeeef1af   50 seconds ago   307MB
 
 ### Запуск контейнера 
 
-docker run -p 8080:8080 rabotyagi/backend
+`docker run -p 8080:8080 rabotyagi/backend`
