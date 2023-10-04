@@ -173,7 +173,7 @@ const docTemplate = `{
             }
         },
         "/signin": {
-            "get": {
+            "post": {
                 "description": "signin in app",
                 "consumes": [
                     "application/json"

@@ -187,7 +187,7 @@ paths:
             type: string
       summary: get posts
   /signin:
-    get:
+    post:
       consumes:
       - application/json
       description: signin in app
