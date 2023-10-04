@@ -2,11 +2,13 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
+	resp "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/responses"
 )
 
 // AddPostHandler godoc
@@ -19,11 +21,11 @@ import (
 //	@Success    200  {object} Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    200  {object} ErrorResponse
+//	@Failure    222  {object} ErrorResponse "Error"
 //	@Router      /post/add [post]
 func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	setupCORS(&w)
+	resp.SetupCORS(&w)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -38,14 +40,14 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	prePost := new(storage.PrePost)
 	if err := decoder.Decode(prePost); err != nil {
 		log.Printf("%v\n", err)
-		sendResponse(w, ErrBadRequest)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrUserNotExits))
 
 		return
 	}
 
 	h.Storage.AddPost(prePost)
 	w.Header().Set("Content-Type", "application/json")
-	sendResponse(w, ResponseSuccessfulAddPost)
+	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulAddPost))
 	log.Printf("added user: %v", prePost)
 }
 
@@ -56,14 +58,14 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Accept      json
 //	@Produce    json
 //	@Param      id  path uint64 true  "post id"
-//	@Success    200  {object} Response
+//	@Success    200  {object} PostResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    200  {object} ErrorResponse
+//	@Failure    222  {object} ErrorResponse "Error"
 //	@Router      /post/get/{id} [get]
 func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	setupCORS(&w)
+	resp.SetupCORS(&w)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -78,7 +80,8 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	postID, err := strconv.Atoi(postIDStr)
 	if err != nil {
 		log.Printf("%v\n", err)
-		sendResponse(w, ErrBadRequest)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest,
+			fmt.Sprintf("%s post id == %s But shoud be integer", resp.ErrBadRequest, postIDStr)))
 
 		return
 	}
@@ -86,22 +89,13 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	post, err := h.Storage.GetPost(uint64(postID))
 	if err != nil {
 		log.Printf("post with this id is not exists %v\n", postID)
-		sendResponse(w, ErrPostNotExist)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrPostNotExist))
 
 		return
 	}
 
-	ResponseSuccessfulGetPost := PostResponse{
-		Status: StatusResponseSuccessful,
-		Body:   *post,
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-
-	w.WriteHeader(http.StatusOK)
-
-	sendResponse(w, ResponseSuccessfulGetPost)
-
+	resp.SendOkResponse(w, resp.NewPostResponse(resp.StatusResponseSuccessful, post))
 	log.Printf("added user: %v", post)
 }
 
@@ -115,11 +109,11 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Success    200  {object} PostsListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    200  {object} ErrorResponse
+//	@Failure    222  {object} ErrorResponse "Error"
 //	@Router      /post/get_list [get]
 func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	setupCORS(&w)
+	resp.SetupCORS(&w)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -134,7 +128,8 @@ func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request
 	count, err := strconv.Atoi(countStr)
 	if err != nil {
 		log.Printf("%v\n", err)
-		sendResponse(w, ErrBadRequest)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest,
+			fmt.Sprintf("%s count posts == %s But shoud be integer", resp.ErrBadRequest, countStr)))
 
 		return
 	}
@@ -142,17 +137,12 @@ func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request
 	posts, err := h.Storage.GetNPosts(count)
 	if err != nil {
 		log.Printf("n > posts count %v\n", count)
-		sendResponse(w, ErrPostNotExist)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrNoSuchCountOfPosts))
 
 		return
 	}
 
-	ResponseSuccessfulGetPostsList := PostsListResponse{
-		Status: StatusResponseSuccessful,
-		Body:   posts,
-	}
-
-	sendResponse(w, ResponseSuccessfulGetPostsList)
 	w.Header().Set("Content-Type", "application/json")
+	resp.SendOkResponse(w, resp.NewPostsListResponse(resp.StatusResponseSuccessful, posts))
 	log.Printf("added user: %v", posts)
 }

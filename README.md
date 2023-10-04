@@ -20,12 +20,6 @@ https://www.figma.com/file/YLSZ9uY9gVn6bMDJchrEzD?node-id=23:2127&mode=design#56
 ### Приложение
 http://84.23.53.28/
 
-### Документация 
-
-Ссылка https://app.swaggerhub.com/apis/IVN15072002/yula-project_api/1.0 
-Также посмотреть информацию по ручками api можно в docs/swagger.yaml
-
-
 ### Запуск локально
 
 `go run cmd/app/main.go`

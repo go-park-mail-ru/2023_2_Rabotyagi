@@ -240,6 +240,12 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "222": {
+                        "description": "error",
+                        "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },

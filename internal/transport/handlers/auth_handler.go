@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
+	resp "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/responses"
 )
 
 const timeTokenLife = 24 * time.Hour
@@ -22,11 +23,11 @@ const timeTokenLife = 24 * time.Hour
 //	@Success    200  {object} Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    200  {object} ErrorResponse
+//	@Failure    222  {object} ErrorResponse "Error"
 //	@Router      /signup [post]
 func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	setupCORS(&w)
+	resp.SetupCORS(&w)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -43,14 +44,14 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	preUser := new(storage.PreUser)
 	if err := decoder.Decode(preUser); err != nil {
 		log.Printf("%v\n", err)
-		sendResponse(w, ErrBadRequest)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrBadRequest))
 
 		return
 	}
 
 	if h.Storage.IsUserExist(preUser.Email) {
 		log.Printf("already exist user %v\n", preUser)
-		sendResponse(w, ErrUserAlreadyExist)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrUserAlreadyExist))
 
 		return
 	}
@@ -58,7 +59,7 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	err := h.Storage.CreateUser(preUser)
 	if err != nil {
 		log.Printf("%v", err)
-		sendResponse(w, ErrInternalServer)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrInternalServer, resp.ErrInternalServer))
 
 		return
 	}
@@ -66,7 +67,7 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := h.Storage.GetUser(preUser.Email)
 	if err != nil {
 		log.Printf("%v", err)
-		sendResponse(w, ErrInternalServer)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrInternalServer, resp.ErrInternalServer))
 
 		return
 	}
@@ -77,19 +78,19 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.Secret)
 	if err != nil {
 		log.Printf("%v", err)
-		sendResponse(w, ErrInternalServer)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrInternalServer, resp.ErrInternalServer))
 
 		return
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    CookieAuthName,
+		Name:    resp.CookieAuthName,
 		Value:   jwtStr,
 		Expires: expire,
 	}
 
 	http.SetCookie(w, cookie)
-	sendResponse(w, ResponseSuccessfulSignUp)
+	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulSignUp))
 	log.Printf("added user: %v", user)
 }
 
@@ -103,11 +104,11 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Success    200  {object} Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    200  {object} ErrorResponse
+//	@Failure    222  {object} ErrorResponse "Error"
 //	@Router      /signin [post]
 func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	setupCORS(&w)
+	resp.SetupCORS(&w)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -125,14 +126,14 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := decoder.Decode(preUser); err != nil {
 		log.Printf("%v\n", err)
-		sendResponse(w, ErrBadRequest)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrBadRequest))
 
 		return
 	}
 
 	if !h.Storage.IsUserExist(preUser.Email) {
 		log.Printf("user is not exists %v\n", preUser)
-		sendResponse(w, ErrWrongCredentials)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrUserNotExits))
 
 		return
 	}
@@ -140,7 +141,7 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := h.Storage.GetUser(preUser.Email)
 	if err != nil || preUser.Password != user.Password {
 		log.Printf("%v\n", err)
-		sendResponse(w, ErrWrongCredentials)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrWrongCredentials))
 
 		return
 	}
@@ -156,20 +157,20 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		log.Printf("%v\n", err)
-		sendResponse(w, ErrInternalServer)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrInternalServer, resp.ErrInternalServer))
 
 		return
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    CookieAuthName,
+		Name:    resp.CookieAuthName,
 		Value:   jwtStr,
 		Expires: expire,
 	}
 
 	http.SetCookie(w, cookie)
 	w.Header().Set("Content-Type", "application/json")
-	sendResponse(w, ResponseSuccessfulSignIn)
+	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulSignIn))
 	log.Printf("signin user: %v", user)
 }
 
@@ -182,11 +183,11 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Success    200  {object} Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    200  {object} ErrorResponse
+//	@Failure    222  {object} ErrorResponse "Error"
 //	@Router      /logout [post]
 func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	setupCORS(&w)
+	resp.SetupCORS(&w)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -198,10 +199,10 @@ func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie(CookieAuthName)
+	cookie, err := r.Cookie(resp.CookieAuthName)
 	if err != nil {
 		log.Printf("%v\n", err)
-		sendResponse(w, ErrUnauthorized)
+		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusUnauthorized, resp.ErrUnauthorized))
 
 		return
 	}
@@ -210,6 +211,6 @@ func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	w.Header().Set("Content-Type", "application/json")
-	sendResponse(w, ResponseSuccessfulLogOut)
+	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulLogOut))
 	log.Printf("logout user with cookie: %v", cookie)
 }

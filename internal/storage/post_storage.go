@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/errors"
 )
 
@@ -11,7 +12,7 @@ var (
 )
 
 type Post struct {
-	ID              uint64
+	ID              uint64 `json:"id"`
 	AuthorID        uint64 `json:"author"`
 	Title           string `json:"title"`
 	Description     string `json:"description"`
@@ -33,19 +34,14 @@ type PrePost struct {
 
 type PostStorage interface {
 	GetPost(postID uint64) (*Post, error)
-	GetAllPosts() *[]Post
+	GetNPosts() []*Post
 	AddPost(user *PreUser)
-}
-
-type PostStorageMap struct {
-	counterPosts uint64
-	posts        map[uint64]Post
 }
 
 func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
 	for i := 1; i <= 40; i++ {
 		postID := postStorageMap.generatePostID()
-		postStorageMap.posts[postID] = Post{
+		postStorageMap.posts[postID] = &Post{
 			ID:              postID,
 			AuthorID:        1,
 			Title:           fmt.Sprintf("post %d", postID),
@@ -60,8 +56,13 @@ func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
 	return postStorageMap
 }
 
+type PostStorageMap struct {
+	counterPosts uint64
+	posts        map[uint64]*Post
+}
+
 func NewPostStorageMap() *PostStorageMap {
-	return &PostStorageMap{counterPosts: 0, posts: make(map[uint64]Post)}
+	return &PostStorageMap{counterPosts: 0, posts: make(map[uint64]*Post)}
 }
 
 func (a *PostStorageMap) GetPostsCount() int {
@@ -75,10 +76,8 @@ func (a *PostStorageMap) generatePostID() uint64 {
 }
 
 func (a *PostStorageMap) GetPost(postID uint64) (*Post, error) {
-	post, exists := a.posts[postID]
-
-	if exists {
-		return &post, nil
+	if post, exists := a.posts[postID]; exists {
+		return post, nil
 	}
 
 	return nil, ErrPostNotExist
@@ -87,22 +86,29 @@ func (a *PostStorageMap) GetPost(postID uint64) (*Post, error) {
 func (a *PostStorageMap) AddPost(post *PrePost) {
 	id := a.generatePostID()
 
-	a.posts[id] = Post{ID: id, AuthorID: post.AuthorID,
-		Title: post.Title, Description: post.Description,
+	a.posts[id] = &Post{
+		ID:       id,
+		AuthorID: post.AuthorID,
+		Title:    post.Title, Description: post.Description,
 		Price: post.Price, SafeTransaction: post.SafeTransaction,
 		Delivery: post.Delivery, City: post.City,
 	}
 }
 
-func (a *PostStorageMap) GetNPosts(n int) ([]Post, error) {
+func (a *PostStorageMap) GetNPosts(n int) ([]*Post, error) {
 	if n > int(a.counterPosts) {
 		return nil, ErrNoSuchCountOfPosts
 	}
 
-	postSlice := make([]Post, 0, n)
+	postSlice := make([]*Post, 0, n)
 
 	for _, v := range a.posts {
+		n--
+
 		postSlice = append(postSlice, v)
+		if n == 0 {
+			return postSlice, nil
+		}
 	}
 
 	return postSlice, nil
