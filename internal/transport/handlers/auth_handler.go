@@ -13,17 +13,17 @@ import (
 
 const timeTokenLife = 24 * time.Hour
 
-// signUpHandler godoc
+// SignUpHandler godoc
 //
 //	@Summary    signup
 //	@Description  signup in app
 //	@Accept      json
 //	@Produce    json
 //	@Param      preUser  body storage.PreUser true  "user data for signup"
-//	@Success    200  {object} Response
+//	@Success    200  {object} responses.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /signup [post]
 func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -101,10 +101,10 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Accept      json
 //	@Produce    json
 //	@Param      preUser  body storage.PreUser true  "user data for signin"
-//	@Success    200  {object} Response
+//	@Success    200  {object} responses.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /signin [post]
 func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -180,10 +180,10 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Description  logout in app
 //	@Accept      json
 //	@Produce    json
-//	@Success    200  {object} Response
+//	@Success    200  {object} responses.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /logout [post]
 func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()

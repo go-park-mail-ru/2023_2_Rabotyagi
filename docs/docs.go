@@ -29,7 +29,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/responses.Response"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "405": {
@@ -72,7 +78,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/responses.Response"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "405": {
@@ -113,7 +125,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/responses.PostResponse"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "405": {
@@ -154,7 +172,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/responses.PostsListResponse"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "405": {
@@ -197,7 +221,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/responses.Response"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "405": {
@@ -240,13 +270,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/responses.Response"
                         }
                     },
                     "222": {
-                        "description": "error",
+                        "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "405": {
@@ -266,18 +296,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handler.ErrorResponse": {
+        "responses.ErrorResponse": {
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/handler.ResponseBodyError"
+                    "$ref": "#/definitions/responses.ResponseBodyError"
                 },
                 "status": {
                     "type": "integer"
                 }
             }
         },
-        "handler.PostsListResponse": {
+        "responses.PostResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/storage.Post"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "responses.PostsListResponse": {
             "type": "object",
             "properties": {
                 "body": {
@@ -291,18 +332,18 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.Response": {
+        "responses.Response": {
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/handler.ResponseBody"
+                    "$ref": "#/definitions/responses.ResponseBody"
                 },
                 "status": {
                     "type": "integer"
                 }
             }
         },
-        "handler.ResponseBody": {
+        "responses.ResponseBody": {
             "type": "object",
             "properties": {
                 "message": {
@@ -310,7 +351,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.ResponseBodyError": {
+        "responses.ResponseBodyError": {
             "type": "object",
             "properties": {
                 "error": {

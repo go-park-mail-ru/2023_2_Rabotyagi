@@ -18,10 +18,10 @@ import (
 //	@Accept      json
 //	@Produce    json
 //	@Param      post  body storage.PrePost true  "post data for adding"
-//	@Success    200  {object} Response
+//	@Success    200  {object} responses.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /post/add [post]
 func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -58,10 +58,10 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Accept      json
 //	@Produce    json
 //	@Param      id  path uint64 true  "post id"
-//	@Success    200  {object} PostResponse
+//	@Success    200  {object} responses.PostResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /post/get/{id} [get]
 func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -106,10 +106,10 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Accept      json
 //	@Produce    json
 //	@Param      count  query uint64 true  "count posts"
-//	@Success    200  {object} PostsListResponse
+//	@Success    200  {object} responses.PostsListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /post/get_list [get]
 func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()

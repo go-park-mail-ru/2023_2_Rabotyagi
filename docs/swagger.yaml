@@ -1,13 +1,20 @@
 basePath: /api/v1
 definitions:
-  handler.ErrorResponse:
+  responses.ErrorResponse:
     properties:
       body:
-        $ref: '#/definitions/handler.ResponseBodyError'
+        $ref: '#/definitions/responses.ResponseBodyError'
       status:
         type: integer
     type: object
-  handler.PostsListResponse:
+  responses.PostResponse:
+    properties:
+      body:
+        $ref: '#/definitions/storage.Post'
+      status:
+        type: integer
+    type: object
+  responses.PostsListResponse:
     properties:
       body:
         items:
@@ -16,19 +23,19 @@ definitions:
       status:
         type: integer
     type: object
-  handler.Response:
+  responses.Response:
     properties:
       body:
-        $ref: '#/definitions/handler.ResponseBody'
+        $ref: '#/definitions/responses.ResponseBody'
       status:
         type: integer
     type: object
-  handler.ResponseBody:
+  responses.ResponseBody:
     properties:
       message:
         type: string
     type: object
-  handler.ResponseBodyError:
+  responses.ResponseBodyError:
     properties:
       error:
         type: string
@@ -94,7 +101,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/responses.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -122,7 +133,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/responses.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -149,7 +164,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/responses.PostResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -176,7 +195,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/responses.PostsListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -204,7 +227,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/responses.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -232,11 +259,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/responses.Response'
         "222":
-          description: error
+          description: Error
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
