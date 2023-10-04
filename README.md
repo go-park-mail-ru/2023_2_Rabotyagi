@@ -22,6 +22,8 @@ http://84.23.53.28/
 
 ### Документация 
 
+Ссылка https://app.swaggerhub.com/apis/IVN15072002/yula-project_api/1.0 
+Также посмотреть информацию по ручками api можно в docs/swagger.yaml
 
 
 ### Запуск локально
