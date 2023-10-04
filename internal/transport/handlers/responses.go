@@ -79,7 +79,7 @@ func sendResponse(w http.ResponseWriter, response any) {
 }
 
 func setupCORS(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "http://84.23.53.28/")
+	(*w).Header().Set("Access-Control-Allow-Origin", "http://84.23.53.28")
 	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	(*w).Header().Set("Access-Control-Allow-Headers",
 		"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
