@@ -5,6 +5,10 @@ Backend репозиторий команды Работяги
 
 Владислав Ильинский: https://github.com/Vilinvil и тг https://t.me/Vilin0
 
+### Запуск локально
+
+`go run cmd/app/main.go`
+
 ### Сгенерировать swagger документацию
 
 `swag init -g cmd/app/main.go`
@@ -33,4 +37,6 @@ REPOSITORY          TAG       IMAGE ID       CREATED          SIZE
 rabotyagi/backend   latest    25dbaeeef1af   50 seconds ago   307MB
 ```
 
-### Push image to remote
+### Запуск контейнера 
+
+docker run -p 8080:8080 rabotyagi/backend
