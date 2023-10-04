@@ -12,6 +12,12 @@ import (
 
 const timeTokenLife = 24 * time.Hour
 
+func setupCORS(w *http.ResponseWriter, req *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+}
+
 // signUpHandler godoc
 //
 //	@Summary    signup
@@ -26,6 +32,11 @@ const timeTokenLife = 24 * time.Hour
 //	@Router      /signup [post]
 func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
+	setupCORS(&w, r)
+
+	if (*r).Method == "OPTIONS" {
+		return
+	}
 
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -84,7 +95,6 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	w.Header().Set("Content-Type", "application/json")
 	sendResponse(w, ResponseSuccessfulSignUp)
 	log.Printf("added user: %v", user)
 }
@@ -103,6 +113,11 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /signin [post]
 func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
+	setupCORS(&w, r)
+
+	if (*r).Method == "OPTIONS" {
+		return
+	}
 
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -177,6 +192,11 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /logout [post]
 func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
+	setupCORS(&w, r)
+
+	if (*r).Method == "OPTIONS" {
+		return
+	}
 
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
