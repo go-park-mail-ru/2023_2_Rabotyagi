@@ -1,0 +1,245 @@
+basePath: /api/v1
+definitions:
+  handler.ErrorResponse:
+    properties:
+      body:
+        $ref: '#/definitions/handler.ResponseBodyError'
+      status:
+        type: integer
+    type: object
+  handler.PostsListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/storage.Post'
+        type: array
+      status:
+        type: integer
+    type: object
+  handler.Response:
+    properties:
+      body:
+        $ref: '#/definitions/handler.ResponseBody'
+      status:
+        type: integer
+    type: object
+  handler.ResponseBody:
+    properties:
+      message:
+        type: string
+    type: object
+  handler.ResponseBodyError:
+    properties:
+      error:
+        type: string
+    type: object
+  storage.Post:
+    properties:
+      author:
+        type: integer
+      city:
+        type: string
+      delivery:
+        type: boolean
+      description:
+        type: string
+      id:
+        type: integer
+      price:
+        type: integer
+      safe:
+        type: boolean
+      title:
+        type: string
+    type: object
+  storage.PrePost:
+    properties:
+      author:
+        type: integer
+      city:
+        type: string
+      delivery:
+        type: boolean
+      description:
+        type: string
+      price:
+        type: integer
+      safe:
+        type: boolean
+      title:
+        type: string
+    type: object
+  storage.PreUser:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+host: 127.0.0.1:8080
+info:
+  contact: {}
+  description: This is a server of YULA server.
+  title: YULA project API
+  version: "1.0"
+paths:
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: logout in app
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: logout
+  /post/add:
+    post:
+      consumes:
+      - application/json
+      description: add post by data
+      parameters:
+      - description: post data for adding
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/storage.PrePost'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: add post
+  /post/get/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get post by id
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get post
+  /post/get_list:
+    get:
+      consumes:
+      - application/json
+      description: get posts by count
+      parameters:
+      - description: count posts
+        in: query
+        name: count
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get posts
+  /signin:
+    post:
+      consumes:
+      - application/json
+      description: signin in app
+      parameters:
+      - description: user data for signin
+        in: body
+        name: preUser
+        required: true
+        schema:
+          $ref: '#/definitions/storage.PreUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: signin
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: signup in app
+      parameters:
+      - description: user data for signup
+        in: body
+        name: preUser
+        required: true
+        schema:
+          $ref: '#/definitions/storage.PreUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: signup
+swagger: "2.0"
