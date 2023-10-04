@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/responses"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -30,7 +31,7 @@ func TestAddPostHandler(t *testing.T) {
 		City:            "Moscow",
 	}
 
-	expectedResponse, _ := json.Marshal(handler.ResponseSuccessfulAddPost)
+	expectedResponse, _ := json.Marshal(responses.NewResponse(responses.StatusResponseSuccessful, responses.ResponseSuccessfulAddPost))
 
 	var testCase TestCase = TestCase{
 		Post:     prePost,
@@ -91,9 +92,9 @@ func TestGetPostHandler(t *testing.T) {
 		City:            "Moscow",
 	}
 
-	ResponseSuccessfulGetPost := handler.PostResponse{
-		Status: handler.StatusResponseSuccessful,
-		Body:   *post,
+	ResponseSuccessfulGetPost := responses.PostResponse{
+		Status: responses.StatusResponseSuccessful,
+		Body:   post,
 	}
 
 	expectedResponse, _ := json.Marshal(ResponseSuccessfulGetPost)
@@ -138,7 +139,7 @@ func TestGetPostsListHandlerSuccessful(t *testing.T) {
 		inputParamCount  int
 		handler          *handler.PostHandler
 		postsForStorage  []storage.PrePost
-		expectedResponse handler.PostsListResponse
+		expectedResponse responses.PostsListResponse
 	}
 
 	testCases := [...]TestCase{
@@ -155,9 +156,9 @@ func TestGetPostsListHandlerSuccessful(t *testing.T) {
 				Delivery:        true,
 				City:            "Moscow",
 			}},
-			expectedResponse: handler.PostsListResponse{
-				Status: handler.StatusResponseSuccessful,
-				Body: []storage.Post{{
+			expectedResponse: responses.PostsListResponse{
+				Status: responses.StatusResponseSuccessful,
+				Body: []*storage.Post{{
 					ID:              1,
 					AuthorID:        1,
 					Title:           "Test Post",
@@ -196,7 +197,7 @@ func TestGetPostsListHandlerSuccessful(t *testing.T) {
 				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 			}
 
-			var resultResponse handler.PostsListResponse
+			var resultResponse responses.PostsListResponse
 
 			err = json.Unmarshal(receivedResponse, &resultResponse)
 			if err != nil {

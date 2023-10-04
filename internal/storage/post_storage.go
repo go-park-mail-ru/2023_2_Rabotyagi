@@ -38,11 +38,6 @@ type PostStorage interface {
 	AddPost(user *PreUser)
 }
 
-type PostStorageMap struct {
-	counterPosts uint64
-	posts        map[uint64]*Post
-}
-
 func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
 	for i := 1; i <= 40; i++ {
 		postID := postStorageMap.generatePostID()
@@ -59,6 +54,11 @@ func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
 	}
 
 	return postStorageMap
+}
+
+type PostStorageMap struct {
+	counterPosts uint64
+	posts        map[uint64]*Post
 }
 
 func NewPostStorageMap() *PostStorageMap {

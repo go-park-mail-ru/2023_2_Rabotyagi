@@ -3,6 +3,7 @@ package handler_test
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/responses"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -20,14 +21,14 @@ func TestSignUpHandlerSuccessful(t *testing.T) {
 	type TestCase struct {
 		name             string
 		inputPreUser     *storage.PreUser
-		expectedResponse *handler.Response
+		expectedResponse *responses.Response
 	}
 
 	testCases := [...]TestCase{
 		{
 			name:             "test basic work",
 			inputPreUser:     &storage.PreUser{Email: "example@mail.ru", Password: "password"},
-			expectedResponse: &handler.ResponseSuccessfulSignUp,
+			expectedResponse: responses.NewResponse(responses.StatusResponseSuccessful, responses.ResponseSuccessfulSignUp),
 		},
 	}
 
@@ -61,7 +62,7 @@ func TestSignUpHandlerSuccessful(t *testing.T) {
 				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 			}
 
-			var resultResponse handler.Response
+			var resultResponse responses.Response
 
 			err = json.Unmarshal(receivedResponse, &resultResponse)
 			if err != nil {
@@ -83,14 +84,14 @@ func TestSignInHandlerSuccessful(t *testing.T) {
 	type TestCase struct {
 		name             string
 		inputPreUser     *storage.PreUser
-		expectedResponse *handler.Response
+		expectedResponse *responses.Response
 	}
 
 	testCases := [...]TestCase{
 		{
 			name:             "test basic work",
 			inputPreUser:     &storage.PreUser{Email: "example@mail.ru", Password: "password"},
-			expectedResponse: &handler.ResponseSuccessfulSignIn,
+			expectedResponse: responses.NewResponse(responses.StatusResponseSuccessful, responses.ResponseSuccessfulSignIn),
 		},
 	}
 
@@ -129,7 +130,7 @@ func TestSignInHandlerSuccessful(t *testing.T) {
 				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 			}
 
-			var resultResponse handler.Response
+			var resultResponse responses.Response
 
 			err = json.Unmarshal(receivedResponse, &resultResponse)
 			if err != nil {
@@ -151,19 +152,19 @@ func TestLogOutHandlerSuccessful(t *testing.T) {
 	type TestCase struct {
 		name             string
 		inputCookie      *http.Cookie
-		expectedResponse *handler.Response
+		expectedResponse *responses.Response
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
 			inputCookie: &http.Cookie{
-				Name: handler.CookieAuthName,
+				Name: responses.CookieAuthName,
 				Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
 					"eyJlbWFpbCI6ImV4YW1wbGVAbWFpbC5ydSIsImV4cGlyZSI6MCwidXNlcklEIjoxfQ." +
 					"GBCEb3XJ6aHTsyl8jC3lxSWK6byjbYN0kg2e3NH2i9s",
 				Expires: time.Now().Add(time.Hour)},
-			expectedResponse: &handler.ResponseSuccessfulLogOut,
+			expectedResponse: responses.NewResponse(responses.StatusResponseSuccessful, responses.ResponseSuccessfulLogOut),
 		},
 	}
 
@@ -193,7 +194,7 @@ func TestLogOutHandlerSuccessful(t *testing.T) {
 				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 			}
 
-			var resultResponse handler.Response
+			var resultResponse responses.Response
 
 			err = json.Unmarshal(receivedResponse, &resultResponse)
 			if err != nil {
@@ -207,7 +208,7 @@ func TestLogOutHandlerSuccessful(t *testing.T) {
 
 			allCookies := resp.Cookies()
 			for _, cookie := range allCookies {
-				if cookie.Name == handler.CookieAuthName {
+				if cookie.Name == responses.CookieAuthName {
 					if cookie.Expires.Before(time.Now()) {
 						return
 					}
