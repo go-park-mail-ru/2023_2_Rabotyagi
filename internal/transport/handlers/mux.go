@@ -37,7 +37,7 @@ func (h *Handler) InitRoutes() http.Handler {
 
 	postStorageMap := storage.NewPostStorageMap()
 	postHandler := &PostHandler{
-		Storage: postStorageMap,
+		Storage: storage.GeneratePosts(postStorageMap),
 	}
 
 	router.HandleFunc("/api/v1/signup", authHandler.SignUpHandler)

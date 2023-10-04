@@ -76,7 +76,7 @@ definitions:
       password:
         type: string
     type: object
-host: 127.0.0.1:8080
+host: 84.23.53.28:8080
 info:
   contact: {}
   description: This is a server of YULA server.
@@ -242,4 +242,6 @@ paths:
           schema:
             type: string
       summary: signup
+schemes:
+- http
 swagger: "2.0"
