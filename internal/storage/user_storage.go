@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/errors"
 )
@@ -13,12 +14,12 @@ var (
 
 type User struct {
 	ID       uint64
-	Email     string `json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type PreUser struct {
-	Email     string `json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -31,16 +32,21 @@ type AuthStorage interface {
 type AuthStorageMap struct {
 	counterUsers uint64
 	users        map[string]User
+	mu           sync.RWMutex
 }
 
 func NewAuthStorageMap() *AuthStorageMap {
 	return &AuthStorageMap{
 		counterUsers: 0,
-		users: make(map[string]User),
+		users:        make(map[string]User),
+		mu:           sync.RWMutex{},
 	}
 }
 
 func (a *AuthStorageMap) GetUsersCount() int {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
 	return len(a.users)
 }
 
@@ -51,6 +57,9 @@ func (a *AuthStorageMap) generateIDCurUser() uint64 {
 }
 
 func (a *AuthStorageMap) GetUser(email string) (*User, error) {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
 	if !a.IsUserExist(email) {
 		return nil, fmt.Errorf("username ==%s %w", email, ErrUserNotExist)
 	}
@@ -61,6 +70,9 @@ func (a *AuthStorageMap) GetUser(email string) (*User, error) {
 }
 
 func (a *AuthStorageMap) CreateUser(user *PreUser) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	if a.IsUserExist(user.Email) {
 		return fmt.Errorf("email ==%s %w", user.Email, ErrUserAlreadyExist)
 	}
