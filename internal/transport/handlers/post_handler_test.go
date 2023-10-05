@@ -158,11 +158,13 @@ func TestGetPostsListHandlerSuccessful(t *testing.T) {
 			}},
 			expectedResponse: responses.PostsListResponse{
 				Status: responses.StatusResponseSuccessful,
-				Body: []*storage.Post{{
+				Body: []*storage.PostInFeed{{
 					ID:              1,
-					AuthorID:        1,
 					Title:           "Test Post",
-					Description:     "This is a test post",
+					Image: storage.Image{
+						Url: "test_url",
+						Alt: "test_alt",
+					},
 					Price:           100,
 					SafeTransaction: true,
 					Delivery:        true,

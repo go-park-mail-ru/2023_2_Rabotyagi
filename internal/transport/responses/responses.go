@@ -84,10 +84,10 @@ func NewPostResponse(status int, body *storage.Post) *PostResponse {
 
 type PostsListResponse struct {
 	Status int             `json:"status"`
-	Body   []*storage.Post `json:"body"`
+	Body   []*storage.PostInFeed `json:"body"`
 }
 
-func NewPostsListResponse(status int, body []*storage.Post) *PostsListResponse {
+func NewPostsListResponse(status int, body []*storage.PostInFeed) *PostsListResponse {
 	return &PostsListResponse{
 		Status: status,
 		Body:   body,
