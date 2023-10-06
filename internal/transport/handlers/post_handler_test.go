@@ -150,6 +150,10 @@ func TestGetPostsListHandlerSuccessful(t *testing.T) {
 			postsForStorage: []storage.PrePost{{
 				AuthorID:        1,
 				Title:           "Test Post",
+				Image: storage.Image{
+					Url: "test_url",
+					Alt: "test_alt",
+				},
 				Description:     "This is a test post",
 				Price:           100,
 				SafeTransaction: true,
