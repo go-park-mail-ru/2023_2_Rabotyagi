@@ -27,7 +27,7 @@ const timeTokenLife = 24 * time.Hour
 //	@Router      /signup [post]
 func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(&w)
+	resp.SetupCORS(&w, h.addrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -108,7 +108,7 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /signin [post]
 func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(&w)
+	resp.SetupCORS(&w, h.addrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -187,7 +187,7 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /logout [post]
 func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(&w)
+	resp.SetupCORS(&w, h.addrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return

@@ -5,6 +5,7 @@ import (
 
 	handler "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/handlers"
 	rabotyagi "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/server"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 )
 
 //	@title      YULA project API
@@ -15,10 +16,10 @@ import (
 // @host	84.23.53.28:8080
 // @BasePath  /api/v1
 func main() {
-	handler := new(handler.Handler)
+	configServer := config.New()
 
 	srv := new(rabotyagi.Server)
-	if err := srv.Run("8080", handler.InitRoutes()); err != nil {
+	if err := srv.Run(configServer, handler.NewMux(configServer.AllowOrigin)); err != nil {
 		log.Fatalf("AAAAAAAAAAAAAA %s", err.Error())
 	}
 }

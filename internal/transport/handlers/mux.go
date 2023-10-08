@@ -14,11 +14,13 @@ import (
 )
 
 type AuthHandler struct {
-	Storage *storage.AuthStorageMap
+	Storage    *storage.AuthStorageMap
+	addrOrigin string
 }
 
 type PostHandler struct {
-	Storage *storage.PostStorageMap
+	Storage    *storage.PostStorageMap
+	addrOrigin string
 }
 
 type Handler struct {
@@ -26,18 +28,20 @@ type Handler struct {
 	PostHandler *PostHandler
 }
 
-func (h *Handler) InitRoutes() http.Handler {
+func NewMux(addrOrigin string) http.Handler {
 	router := http.NewServeMux()
 
 	authStorageMap := storage.NewAuthStorageMap()
 
 	authHandler := &AuthHandler{
-		Storage: authStorageMap,
+		Storage:    authStorageMap,
+		addrOrigin: addrOrigin,
 	}
 
 	postStorageMap := storage.NewPostStorageMap()
 	postHandler := &PostHandler{
-		Storage: storage.GeneratePosts(postStorageMap),
+		Storage:    storage.GeneratePosts(postStorageMap),
+		addrOrigin: addrOrigin,
 	}
 
 	router.HandleFunc("/api/v1/signup", authHandler.SignUpHandler)

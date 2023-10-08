@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 )
 
 const (
@@ -15,16 +17,16 @@ type Server struct {
 	httpServer *http.Server
 }
 
-func (s *Server) Run(port string, handler http.Handler) error {
+func (s *Server) Run(config *config.Config, handler http.Handler) error {
 	s.httpServer = &http.Server{ //nolint:exhaustruct
-		Addr:           ":" + port,
+		Addr:           ":" + config.PortServer,
 		Handler:        handler,
 		MaxHeaderBytes: http.DefaultMaxHeaderBytes,
 		ReadTimeout:    basicTimeout,
 		WriteTimeout:   basicTimeout,
 	}
 
-	log.Printf("Start server:%s", port)
+	log.Printf("Start server:%s", config.PortServer)
 
 	return s.httpServer.ListenAndServe() //nolint:wrapcheck
 }
