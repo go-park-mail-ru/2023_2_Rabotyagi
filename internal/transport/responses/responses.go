@@ -8,7 +8,10 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
 )
 
-const CookieAuthName = "session_id"
+const (
+	CookieAuthName = "access_token"
+	Schema         = "http://"
+)
 
 const (
 	HTTPStatusOk    = 200
@@ -83,7 +86,7 @@ func NewPostResponse(status int, body *storage.Post) *PostResponse {
 }
 
 type PostsListResponse struct {
-	Status int             `json:"status"`
+	Status int                   `json:"status"`
 	Body   []*storage.PostInFeed `json:"body"`
 }
 

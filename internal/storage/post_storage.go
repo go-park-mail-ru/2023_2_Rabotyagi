@@ -43,7 +43,7 @@ type PrePost struct {
 type PostInFeed struct {
 	ID              uint64 `json:"id"`
 	Title           string `json:"title"`
-	Image           Image  `jsom:"image"`
+	Image           Image  `json:"image"`
 	Price           int    `json:"price"`
 	SafeTransaction bool   `json:"safe"`
 	Delivery        bool   `json:"delivery"`
