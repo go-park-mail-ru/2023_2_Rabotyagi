@@ -26,7 +26,7 @@ http://84.23.53.28/
 
 ### Тестирование 
 
-`mkdir -p bin && go test -v  -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html`
+`mkdir -p bin && go test -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html && go tool cover --func bin/cover.out`
 
 ## Документация
  Ссылка https://app.swaggerhub.com/apis/IVN15072002/yula-project_api/1.0
