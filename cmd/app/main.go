@@ -20,6 +20,6 @@ func main() {
 
 	srv := new(rabotyagi.Server)
 	if err := srv.Run(configServer, handler.NewMux(configServer.AllowOrigin)); err != nil {
-		log.Fatalf("AAAAAAAAAAAAAA %s", err.Error())
+		log.Fatalf("Error in server: %s", err.Error())
 	}
 }
