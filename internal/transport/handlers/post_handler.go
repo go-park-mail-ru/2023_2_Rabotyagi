@@ -25,7 +25,7 @@ import (
 //	@Router      /post/add [post]
 func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(&w, h.addrOrigin)
+	resp.SetupCORS(w, h.addrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -46,7 +46,6 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Storage.AddPost(prePost)
-	w.Header().Set("Content-Type", "application/json")
 	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulAddPost))
 	log.Printf("added user: %v", prePost)
 }
@@ -65,7 +64,7 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /post/get/{id} [get]
 func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(&w, h.addrOrigin)
+	resp.SetupCORS(w, h.addrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -94,7 +93,6 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	resp.SendOkResponse(w, resp.NewPostResponse(resp.StatusResponseSuccessful, post))
 	log.Printf("added user: %v", post)
 }
@@ -113,7 +111,7 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /post/get_list [get]
 func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(&w, h.addrOrigin)
+	resp.SetupCORS(w, h.addrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -142,7 +140,6 @@ func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	resp.SendOkResponse(w, resp.NewPostsListResponse(resp.StatusResponseSuccessful, posts))
 	log.Printf("added user: %v", posts)
 }

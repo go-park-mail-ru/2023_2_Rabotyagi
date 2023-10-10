@@ -115,18 +115,21 @@ func sendResponse(w http.ResponseWriter, response any) {
 }
 
 func SendErrResponse(w http.ResponseWriter, response any) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(HTTPStatusError)
 	sendResponse(w, response)
 }
 
 func SendOkResponse(w http.ResponseWriter, response any) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(HTTPStatusOk)
 	sendResponse(w, response)
 }
 
-func SetupCORS(w *http.ResponseWriter, allowOrigin string) {
-	(*w).Header().Set("Access-Control-Allow-Origin", Schema+allowOrigin)
-	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	(*w).Header().Set("Access-Control-Allow-Headers",
+func SetupCORS(w http.ResponseWriter, allowOrigin string) {
+	w.Header().Set("Access-Control-Allow-Origin", Schema+allowOrigin)
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers",
 		"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }

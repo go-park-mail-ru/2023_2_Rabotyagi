@@ -27,7 +27,7 @@ const timeTokenLife = 24 * time.Hour
 //	@Router      /signup [post]
 func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(&w, h.addrOrigin)
+	resp.SetupCORS(w, h.addrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -108,7 +108,7 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /signin [post]
 func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(&w, h.addrOrigin)
+	resp.SetupCORS(w, h.addrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -169,7 +169,6 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	w.Header().Set("Content-Type", "application/json")
 	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulSignIn))
 	log.Printf("signin user: %v", user)
 }
@@ -187,7 +186,7 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /logout [post]
 func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(&w, h.addrOrigin)
+	resp.SetupCORS(w, h.addrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -210,7 +209,6 @@ func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie.Expires = time.Now()
 
 	http.SetCookie(w, cookie)
-	w.Header().Set("Content-Type", "application/json")
 	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulLogOut))
 	log.Printf("logout user with cookie: %v", cookie)
 }
