@@ -87,7 +87,7 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		Name:    resp.CookieAuthName,
 		Value:   jwtStr,
 		Expires: expire,
-		Path:    "/signup",
+		Path:    "/",
 	}
 
 	http.SetCookie(w, cookie)
@@ -167,7 +167,7 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		Name:    resp.CookieAuthName,
 		Value:   jwtStr,
 		Expires: expire,
-		Path:    "/signin",
+		Path:    "/",
 	}
 
 	http.SetCookie(w, cookie)
