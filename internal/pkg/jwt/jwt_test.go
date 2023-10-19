@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 )
 
 //nolint:funlen

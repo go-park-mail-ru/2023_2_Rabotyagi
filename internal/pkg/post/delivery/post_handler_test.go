@@ -1,27 +1,28 @@
-package handler_test
+package delivery_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/responses"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
-	handler "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/handlers"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	postdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 )
 
 type TestCase struct {
-	Post     *storage.PrePost
+	Post     *models.PrePost
 	Response []byte
 }
 
 func TestAddPostHandler(t *testing.T) {
-	prePost := &storage.PrePost{
+	prePost := &models.PrePost{
 		AuthorID:        1,
 		Title:           "Test Post",
 		Description:     "This is a test post",
@@ -31,9 +32,13 @@ func TestAddPostHandler(t *testing.T) {
 		City:            "Moscow",
 	}
 
-	expectedResponse, _ := json.Marshal(responses.NewResponse(responses.StatusResponseSuccessful, responses.ResponseSuccessfulAddPost))
+	expectedResponse, err := json.Marshal(delivery.NewResponse(
+		delivery.StatusResponseSuccessful, postdelivery.ResponseSuccessfulAddPost))
+	if err != nil {
+		t.Fatalf("Failed to marshall expepectedResponse. Error: %v", err)
+	}
 
-	var testCase TestCase = TestCase{
+	testCase := TestCase{
 		Post:     prePost,
 		Response: expectedResponse,
 	}
@@ -44,14 +49,14 @@ func TestAddPostHandler(t *testing.T) {
 	}
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/post/add", bytes.NewBuffer(reqBody))
-	if err != nil {
+	if req == nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
 
 	w := httptest.NewRecorder()
 
-	postStorageMap := storage.NewPostStorageMap()
-	postHandler := &handler.PostHandler{
+	postStorageMap := repository.NewPostStorageMap()
+	postHandler := &postdelivery.PostHandler{
 		Storage: postStorageMap,
 	}
 
@@ -61,7 +66,10 @@ func TestAddPostHandler(t *testing.T) {
 
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Failed to io.ReadAll(). Error: %v", err)
+	}
 
 	bodyStr := string(body)
 	if bodyStr != string(testCase.Response) {
@@ -71,7 +79,7 @@ func TestAddPostHandler(t *testing.T) {
 }
 
 func TestGetPostHandler(t *testing.T) {
-	prePost := &storage.PrePost{
+	prePost := &models.PrePost{
 		AuthorID:        1,
 		Title:           "Test Post",
 		Description:     "This is a test post",
@@ -81,7 +89,7 @@ func TestGetPostHandler(t *testing.T) {
 		City:            "Moscow",
 	}
 
-	post := &storage.Post{
+	post := &models.Post{
 		ID:              1,
 		AuthorID:        1,
 		Title:           "Test Post",
@@ -92,14 +100,17 @@ func TestGetPostHandler(t *testing.T) {
 		City:            "Moscow",
 	}
 
-	ResponseSuccessfulGetPost := responses.PostResponse{
-		Status: responses.StatusResponseSuccessful,
+	ResponseSuccessfulGetPost := postdelivery.PostResponse{
+		Status: delivery.StatusResponseSuccessful,
 		Body:   post,
 	}
 
-	expectedResponse, _ := json.Marshal(ResponseSuccessfulGetPost)
+	expectedResponse, err := json.Marshal(ResponseSuccessfulGetPost)
+	if err != nil {
+		t.Fatalf("Failed to marshall expepectedResponse. Error: %v", err)
+	}
 
-	var testCase TestCase = TestCase{
+	testCase := TestCase{
 		Post:     prePost,
 		Response: expectedResponse,
 	}
@@ -108,8 +119,8 @@ func TestGetPostHandler(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	postStorageMap := storage.NewPostStorageMap()
-	postHandler := &handler.PostHandler{
+	postStorageMap := repository.NewPostStorageMap()
+	postHandler := &postdelivery.PostHandler{
 		Storage: postStorageMap,
 	}
 
@@ -121,7 +132,10 @@ func TestGetPostHandler(t *testing.T) {
 
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+	}
 
 	bodyStr := string(body)
 	if bodyStr != string(testCase.Response) {
@@ -137,21 +151,21 @@ func TestGetPostsListHandlerSuccessful(t *testing.T) {
 	type TestCase struct {
 		name             string
 		inputParamCount  int
-		handler          *handler.PostHandler
-		postsForStorage  []storage.PrePost
-		expectedResponse responses.PostsListResponse
+		handler          *postdelivery.PostHandler
+		postsForStorage  []models.PrePost
+		expectedResponse postdelivery.PostsListResponse
 	}
 
 	testCases := [...]TestCase{
 		{
 			name:            "test basic work",
 			inputParamCount: 1,
-			handler:         &handler.PostHandler{Storage: storage.NewPostStorageMap()},
-			postsForStorage: []storage.PrePost{{
-				AuthorID:        1,
-				Title:           "Test Post",
-				Image: storage.Image{
-					Url: "test_url",
+			handler:         &postdelivery.PostHandler{Storage: repository.NewPostStorageMap()},
+			postsForStorage: []models.PrePost{{
+				AuthorID: 1,
+				Title:    "Test Post",
+				Image: models.Image{
+					URL: "test_url",
 					Alt: "test_alt",
 				},
 				Description:     "This is a test post",
@@ -160,13 +174,13 @@ func TestGetPostsListHandlerSuccessful(t *testing.T) {
 				Delivery:        true,
 				City:            "Moscow",
 			}},
-			expectedResponse: responses.PostsListResponse{
-				Status: responses.StatusResponseSuccessful,
-				Body: []*storage.PostInFeed{{
-					ID:              1,
-					Title:           "Test Post",
-					Image: storage.Image{
-						Url: "test_url",
+			expectedResponse: postdelivery.PostsListResponse{
+				Status: delivery.StatusResponseSuccessful,
+				Body: []*models.PostInFeed{{
+					ID:    1,
+					Title: "Test Post",
+					Image: models.Image{
+						URL: "test_url",
 						Alt: "test_alt",
 					},
 					Price:           100,
@@ -203,7 +217,7 @@ func TestGetPostsListHandlerSuccessful(t *testing.T) {
 				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 			}
 
-			var resultResponse responses.PostsListResponse
+			var resultResponse postdelivery.PostsListResponse
 
 			err = json.Unmarshal(receivedResponse, &resultResponse)
 			if err != nil {

@@ -1,10 +1,11 @@
-package storage
+package repository
 
 import (
 	"fmt"
 	"sync"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 )
 
 var (
@@ -12,33 +13,22 @@ var (
 	ErrUserNotExist     = errors.NewError("user not exist")
 )
 
-type User struct {
-	ID       uint64
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type PreUser struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type AuthStorage interface {
-	GetUser(username string) (*User, error)
-	CreateUser(user *PreUser) error
+	GetUser(username string) (*models.User, error)
+	CreateUser(user *models.PreUser) error
 	IsUserExist(username string) bool
 }
 
 type AuthStorageMap struct {
 	counterUsers uint64
-	users        map[string]User
+	users        map[string]models.User
 	mu           sync.RWMutex
 }
 
 func NewAuthStorageMap() *AuthStorageMap {
 	return &AuthStorageMap{
 		counterUsers: 0,
-		users:        make(map[string]User),
+		users:        make(map[string]models.User),
 		mu:           sync.RWMutex{},
 	}
 }
@@ -56,7 +46,7 @@ func (a *AuthStorageMap) generateIDCurUser() uint64 {
 	return a.counterUsers
 }
 
-func (a *AuthStorageMap) GetUser(email string) (*User, error) {
+func (a *AuthStorageMap) GetUser(email string) (*models.User, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
@@ -69,7 +59,7 @@ func (a *AuthStorageMap) GetUser(email string) (*User, error) {
 	return &user, nil
 }
 
-func (a *AuthStorageMap) CreateUser(user *PreUser) error {
+func (a *AuthStorageMap) CreateUser(user *models.PreUser) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
@@ -77,7 +67,7 @@ func (a *AuthStorageMap) CreateUser(user *PreUser) error {
 		return fmt.Errorf("email ==%s %w", user.Email, ErrUserAlreadyExist)
 	}
 
-	a.users[user.Email] = User{ID: a.generateIDCurUser(), Email: user.Email, Password: user.Password}
+	a.users[user.Email] = models.User{ID: a.generateIDCurUser(), Email: user.Email, Password: user.Password}
 
 	return nil
 }

@@ -1,4 +1,4 @@
-package handler
+package delivery
 
 import (
 	"encoding/json"
@@ -7,9 +7,16 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
-	resp "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 )
+
+type PostHandler struct {
+	Storage    *repository.PostStorageMap
+	AddrOrigin string
+}
 
 // AddPostHandler godoc
 //
@@ -17,15 +24,15 @@ import (
 //	@Description  add post by data
 //	@Accept      json
 //	@Produce    json
-//	@Param      post  body storage.PrePost true  "post data for adding"
-//	@Success    200  {object} responses.Response
+//	@Param      post  body models.PrePost true  "post data for adding"
+//	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /post/add [post]
 func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(w, h.addrOrigin)
+	delivery.SetupCORS(w, h.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -37,16 +44,16 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 
-	prePost := new(storage.PrePost)
+	prePost := new(models.PrePost)
 	if err := decoder.Decode(prePost); err != nil {
 		log.Printf("%v\n", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrUserNotExits))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
 
 		return
 	}
 
 	h.Storage.AddPost(prePost)
-	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulAddPost))
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddPost))
 	log.Printf("added user: %v", prePost)
 }
 
@@ -57,14 +64,14 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Accept      json
 //	@Produce    json
 //	@Param      id  path uint64 true  "post id"
-//	@Success    200  {object} responses.PostResponse
+//	@Success    200  {object} PostResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /post/get/{id} [get]
 func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(w, h.addrOrigin)
+	delivery.SetupCORS(w, h.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -74,13 +81,13 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 	}
 
-	postIDStr := getPathParam(r.URL.Path)
+	postIDStr := utils.GetPathParam(r.URL.Path)
 
 	postID, err := strconv.Atoi(postIDStr)
 	if err != nil {
 		log.Printf("%v\n", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest,
-			fmt.Sprintf("%s post id == %s But shoud be integer", resp.ErrBadRequest, postIDStr)))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest,
+			fmt.Sprintf("%s post id == %s But shoud be integer", delivery.ErrBadRequest, postIDStr)))
 
 		return
 	}
@@ -88,12 +95,12 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	post, err := h.Storage.GetPost(uint64(postID))
 	if err != nil {
 		log.Printf("post with this id is not exists %v\n", postID)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrPostNotExist))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrPostNotExist))
 
 		return
 	}
 
-	resp.SendOkResponse(w, resp.NewPostResponse(resp.StatusResponseSuccessful, post))
+	delivery.SendOkResponse(w, NewPostResponse(delivery.StatusResponseSuccessful, post))
 	log.Printf("added user: %v", post)
 }
 
@@ -104,14 +111,14 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Accept      json
 //	@Produce    json
 //	@Param      count  query uint64 true  "count posts"
-//	@Success    200  {object} responses.PostsListResponse
+//	@Success    200  {object} PostsListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /post/get_list [get]
 func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(w, h.addrOrigin)
+	delivery.SetupCORS(w, h.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -126,8 +133,8 @@ func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request
 	count, err := strconv.Atoi(countStr)
 	if err != nil {
 		log.Printf("%v\n", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest,
-			fmt.Sprintf("%s count posts == %s But shoud be integer", resp.ErrBadRequest, countStr)))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest,
+			fmt.Sprintf("%s count posts == %s But shoud be integer", delivery.ErrBadRequest, countStr)))
 
 		return
 	}
@@ -135,11 +142,11 @@ func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request
 	posts, err := h.Storage.GetNPosts(count)
 	if err != nil {
 		log.Printf("n > posts count %v\n", count)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrNoSuchCountOfPosts))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrNoSuchCountOfPosts))
 
 		return
 	}
 
-	resp.SendOkResponse(w, resp.NewPostsListResponse(resp.StatusResponseSuccessful, posts))
+	delivery.SendOkResponse(w, NewPostsListResponse(delivery.StatusResponseSuccessful, posts))
 	log.Printf("added user: %v", posts)
 }

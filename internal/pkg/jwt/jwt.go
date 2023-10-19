@@ -3,11 +3,11 @@ package jwt
 import (
 	"fmt"
 
-	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/errors"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 )
 
-// TODO from config and reset her every some time
+// Secret TODO from config and reset her every some time.
 var Secret = []byte("super-secret")
 
 var (
@@ -23,7 +23,7 @@ type UserJwtPayload struct {
 	Email  string
 }
 
-func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) {
+func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { //nolint:cyclop
 	tokenDuplicity, err := jwt.Parse(rawJwt, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("method == %v %w", token.Header["alg"], ErrWrongSigningMethod)

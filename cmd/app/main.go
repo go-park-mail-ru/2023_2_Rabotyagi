@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	handler "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/handlers"
-	rabotyagi "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/server"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/mux"
 )
 
 //	@title      YULA project API
@@ -18,8 +18,8 @@ import (
 func main() {
 	configServer := config.New()
 
-	srv := new(rabotyagi.Server)
-	if err := srv.Run(configServer, handler.NewMux(configServer.AllowOrigin)); err != nil {
+	srv := new(server.Server)
+	if err := srv.Run(configServer, mux.NewMux(configServer.AllowOrigin)); err != nil {
 		log.Fatalf("Error in server: %s", err.Error())
 	}
 }

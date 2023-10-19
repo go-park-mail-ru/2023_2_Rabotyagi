@@ -1,8 +1,8 @@
-package handler
+package utils
 
 import "strings"
 
-func getPathParam(path string) string {
+func GetPathParam(path string) string {
 	last := strings.LastIndex(path, "/")
 	if last == -1 {
 		return ""

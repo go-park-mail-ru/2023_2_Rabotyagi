@@ -1,9 +1,8 @@
-package handler_test
+package delivery_test
 
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/responses"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,8 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
-	handler "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/handlers"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
 )
 
 func TestSignUpHandlerSuccessful(t *testing.T) {
@@ -20,15 +21,15 @@ func TestSignUpHandlerSuccessful(t *testing.T) {
 
 	type TestCase struct {
 		name             string
-		inputPreUser     *storage.PreUser
-		expectedResponse *responses.Response
+		inputPreUser     *models.PreUser
+		expectedResponse *delivery.Response
 	}
 
 	testCases := [...]TestCase{
 		{
 			name:             "test basic work",
-			inputPreUser:     &storage.PreUser{Email: "example@mail.ru", Password: "password"},
-			expectedResponse: responses.NewResponse(responses.StatusResponseSuccessful, responses.ResponseSuccessfulSignUp),
+			inputPreUser:     &models.PreUser{Email: "example@mail.ru", Password: "password"},
+			expectedResponse: delivery.NewResponse(delivery.StatusResponseSuccessful, userdelivery.ResponseSuccessfulSignUp),
 		},
 	}
 
@@ -47,8 +48,8 @@ func TestSignUpHandlerSuccessful(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			authStorageMap := storage.NewAuthStorageMap()
-			authHandler := &handler.AuthHandler{
+			authStorageMap := repository.NewAuthStorageMap()
+			authHandler := &userdelivery.AuthHandler{
 				Storage: authStorageMap,
 			}
 
@@ -62,7 +63,7 @@ func TestSignUpHandlerSuccessful(t *testing.T) {
 				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 			}
 
-			var resultResponse responses.Response
+			var resultResponse delivery.Response
 
 			err = json.Unmarshal(receivedResponse, &resultResponse)
 			if err != nil {
@@ -83,15 +84,15 @@ func TestSignInHandlerSuccessful(t *testing.T) {
 
 	type TestCase struct {
 		name             string
-		inputPreUser     *storage.PreUser
-		expectedResponse *responses.Response
+		inputPreUser     *models.PreUser
+		expectedResponse *delivery.Response
 	}
 
 	testCases := [...]TestCase{
 		{
 			name:             "test basic work",
-			inputPreUser:     &storage.PreUser{Email: "example@mail.ru", Password: "password"},
-			expectedResponse: responses.NewResponse(responses.StatusResponseSuccessful, responses.ResponseSuccessfulSignIn),
+			inputPreUser:     &models.PreUser{Email: "example@mail.ru", Password: "password"},
+			expectedResponse: delivery.NewResponse(delivery.StatusResponseSuccessful, userdelivery.ResponseSuccessfulSignIn),
 		},
 	}
 
@@ -110,13 +111,13 @@ func TestSignInHandlerSuccessful(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			authStorageMap := storage.NewAuthStorageMap()
+			authStorageMap := repository.NewAuthStorageMap()
 			err = authStorageMap.CreateUser(testCase.inputPreUser)
 			if err != nil {
 				t.Fatalf("Failed to CreateUser err: %v", err)
 			}
 
-			authHandler := &handler.AuthHandler{
+			authHandler := &userdelivery.AuthHandler{
 				Storage: authStorageMap,
 			}
 
@@ -130,7 +131,7 @@ func TestSignInHandlerSuccessful(t *testing.T) {
 				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 			}
 
-			var resultResponse responses.Response
+			var resultResponse delivery.Response
 
 			err = json.Unmarshal(receivedResponse, &resultResponse)
 			if err != nil {
@@ -152,19 +153,19 @@ func TestLogOutHandlerSuccessful(t *testing.T) {
 	type TestCase struct {
 		name             string
 		inputCookie      *http.Cookie
-		expectedResponse *responses.Response
+		expectedResponse *delivery.Response
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
 			inputCookie: &http.Cookie{
-				Name: responses.CookieAuthName,
+				Name: userdelivery.CookieAuthName,
 				Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
 					"eyJlbWFpbCI6ImV4YW1wbGVAbWFpbC5ydSIsImV4cGlyZSI6MCwidXNlcklEIjoxfQ." +
 					"GBCEb3XJ6aHTsyl8jC3lxSWK6byjbYN0kg2e3NH2i9s",
 				Expires: time.Now().Add(time.Hour)},
-			expectedResponse: responses.NewResponse(responses.StatusResponseSuccessful, responses.ResponseSuccessfulLogOut),
+			expectedResponse: delivery.NewResponse(delivery.StatusResponseSuccessful, userdelivery.ResponseSuccessfulLogOut),
 		},
 	}
 
@@ -179,8 +180,8 @@ func TestLogOutHandlerSuccessful(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			authStorageMap := storage.NewAuthStorageMap()
-			authHandler := &handler.AuthHandler{
+			authStorageMap := repository.NewAuthStorageMap()
+			authHandler := &userdelivery.AuthHandler{
 				Storage: authStorageMap,
 			}
 
@@ -194,7 +195,7 @@ func TestLogOutHandlerSuccessful(t *testing.T) {
 				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 			}
 
-			var resultResponse responses.Response
+			var resultResponse delivery.Response
 
 			err = json.Unmarshal(receivedResponse, &resultResponse)
 			if err != nil {
@@ -208,7 +209,7 @@ func TestLogOutHandlerSuccessful(t *testing.T) {
 
 			allCookies := resp.Cookies()
 			for _, cookie := range allCookies {
-				if cookie.Name == responses.CookieAuthName {
+				if cookie.Name == userdelivery.CookieAuthName {
 					if cookie.Expires.Before(time.Now()) {
 						return
 					}

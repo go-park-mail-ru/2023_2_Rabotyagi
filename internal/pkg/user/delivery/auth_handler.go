@@ -1,4 +1,4 @@
-package handler
+package delivery
 
 import (
 	"encoding/json"
@@ -6,12 +6,21 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/storage"
-	resp "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/transport/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
 )
 
-const timeTokenLife = 24 * time.Hour
+const (
+	CookieAuthName = "access_token"
+	timeTokenLife  = 24 * time.Hour
+)
+
+type AuthHandler struct {
+	Storage    *repository.AuthStorageMap
+	AddrOrigin string
+}
 
 // SignUpHandler godoc
 //
@@ -19,15 +28,15 @@ const timeTokenLife = 24 * time.Hour
 //	@Description  signup in app
 //	@Accept      json
 //	@Produce    json
-//	@Param      preUser  body storage.PreUser true  "user data for signup"
-//	@Success    200  {object} responses.Response
+//	@Param      preUser  body models.PreUser true  "user data for signup"
+//	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signup [post]
 func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(w, h.addrOrigin)
+	delivery.SetupCORS(w, h.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -41,17 +50,17 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 
-	preUser := new(storage.PreUser)
+	preUser := new(models.PreUser)
 	if err := decoder.Decode(preUser); err != nil {
 		log.Printf("%v\n", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrBadRequest))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
 
 		return
 	}
 
 	if h.Storage.IsUserExist(preUser.Email) {
 		log.Printf("already exist user %v\n", preUser)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrUserAlreadyExist))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserAlreadyExist))
 
 		return
 	}
@@ -59,7 +68,7 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	err := h.Storage.CreateUser(preUser)
 	if err != nil {
 		log.Printf("%v", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrInternalServer, resp.ErrInternalServer))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -67,7 +76,7 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := h.Storage.GetUser(preUser.Email)
 	if err != nil {
 		log.Printf("%v", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrInternalServer, resp.ErrInternalServer))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -78,20 +87,20 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.Secret)
 	if err != nil {
 		log.Printf("%v", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrInternalServer, resp.ErrInternalServer))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    resp.CookieAuthName,
+		Name:    CookieAuthName,
 		Value:   jwtStr,
 		Expires: expire,
 		Path:    "/",
 	}
 
 	http.SetCookie(w, cookie)
-	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulSignUp))
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignUp))
 	log.Printf("added user: %v", user)
 }
 
@@ -101,15 +110,15 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Description  signin in app
 //	@Accept      json
 //	@Produce    json
-//	@Param      preUser  body storage.PreUser true  "user data for signin"
-//	@Success    200  {object} responses.Response
+//	@Param      preUser  body models.PreUser true  "user data for signin"
+//	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signin [post]
 func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(w, h.addrOrigin)
+	delivery.SetupCORS(w, h.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -123,18 +132,18 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 
-	preUser := new(storage.PreUser)
+	preUser := new(models.PreUser)
 
 	if err := decoder.Decode(preUser); err != nil {
 		log.Printf("%v\n", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrBadRequest))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
 
 		return
 	}
 
 	if !h.Storage.IsUserExist(preUser.Email) {
 		log.Printf("user is not exists %v\n", preUser)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrUserNotExits))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserNotExits))
 
 		return
 	}
@@ -142,7 +151,7 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := h.Storage.GetUser(preUser.Email)
 	if err != nil || preUser.Password != user.Password {
 		log.Printf("%v\n", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrBadRequest, resp.ErrWrongCredentials))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
 
 		return
 	}
@@ -158,20 +167,20 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		log.Printf("%v\n", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusErrInternalServer, resp.ErrInternalServer))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    resp.CookieAuthName,
+		Name:    CookieAuthName,
 		Value:   jwtStr,
 		Expires: expire,
 		Path:    "/",
 	}
 
 	http.SetCookie(w, cookie)
-	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulSignIn))
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignIn))
 	log.Printf("signin user: %v", user)
 }
 
@@ -181,14 +190,14 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Description  logout in app
 //	@Accept      json
 //	@Produce    json
-//	@Success    200  {object} responses.Response
+//	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /logout [post]
 func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.SetupCORS(w, h.addrOrigin)
+	delivery.SetupCORS(w, h.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -200,10 +209,10 @@ func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie(resp.CookieAuthName)
+	cookie, err := r.Cookie(CookieAuthName)
 	if err != nil {
 		log.Printf("%v\n", err)
-		resp.SendErrResponse(w, resp.NewErrResponse(resp.StatusUnauthorized, resp.ErrUnauthorized))
+		delivery.SendErrResponse(w, delivery.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
 
 		return
 	}
@@ -211,6 +220,6 @@ func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie.Expires = time.Now()
 
 	http.SetCookie(w, cookie)
-	resp.SendOkResponse(w, resp.NewResponse(resp.StatusResponseSuccessful, resp.ResponseSuccessfulLogOut))
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulLogOut))
 	log.Printf("logout user with cookie: %v", cookie)
 }

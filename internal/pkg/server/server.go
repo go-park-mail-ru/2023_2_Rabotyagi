@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
 )
 
 const (

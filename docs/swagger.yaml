@@ -1,46 +1,53 @@
 basePath: /api/v1
 definitions:
-  responses.ErrorResponse:
+  delivery.ErrorResponse:
     properties:
       body:
-        $ref: '#/definitions/responses.ResponseBodyError'
+        $ref: '#/definitions/delivery.ResponseBodyError'
       status:
         type: integer
     type: object
-  responses.PostResponse:
+  delivery.PostResponse:
     properties:
       body:
-        $ref: '#/definitions/storage.Post'
+        $ref: '#/definitions/models.Post'
       status:
         type: integer
     type: object
-  responses.PostsListResponse:
+  delivery.PostsListResponse:
     properties:
       body:
         items:
-          $ref: '#/definitions/storage.Post'
+          $ref: '#/definitions/models.PostInFeed'
         type: array
       status:
         type: integer
     type: object
-  responses.Response:
+  delivery.Response:
     properties:
       body:
-        $ref: '#/definitions/responses.ResponseBody'
+        $ref: '#/definitions/delivery.ResponseBody'
       status:
         type: integer
     type: object
-  responses.ResponseBody:
+  delivery.ResponseBody:
     properties:
       message:
         type: string
     type: object
-  responses.ResponseBodyError:
+  delivery.ResponseBodyError:
     properties:
       error:
         type: string
     type: object
-  storage.Post:
+  models.Image:
+    properties:
+      alt:
+        type: string
+      url:
+        type: string
+    type: object
+  models.Post:
     properties:
       author:
         type: integer
@@ -52,6 +59,8 @@ definitions:
         type: string
       id:
         type: integer
+      image:
+        $ref: '#/definitions/models.Image'
       price:
         type: integer
       safe:
@@ -59,7 +68,24 @@ definitions:
       title:
         type: string
     type: object
-  storage.PrePost:
+  models.PostInFeed:
+    properties:
+      city:
+        type: string
+      delivery:
+        type: boolean
+      id:
+        type: integer
+      image:
+        $ref: '#/definitions/models.Image'
+      price:
+        type: integer
+      safe:
+        type: boolean
+      title:
+        type: string
+    type: object
+  models.PrePost:
     properties:
       author:
         type: integer
@@ -69,6 +95,8 @@ definitions:
         type: boolean
       description:
         type: string
+      image:
+        $ref: '#/definitions/models.Image'
       price:
         type: integer
       safe:
@@ -76,7 +104,7 @@ definitions:
       title:
         type: string
     type: object
-  storage.PreUser:
+  models.PreUser:
     properties:
       email:
         type: string
@@ -101,11 +129,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/responses.Response'
+            $ref: '#/definitions/delivery.Response'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -126,18 +154,18 @@ paths:
         name: post
         required: true
         schema:
-          $ref: '#/definitions/storage.PrePost'
+          $ref: '#/definitions/models.PrePost'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/responses.Response'
+            $ref: '#/definitions/delivery.Response'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -164,11 +192,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/responses.PostResponse'
+            $ref: '#/definitions/delivery.PostResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -195,11 +223,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/responses.PostsListResponse'
+            $ref: '#/definitions/delivery.PostsListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -220,18 +248,18 @@ paths:
         name: preUser
         required: true
         schema:
-          $ref: '#/definitions/storage.PreUser'
+          $ref: '#/definitions/models.PreUser'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/responses.Response'
+            $ref: '#/definitions/delivery.Response'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -252,18 +280,18 @@ paths:
         name: preUser
         required: true
         schema:
-          $ref: '#/definitions/storage.PreUser'
+          $ref: '#/definitions/models.PreUser'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/responses.Response'
+            $ref: '#/definitions/delivery.Response'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:

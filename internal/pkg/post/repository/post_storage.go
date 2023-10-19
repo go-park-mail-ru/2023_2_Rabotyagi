@@ -1,10 +1,11 @@
-package storage
+package repository
 
 import (
 	"fmt"
 	"sync"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 )
 
 var (
@@ -12,66 +13,28 @@ var (
 	ErrNoSuchCountOfPosts = errors.NewError("n > posts count")
 )
 
-type Image struct {
-	Url string
-	Alt string
-}
-
-type Post struct {
-	ID              uint64 `json:"id"`
-	AuthorID        uint64 `json:"author"`
-	Title           string `json:"title"`
-	Image           Image  `jsom:"image"`
-	Description     string `json:"description"`
-	Price           int    `json:"price"`
-	SafeTransaction bool   `json:"safe"`
-	Delivery        bool   `json:"delivery"`
-	City            string `json:"city"`
-}
-
-type PrePost struct {
-	AuthorID        uint64 `json:"author"`
-	Title           string `json:"title"`
-	Image           Image  `jsom:"image"`
-	Description     string `json:"description"`
-	Price           int    `json:"price"`
-	SafeTransaction bool   `json:"safe"`
-	Delivery        bool   `json:"delivery"`
-	City            string `json:"city"`
-}
-
-type PostInFeed struct {
-	ID              uint64 `json:"id"`
-	Title           string `json:"title"`
-	Image           Image  `json:"image"`
-	Price           int    `json:"price"`
-	SafeTransaction bool   `json:"safe"`
-	Delivery        bool   `json:"delivery"`
-	City            string `json:"city"`
-}
-
 type PostStorage interface {
-	GetPost(postID uint64) (*Post, error)
-	GetNPosts() []*Post
-	AddPost(user *PreUser)
+	GetPost(postID uint64) (*models.Post, error)
+	GetNPosts() []*models.Post
+	AddPost(user *models.PreUser)
 }
 
 type PostStorageMap struct {
 	counterPosts uint64
-	posts        map[uint64]*Post
+	posts        map[uint64]*models.Post
 	mu           sync.RWMutex
 }
 
 func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
 	for i := 1; i <= 40; i++ {
 		postID := postStorageMap.generatePostID()
-		postStorageMap.posts[postID] = &Post{
+		postStorageMap.posts[postID] = &models.Post{
 			ID:       postID,
 			AuthorID: 1,
 			Title:    fmt.Sprintf("post %d", postID),
-			Image: Image{
-				fmt.Sprintf("img_url%d", postID),
-				fmt.Sprintf("img_alt%d", postID),
+			Image: models.Image{
+				URL: fmt.Sprintf("img_url%d", postID),
+				Alt: fmt.Sprintf("img_alt%d", postID),
 			},
 			Description:     fmt.Sprintf("description of post %d", postID),
 			Price:           int(100 * postID),
@@ -87,7 +50,7 @@ func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
 func NewPostStorageMap() *PostStorageMap {
 	return &PostStorageMap{
 		counterPosts: 0,
-		posts:        make(map[uint64]*Post),
+		posts:        make(map[uint64]*models.Post),
 		mu:           sync.RWMutex{},
 	}
 }
@@ -105,7 +68,7 @@ func (a *PostStorageMap) generatePostID() uint64 {
 	return a.counterPosts
 }
 
-func (a *PostStorageMap) GetPost(postID uint64) (*Post, error) {
+func (a *PostStorageMap) GetPost(postID uint64) (*models.Post, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
@@ -118,19 +81,19 @@ func (a *PostStorageMap) GetPost(postID uint64) (*Post, error) {
 	return nil, ErrPostNotExist
 }
 
-func (a *PostStorageMap) AddPost(post *PrePost) {
+func (a *PostStorageMap) AddPost(post *models.PrePost) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
 	id := a.generatePostID()
 
-	a.posts[id] = &Post{
+	a.posts[id] = &models.Post{
 		ID:       id,
 		AuthorID: post.AuthorID,
 		Title:    post.Title,
-		Image: Image{
-			post.Image.Url,
-			post.Image.Alt,
+		Image: models.Image{
+			URL: post.Image.URL,
+			Alt: post.Image.Alt,
 		},
 		Description:     post.Description,
 		Price:           post.Price,
@@ -140,7 +103,7 @@ func (a *PostStorageMap) AddPost(post *PrePost) {
 	}
 }
 
-func (a *PostStorageMap) GetNPosts(n int) ([]*PostInFeed, error) {
+func (a *PostStorageMap) GetNPosts(n int) ([]*models.PostInFeed, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
@@ -148,17 +111,17 @@ func (a *PostStorageMap) GetNPosts(n int) ([]*PostInFeed, error) {
 		return nil, ErrNoSuchCountOfPosts
 	}
 
-	postsInFeedSlice := make([]*PostInFeed, 0, n)
+	postsInFeedSlice := make([]*models.PostInFeed, 0, n)
 
 	for _, post := range a.posts {
 		n--
 
-		postsInFeedSlice = append(postsInFeedSlice, &PostInFeed{
+		postsInFeedSlice = append(postsInFeedSlice, &models.PostInFeed{
 			ID:    post.ID,
 			Title: post.Title,
-			Image: Image{
-				post.Image.Url,
-				post.Image.Alt,
+			Image: models.Image{
+				URL: post.Image.URL,
+				Alt: post.Image.Alt,
 			},
 			Price:           post.Price,
 			SafeTransaction: post.SafeTransaction,
