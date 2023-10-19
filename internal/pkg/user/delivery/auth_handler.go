@@ -34,9 +34,9 @@ type AuthHandler struct {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signup [post]
-func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, h.AddrOrigin)
+	delivery.SetupCORS(w, a.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -58,14 +58,14 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.Storage.IsUserExist(preUser.Email) {
+	if a.Storage.IsUserExist(preUser.Email) {
 		log.Printf("already exist user %v\n", preUser)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserAlreadyExist))
 
 		return
 	}
 
-	err := h.Storage.CreateUser(preUser)
+	err := a.Storage.CreateUser(preUser)
 	if err != nil {
 		log.Printf("%v", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
@@ -73,7 +73,7 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.Storage.GetUser(preUser.Email)
+	user, err := a.Storage.GetUser(preUser.Email)
 	if err != nil {
 		log.Printf("%v", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
@@ -116,9 +116,9 @@ func (h *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signin [post]
-func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, h.AddrOrigin)
+	delivery.SetupCORS(w, a.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -141,14 +141,14 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.Storage.IsUserExist(preUser.Email) {
+	if !a.Storage.IsUserExist(preUser.Email) {
 		log.Printf("user is not exists %v\n", preUser)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserNotExits))
 
 		return
 	}
 
-	user, err := h.Storage.GetUser(preUser.Email)
+	user, err := a.Storage.GetUser(preUser.Email)
 	if err != nil || preUser.Password != user.Password {
 		log.Printf("%v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
@@ -195,9 +195,9 @@ func (h *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /logout [post]
-func (h *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, h.AddrOrigin)
+	delivery.SetupCORS(w, a.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return

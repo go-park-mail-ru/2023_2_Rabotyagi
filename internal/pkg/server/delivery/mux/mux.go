@@ -1,6 +1,7 @@
 package mux
 
 import (
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/middleware"
 	"net/http"
 
 	postdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/delivery"
@@ -38,5 +39,8 @@ func NewMux(addrOrigin string) http.Handler {
 	router.HandleFunc("/api/v1/post/get/", postHandler.GetPostHandler)
 	router.HandleFunc("/api/v1/post/get_list", postHandler.GetPostsListHandler)
 
-	return router
+	mux := http.NewServeMux()
+	mux.Handle("/", middleware.Panic(router))
+
+	return mux
 }

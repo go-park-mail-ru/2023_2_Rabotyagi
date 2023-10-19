@@ -30,9 +30,9 @@ type PostHandler struct {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /post/add [post]
-func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
+func (p *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, h.AddrOrigin)
+	delivery.SetupCORS(w, p.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -52,7 +52,7 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Storage.AddPost(prePost)
+	p.Storage.AddPost(prePost)
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddPost))
 	log.Printf("added user: %v", prePost)
 }
@@ -69,9 +69,9 @@ func (h *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /post/get/{id} [get]
-func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
+func (p *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, h.AddrOrigin)
+	delivery.SetupCORS(w, p.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -92,7 +92,7 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.Storage.GetPost(uint64(postID))
+	post, err := p.Storage.GetPost(uint64(postID))
 	if err != nil {
 		log.Printf("post with this id is not exists %v\n", postID)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrPostNotExist))
@@ -116,9 +116,9 @@ func (h *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /post/get_list [get]
-func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
+func (p *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, h.AddrOrigin)
+	delivery.SetupCORS(w, p.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -139,7 +139,7 @@ func (h *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	posts, err := h.Storage.GetNPosts(count)
+	posts, err := p.Storage.GetNPosts(count)
 	if err != nil {
 		log.Printf("n > posts count %v\n", count)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrNoSuchCountOfPosts))
