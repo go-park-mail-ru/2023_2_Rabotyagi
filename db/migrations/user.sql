@@ -1,6 +1,6 @@
 -- Table: public.user
 
-drop table if exists public."user";
+drop table if exists public."user" cascade;
 drop sequence if exists user_id_seq;
 
 create sequence user_id_seq;

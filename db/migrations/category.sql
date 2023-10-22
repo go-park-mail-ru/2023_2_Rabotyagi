@@ -1,6 +1,6 @@
 -- Table: public.category
 
-drop table if exists public."category";
+drop table if exists public."category" cascade;
 drop sequence if exists category_id_seq;
 
 create sequence category_id_seq;

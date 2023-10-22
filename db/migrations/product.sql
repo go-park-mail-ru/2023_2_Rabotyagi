@@ -6,8 +6,8 @@ create sequence product_id_seq;
 create table public."product"
 (
   id bigint not null primary key default nextval('product_id_seq'::regclass),
-	saler_id bigint not null references public."user" (id) on delete cascade on update no action,
-	category_id bigint not null references category (id) on delete set null on update no action,
+	saler_id bigint not null references public."user" (id),
+	category_id bigint not null references category (id),
 	title character(256) not null,
 	description text not null,
 	price bigint default 0,
