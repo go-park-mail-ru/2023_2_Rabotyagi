@@ -44,6 +44,8 @@ saler_id foreign key
 
 ### ФЗ
 { id } $\rightarrow$ email, phone, name, pass, birthday
+{ email } $\rightarrow$ id, phone, name, pass, birthday
+{ phone } $\rightarrow$ id, email, name, pass, birthday
 ### Нормальные формы
 1. все типы атрибутов атомарны $\Rightarrow$ отношение находится в 1НФ.
 2. отношение находится в 1НФ, ключ является не составным $\Rightarrow$ не имеем зависимости неключевых атрибутов от части ключа $\Rightarrow$ отношение находится в 2НФ.
@@ -82,6 +84,7 @@ saler_id foreign key
 
 ### ФЗ
 { id } $\rightarrow$ url, product_id
+{ url } $\rightarrow$ id, product_id
 ### Нормальные формы
 1. все типы атрибутов атомарны $\Rightarrow$ отношение находится в 1НФ.
 2. отношение находится в 1НФ, ключ является не составным $\Rightarrow$ не имеем зависимости неключевых атрибутов от части ключа $\Rightarrow$ отношение находится в 2НФ.
@@ -98,6 +101,7 @@ saler_id foreign key
 
 ### ФЗ
 { id } $\rightarrow$ name, parent_id
+{ name } $\rightarrow$ id, parent_id
 ### Нормальные формы
 1. все типы атрибутов атомарны $\Rightarrow$ отношение находится в 1НФ.
 2. отношение находится в 1НФ, ключ является не составным $\Rightarrow$ не имеем зависимости неключевых атрибутов от части ключа $\Rightarrow$ отношение находится в 2НФ.
