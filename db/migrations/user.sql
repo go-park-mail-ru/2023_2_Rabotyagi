@@ -1,6 +1,6 @@
 -- Table: public.user
 
-drop table if exists public."user";
+drop table if exists public."user" cascade;
 drop sequence if exists user_id_seq;
 
 create sequence user_id_seq;
@@ -12,4 +12,4 @@ create table public."user"
     name character(256),
     pass character(256) not null,
     birthday timestamp with time zone
-)
+);
