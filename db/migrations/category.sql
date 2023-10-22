@@ -8,5 +8,5 @@ create table public."category"
 (
     id bigint not null primary key default nextval('category_id_seq'::regclass),
     name character(256) unique not null,
-    parent_id bigint default null
+    parent_id bigint default null references public.category (id)
 )

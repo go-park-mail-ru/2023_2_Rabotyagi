@@ -16,3 +16,17 @@ create table public."order"
     close_date  timestamp with time zone default null
 );
 
+create or replace function update_data_func()
+    returns trigger as $$
+begin
+    new.update_data = now();
+    return new;
+end;
+$$ language plpgsql;
+
+
+create trigger verify_update_data
+    before update
+    on public."order"
+    for each row
+execute procedure update_data_func();
