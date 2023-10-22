@@ -9,7 +9,7 @@ create table public."order"
     id          bigint not null primary key default nextval('order_id_seq'::regclass),
     owner_id    bigint not null references public."user" (id),
     product_id  bigint not null references product (id),
-    count       smallint not null default 1,
+    count       smallint not null default 1 check (count > 0),
     status      smallint not null default 0,
     create_date timestamp with time zone not null default now(),
     update_date timestamp with time zone not null default now(),

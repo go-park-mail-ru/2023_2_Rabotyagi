@@ -12,4 +12,4 @@ create table public."user"
     name character(256),
     pass character(256) not null,
     birthday timestamp with time zone
-)
+);
