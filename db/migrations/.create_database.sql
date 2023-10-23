@@ -80,7 +80,7 @@ create table public."favourite"
     product_id bigint                                               not null references public."product" (id) on delete cascade
 );
 
-create or replace function update_data()
+create or replace function update_date()
     returns trigger as
 $$
 begin
@@ -89,8 +89,8 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger verify_update_data
+create trigger verify_update_date
     before update
     on public."order"
     for each row
-execute procedure update_data();
+execute procedure update_date();
