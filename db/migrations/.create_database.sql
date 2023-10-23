@@ -1,96 +1,95 @@
-drop table if exists public."user" cascade;
-drop table if exists public."product" cascade;
-drop table if exists public."category" cascade;
-drop table if exists public."order" cascade;
-drop table if exists public."image" cascade;
-drop table if exists public."favourite" cascade;
-drop sequence if exists user_id_seq;
-drop sequence if exists category_id_seq;
-drop sequence if exists product_id_seq;
-drop sequence if exists order_id_seq;
-drop sequence if exists image_id_seq;
-drop sequence if exists favourite_id_seq;
+DROP TABLE IF EXISTS public."user" CASCADE;
+DROP TABLE IF EXISTS public."product" CASCADE;
+DROP TABLE IF EXISTS public."category" CASCADE;
+DROP TABLE IF EXISTS public."order" CASCADE;
+DROP TABLE IF EXISTS public."image" CASCADE;
+DROP TABLE IF EXISTS public."favourite" CASCADE;
+DROP SEQUENCE IF EXISTS user_id_seq;
+DROP SEQUENCE IF EXISTS product_id_seq;
+DROP SEQUENCE IF EXISTS category_id_seq;
+DROP SEQUENCE IF EXISTS order_id_seq;
+DROP SEQUENCE IF EXISTS image_id_seq;
+DROP SEQUENCE IF EXISTS favourite_id_seq;
+CREATE SEQUENCE user_id_seq;
+CREATE SEQUENCE product_id_seq;
+CREATE SEQUENCE category_id_seq;
+CREATE SEQUENCE order_id_seq;
+CREATE SEQUENCE image_id_seq;
+CREATE SEQUENCE favourite_id_seq;
 
-create sequence user_id_seq;
-create sequence category_id_seq;
-create sequence product_id_seq;
-create sequence order_id_seq;
-create sequence image_id_seq;
-create sequence favourite_id_seq;
-
-create table public."user"
+CREATE TABLE public."user"
 (
-    id       bigint default nextval('user_id_seq'::regclass) not null primary key,
-    email    character(256) unique                           not null,
-    phone    character(18) unique                            not null,
-    name     character(256),
-    pass     character(256)                                  not null,
-    birthday timestamp with time zone
+    id       BIGINT DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    email    CHARACTER(256) UNIQUE                           NOT NULL,
+    phone    CHARACTER(18) UNIQUE                            NOT NULL,
+    name     CHARACTER(256),
+    pass     CHARACTER(256)                                  NOT NULL,
+    birthday TIMESTAMP WITH TIME ZONE
 );
 
-create table public."category"
+CREATE TABLE public."category"
 (
-    id        bigint default nextval('category_id_seq'::regclass) not null primary key,
-    name      character(256) unique                               not null,
-    parent_id bigint default null references public.category (id)
+    id        BIGINT DEFAULT NEXTVAL('category_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    name      CHARACTER(256) UNIQUE                               NOT NULL,
+    parent_id BIGINT DEFAULT NULL REFERENCES public.category (id)
 );
 
-create table public."product"
+CREATE TABLE public."product"
 (
-    id              bigint                   default nextval('product_id_seq'::regclass) not null primary key,
-    saler_id        bigint                                                               not null references public."user" (id),
-    category_id     bigint                                                               not null references public."category" (id),
-    title           character(256)                                                       not null,
-    description     text                                                                 not null,
-    price           bigint                   default 0 check (price >= 0),
-    create_date     timestamp with time zone default now(),
-    views           int                      default 0 check (views >= 0),
-    in_favourites   int                      default 0 check (in_favourites >= 0),
-    available_count int                      default 0 check (available_count >= 0),
-    city            character(256)                                                       not null,
-    delivery        boolean                  default false,
-    safe_dial       boolean                  default false,
-    is_active       boolean                  default false,
-    constraint not_null_good_count check (not (available_count = 0 and is_active))
+    id              BIGINT                   DEFAULT NEXTVAL('product_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    saler_id        BIGINT                                                               NOT NULL REFERENCES public."user" (id),
+    category_id     BIGINT                                                               NOT NULL REFERENCES public."category" (id),
+    title           CHARACTER(256)                                                       NOT NULL,
+    description     TEXT                                                                 NOT NULL,
+    price           BIGINT                   DEFAULT 0 CHECK (price >= 0),
+    create_date     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    views           INT                      DEFAULT 0 CHECK (views >= 0),
+    in_favourites   INT                      DEFAULT 0 CHECK (in_favourites >= 0),
+    available_count INT                      DEFAULT 0 CHECK (available_count >= 0),
+    city            CHARACTER(256)                                                       NOT NULL,
+    delivery        BOOLEAN                  DEFAULT FALSE,
+    safe_dial       BOOLEAN                  DEFAULT FALSE,
+    is_active       BOOLEAN                  DEFAULT FALSE,
+    constraint not_null_good_count CHECK (not (available_count = 0 and is_active))
 );
 
-create table public."order"
+CREATE TABLE public."order"
 (
-    id          bigint                   default nextval('order_id_seq'::regclass) not null primary key,
-    owner_id    bigint                                                             not null references public."user" (id),
-    product_id  bigint                                                             not null references public."product" (id),
-    count       smallint                                                           not null default 1 check (count > 0),
-    status      smallint                                                           not null default 0,
-    create_date timestamp with time zone default now()                             not null,
-    update_date timestamp with time zone default now()                             not null,
-    close_date  timestamp with time zone default null
+    id          BIGINT                   DEFAULT NEXTVAL('order_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    owner_id    BIGINT                                                             NOT NULL REFERENCES public."user" (id),
+    product_id  BIGINT                                                             NOT NULL REFERENCES public."product" (id),
+    count       SMALLINT                                                           NOT NULL DEFAULT 1 CHECK (count > 0),
+    status      SMALLINT                                                           NOT NULL DEFAULT 0,
+    create_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
+    update_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
+    close_date  TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
-create table public."image"
+CREATE TABLE public."image"
 (
-    id         bigint default nextval('image_id_seq'::regclass) not null primary key,
-    url        character(256)                                   not null unique,
-    product_id bigint                                           not null references public."product" (id) on delete cascade
+    id         BIGINT DEFAULT NEXTVAL('image_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    url        CHARACTER(256)                                   NOT NULL UNIQUE,
+    product_id BIGINT                                           NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE
 );
 
-create table public."favourite"
+CREATE TABLE public."favourite"
 (
-    id         bigint default nextval('favourite_id_seq'::regclass) not null primary key,
-    owner_id   bigint                                               not null references public."user" (id),
-    product_id bigint                                               not null references public."product" (id) on delete cascade
+    id         BIGINT DEFAULT NEXTVAL('favourite_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    owner_id   BIGINT                                               NOT NULL REFERENCES public."user" (id),
+    product_id BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE
 );
 
-create or replace function update_date()
-    returns trigger as
+CREATE OR REPLACE FUNCTION update_date()
+    RETURNS TRIGGER AS
 $$
-begin
-    new.update_date = now();
-    return new;
-end;
-$$ language plpgsql;
+BEGIN
+    NEW.update_date = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-create trigger verify_update_date
-    before update
-    on public."order"
-    for each row
-execute procedure update_date();
+CREATE TRIGGER verify_update_date
+    BEFORE UPDATE
+    ON public."order"
+    FOR EACH ROW
+EXECUTE PROCEDURE update_date();

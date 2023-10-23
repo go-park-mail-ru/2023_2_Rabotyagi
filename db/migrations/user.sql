@@ -1,15 +1,15 @@
 -- Table: public.user
 
-drop table if exists public."user" cascade;
-drop sequence if exists user_id_seq;
+DROP TABLE IF EXISTS public."user" CASCADE;
+DROP SEQUENCE IF EXISTS user_id_seq;
 
-create sequence user_id_seq;
-create table public."user"
+CREATE SEQUENCE user_id_seq;
+CREATE TABLE public."user"
 (
-    id       bigint default nextval('user_id_seq'::regclass) not null primary key,
-    email    character(256) unique                           not null,
-    phone    character(18) unique                            not null,
-    name     character(256),
-    pass     character(256)                                  not null,
-    birthday timestamp with time zone
+    id       BIGINT DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    email    CHARACTER(256) UNIQUE                           NOT NULL,
+    phone    CHARACTER(18) UNIQUE                            NOT NULL,
+    name     CHARACTER(256),
+    pass     CHARACTER(256)                                  NOT NULL,
+    birthday TIMESTAMP WITH TIME ZONE
 );

@@ -1,10 +1,10 @@
-drop table if exists public."image";
-drop sequence if exists image_id_seq;
+DROP TABLE IF EXISTS public."image";
+DROP SEQUENCE IF EXISTS image_id_seq;
 
-create sequence image_id_seq;
-create table public."image"
+CREATE SEQUENCE image_id_seq;
+CREATE TABLE public."image"
 (
-    id         bigint default nextval('image_id_seq'::regclass) not null primary key,
-    url        character(256)                                   not null unique,
-    product_id bigint                                           not null references public."product" (id) on delete cascade
+    id         BIGINT DEFAULT NEXTVAL('image_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    url        CHARACTER(256)                                   NOT NULL UNIQUE,
+    product_id BIGINT                                           NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE
 );

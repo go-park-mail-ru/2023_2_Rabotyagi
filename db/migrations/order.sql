@@ -1,32 +1,32 @@
 -- Table: public.order
 
-drop table if exists public."order" cascade;
-drop sequence if exists order_id_seq;
+DROP TABLE IF EXISTS public."order" CASCADE;
+DROP SEQUENCE IF EXISTS order_id_seq;
 
-create sequence order_id_seq;
-create table public."order"
+CREATE SEQUENCE order_id_seq;
+CREATE TABLE public."order"
 (
-    id          bigint                   default nextval('order_id_seq'::regclass) not null primary key,
-    owner_id    bigint                                                             not null references public."user" (id),
-    product_id  bigint                                                             not null references public."product" (id),
-    count       smallint                                                           not null default 1 check (count > 0),
-    status      smallint                                                           not null default 0,
-    create_date timestamp with time zone default now()                             not null,
-    update_date timestamp with time zone default now()                             not null,
-    close_date  timestamp with time zone default null
+    id          BIGINT                   DEFAULT NEXTVAL('order_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    owner_id    BIGINT                                                             NOT NULL REFERENCES public."user" (id),
+    product_id  BIGINT                                                             NOT NULL REFERENCES public."product" (id),
+    count       SMALLINT                                                           NOT NULL DEFAULT 1 CHECK (count > 0),
+    status      SMALLINT                                                           NOT NULL DEFAULT 0,
+    create_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
+    update_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
+    close_date  TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
-create or replace function update_data()
-    returns trigger as
+CREATE OR REPLACE FUNCTION update_date()
+    RETURNS TRIGGER AS
 $$
-begin
-    new.update_date = now();
-    return new;
-end;
-$$ language plpgsql;
+BEGIN
+    NEW.update_date = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-create trigger verify_update_data
-    before update
-    on public."order"
-    for each row
-execute procedure update_data();
+CREATE TRIGGER verify_update_date
+    BEFORE UPDATE
+    ON public."order"
+    FOR EACH ROW
+EXECUTE PROCEDURE update_date();
