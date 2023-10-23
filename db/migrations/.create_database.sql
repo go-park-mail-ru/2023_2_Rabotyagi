@@ -80,8 +80,9 @@ create table public."favourite"
     product_id bigint not null references product (id) on delete cascade
 );
 
-create or replace function update_data_func()
-    returns trigger as $$
+create or replace function update_data()
+    returns trigger as
+$$
 begin
     new.update_data = now();
     return new;
@@ -92,4 +93,4 @@ create trigger verify_update_data
     before update
     on public."order"
     for each row
-execute procedure update_data_func();
+execute procedure update_data();
