@@ -6,7 +6,7 @@ drop sequence if exists category_id_seq;
 create sequence category_id_seq;
 create table public."category"
 (
-    id bigint not null primary key default nextval('category_id_seq'::regclass),
-    name character(256) unique not null,
+    id        bigint default nextval('category_id_seq'::regclass) not null primary key,
+    name      character(256) unique                               not null,
     parent_id bigint default null references public.category (id)
-)
+);
