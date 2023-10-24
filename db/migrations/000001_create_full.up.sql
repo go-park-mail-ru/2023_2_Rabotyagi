@@ -1,23 +1,11 @@
-DROP TABLE IF EXISTS public."user" CASCADE;
-DROP TABLE IF EXISTS public."product" CASCADE;
-DROP TABLE IF EXISTS public."category" CASCADE;
-DROP TABLE IF EXISTS public."order" CASCADE;
-DROP TABLE IF EXISTS public."image" CASCADE;
-DROP TABLE IF EXISTS public."favourite" CASCADE;
-DROP SEQUENCE IF EXISTS user_id_seq;
-DROP SEQUENCE IF EXISTS product_id_seq;
-DROP SEQUENCE IF EXISTS category_id_seq;
-DROP SEQUENCE IF EXISTS order_id_seq;
-DROP SEQUENCE IF EXISTS image_id_seq;
-DROP SEQUENCE IF EXISTS favourite_id_seq;
-CREATE SEQUENCE user_id_seq;
-CREATE SEQUENCE product_id_seq;
-CREATE SEQUENCE category_id_seq;
-CREATE SEQUENCE order_id_seq;
-CREATE SEQUENCE image_id_seq;
-CREATE SEQUENCE favourite_id_seq;
+CREATE SEQUENCE IF NOT EXISTS user_id_seq;
+CREATE SEQUENCE IF NOT EXISTS product_id_seq;
+CREATE SEQUENCE IF NOT EXISTS category_id_seq;
+CREATE SEQUENCE IF NOT EXISTS order_id_seq;
+CREATE SEQUENCE IF NOT EXISTS image_id_seq;
+CREATE SEQUENCE IF NOT EXISTS favourite_id_seq;
 
-CREATE TABLE public."user"
+CREATE TABLE IF NOT EXISTS public."user"
 (
     id       BIGINT DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
     email    VARCHAR(256) UNIQUE                             NOT NULL CHECK (email <> ''),
@@ -27,14 +15,14 @@ CREATE TABLE public."user"
     birthday TIMESTAMP WITH TIME ZONE
 );
 
-CREATE TABLE public."category"
+CREATE TABLE IF NOT EXISTS public."category"
 (
     id        BIGINT DEFAULT NEXTVAL('category_id_seq'::regclass) NOT NULL PRIMARY KEY,
     name      VARCHAR(256) UNIQUE                                 NOT NULL CHECK (name <> ''),
     parent_id BIGINT DEFAULT NULL REFERENCES public.category (id)
 );
 
-CREATE TABLE public."product"
+CREATE TABLE IF NOT EXISTS public."product"
 (
     id              BIGINT                   DEFAULT NEXTVAL('product_id_seq'::regclass) NOT NULL PRIMARY KEY,
     saler_id        BIGINT                                                               NOT NULL REFERENCES public."user" (id),
@@ -54,7 +42,7 @@ CREATE TABLE public."product"
     CONSTRAINT not_zero_count_with_active CHECK (not (available_count = 0 and is_active))
 );
 
-CREATE TABLE public."order"
+CREATE TABLE IF NOT EXISTS public."order"
 (
     id          BIGINT                   DEFAULT NEXTVAL('order_id_seq'::regclass) NOT NULL PRIMARY KEY,
     owner_id    BIGINT                                                             NOT NULL REFERENCES public."user" (id),
@@ -67,14 +55,14 @@ CREATE TABLE public."order"
     close_date  TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
-CREATE TABLE public."image"
+CREATE TABLE IF NOT EXISTS public."image"
 (
     id         BIGINT DEFAULT NEXTVAL('image_id_seq'::regclass) NOT NULL PRIMARY KEY,
     url        VARCHAR(256)                                     NOT NULL CHECK (url <> ''),
     product_id BIGINT                                           NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE
 );
 
-CREATE TABLE public."favourite"
+CREATE TABLE IF NOT EXISTS public."favourite"
 (
     id         BIGINT DEFAULT NEXTVAL('favourite_id_seq'::regclass) NOT NULL PRIMARY KEY,
     owner_id   BIGINT                                               NOT NULL REFERENCES public."user" (id),

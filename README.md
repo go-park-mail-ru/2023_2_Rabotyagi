@@ -60,3 +60,9 @@ rabotyagi/backend   latest    25dbaeeef1af   50 seconds ago   307MB
 ### Запуск контейнера 
 
 `docker run -p 8080:8080 rabotyagi/backend`
+
+
+### Локальная установка тула для миграций
+```bash
+go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+```
