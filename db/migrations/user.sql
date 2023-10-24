@@ -7,9 +7,9 @@ CREATE SEQUENCE user_id_seq;
 CREATE TABLE public."user"
 (
     id       BIGINT DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
-    email    CHARACTER(256) UNIQUE                           NOT NULL,
-    phone    CHARACTER(18) UNIQUE                            NOT NULL,
-    name     CHARACTER(256),
-    pass     CHARACTER(256)                                  NOT NULL,
+    email    VARCHAR(256) UNIQUE                             NOT NULL CHECK (email <> ''),
+    phone    VARCHAR(18) UNIQUE                              NOT NULL CHECK (phone <> ''),
+    name     VARCHAR(256)                                    NOT NULL CHECK (name <> ''),
+    pass     VARCHAR(256)                                    NOT NULL CHECK (pass <> ''),
     birthday TIMESTAMP WITH TIME ZONE
 );

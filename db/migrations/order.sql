@@ -10,7 +10,8 @@ CREATE TABLE public."order"
     owner_id    BIGINT                                                             NOT NULL REFERENCES public."user" (id),
     product_id  BIGINT                                                             NOT NULL REFERENCES public."product" (id),
     count       SMALLINT                                                           NOT NULL DEFAULT 1 CHECK (count > 0),
-    status      SMALLINT                                                           NOT NULL DEFAULT 0,
+    status      SMALLINT                                                           NOT NULL DEFAULT 0
+        CONSTRAINT status_contract CHECK ( status BETWEEN 0 AND 3),
     create_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
     update_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
     close_date  TIMESTAMP WITH TIME ZONE DEFAULT NULL
