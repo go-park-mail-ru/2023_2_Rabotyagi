@@ -78,6 +78,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS verify_update_date ON public."order";
 CREATE TRIGGER verify_update_date
     BEFORE UPDATE
     ON public."order"
