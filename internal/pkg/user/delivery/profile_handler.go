@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-type ProfileHandler struct {
+type UserHandler struct {
 	Storage    *repository.AuthStorageMap
 	AddrOrigin string
 }
