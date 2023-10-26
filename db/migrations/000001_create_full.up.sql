@@ -31,13 +31,12 @@ CREATE TABLE IF NOT EXISTS public."product"
     description     TEXT                                                                 NOT NULL CHECK (description <> '')
         CONSTRAINT max_len_description CHECK (LENGTH(description) <= 4000),
     price           BIGINT                   DEFAULT 0                                   NOT NULL CHECK (price >= 0),
-    create_date     TIMESTAMP WITH TIME ZONE DEFAULT NOW()                               NOT NULL,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()                               NOT NULL,
     views           INT                      DEFAULT 0                                   NOT NULL CHECK (views >= 0),
-    in_favourites   INT                      DEFAULT 0                                   NOT NULL CHECK (in_favourites >= 0),
     available_count INT                      DEFAULT 0                                   NOT NULL CHECK (available_count >= 0),
     city            VARCHAR(256)                                                         NOT NULL CHECK (city <> ''),
     delivery        BOOLEAN                  DEFAULT FALSE                               NOT NULL,
-    safe_dial       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
+    safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     is_active       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     CONSTRAINT not_zero_count_with_active CHECK (not (available_count = 0 and is_active))
 );
@@ -50,9 +49,9 @@ CREATE TABLE IF NOT EXISTS public."order"
     count       SMALLINT                                                           NOT NULL DEFAULT 1 CHECK (count > 0),
     status      SMALLINT                                                           NOT NULL DEFAULT 0
         CONSTRAINT status_contract CHECK ( status BETWEEN 0 AND 3),
-    create_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
-    update_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
-    close_date  TIMESTAMP WITH TIME ZONE DEFAULT NULL
+    created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
+    updated_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
+    closed_at   TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public."image"

@@ -4,22 +4,21 @@
 
 Таблица с полями объявления
 
-| Название        | Тип          |
-|:----------------|:-------------|
-| <u>id           | bigserial    |
-| saler_id        | bigint       |
-| category_id     | bigint       |
-| title           | varchar(256) |
-| description     | text         |
-| price           | bigint       |
-| creation_date   | timestamp    |
-| views           | int          |
-| in_favourites   | int          |
-| available_count | int          |
-| city            | varchar(256) |
-| delivery        | boolean      |
-| safe_dial       | boolean      |
-| is_active       | boolean      |  
+|   Название              |   Тип            | Описание                                               |
+|:------------------------|:-----------------|:-------------------------------------------------------|
+|   <u>id</u>             |   bigserial      | Синтетический ключ                                     |
+|   saler_id              |   bigint         | внешний ключ к пользователю, который создал объявление |
+|   category_id           |   bigint         | внешний ключ к категории объявления                    |
+|   title                 |   varchar(256)   | Краткое описание                                       |
+|   description           |   text           | Полное описание                                        |
+|   price                 |   bigint         | Цена                                                   |
+|   created_at            |   timestamp      | Время создания объявления                              |
+|   views                 |   int            | Кол-во просмотров                                      |
+|   available_count       |   int            | Кол-во товара, доступного для продажи                  |
+|   city                  |   varchar(256)   | Город, в котором товар находится                       |
+|   delivery              |   boolean        | Доступна ли доставка                                   |
+|   safe_deal             |   boolean        | Доступна ли опция безопасной сделки                    |
+|   is_active             |   boolean        | Активно ли ообъявление                                 |  
 
 ### ФЗ
 
@@ -39,7 +38,7 @@ delivery, safe_dial
 
 ### Ограничения
 
-Все ограничения можно посмотреть в файле db/mirgations/.create_database.sql
+Все ограничения можно посмотреть в [файле](../migrations/.create_database.sql)  
 
 Здесь только пояснения к некоторым:
 
@@ -53,14 +52,14 @@ delivery, safe_dial
 
 Таблица с данными пользователя
 
-| Название  | Тип          |
-|:----------|:-------------|
-| <u>id</u> | bigserial    |
-| email     | varchar(256) |
-| phone     | varchar(18)  |
-| name      | varchar(256) |
-| pass      | varchar(256) |
-| birthday  | timestamp    |  
+|  Название   |  Тип           | Описание                    |
+|:------------|:---------------|:----------------------------|
+|  <u>id</u>  |  bigserial     | Синтетический ключ          |
+|  email      |  varchar(256)  | Почта                       |
+|  phone      |  varchar(18)   | Телефон                     |
+|  name       |  varchar(256)  | ФИО юзера либо никнейм      |
+|  pass       |  varchar(256)  | Пароль в зашифрованном виде |
+|  birthday   |  timestamp     | Дата дня рождения           |  
 
 ### ФЗ
 
@@ -84,16 +83,16 @@ delivery, safe_dial
 
 Таблица с данными заказа. Отражает данные заказа на покупку
 
-| Название    | Тип       |
-|-------------|-----------|
-| <u>id       | bigserial |
-| owner_id    | bigint    |
-| product_id  | bigint    |
-| count       | smallint  |
-| status      | smallint  |
-| create_date | timestamp |
-| update_date | timestamp |
-| close_date  | timestamp |
+|  Название         |  Тип        | Описание                                             |
+|:------------------|:------------|:-----------------------------------------------------|
+|  <u>id</u>        |  bigserial  | Синтетический ключ                                   |
+|  owner_id         |  bigint     | Внешний ключ к пользователю, который создал заказ    |
+|  product_id       |  bigint     | Внешний ключ к объявлению, на которое заказ размещен |
+|  count            |  smallint   | Кол-во покупаемого товара                            |
+|  status           |  smallint   | Статус заказа                                        |
+|  created_at       |  timestamp  | Дата создания заказа                                 |
+|  updated_at       |  timestamp  | Дата последнего&nbsp;обновления заказа               |
+|  closed_at        |  timestamp  | Дата закрытия заказа                                 |  
 
 ### ФЗ
 
@@ -112,7 +111,7 @@ delivery, safe_dial
 
 ### Ограничения
 
-Все ограничения можно посмотреть в файле db/mirgations/.create_database.sql
+Все ограничения можно посмотреть в Все ограничения можно посмотреть в [файле](../migrations/.create_database.sql)  
 
 Здесь только пояснения к некоторым:
 * CONSTRAINT status_contract CHECK ( status BETWEEN 0 AND 3). Аналогия на enum,
@@ -123,11 +122,11 @@ delivery, safe_dial
 
 Таблица с путями до изображения на файловом сервере
 
-| Название   | Тип          |
-|:-----------|:-------------|
-| <u>id      | bigserial    |
-| url        | varchar(256) |
-| product_id | bigint       |  
+|  Название        |  Тип           | Описание                                                   |
+|:-----------------|:---------------|:-----------------------------------------------------------|
+|  <u>id</u>       |  bigserial     | Синтетический ключ                                         |
+|  url             |  varchar(256)  | Путь к файлу                                               |
+|  product_id      |  bigint        | Внешний ключ к объявлению, к которому добавили изображение |  
 
 ### ФЗ
 
@@ -146,11 +145,11 @@ delivery, safe_dial
 
 Таблица с категориями
 
-| Название  | Тип          |
-|:----------|:-------------|
-| <u>id     | bigserial    |
-| name      | varchar(256) |
-| parent_id | bigint       |  
+|  Название       |  Тип           | Описание                      |
+|:----------------|:---------------|:------------------------------|
+|  <u>id</u>      |  bigserial     | Синтетический ключ            |
+|  name           |  varchar(256)  | Имя категории                 |
+|  parent_id      |  bigint        | Индекс родительской категории |  
 
 ### ФЗ
 
@@ -171,11 +170,11 @@ delivery, safe_dial
 
 Сводная таблица User -> Product, отражающая список избранного
 
-| Название   | Тип       |
-|------------|-----------|
-| <u>id      | bigserial |
-| owner_id   | bigint    |
-| product_id | bigint    |
+|  Название        |  Тип        | Описание                                                            |
+|:-----------------|:------------|:--------------------------------------------------------------------|
+|  <u>id</u>       |  bigserial  | Синтетический ключ                                                  |
+|  owner_id        |  bigint     | Внешний ключ к пользователю, который добавил объявление в избранное |
+|  product_id      |  bigint     | Внешний ключ к объявлению, которое пользователь добавил в избранное |  
 
 ### ФЗ
 
