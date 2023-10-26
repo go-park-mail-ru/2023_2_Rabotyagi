@@ -8,20 +8,19 @@ func init() {
 		govalidator.CustomTypeValidator(func(i interface{}, o interface{}) bool {
 			subject, ok := i.(string)
 			if !ok {
-				// Тип интерфейса не является строкой, возвращаем false
 				return false
 			}
 			if len(subject) < 6 {
-				// Пароль меньше 6 символов, возвращаем false
 				return false
 			}
+
 			return true
 		}),
 	)
 }
 
 type User struct {
-	ID       uint64 `valid:"required"`
+	ID       uint64 `json:"id" valid:"required"`
 	Email    string `json:"email" valid:"email"`
 	Phone    string `json:"phone" valid:"numeric,length(10|11)"`
 	Name     string `json:"name" valid:"alphanum"`
@@ -30,7 +29,7 @@ type User struct {
 }
 
 type UserWithoutPassword struct {
-	ID       uint64 `valid:"required"`
+	ID       uint64 `json:"id" valid:"required"`
 	Email    string `json:"email" valid:"email"`
 	Phone    string `json:"phone" valid:"numeric,length(10|11)"`
 	Name     string `json:"name" valid:"alphanum"`
