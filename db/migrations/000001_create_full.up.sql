@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public."user"
     email    VARCHAR(256) UNIQUE                             NOT NULL CHECK (email <> ''),
     phone    VARCHAR(18) UNIQUE                              NOT NULL CHECK (phone <> ''),
     name     VARCHAR(256)                                    NOT NULL CHECK (name <> ''),
-    pass     VARCHAR(256)                                    NOT NULL CHECK (pass <> ''),
+    password VARCHAR(256)                                    NOT NULL CHECK (pass <> ''),
     birthday TIMESTAMP WITH TIME ZONE
 );
 

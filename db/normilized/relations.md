@@ -58,7 +58,7 @@ delivery, safe_dial
 |  email      |  varchar(256)  | Почта                       |
 |  phone      |  varchar(18)   | Телефон                     |
 |  name       |  varchar(256)  | ФИО юзера либо никнейм      |
-|  pass       |  varchar(256)  | Пароль в зашифрованном виде |
+|  password       |  varchar(256)  | Пароль в зашифрованном виде |
 |  birthday   |  timestamp     | Дата дня рождения           |  
 
 ### ФЗ
