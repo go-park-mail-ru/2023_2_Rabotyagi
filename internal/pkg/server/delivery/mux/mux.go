@@ -1,6 +1,7 @@
 package mux
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/middleware"
@@ -15,13 +16,11 @@ type Handler struct {
 	PostHandler *postdelivery.PostHandler
 }
 
-func NewMux(addrOrigin string) http.Handler {
+func NewMux(ctx context.Context, addrOrigin string, userStorage userrepo.IUserStorage) http.Handler {
 	router := http.NewServeMux()
 
-	authStorageMap := userrepo.NewAuthStorageMap()
-
 	authHandler := &userdelivery.AuthHandler{
-		Storage:    authStorageMap,
+		Storage:    userStorage,
 		AddrOrigin: addrOrigin,
 	}
 
@@ -31,13 +30,13 @@ func NewMux(addrOrigin string) http.Handler {
 		AddrOrigin: addrOrigin,
 	}
 
-	router.HandleFunc("/api/v1/signup", authHandler.SignUpHandler)
-	router.HandleFunc("/api/v1/signin", authHandler.SignInHandler)
-	router.HandleFunc("/api/v1/logout", authHandler.LogOutHandler)
+	router.Handle("/api/v1/signup", middleware.Context(ctx, authHandler.SignUpHandler))
+	router.Handle("/api/v1/signin", middleware.Context(ctx, authHandler.SignInHandler))
+	router.Handle("/api/v1/logout", middleware.Context(ctx, authHandler.LogOutHandler))
 
-	router.HandleFunc("/api/v1/post/add", postHandler.AddPostHandler)
-	router.HandleFunc("/api/v1/post/get/", postHandler.GetPostHandler)
-	router.HandleFunc("/api/v1/post/get_list", postHandler.GetPostsListHandler)
+	router.Handle("/api/v1/post/add", middleware.Context(ctx, postHandler.AddPostHandler))
+	router.Handle("/api/v1/post/get/", middleware.Context(ctx, postHandler.GetPostHandler))
+	router.Handle("/api/v1/post/get_list", middleware.Context(ctx, postHandler.GetPostsListHandler))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(router))

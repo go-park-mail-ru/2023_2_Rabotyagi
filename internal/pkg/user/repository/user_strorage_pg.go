@@ -2,24 +2,22 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
-	GetUserByEmail = "SELECT id, email, phone, name, pass, birthday FROM public.\"user\" WHERE email=$1"
-	GetUserByID = "SELECT id, email, phone, name, pass, birthday FROM public.\"user\" WHERE id=$1"
-	CreateUser     = "INSERT INTO public.\"user\" (email, phone, name, pass, birthday) VALUES ($1, $2, $3, $4, $5)"
-	IsUserExist    = "SELECT id FORM public.\"user\" WHERE email=$1 AND phone=$2"
-)
-
-var (
-	ErrExecuting = errors.NewError("error while executing")
-	ErrParceRow  = errors.NewError("parcing row error")
+	GetUserByEmail = `SELECT id, email, phone, name, pass, birthday FROM public."user" WHERE email=$1`
+	GetUserByID    = `SELECT id, email, phone, name, pass, birthday FROM public."user" WHERE id=$1`
+	CreateUser     = `INSERT INTO public."user" (email, phone, name, pass, birthday) VALUES ($1, $2, $3, $4, $5)`
+	IsUserExist    = `SELECT id FROM public."user" WHERE email=$1 OR phone=$2`
 )
 
 type IUserStorage interface {
@@ -30,62 +28,71 @@ type IUserStorage interface {
 }
 
 type UserStorage struct {
-	Pool *pgxpool.Pool
+	pool *pgxpool.Pool
 }
 
-func NewUserStorage(Pool *pgxpool.Pool) *UserStorage {
+func NewUserStorage(pool *pgxpool.Pool) *UserStorage {
 	return &UserStorage{
-		Pool: Pool,
+		pool: pool,
 	}
 }
 
 func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	userLine := u.Pool.QueryRow(ctx, GetUserByEmail, email)
+	userLine := u.pool.QueryRow(ctx, GetUserByEmail, email)
 
 	user := models.User{
 		Email: email,
 	}
 
 	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Pass, &user.Birthday); err != nil {
-		return nil, fmt.Errorf("%w", ErrParceRow)
+		log.Printf("error in GetUserByEmail: %v", err)
+
+		return nil, err
 	}
 
 	return &user, nil
 }
 
 func (u *UserStorage) GetUserByID(ctx context.Context, id uint64) (*models.User, error) {
-	userLine := u.Pool.QueryRow(ctx, GetUserByID, id)
+	userLine := u.pool.QueryRow(ctx, GetUserByID, id)
 
 	user := models.User{
 		ID: id,
 	}
 
 	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Pass, &user.Birthday); err != nil {
-		return nil, fmt.Errorf("%w", ErrParceRow)
+		log.Printf("error in GetUserByID: %v", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return &user, nil
 }
 
 func (u *UserStorage) IsUserExist(ctx context.Context, email string, phone string) (bool, error) {
-	userRow := u.Pool.QueryRow(ctx, IsUserExist, email, phone)
+	userRow := u.pool.QueryRow(ctx, IsUserExist, email, phone)
+
 	var user string
 
-	if err := userRow.Scan(user); err != nil {
-		return false, fmt.Errorf("%w", ErrParceRow)
+	if err := userRow.Scan(&user); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, nil
+		}
+
+		log.Printf("error in IsUserExist: %v", err)
+
+		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	if user != "" {
-		return true, nil
-	}
-	
-	return false, nil
+	return true, nil
 }
 
 func (u *UserStorage) CreateUser(ctx context.Context, preUser *models.UserWithoutID) error {
-	_, err := u.Pool.Exec(ctx, CreateUser, preUser.Email, preUser.Name, preUser.Name, preUser.Pass, preUser.Phone)
+	_, err := u.pool.Exec(ctx, CreateUser, preUser.Email, preUser.Phone, preUser.Name, preUser.Pass, preUser.Birthday)
 	if err != nil {
-		return fmt.Errorf("%w", ErrExecuting)
+		log.Printf("preUser=%+v Error in CreateUser: %v", preUser, err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return nil

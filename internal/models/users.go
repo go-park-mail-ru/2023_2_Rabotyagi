@@ -1,5 +1,7 @@
 package models
 
+import "github.com/jackc/pgx/v5/pgtype"
+
 type User struct {
 	ID       uint64
 	Email    string `json:"email"`
@@ -18,11 +20,11 @@ type UserWithoutPass struct {
 }
 
 type UserWithoutID struct {
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Name     string `json:"name"`
-	Pass     string `json:"pass"`
-	Birthday uint64 `json:"birthday"`
+	Email    string           `json:"email"`
+	Phone    string           `json:"phone"`
+	Name     string           `json:"name"`
+	Pass     string           `json:"pass"`
+	Birthday pgtype.Timestamp `json:"birthday"`
 }
 
 type PreUser struct {

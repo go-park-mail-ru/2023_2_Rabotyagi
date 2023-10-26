@@ -18,7 +18,7 @@ const (
 )
 
 type AuthHandler struct {
-	Storage    *repository.AuthStorageMap
+	Storage    repository.IUserStorage
 	AddrOrigin string
 }
 
@@ -48,24 +48,25 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := r.Context()
 	decoder := json.NewDecoder(r.Body)
 
-	preUser := new(models.PreUser)
-	if err := decoder.Decode(preUser); err != nil {
+	userWithoutID := new(models.UserWithoutID)
+	if err := decoder.Decode(userWithoutID); err != nil {
 		log.Printf("%v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
 
 		return
 	}
 
-	if a.Storage.IsUserExist(preUser.Email) {
-		log.Printf("already exist user %v\n", preUser)
+	exist, err := a.Storage.IsUserExist(ctx, userWithoutID.Email, userWithoutID.Phone)
+	if exist {
+		log.Printf("already exist user %v\n", userWithoutID)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserAlreadyExist))
 
 		return
 	}
 
-	err := a.Storage.CreateUser(preUser)
 	if err != nil {
 		log.Printf("%v", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
@@ -73,7 +74,15 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.Storage.GetUser(preUser.Email)
+	err = a.Storage.CreateUser(ctx, userWithoutID)
+	if err != nil {
+		log.Printf("%v", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	user, err := a.Storage.GetUserByEmail(ctx, userWithoutID.Email)
 	if err != nil {
 		log.Printf("%v", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
@@ -130,26 +139,35 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := r.Context()
 	decoder := json.NewDecoder(r.Body)
 
-	preUser := new(models.PreUser)
+	userWithoutID := new(models.UserWithoutID)
 
-	if err := decoder.Decode(preUser); err != nil {
+	if err := decoder.Decode(userWithoutID); err != nil {
 		log.Printf("%v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
 
 		return
 	}
 
-	if !a.Storage.IsUserExist(preUser.Email) {
-		log.Printf("user is not exists %v\n", preUser)
+	exist, err := a.Storage.IsUserExist(ctx, userWithoutID.Email, userWithoutID.Phone)
+	if !exist {
+		log.Printf("user is not exists %v\n", userWithoutID)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserNotExits))
 
 		return
 	}
 
-	user, err := a.Storage.GetUser(preUser.Email)
-	if err != nil || preUser.Password != user.Password {
+	if err != nil {
+		log.Printf("%v", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	user, err := a.Storage.GetUserByEmail(ctx, userWithoutID.Email)
+	if err != nil || userWithoutID.Pass != user.Pass {
 		log.Printf("%v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
 

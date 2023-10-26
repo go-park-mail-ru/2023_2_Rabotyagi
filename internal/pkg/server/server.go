@@ -2,11 +2,14 @@ package server
 
 import (
 	"context"
+	repository2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/mux"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
 )
 
 const (
@@ -17,7 +20,20 @@ type Server struct {
 	httpServer *http.Server
 }
 
-func (s *Server) Run(config *config.Config, handler http.Handler) error {
+func (s *Server) Run(config *config.Config) error {
+	baseCtx := context.Background()
+
+	pool, err := repository2.NewPgxPool(baseCtx, config.URLDataBase)
+	if err != nil {
+		log.Printf("Error create pool: %v\n", err)
+
+		return err //nolint:wrapcheck
+	}
+
+	userStorage := repository.NewUserStorage(pool)
+
+	handler := mux.NewMux(baseCtx, config.AllowOrigin, userStorage)
+
 	s.httpServer = &http.Server{ //nolint:exhaustruct
 		Addr:           ":" + config.PortServer,
 		Handler:        handler,

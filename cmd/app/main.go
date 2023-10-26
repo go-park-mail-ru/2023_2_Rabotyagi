@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/mux"
 )
 
 //	@title      YULA project API
@@ -17,9 +16,10 @@ import (
 // @BasePath  /api/v1
 func main() {
 	configServer := config.New()
+	log.Println(configServer)
 
 	srv := new(server.Server)
-	if err := srv.Run(configServer, mux.NewMux(configServer.AllowOrigin)); err != nil {
+	if err := srv.Run(configServer); err != nil {
 		log.Fatalf("Error in server: %s", err.Error())
 	}
 }
