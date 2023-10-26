@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
-
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"log"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,16 +15,10 @@ import (
 const (
 	GetUserByEmail = `SELECT id, email, phone, name, pass, birthday FROM public."user" WHERE email=$1`
 	GetUserByID    = `SELECT id, email, phone, name, pass, birthday FROM public."user" WHERE id=$1`
-	CreateUser     = `INSERT INTO public."user" (email, phone, name, pass, birthday) VALUES ($1, $2, $3, $4, $5)`
 	IsUserExist    = `SELECT id FROM public."user" WHERE email=$1 OR phone=$2`
+	SQLAddUser     = `INSERT INTO public."user" (email, phone, name, pass, birthday) VALUES ($1, $2, $3, $4, $5)`
+	SQLGetIDUser   = `SELECT id FROM public."user" WHERE email=$1`
 )
-
-type IUserStorage interface {
-	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
-	GetUserByID(ctx context.Context, id uint64) (*models.User, error)
-	CreateUser(ctx context.Context, preUser *models.UserWithoutID) error
-	IsUserExist(ctx context.Context, email string, phone string) (bool, error)
-}
 
 type UserStorage struct {
 	pool *pgxpool.Pool
@@ -55,7 +48,6 @@ func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models
 
 func (u *UserStorage) GetUserByID(ctx context.Context, id uint64) (*models.User, error) {
 	userLine := u.pool.QueryRow(ctx, GetUserByID, id)
-
 	user := models.User{
 		ID: id,
 	}
@@ -87,13 +79,40 @@ func (u *UserStorage) IsUserExist(ctx context.Context, email string, phone strin
 	return true, nil
 }
 
-func (u *UserStorage) CreateUser(ctx context.Context, preUser *models.UserWithoutID) error {
-	_, err := u.pool.Exec(ctx, CreateUser, preUser.Email, preUser.Phone, preUser.Name, preUser.Pass, preUser.Birthday)
-	if err != nil {
-		log.Printf("preUser=%+v Error in CreateUser: %v", preUser, err)
+func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID) (*models.User, error) {
+	user := models.User{} //nolint:exhaustruct
 
-		return fmt.Errorf(myerrors.ErrTemplate, err)
+	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
+		commandTag, err := u.pool.Exec(ctx, SQLAddUser, preUser.Email, preUser.Phone,
+			preUser.Name, preUser.Pass, preUser.Birthday)
+		if err != nil {
+			log.Printf("preUser=%+v Error in AddUser: %v", preUser, err)
+
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+
+		log.Println(commandTag.String())
+
+		row := u.pool.QueryRow(ctx, SQLGetIDUser, preUser.Email)
+
+		err = row.Scan(&user.ID)
+		if err != nil {
+			log.Printf("error in AddUser: %v", err)
+
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return nil
+	user.Email = preUser.Email
+	user.Phone = preUser.Phone
+	user.Name = preUser.Name
+	user.Pass = preUser.Pass
+	user.Birthday = preUser.Birthday
+
+	return &user, nil
 }

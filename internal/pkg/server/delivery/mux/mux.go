@@ -8,7 +8,7 @@ import (
 	postdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/delivery"
 	postrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/repository"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
-	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
+	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 )
 
 type Handler struct {
@@ -16,7 +16,7 @@ type Handler struct {
 	PostHandler *postdelivery.PostHandler
 }
 
-func NewMux(ctx context.Context, addrOrigin string, userStorage userrepo.IUserStorage) http.Handler {
+func NewMux(ctx context.Context, addrOrigin string, userStorage userusecases.IUserStorage) http.Handler {
 	router := http.NewServeMux()
 
 	authHandler := &userdelivery.AuthHandler{

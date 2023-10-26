@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 )
 
 type AuthHandler struct {
-	Storage    repository.IUserStorage
+	Storage    usecases.IUserStorage
 	AddrOrigin string
 }
 
@@ -53,39 +53,16 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	userWithoutID := new(models.UserWithoutID)
 	if err := decoder.Decode(userWithoutID); err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("error in SignUpHandler: %v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
 
 		return
 	}
 
-	exist, err := a.Storage.IsUserExist(ctx, userWithoutID.Email, userWithoutID.Phone)
-	if exist {
-		log.Printf("already exist user %v\n", userWithoutID)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserAlreadyExist))
-
-		return
-	}
-
+	user, err := a.Storage.AddUser(ctx, userWithoutID)
 	if err != nil {
-		log.Printf("%v", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
-
-	err = a.Storage.CreateUser(ctx, userWithoutID)
-	if err != nil {
-		log.Printf("%v", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
-
-	user, err := a.Storage.GetUserByEmail(ctx, userWithoutID.Email)
-	if err != nil {
-		log.Printf("%v", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		log.Printf("error in SignUpHandler: %v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer)) //TODO maybe not at all 500
 
 		return
 	}
@@ -110,7 +87,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignUp))
-	log.Printf("added user: %v", user)
+	log.Printf("in SignUpHandler: added user: %v", user)
 }
 
 // SignInHandler godoc
