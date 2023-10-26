@@ -38,7 +38,7 @@ delivery, safe_dial
 
 ### Ограничения
 
-Все ограничения можно посмотреть в [файле](../migrations/.create_database.sql)  
+Все ограничения можно посмотреть в [файле](../migrations/000001_create_full.up.sql)  
 
 Здесь только пояснения к некоторым:
 
@@ -111,7 +111,7 @@ delivery, safe_dial
 
 ### Ограничения
 
-Все ограничения можно посмотреть в Все ограничения можно посмотреть в [файле](../migrations/.create_database.sql)  
+Все ограничения можно посмотреть в Все ограничения можно посмотреть в [файле](../migrations/000001_create_full.up.sql)  
 
 Здесь только пояснения к некоторым:
 * CONSTRAINT status_contract CHECK ( status BETWEEN 0 AND 3). Аналогия на enum,
