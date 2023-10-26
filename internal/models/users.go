@@ -1,30 +1,48 @@
 package models
 
-import "github.com/jackc/pgx/v5/pgtype"
+import "github.com/asaskevich/govalidator"
 
-type User struct {
-	ID       uint64
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Name     string `json:"name"`
-	Pass     string `json:"pass"`
-	Birthday uint64 `json:"birthday"`
+func init() {
+	govalidator.CustomTypeTagMap.Set(
+		"password",
+		govalidator.CustomTypeValidator(func(i interface{}, o interface{}) bool {
+			subject, ok := i.(string)
+			if !ok {
+				// Тип интерфейса не является строкой, возвращаем false
+				return false
+			}
+			if len(subject) < 6 {
+				// Пароль меньше 6 символов, возвращаем false
+				return false
+			}
+			return true
+		}),
+	)
 }
 
-type UserWithoutPass struct {
-	ID       uint64
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Name     string `json:"name"`
-	Birthday uint64 `json:"birthday"`
+type User struct {
+	ID       uint64 `valid:"required"`
+	Email    string `json:"email" valid:"email"`
+	Phone    string `json:"phone" valid:"numeric,length(10|11)"`
+	Name     string `json:"name" valid:"alphanum"`
+	Pass     string `json:"pass" valid:"password"`
+	Birthday uint64 `json:"birthday" valid:"numeric"`
+}
+
+type UserWithoutPassword struct {
+	ID       uint64 `valid:"required"`
+	Email    string `json:"email" valid:"email"`
+	Phone    string `json:"phone" valid:"numeric,length(10|11)"`
+	Name     string `json:"name" valid:"alphanum"`
+	Birthday uint64 `json:"birthday" valid:"numeric"`
 }
 
 type UserWithoutID struct {
-	Email    string           `json:"email"`
-	Phone    string           `json:"phone"`
-	Name     string           `json:"name"`
-	Pass     string           `json:"pass"`
-	Birthday pgtype.Timestamp `json:"birthday"`
+	Email    string `json:"email" valid:"email"`
+	Phone    string `json:"phone" valid:"numeric,length(10|11)"`
+	Name     string `json:"name" valid:"alphanum"`
+	Pass     string `json:"pass" valid:"password"`
+	Birthday uint64 `json:"birthday" valid:"numeric"`
 }
 
 type PreUser struct {

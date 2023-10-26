@@ -3,6 +3,7 @@ module github.com/go-park-mail-ru/2023_2_Rabotyagi
 go 1.18
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/stretchr/testify v1.8.1
