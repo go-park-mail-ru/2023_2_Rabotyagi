@@ -83,15 +83,13 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 	user := models.User{} //nolint:exhaustruct
 
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		commandTag, err := u.pool.Exec(ctx, SQLAddUser, preUser.Email, preUser.Phone,
+		_, err := u.pool.Exec(ctx, SQLAddUser, preUser.Email, preUser.Phone,
 			preUser.Name, preUser.Pass, preUser.Birthday)
 		if err != nil {
 			log.Printf("preUser=%+v Error in AddUser: %v", preUser, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
-
-		log.Println(commandTag.String())
 
 		row := u.pool.QueryRow(ctx, SQLGetIDUser, preUser.Email)
 
