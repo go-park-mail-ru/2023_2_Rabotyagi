@@ -136,6 +136,8 @@ linters-settings:
           - github.com/go-park-mail-ru/2023_2_Rabotyagi
           - github.com/dgrijalva/jwt-go
           - github.com/stretchr/testify/assert
+          - github.com/jackc/pgx/v5
+          - github.com/asaskevich/govalidator
         deny:
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package

@@ -104,6 +104,8 @@ func (p *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("get post: %+v", post)
 }
 
+// TODO post list, у нас лежит размер пачки, с фронта прилетает начиная с какого поста брать
+
 // GetPostsListHandler godoc
 //
 //	@Summary    get posts
