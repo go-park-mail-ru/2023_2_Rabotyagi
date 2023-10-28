@@ -44,7 +44,7 @@ func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models
 		Email: email,
 	}
 
-	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Pass, &user.Birthday); err != nil {
+	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Password, &user.Birthday); err != nil {
 		log.Printf("error in GetUserByEmail: %v", err)
 
 		return nil, err
@@ -60,7 +60,7 @@ func (u *UserStorage) GetUserByID(ctx context.Context, id uint64) (*models.User,
 		ID: id,
 	}
 
-	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Pass, &user.Birthday); err != nil {
+	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Password, &user.Birthday); err != nil {
 		log.Printf("error in GetUserByID: %v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -88,7 +88,7 @@ func (u *UserStorage) IsUserExist(ctx context.Context, email string, phone strin
 }
 
 func (u *UserStorage) CreateUser(ctx context.Context, preUser *models.UserWithoutID) error {
-	_, err := u.pool.Exec(ctx, CreateUser, preUser.Email, preUser.Phone, preUser.Name, preUser.Pass, preUser.Birthday)
+	_, err := u.pool.Exec(ctx, CreateUser, preUser.Email, preUser.Phone, preUser.Name, preUser.Password, preUser.Birthday)
 	if err != nil {
 		log.Printf("preUser=%+v Error in CreateUser: %v", preUser, err)
 

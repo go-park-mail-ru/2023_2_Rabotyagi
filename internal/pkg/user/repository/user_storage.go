@@ -67,7 +67,7 @@ func (a *AuthStorageMap) CreateUser(user *models.PreUser) error {
 		return fmt.Errorf("email ==%s %w", user.Email, ErrUserAlreadyExist)
 	}
 
-	a.users[user.Email] = models.User{ID: a.generateIDCurUser(), Email: user.Email, Pass: user.Password}
+	a.users[user.Email] = models.User{ID: a.generateIDCurUser(), Email: user.Email, Password: user.Password}
 
 	return nil
 }

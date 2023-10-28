@@ -37,7 +37,7 @@ func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
 				Alt: fmt.Sprintf("img_alt%d", postID),
 			},
 			Description:     fmt.Sprintf("description of post %d", postID),
-			Price:           int(100 * postID),
+			Price:           uint(100 * postID),
 			SafeTransaction: true,
 			Delivery:        true,
 			City:            "Moscow",

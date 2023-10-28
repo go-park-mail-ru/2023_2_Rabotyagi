@@ -167,7 +167,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := a.Storage.GetUserByEmail(ctx, userWithoutID.Email)
-	if err != nil || userWithoutID.Pass != user.Pass {
+	if err != nil || userWithoutID.Password != user.Password {
 		log.Printf("%v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
 
