@@ -6,39 +6,42 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/jackc/pgx/v5"
 	"log"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const (
-	GetUserByEmail = `SELECT id, email, phone, name, pass, birthday FROM public."user" WHERE email=$1`
-	GetUserByID    = `SELECT id, email, phone, name, pass, birthday FROM public."user" WHERE id=$1`
-	IsUserExist    = `SELECT id FROM public."user" WHERE email=$1 OR phone=$2`
-	SQLAddUser     = `INSERT INTO public."user" (email, phone, name, pass, birthday) VALUES ($1, $2, $3, $4, $5)`
-	SQLGetIDUser   = `SELECT id FROM public."user" WHERE email=$1`
-)
-
-type UserStorage struct {
-	pool *pgxpool.Pool
+type IUserStorage interface {
+	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	GetUserByID(ctx context.Context, id uint64) (*models.User, error)
+	CreateUser(ctx context.Context, preUser *models.UserWithoutID) error
+	UpdateUser(ctx context.Context, userID uint64, updateData map[string]interface{}) error
+	IsEmailBusy(ctx context.Context, email string) (bool, error)
+	IsPhoneBusy(ctx context.Context, phone string) (bool, error)
 }
 
-func NewUserStorage(pool *pgxpool.Pool) *UserStorage {
+type UserStorage struct {
+	Pool *pgxpool.Pool
+}
+
+func NewUserStorage(Pool *pgxpool.Pool) *UserStorage {
 	return &UserStorage{
-		pool: pool,
+		Pool: Pool,
 	}
 }
 
 func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	userLine := u.pool.QueryRow(ctx, GetUserByEmail, email)
+	GetUserByEmail := `SELECT id, email, phone, name, pass, birthday FROM public."user" WHERE email=$1`
+	userLine := u.Pool.QueryRow(ctx, GetUserByEmail, email)
 
 	user := models.User{
 		Email: email,
 	}
 
 	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Pass, &user.Birthday); err != nil {
-		log.Printf("error in GetUserByEmail: %v", err)
+		log.Printf("error in GetUserByEmail: %+v", err)
 
 		return nil, err
 	}
@@ -47,22 +50,25 @@ func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models
 }
 
 func (u *UserStorage) GetUserByID(ctx context.Context, id uint64) (*models.User, error) {
-	userLine := u.pool.QueryRow(ctx, GetUserByID, id)
+	GetUserByID := `SELECT id, email, phone, name, pass, birthday FROM public."user" WHERE id=$1`
+	userLine := u.Pool.QueryRow(ctx, GetUserByID, id)
+
 	user := models.User{
 		ID: id,
 	}
 
 	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Pass, &user.Birthday); err != nil {
-		log.Printf("error in GetUserByID: %v", err)
+		log.Printf("error in GetUserByID: %+v", err)
 
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	return &user, nil
 }
 
-func (u *UserStorage) IsUserExist(ctx context.Context, email string, phone string) (bool, error) {
-	userRow := u.pool.QueryRow(ctx, IsUserExist, email, phone)
+func (u *UserStorage) IsEmailBusy(ctx context.Context, email string) (bool, error) {
+	IsEmailBusy := `SELECT id FORM public."user" WHERE email=$1`
+	userRow := u.Pool.QueryRow(ctx, IsEmailBusy, email)
 
 	var user string
 
@@ -71,7 +77,7 @@ func (u *UserStorage) IsUserExist(ctx context.Context, email string, phone strin
 			return false, nil
 		}
 
-		log.Printf("error in IsUserExist: %v", err)
+		log.Printf("error in IsEmailBusy: %+v", err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -79,11 +85,67 @@ func (u *UserStorage) IsUserExist(ctx context.Context, email string, phone strin
 	return true, nil
 }
 
+func (u *UserStorage) IsPhoneBusy(ctx context.Context, phone string) (bool, error) {
+	IsPhoneBusy := `SELECT id FORM public."user" WHERE phone=$1`
+	userRow := u.Pool.QueryRow(ctx, IsPhoneBusy, phone)
+
+	var user string
+
+	if err := userRow.Scan(&user); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, nil
+		}
+
+		log.Printf("error in IsPhoneBusy: %+v", err)
+
+		return false, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return true, nil
+}
+
+func (u *UserStorage) CreateUser(ctx context.Context, preUser *models.UserWithoutID) error {
+	CreateUser := `INSERT INTO public."user" (email, phone, name, pass, birthday) VALUES ($1, $2, $3, $4, $5)`
+	_, err := u.Pool.Exec(ctx, CreateUser, preUser.Email, preUser.Name, preUser.Name, preUser.Pass, preUser.Phone)
+	if err != nil {
+		log.Printf("preUser=%+v Error in CreateUser: %+v", preUser, err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (u *UserStorage) UpdateUser(ctx context.Context, userID uint64, updateData map[string]interface{}) error {
+	query := squirrel.Update(`public."user"`).
+		Where(squirrel.Eq{"id": userID})
+
+	for key, value := range updateData {
+		query = query.Set(key, value)
+	}
+
+	queryString, args, err := query.ToSql()
+	if err != nil {
+		log.Printf("Error in UpdateUser while converting ToSql: %+v", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	_, err = u.Pool.Exec(ctx, queryString, args...)
+	if err != nil {
+		log.Printf("Error in UpdateUser while executing: %+v", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
 func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID) (*models.User, error) {
 	user := models.User{} //nolint:exhaustruct
 
-	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		_, err := u.pool.Exec(ctx, SQLAddUser, preUser.Email, preUser.Phone,
+	err := pgx.BeginFunc(ctx, u.Pool, func(tx pgx.Tx) error {
+		_, err := u.Pool.Exec(ctx, SQLAddUser, preUser.Email, preUser.Phone,
 			preUser.Name, preUser.Pass, preUser.Birthday)
 		if err != nil {
 			log.Printf("preUser=%+v Error in AddUser: %v", preUser, err)
@@ -91,7 +153,7 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		row := u.pool.QueryRow(ctx, SQLGetIDUser, preUser.Email)
+		row := u.Pool.QueryRow(ctx, SQLGetIDUser, preUser.Email)
 
 		err = row.Scan(&user.ID)
 		if err != nil {
