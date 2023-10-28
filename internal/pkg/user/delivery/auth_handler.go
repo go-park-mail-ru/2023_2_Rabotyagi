@@ -101,7 +101,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignUp))
-	log.Printf("added user: %v", user)
+	log.Printf("added user: %+v", user)
 }
 
 // SignInHandler godoc
@@ -181,7 +181,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignIn))
-	log.Printf("signin user: %v", user)
+	log.Printf("signin user: %+v", user)
 }
 
 // LogOutHandler godoc

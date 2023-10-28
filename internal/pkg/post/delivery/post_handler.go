@@ -54,7 +54,7 @@ func (p *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	p.Storage.AddPost(prePost)
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddPost))
-	log.Printf("added user: %v", prePost)
+	log.Printf("added post: %+v", prePost)
 }
 
 // GetPostHandler godoc
@@ -101,7 +101,7 @@ func (p *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	delivery.SendOkResponse(w, NewPostResponse(delivery.StatusResponseSuccessful, post))
-	log.Printf("added user: %v", post)
+	log.Printf("get post: %+v", post)
 }
 
 // GetPostsListHandler godoc
@@ -148,5 +148,5 @@ func (p *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	delivery.SendOkResponse(w, NewPostsListResponse(delivery.StatusResponseSuccessful, posts))
-	log.Printf("added user: %v", posts)
+	log.Printf("get post list: %+v", posts)
 }
