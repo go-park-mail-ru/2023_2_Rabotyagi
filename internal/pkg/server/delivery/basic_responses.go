@@ -55,7 +55,7 @@ func NewErrResponse(status int, err string) *ErrorResponse {
 func sendResponse(w http.ResponseWriter, response any) {
 	responseSend, err := json.Marshal(response)
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("in sendResponse: %+v\n", err)
 		http.Error(w, ErrInternalServer, http.StatusInternalServerError)
 
 		return
@@ -63,7 +63,7 @@ func sendResponse(w http.ResponseWriter, response any) {
 
 	_, err = w.Write(responseSend)
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("in sendResponse: %+v\n", err)
 		http.Error(w, ErrInternalServer, http.StatusInternalServerError)
 	}
 }

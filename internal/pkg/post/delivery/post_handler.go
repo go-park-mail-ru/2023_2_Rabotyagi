@@ -46,7 +46,7 @@ func (p *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	prePost := new(models.PrePost)
 	if err := decoder.Decode(prePost); err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("in AddPostHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
 
 		return
@@ -85,7 +85,7 @@ func (p *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	postID, err := strconv.Atoi(postIDStr)
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("in GetPostHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest,
 			fmt.Sprintf("%s post id == %s But shoud be integer", delivery.ErrBadRequest, postIDStr)))
 
@@ -94,14 +94,14 @@ func (p *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	post, err := p.Storage.GetPost(uint64(postID))
 	if err != nil {
-		log.Printf("post with this id is not exists %v\n", postID)
+		log.Printf("in GetPostHandler: post with this id is not exists %+v\n", postID)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrPostNotExist))
 
 		return
 	}
 
 	delivery.SendOkResponse(w, NewPostResponse(delivery.StatusResponseSuccessful, post))
-	log.Printf("get post: %+v", post)
+	log.Printf("in GetPostHandler: get post: %+v", post)
 }
 
 // TODO post list, у нас лежит размер пачки, с фронта прилетает начиная с какого поста брать
@@ -134,7 +134,7 @@ func (p *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request
 
 	count, err := strconv.Atoi(countStr)
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("in GetPostsListHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest,
 			fmt.Sprintf("%s count posts == %s But shoud be integer", delivery.ErrBadRequest, countStr)))
 
@@ -143,12 +143,12 @@ func (p *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request
 
 	posts, err := p.Storage.GetNPosts(count)
 	if err != nil {
-		log.Printf("n > posts count %v\n", count)
+		log.Printf("in GetPostsListHandler: n > posts count %+v\n", count)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrNoSuchCountOfPosts))
 
 		return
 	}
 
 	delivery.SendOkResponse(w, NewPostsListResponse(delivery.StatusResponseSuccessful, posts))
-	log.Printf("get post list: %+v", posts)
+	log.Printf("in GetPostsListHandler: get post list: %+v", posts)
 }

@@ -2,7 +2,9 @@ package errors
 
 import "fmt"
 
-const ErrTemplate = "%w"
+const (
+	ErrTemplate = "%w"
+)
 
 type Error struct {
 	err string

@@ -24,7 +24,8 @@ type IUserStorage interface {
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	GetUserByID(ctx context.Context, id uint64) (*models.User, error)
 	CreateUser(ctx context.Context, preUser *models.UserWithoutID) error
-	IsUserExist(ctx context.Context, email string, phone string) (bool, error)
+	IsEmailBusy(ctx context.Context, email string) bool
+	IsPhoneBusy(ctx context.Context, phone string) bool
 }
 
 type UserStorage struct {
@@ -45,7 +46,7 @@ func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models
 	}
 
 	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Password, &user.Birthday); err != nil {
-		log.Printf("error in GetUserByEmail: %v", err)
+		log.Printf("error in GetUserByEmail: %+v", err)
 
 		return nil, err
 	}
@@ -61,7 +62,7 @@ func (u *UserStorage) GetUserByID(ctx context.Context, id uint64) (*models.User,
 	}
 
 	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Password, &user.Birthday); err != nil {
-		log.Printf("error in GetUserByID: %v", err)
+		log.Printf("error in GetUserByID: %+v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -69,7 +70,7 @@ func (u *UserStorage) GetUserByID(ctx context.Context, id uint64) (*models.User,
 	return &user, nil
 }
 
-func (u *UserStorage) IsUserExist(ctx context.Context, email string, phone string) (bool, error) {
+func (u *UserStorage) IsUserExistByEmail(ctx context.Context, email string, phone string) (bool, error) {
 	userRow := u.pool.QueryRow(ctx, IsUserExist, email, phone)
 
 	var user string
@@ -79,7 +80,7 @@ func (u *UserStorage) IsUserExist(ctx context.Context, email string, phone strin
 			return false, nil
 		}
 
-		log.Printf("error in IsUserExist: %v", err)
+		log.Printf("error in IsEmailBusy: %+v", err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -90,7 +91,7 @@ func (u *UserStorage) IsUserExist(ctx context.Context, email string, phone strin
 func (u *UserStorage) CreateUser(ctx context.Context, preUser *models.UserWithoutID) error {
 	_, err := u.pool.Exec(ctx, CreateUser, preUser.Email, preUser.Phone, preUser.Name, preUser.Password, preUser.Birthday)
 	if err != nil {
-		log.Printf("preUser=%+v Error in CreateUser: %v", preUser, err)
+		log.Printf("preUser=%+v Error in CreateUser: %+v", preUser, err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}

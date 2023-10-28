@@ -26,7 +26,7 @@ type UserJwtPayload struct {
 func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { //nolint:cyclop
 	tokenDuplicity, err := jwt.Parse(rawJwt, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("method == %v %w", token.Header["alg"], ErrWrongSigningMethod)
+			return nil, fmt.Errorf("method == %+v %w", token.Header["alg"], ErrWrongSigningMethod)
 		}
 
 		return secret, nil
@@ -41,7 +41,7 @@ func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { 
 		interfaceEmail, ok3 := claims["email"]
 
 		if !(ok1 && ok2 && ok3) {
-			return nil, fmt.Errorf("error with claims: %v %w", claims, ErrInvalidToken)
+			return nil, fmt.Errorf("error with claims: %+v %w", claims, ErrInvalidToken)
 		}
 
 		userID, ok1 := interfaceUserID.(float64)
@@ -49,7 +49,7 @@ func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { 
 		email, ok3 := interfaceEmail.(string)
 
 		if !(ok1 && ok2 && ok3) {
-			return nil, fmt.Errorf("error with casting claims: %v %w", claims, ErrInvalidToken)
+			return nil, fmt.Errorf("error with casting claims: %+v %w", claims, ErrInvalidToken)
 		}
 
 		return &UserJwtPayload{UserID: uint64(userID), Expire: int64(expire), Email: email}, nil

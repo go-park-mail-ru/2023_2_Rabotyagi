@@ -1,8 +1,12 @@
 package models
 
-import "github.com/asaskevich/govalidator"
+import (
+	"time"
 
-const minLenPassword = 6
+	"github.com/asaskevich/govalidator"
+)
+
+const MinLenPassword = 6
 
 //nolint:gochecknoinits
 func init() {
@@ -13,7 +17,7 @@ func init() {
 			if !ok {
 				return false
 			}
-			if len(subject) < minLenPassword {
+			if len(subject) < MinLenPassword {
 				return false
 			}
 
@@ -23,28 +27,28 @@ func init() {
 }
 
 type User struct {
-	ID       uint64 `json:"id"       valid:"required"`
-	Email    string `json:"email"    valid:"email"`
-	Phone    string `json:"phone"    valid:"numeric,length(10|11)"`
-	Name     string `json:"name"     valid:"alphanum"`
-	Password string `json:"password"     valid:"password"`
-	Birthday uint64 `json:"birthday" valid:"numeric"`
+	ID       uint64    `json:"id"       valid:"required"`
+	Email    string    `json:"email"    valid:"email"`
+	Phone    string    `json:"phone"    valid:"numeric,length(10|11)"`
+	Name     string    `json:"name"     valid:"alphanum"`
+	Password string    `json:"password" valid:"password"`
+	Birthday time.Time `json:"birthday" valid:"rfc3339"`
 }
 
 type UserWithoutPassword struct {
-	ID       uint64 `json:"id"       valid:"required"`
-	Email    string `json:"email"    valid:"email"`
-	Phone    string `json:"phone"    valid:"numeric,length(10|11)"`
-	Name     string `json:"name"     valid:"alphanum"`
-	Birthday uint64 `json:"birthday" valid:"numeric"`
+	ID       uint64    `json:"id"       valid:"required"`
+	Email    string    `json:"email"    valid:"required, email"`
+	Phone    string    `json:"phone"    valid:"numeric,length(10|11)"`
+	Name     string    `json:"name"     valid:"required, alphanum"`
+	Birthday time.Time `json:"birthday" valid:"rfc3339"`
 }
 
 type UserWithoutID struct {
-	Email    string `json:"email"    valid:"email"`
-	Phone    string `json:"phone"    valid:"numeric,length(10|11)"`
-	Name     string `json:"name"     valid:"alphanum"`
-	Password string `json:"password"     valid:"password"`
-	Birthday uint64 `json:"birthday" valid:"numeric"`
+	Email    string    `json:"email"    valid:"required, email"`
+	Phone    string    `json:"phone"    valid:"numeric,length(10|11)"`
+	Name     string    `json:"name"     valid:"required, alphanum"`
+	Password string    `json:"password" valid:"required, password~Password must be at least 6 symbols"`
+	Birthday time.Time `json:"birthday" valid:"rfc3339"`
 }
 
 type PreUser struct {

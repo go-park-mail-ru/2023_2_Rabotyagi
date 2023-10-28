@@ -21,7 +21,7 @@ func TestUserStorageMapGetUser(t *testing.T) {
 	expectedID := 1
 	assert.Equal(t, expectedID, storageMap.GetUsersCount())
 
-	userInMap, _ := storageMap.GetUser(preUser.Email)
+	userInMap, _ := storageMap.GetUserByEmail(preUser.Email)
 
 	assert.Equal(t, uint64(1), userInMap.ID)
 	assert.Equal(t, preUser.Email, userInMap.Email)
@@ -37,7 +37,7 @@ func TestUserStorageMapGetUserError(t *testing.T) {
 
 	_ = storageMap.CreateUser(preUser)
 
-	_, err := storageMap.GetUser("non-existen-email@gmail.com")
+	_, err := storageMap.GetUserByEmail("non-existen-email@gmail.com")
 	assert.NotNil(t, err)
 }
 
@@ -50,7 +50,7 @@ func TestUserStorageMapIsUserExist(t *testing.T) {
 
 	_ = storageMap.CreateUser(preUser)
 
-	assert.Equal(t, true, storageMap.IsUserExist("test@gmail.com"))
+	assert.Equal(t, true, storageMap.IsEmailBusy("test@gmail.com"))
 }
 
 func TestUserStorageMapCreateUserError(t *testing.T) {
