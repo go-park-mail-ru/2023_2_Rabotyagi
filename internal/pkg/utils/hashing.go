@@ -33,7 +33,7 @@ func hashPassWithSalt(salt []byte, plainPassword string) []byte {
 }
 
 func ComparePassAndHash(passHash []byte, plainPassword string) bool {
-	salt := passHash[0:8]
+	salt := passHash[:saltLen]
 	userPassHash := hashPassWithSalt(salt, plainPassword)
 
 	return bytes.Equal(userPassHash, passHash)
