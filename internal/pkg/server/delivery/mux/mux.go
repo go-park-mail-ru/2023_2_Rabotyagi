@@ -2,13 +2,12 @@ package mux
 
 import (
 	"context"
-	"net/http"
-
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/middleware"
 	postdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/delivery"
 	postrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/repository"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
 	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
+	"net/http"
 )
 
 type Handler struct {
@@ -29,6 +28,12 @@ func NewMux(ctx context.Context, addrOrigin string, userStorage userrepo.IUserSt
 		Storage:    postrepo.GeneratePosts(postStorageMap),
 		AddrOrigin: addrOrigin,
 	}
+
+	imgHandler := http.StripPrefix(
+		"/api/v1/img/",
+		http.FileServer(http.Dir("./db/img")),
+	)
+	router.Handle("/api/v1/img/", imgHandler)
 
 	router.Handle("/api/v1/signup", middleware.Context(ctx, authHandler.SignUpHandler))
 	router.Handle("/api/v1/signin", middleware.Context(ctx, authHandler.SignInHandler))
