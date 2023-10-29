@@ -4,17 +4,17 @@ import (
 	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 )
 
 // Secret TODO from config and reset her every some time.
 var Secret = []byte("super-secret")
 
 var (
-	ErrNilToken           = errors.NewError("get nil token")
-	ErrWrongSigningMethod = errors.NewError("unexpected signing method")
-	ErrInvalidToken       = errors.NewError("invalid token")
-	ErrParseToken         = errors.NewError("error parsing token")
+	ErrNilToken           = myerrors.NewError("get nil token")
+	ErrWrongSigningMethod = myerrors.NewError("unexpected signing method")
+	ErrInvalidToken       = myerrors.NewError("invalid token")
+	ErrParseToken         = myerrors.NewError("error parsing token")
 )
 
 type UserJwtPayload struct {
@@ -26,7 +26,7 @@ type UserJwtPayload struct {
 func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { //nolint:cyclop
 	tokenDuplicity, err := jwt.Parse(rawJwt, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("method == %v %w", token.Header["alg"], ErrWrongSigningMethod)
+			return nil, fmt.Errorf("method == %+v %w", token.Header["alg"], ErrWrongSigningMethod)
 		}
 
 		return secret, nil
@@ -41,7 +41,7 @@ func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { 
 		interfaceEmail, ok3 := claims["email"]
 
 		if !(ok1 && ok2 && ok3) {
-			return nil, fmt.Errorf("error with claims: %v %w", claims, ErrInvalidToken)
+			return nil, fmt.Errorf("error with claims: %+v %w", claims, ErrInvalidToken)
 		}
 
 		userID, ok1 := interfaceUserID.(float64)
@@ -49,13 +49,13 @@ func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { 
 		email, ok3 := interfaceEmail.(string)
 
 		if !(ok1 && ok2 && ok3) {
-			return nil, fmt.Errorf("error with casting claims: %v %w", claims, ErrInvalidToken)
+			return nil, fmt.Errorf("error with casting claims: %+v %w", claims, ErrInvalidToken)
 		}
 
 		return &UserJwtPayload{UserID: uint64(userID), Expire: int64(expire), Email: email}, nil
 	}
 
-	return nil, fmt.Errorf(errors.ErrTemplate, ErrInvalidToken)
+	return nil, fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
 }
 
 func (u *UserJwtPayload) getMapClaims() jwt.MapClaims {
@@ -70,14 +70,14 @@ func (u *UserJwtPayload) getMapClaims() jwt.MapClaims {
 
 func GenerateJwtToken(userToken *UserJwtPayload, secret []byte) (string, error) {
 	if userToken == nil {
-		return "", fmt.Errorf(errors.ErrTemplate, ErrNilToken)
+		return "", fmt.Errorf(myerrors.ErrTemplate, ErrNilToken)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, userToken.getMapClaims())
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		return "", fmt.Errorf(errors.ErrTemplate, err)
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return tokenString, nil

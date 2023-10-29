@@ -5,12 +5,12 @@ import (
 	"sync"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 )
 
 var (
-	ErrPostNotExist       = errors.NewError("post not exist")
-	ErrNoSuchCountOfPosts = errors.NewError("n > posts count")
+	ErrPostNotExist       = myerrors.NewError("post not exist")
+	ErrNoSuchCountOfPosts = myerrors.NewError("n > posts count")
 )
 
 type PostStorage interface {
@@ -33,11 +33,13 @@ func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
 			AuthorID: 1,
 			Title:    fmt.Sprintf("post %d", postID),
 			Image: models.Image{
-				URL: fmt.Sprintf("img_url%d", postID),
-				Alt: fmt.Sprintf("img_alt%d", postID),
+				URL: "http://84.23.53.28:8080/api/v1/img/" +
+					"�%7D�̙�%7F�w���f%7C.WebP",
+				Alt: "http://84.23.53.28:8080/api/v1/img/" +
+					"�%7D�̙�%7F�w���f%7C.WebP",
 			},
 			Description:     fmt.Sprintf("description of post %d", postID),
-			Price:           int(100 * postID),
+			Price:           uint(100 * postID),
 			SafeTransaction: true,
 			Delivery:        true,
 			City:            "Moscow",

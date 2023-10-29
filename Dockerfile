@@ -11,6 +11,5 @@ RUN go mod tidy
 RUN go mod download
 
 EXPOSE 8080
-WORKDIR /var/backend/cmd/app
 
-ENTRYPOINT go run main.go
+ENTRYPOINT go run  /var/backend/cmd/app/main.go

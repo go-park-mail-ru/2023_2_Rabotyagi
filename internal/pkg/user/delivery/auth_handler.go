@@ -1,12 +1,12 @@
 package delivery
 
 import (
-	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
@@ -20,6 +20,21 @@ const (
 type AuthHandler struct {
 	Storage    usecases.IUserStorage
 	AddrOrigin string
+}
+
+// handleErr this function handle err. If err is myerror.
+// Error then we built this error and client get it, otherwise it is internal error and client shouldn`t get it.
+func handleErr(w http.ResponseWriter, message string, err error) {
+	log.Printf("%s %+v\n", message, err)
+
+	myErr := &myerrors.Error{}
+	if errors.As(err, &myErr) {
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, err.Error()))
+
+		return
+	}
+
+	delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
 }
 
 // SignUpHandler godoc
@@ -49,20 +64,17 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	decoder := json.NewDecoder(r.Body)
 
-	userWithoutID := new(models.UserWithoutID)
-	if err := decoder.Decode(userWithoutID); err != nil {
-		log.Printf("error in SignUpHandler: %v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
+	userWithoutID, err := usecases.ValidateUserWithoutID(r.Body)
+	if err != nil {
+		handleErr(w, "in SignUpHandler:", err)
 
 		return
 	}
 
 	user, err := a.Storage.AddUser(ctx, userWithoutID)
 	if err != nil {
-		log.Printf("error in SignUpHandler: %v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer)) //TODO maybe not at all 500
+		handleErr(w, "error in SignUpHandler:", err)
 
 		return
 	}
@@ -72,7 +84,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	jwtStr, err := jwt.GenerateJwtToken(
 		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.Secret)
 	if err != nil {
-		log.Printf("%v", err)
+		log.Printf("in SignUpHandler: %+v", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
@@ -87,7 +99,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignUp))
-	log.Printf("in SignUpHandler: added user: %v", user)
+	log.Printf("in SignUpHandler: added user: %+v", user)
 }
 
 // SignInHandler godoc
@@ -117,35 +129,32 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	decoder := json.NewDecoder(r.Body)
 
-	userWithoutID := new(models.UserWithoutID)
-
-	if err := decoder.Decode(userWithoutID); err != nil {
-		log.Printf("%v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
-
-		return
-	}
-
-	exist, err := a.Storage.IsUserExist(ctx, userWithoutID.Email, userWithoutID.Phone)
-	if !exist {
-		log.Printf("user is not exists %v\n", userWithoutID)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserNotExits))
-
-		return
-	}
-
+	userWithoutID, err := usecases.ValidateUserWithoutID(r.Body)
 	if err != nil {
-		log.Printf("%v", err)
+		handleErr(w, "in SignUpHandler:", err)
+
+		return
+	}
+
+	emailBusy, err := a.Storage.IsEmailBusy(ctx, userWithoutID.Email)
+	if err != nil {
+		log.Printf("in SignInHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
+	if !emailBusy {
+		log.Printf("in SignInHandler: user is not exists %+v\n", userWithoutID)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
+
+		return
+	}
+
 	user, err := a.Storage.GetUserByEmail(ctx, userWithoutID.Email)
-	if err != nil || userWithoutID.Pass != user.Pass {
-		log.Printf("%v\n", err)
+	if err != nil || userWithoutID.Password != user.Password {
+		log.Printf("in SignInHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
 
 		return
@@ -161,7 +170,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		jwt.Secret,
 	)
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("in SignInHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
@@ -176,7 +185,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignIn))
-	log.Printf("signin user: %v", user)
+	log.Printf("in SignInHandler: signin user: %+v", user)
 }
 
 // LogOutHandler godoc
@@ -206,7 +215,7 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie(CookieAuthName)
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("in LogOutHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
 
 		return
@@ -216,5 +225,5 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulLogOut))
-	log.Printf("logout user with cookie: %v", cookie)
+	log.Printf("in LogOutHandler: logout user with cookie: %+v", cookie)
 }

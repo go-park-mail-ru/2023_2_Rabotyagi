@@ -63,6 +63,15 @@ rabotyagi/backend   latest    25dbaeeef1af   50 seconds ago   307MB
 
 
 ### Локальная установка тула для миграций
-```bash
+```shell
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+```
+
+### Пример команды, чтобы накатить миграцию
+```shell
+ migrate -database postgres://postgres:password@localhost:5432/youla?sslmode=disable -path db/migrations up
+```
+### Пример команды, чтобы отменить миграцию
+```shell
+ migrate -database postgres://postgres:password@localhost:5432/youla?sslmode=disable -path db/migrations up
 ```

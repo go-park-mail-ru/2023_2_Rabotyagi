@@ -30,6 +30,13 @@ func NewMux(ctx context.Context, addrOrigin string, userStorage userusecases.IUs
 		AddrOrigin: addrOrigin,
 	}
 
+	imgHandler := http.StripPrefix(
+		"/api/v1/img/",
+		http.FileServer(http.Dir("./db/img")),
+	)
+
+	router.Handle("/api/v1/img/", imgHandler)
+
 	router.Handle("/api/v1/signup", middleware.Context(ctx, authHandler.SignUpHandler))
 	router.Handle("/api/v1/signin", middleware.Context(ctx, authHandler.SignInHandler))
 	router.Handle("/api/v1/logout", middleware.Context(ctx, authHandler.LogOutHandler))

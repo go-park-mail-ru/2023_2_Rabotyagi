@@ -9,7 +9,8 @@ import (
 type IUserStorage interface {
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	GetUserByID(ctx context.Context, id uint64) (*models.User, error)
-	//CreateUser(ctx context.Context, preUser *models.UserWithoutID) error
-	IsUserExist(ctx context.Context, email string, phone string) (bool, error)
 	AddUser(ctx context.Context, preUser *models.UserWithoutID) (*models.User, error)
+	UpdateUser(ctx context.Context, userID uint64, updateData map[string]interface{}) error
+	IsEmailBusy(ctx context.Context, email string) (bool, error) // TODO maybe unuseful in outside
+	IsPhoneBusy(ctx context.Context, phone string) (bool, error) // TODO maybe unuseful in outside
 }

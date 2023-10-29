@@ -16,7 +16,7 @@ import (
 // @BasePath  /api/v1
 func main() {
 	configServer := config.New()
-	log.Println(configServer)
+	log.Printf("Config: %+v\n", configServer)
 
 	srv := new(server.Server)
 	if err := srv.Run(configServer); err != nil {
