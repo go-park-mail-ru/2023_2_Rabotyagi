@@ -9,7 +9,7 @@ type Post struct {
 	ID              uint64 `json:"id"          valid:"required"`
 	AuthorID        uint64 `json:"author"      valid:"required"`
 	Title           string `json:"title"       valid:"required"`
-	Image           Image  `jsom:"image"       valid:"required"`
+	Image           Image  `json:"image"       valid:"required"`
 	Description     string `json:"description" valid:"required"`
 	Price           uint   `json:"price"       valid:"required"`
 	SafeTransaction bool   `json:"safe"        valid:"required"`
@@ -20,7 +20,7 @@ type Post struct {
 type PrePost struct {
 	AuthorID        uint64 `json:"author"      valid:"required"`
 	Title           string `json:"title"       valid:"required"`
-	Image           Image  `jsom:"image"       valid:"required"`
+	Image           Image  `json:"image"       valid:"required"`
 	Description     string `json:"description" valid:"required"`
 	Price           uint   `json:"price"       valid:"required"`
 	SafeTransaction bool   `json:"safe"        valid:"required"`
@@ -31,7 +31,7 @@ type PrePost struct {
 type PostInFeed struct {
 	ID              uint64 `json:"id"       valid:"required"`
 	Title           string `json:"title"    valid:"required"`
-	Image           Image  `jsom:"image"    valid:"required"`
+	Image           Image  `json:"image"    valid:"required"`
 	Price           uint   `json:"price"    valid:"required"`
 	SafeTransaction bool   `json:"safe"     valid:"required"`
 	Delivery        bool   `json:"delivery" valid:"required"`
