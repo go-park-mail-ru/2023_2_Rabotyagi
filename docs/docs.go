@@ -53,24 +53,24 @@ const docTemplate = `{
                 }
             }
         },
-        "/post/add": {
+        "/product/add": {
             "post": {
-                "description": "add post by data",
+                "description": "add product by data",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "add post",
+                "summary": "add product",
                 "parameters": [
                     {
-                        "description": "post data for adding",
-                        "name": "post",
+                        "description": "product data for adding",
+                        "name": "product",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PrePost"
+                            "$ref": "#/definitions/models.PreProduct"
                         }
                     }
                 ],
@@ -102,20 +102,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/post/get/{id}": {
+        "/product/get/{id}": {
             "get": {
-                "description": "get post by id",
+                "description": "get product by id",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "get post",
+                "summary": "get product",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "post id",
+                        "description": "product id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -149,7 +149,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/post/get_list": {
+        "/product/get_list": {
             "get": {
                 "description": "get posts by count",
                 "consumes": [
@@ -311,7 +311,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/models.Post"
+                    "$ref": "#/definitions/models.Product"
                 },
                 "status": {
                     "type": "integer"
@@ -324,7 +324,7 @@ const docTemplate = `{
                 "body": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.PostInFeed"
+                        "$ref": "#/definitions/models.ProductInFeed"
                     }
                 },
                 "status": {
@@ -370,7 +370,36 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Post": {
+        "models.PreProduct": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "integer"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "delivery": {
+                    "type": "boolean"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "image": {
+                    "$ref": "#/definitions/models.Image"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "safe": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Product": {
             "type": "object",
             "properties": {
                 "author": {
@@ -402,7 +431,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.PostInFeed": {
+        "models.ProductInFeed": {
             "type": "object",
             "properties": {
                 "city": {
@@ -413,35 +442,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "image": {
-                    "$ref": "#/definitions/models.Image"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "safe": {
-                    "type": "boolean"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.PrePost": {
-            "type": "object",
-            "properties": {
-                "author": {
-                    "type": "integer"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "delivery": {
-                    "type": "boolean"
-                },
-                "description": {
-                    "type": "string"
                 },
                 "image": {
                     "$ref": "#/definitions/models.Image"

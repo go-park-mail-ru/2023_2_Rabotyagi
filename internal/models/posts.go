@@ -5,7 +5,7 @@ type Image struct {
 	Alt string `json:"alt"`
 }
 
-type Post struct {
+type Product struct {
 	ID              uint64 `json:"id"          valid:"required"`
 	AuthorID        uint64 `json:"author"      valid:"required"`
 	Title           string `json:"title"       valid:"required"`
@@ -17,7 +17,7 @@ type Post struct {
 	City            string `json:"city"        valid:"required"`
 }
 
-type PrePost struct {
+type PreProduct struct {
 	AuthorID        uint64 `json:"author"      valid:"required"`
 	Title           string `json:"title"       valid:"required"`
 	Image           Image  `json:"image"       valid:"required"`
@@ -28,7 +28,7 @@ type PrePost struct {
 	City            string `json:"city"        valid:"required"`
 }
 
-type PostInFeed struct {
+type ProductInFeed struct {
 	ID              uint64 `json:"id"       valid:"required"`
 	Title           string `json:"title"    valid:"required"`
 	Image           Image  `json:"image"    valid:"required"`

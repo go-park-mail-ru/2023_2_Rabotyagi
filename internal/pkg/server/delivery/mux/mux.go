@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/middleware"
-	postdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/delivery"
-	postrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/post/repository"
+	postdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/delivery"
+	postrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 )
@@ -24,9 +24,9 @@ func NewMux(ctx context.Context, addrOrigin string, userStorage userusecases.IUs
 		AddrOrigin: addrOrigin,
 	}
 
-	postStorageMap := postrepo.NewPostStorageMap()
+	postStorageMap := postrepo.NewProductStorageMap()
 	postHandler := &postdelivery.PostHandler{
-		Storage:    postrepo.GeneratePosts(postStorageMap),
+		Storage:    postrepo.GenerateProducts(postStorageMap),
 		AddrOrigin: addrOrigin,
 	}
 
