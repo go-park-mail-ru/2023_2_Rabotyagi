@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public."user"
     email    VARCHAR(256) UNIQUE                             NOT NULL CHECK (email <> ''),
     phone    VARCHAR(18) UNIQUE                              NOT NULL CHECK (phone <> ''),
     name     VARCHAR(256)                                    NOT NULL CHECK (name <> ''),
-    password VARCHAR(256)                                    NOT NULL CHECK (pass <> ''),
+    password VARCHAR(256)                                    NOT NULL CHECK (password <> ''),
     birthday TIMESTAMP WITH TIME ZONE
 );
 
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public."category"
 (
     id        BIGINT DEFAULT NEXTVAL('category_id_seq'::regclass) NOT NULL PRIMARY KEY,
     name      VARCHAR(256) UNIQUE                                 NOT NULL CHECK (name <> ''),
-    parent_id BIGINT DEFAULT NULL REFERENCES public.category (id)
+    parent_id BIGINT DEFAULT NULL REFERENCES public."category" (id)
 );
 
 CREATE TABLE IF NOT EXISTS public."product"
@@ -68,18 +68,18 @@ CREATE TABLE IF NOT EXISTS public."favourite"
     product_id BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE
 );
 
-CREATE OR REPLACE FUNCTION update_date()
+CREATE OR REPLACE FUNCTION updated_at_now()
     RETURNS TRIGGER AS
 $$
 BEGIN
-    NEW.update_date = NOW();
+    NEW.updated_at = NOW();
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS verify_update_date ON public."order";
-CREATE TRIGGER verify_update_date
+DROP TRIGGER IF EXISTS verify_updated_at ON public."order";
+CREATE TRIGGER verify_updated_at
     BEFORE UPDATE
     ON public."order"
     FOR EACH ROW
-EXECUTE PROCEDURE update_date();
+EXECUTE PROCEDURE updated_at_now();
