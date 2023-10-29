@@ -33,8 +33,10 @@ func GeneratePosts(postStorageMap *PostStorageMap) *PostStorageMap {
 			AuthorID: 1,
 			Title:    fmt.Sprintf("post %d", postID),
 			Image: models.Image{
-				URL: "/api/v1/img/�%7D�̙�%7F�w���f%7C.WebP",
-				Alt: "/api/v1/img/�%7D�̙�%7F�w���f%7C.WebP",
+				URL: "http://84.23.53.28:8080/api/v1/img/" +
+					"�%7D�̙�%7F�w���f%7C.WebP",
+				Alt: "http://84.23.53.28:8080/api/v1/img/" +
+					"�%7D�̙�%7F�w���f%7C.WebP",
 			},
 			Description:     fmt.Sprintf("description of post %d", postID),
 			Price:           uint(100 * postID),

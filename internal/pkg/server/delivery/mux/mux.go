@@ -33,6 +33,7 @@ func NewMux(ctx context.Context, addrOrigin string, userStorage userrepo.IUserSt
 		"/api/v1/img/",
 		http.FileServer(http.Dir("./db/img")),
 	)
+
 	router.Handle("/api/v1/img/", imgHandler)
 
 	router.Handle("/api/v1/signup", middleware.Context(ctx, authHandler.SignUpHandler))
