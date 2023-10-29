@@ -134,7 +134,7 @@ linters-settings:
         allow:
           - $gostd
           - github.com/go-park-mail-ru/2023_2_Rabotyagi
-          - github.com/dgrijalva/jwt-go
+          - github.com/golang-jwt/jwt
           - github.com/stretchr/testify/assert
           - github.com/jackc/pgx/v5
           - github.com/asaskevich/govalidator

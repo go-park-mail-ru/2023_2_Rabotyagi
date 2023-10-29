@@ -3,8 +3,8 @@ package jwt
 import (
 	"fmt"
 
-	"github.com/dgrijalva/jwt-go"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/golang-jwt/jwt"
 )
 
 // Secret TODO from config and reset her every some time.
