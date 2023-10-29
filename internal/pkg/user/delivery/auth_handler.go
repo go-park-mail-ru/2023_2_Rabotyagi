@@ -41,9 +41,14 @@ func handleErr(w http.ResponseWriter, message string, err error) {
 //
 //	@Summary    signup
 //	@Description  signup in app
+//
+//	@Description Error.status can be:
+//	@Description StatusErrBadRequest      = 400
+//	@Description  StatusErrInternalServer  = 500
+//
 //	@Accept      json
 //	@Produce    json
-//	@Param      preUser  body models.PreUser true  "user data for signup"
+//	@Param      preUser  body models.UserWithoutID true  "user data for signup"
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -108,7 +113,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Description  signin in app
 //	@Accept      json
 //	@Produce    json
-//	@Param      preUser  body models.PreUser true  "user data for signin"
+//	@Param      preUser  body models.UserWithoutID true  "user data for signin"
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string

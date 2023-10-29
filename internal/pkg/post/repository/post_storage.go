@@ -16,7 +16,7 @@ var (
 type PostStorage interface {
 	GetPost(postID uint64) (*models.Post, error)
 	GetNPosts() []*models.Post
-	AddPost(user *models.PreUser)
+	AddPost(user *models.UserWithoutID)
 }
 
 type PostStorageMap struct {

@@ -48,8 +48,3 @@ type UserWithoutID struct {
 	Password string `json:"password" valid:"required,password~Password must be at least 6 symbols"`
 	Birthday string `json:"birthday" valid:"rfc3339~Birthday must be in 2016-12-31T11:00:00+01:00 or 2016-12-31T11:00:00Z format'"` //nolint
 }
-
-type PreUser struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}

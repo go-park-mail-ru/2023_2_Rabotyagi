@@ -213,7 +213,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PreUser"
+                            "$ref": "#/definitions/models.UserWithoutID"
                         }
                     }
                 ],
@@ -247,7 +247,7 @@ const docTemplate = `{
         },
         "/signup": {
             "post": {
-                "description": "signup in app",
+                "description": "signup in app\nError.status can be:\nStatusErrBadRequest      = 400\nStatusErrInternalServer  = 500",
                 "consumes": [
                     "application/json"
                 ],
@@ -262,7 +262,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PreUser"
+                            "$ref": "#/definitions/models.UserWithoutID"
                         }
                     }
                 ],
@@ -457,13 +457,25 @@ const docTemplate = `{
                 }
             }
         },
-        "models.PreUser": {
+        "models.UserWithoutID": {
             "type": "object",
             "properties": {
+                "birthday": {
+                    "description": "nolint",
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
+                "name": {
+                    "description": "nolint",
+                    "type": "string"
+                },
                 "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "nolint",
                     "type": "string"
                 }
             }

@@ -104,11 +104,20 @@ definitions:
       title:
         type: string
     type: object
-  models.PreUser:
+  models.UserWithoutID:
     properties:
+      birthday:
+        description: nolint
+        type: string
       email:
         type: string
+      name:
+        description: nolint
+        type: string
       password:
+        type: string
+      phone:
+        description: nolint
         type: string
     type: object
 host: 84.23.53.28:8080
@@ -248,7 +257,7 @@ paths:
         name: preUser
         required: true
         schema:
-          $ref: '#/definitions/models.PreUser'
+          $ref: '#/definitions/models.UserWithoutID'
       produces:
       - application/json
       responses:
@@ -273,14 +282,18 @@ paths:
     post:
       consumes:
       - application/json
-      description: signup in app
+      description: |-
+        signup in app
+        Error.status can be:
+        StatusErrBadRequest      = 400
+        StatusErrInternalServer  = 500
       parameters:
       - description: user data for signup
         in: body
         name: preUser
         required: true
         schema:
-          $ref: '#/definitions/models.PreUser'
+          $ref: '#/definitions/models.UserWithoutID'
       produces:
       - application/json
       responses:
