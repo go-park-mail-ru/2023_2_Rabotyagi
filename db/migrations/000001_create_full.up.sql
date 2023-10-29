@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public."user"
     email    VARCHAR(256) UNIQUE                             NOT NULL CHECK (email <> ''),
     phone    VARCHAR(18) UNIQUE                              NOT NULL CHECK (phone <> ''),
     name     VARCHAR(256)                                    NOT NULL CHECK (name <> ''),
-    pass     VARCHAR(256)                                    NOT NULL CHECK (pass <> ''),
+    password VARCHAR(256)                                    NOT NULL CHECK (password <> ''),
     birthday TIMESTAMP WITH TIME ZONE
 );
 
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public."category"
 (
     id        BIGINT DEFAULT NEXTVAL('category_id_seq'::regclass) NOT NULL PRIMARY KEY,
     name      VARCHAR(256) UNIQUE                                 NOT NULL CHECK (name <> ''),
-    parent_id BIGINT DEFAULT NULL REFERENCES public.category (id)
+    parent_id BIGINT DEFAULT NULL REFERENCES public."category" (id)
 );
 
 CREATE TABLE IF NOT EXISTS public."product"
@@ -31,13 +31,12 @@ CREATE TABLE IF NOT EXISTS public."product"
     description     TEXT                                                                 NOT NULL CHECK (description <> '')
         CONSTRAINT max_len_description CHECK (LENGTH(description) <= 4000),
     price           BIGINT                   DEFAULT 0                                   NOT NULL CHECK (price >= 0),
-    create_date     TIMESTAMP WITH TIME ZONE DEFAULT NOW()                               NOT NULL,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()                               NOT NULL,
     views           INT                      DEFAULT 0                                   NOT NULL CHECK (views >= 0),
-    in_favourites   INT                      DEFAULT 0                                   NOT NULL CHECK (in_favourites >= 0),
     available_count INT                      DEFAULT 0                                   NOT NULL CHECK (available_count >= 0),
     city            VARCHAR(256)                                                         NOT NULL CHECK (city <> ''),
     delivery        BOOLEAN                  DEFAULT FALSE                               NOT NULL,
-    safe_dial       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
+    safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     is_active       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     CONSTRAINT not_zero_count_with_active CHECK (not (available_count = 0 and is_active))
 );
@@ -50,9 +49,9 @@ CREATE TABLE IF NOT EXISTS public."order"
     count       SMALLINT                                                           NOT NULL DEFAULT 1 CHECK (count > 0),
     status      SMALLINT                                                           NOT NULL DEFAULT 0
         CONSTRAINT status_contract CHECK ( status BETWEEN 0 AND 3),
-    create_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
-    update_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
-    close_date  TIMESTAMP WITH TIME ZONE DEFAULT NULL
+    created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
+    updated_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()                             NOT NULL,
+    closed_at   TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public."image"
@@ -69,18 +68,18 @@ CREATE TABLE IF NOT EXISTS public."favourite"
     product_id BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE
 );
 
-CREATE OR REPLACE FUNCTION update_date()
+CREATE OR REPLACE FUNCTION updated_at_now()
     RETURNS TRIGGER AS
 $$
 BEGIN
-    NEW.update_date = NOW();
+    NEW.updated_at = NOW();
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS verify_update_date ON public."order";
-CREATE TRIGGER verify_update_date
+DROP TRIGGER IF EXISTS verify_updated_at ON public."order";
+CREATE TRIGGER verify_updated_at
     BEFORE UPDATE
     ON public."order"
     FOR EACH ROW
-EXECUTE PROCEDURE update_date();
+EXECUTE PROCEDURE updated_at_now();
