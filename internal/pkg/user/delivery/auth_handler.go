@@ -19,7 +19,7 @@ const (
 	timeTokenLife  = 24 * time.Hour
 )
 
-type AuthHandler struct {
+type UserHandler struct {
 	Storage    usecases.IUserStorage
 	AddrOrigin string
 }
@@ -56,9 +56,9 @@ func handleErr(w http.ResponseWriter, message string, err error) {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signup [post]
-func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, a.AddrOrigin)
+	delivery.SetupCORS(w, u.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -79,7 +79,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.Storage.AddUser(ctx, userWithoutID)
+	user, err := u.Storage.AddUser(ctx, userWithoutID)
 	if err != nil {
 		handleErr(w, "error in SignUpHandler:", err)
 
@@ -121,9 +121,9 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signin [post]
-func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, a.AddrOrigin)
+	delivery.SetupCORS(w, u.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -147,7 +147,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.Storage.GetUser(ctx, userWithoutID.Email, userWithoutID.Password)
+	user, err := u.Storage.GetUser(ctx, userWithoutID.Email, userWithoutID.Password)
 	if err != nil {
 		log.Printf("in SignInHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
@@ -194,9 +194,9 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /logout [post]
-func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, a.AddrOrigin)
+	delivery.SetupCORS(w, u.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return

@@ -12,14 +12,14 @@ import (
 )
 
 type Handler struct {
-	AuthHandler *userdelivery.AuthHandler
+	UserHandler *userdelivery.UserHandler
 	PostHandler *postdelivery.PostHandler
 }
 
 func NewMux(ctx context.Context, addrOrigin string, userStorage userusecases.IUserStorage) http.Handler {
 	router := http.NewServeMux()
 
-	authHandler := &userdelivery.AuthHandler{
+	userHandler := &userdelivery.UserHandler{
 		Storage:    userStorage,
 		AddrOrigin: addrOrigin,
 	}
@@ -36,10 +36,10 @@ func NewMux(ctx context.Context, addrOrigin string, userStorage userusecases.IUs
 	)
 
 	router.Handle("/api/v1/img/", imgHandler)
-
-	router.Handle("/api/v1/signup", middleware.Context(ctx, authHandler.SignUpHandler))
-	router.Handle("/api/v1/signin", middleware.Context(ctx, authHandler.SignInHandler))
-	router.Handle("/api/v1/logout", middleware.Context(ctx, authHandler.LogOutHandler))
+	
+	router.Handle("/api/v1/signup", middleware.Context(ctx, userHandler.SignUpHandler))
+	router.Handle("/api/v1/signin", middleware.Context(ctx, userHandler.SignInHandler))
+	router.Handle("/api/v1/logout", middleware.Context(ctx, userHandler.LogOutHandler))
 
 	router.Handle("/api/v1/post/add", middleware.Context(ctx, postHandler.AddPostHandler))
 	router.Handle("/api/v1/post/get/", middleware.Context(ctx, postHandler.GetPostHandler))

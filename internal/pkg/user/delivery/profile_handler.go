@@ -10,11 +10,6 @@ import (
 	"strconv"
 )
 
-type ProfileHandler struct {
-	Storage    usecases.IUserStorage
-	AddrOrigin string
-}
-
 func structToMap(data interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 
@@ -47,9 +42,9 @@ func structToMap(data interface{}) map[string]interface{} {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /profile/get/{id} [get]
-func (p *ProfileHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, p.AddrOrigin)
+	delivery.SetupCORS(w, u.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -73,7 +68,7 @@ func (p *ProfileHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user, err := p.Storage.GetUserWithoutPasswordByID(ctx, uint64(userID))
+	user, err := u.Storage.GetUserWithoutPasswordByID(ctx, uint64(userID))
 	if err != nil {
 		handleErr(w, "error in GetUserHandler:", err)
 
@@ -96,9 +91,9 @@ func (p *ProfileHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) 
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /profile/get/{id} [get]
-func (p *ProfileHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, p.AddrOrigin)
+	delivery.SetupCORS(w, u.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -125,9 +120,9 @@ func (p *ProfileHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *ht
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /profile/get/{id} [get]
-func (p *ProfileHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, p.AddrOrigin)
+	delivery.SetupCORS(w, u.AddrOrigin)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -150,7 +145,7 @@ func (p *ProfileHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.R
 
 	updataDataMap := structToMap(userWithoutPassword)
 
-	err := p.Storage.UpdateUser(ctx, userWithoutID)
+	err := u.Storage.UpdateUser(ctx, userWithoutID)
 	if err != nil {
 		handleErr(w, "error in SignUpHandler:", err)
 
