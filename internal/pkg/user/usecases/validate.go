@@ -6,9 +6,10 @@ import (
 	"io"
 	"log"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+
+	"github.com/asaskevich/govalidator"
 )
 
 func ValidateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {

@@ -34,7 +34,7 @@ func handleErr(w http.ResponseWriter, message string, err error) {
 		return
 	}
 
-	delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
+	delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 }
 
 // SignUpHandler godoc
