@@ -1,6 +1,8 @@
 package delivery
 
 import (
+	"encoding/json"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
@@ -106,6 +108,35 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 	}
 
 	ctx := r.Context()
+
+	decoder := json.NewDecoder(r.Body)
+
+	userWithoutPassword := new(models.UserWithoutPassword)
+	if err := decoder.Decode(userWithoutPassword); err != nil {
+		log.Printf("in PartiallyUpdateUserHandler: %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
+
+		return
+	}
+
+	updateDataMap := structToMap(userWithoutPassword)
+
+	id, ok := updateDataMap["ID"].(uint64)
+	if !ok {
+		log.Printf("in PartiallyUpdateUserHandler")
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delete(updateDataMap, "ID")
+
+	err := u.Storage.UpdateUser(ctx, id, updateDataMap)
+	if err != nil {
+		handleErr(w, "error in PartiallyUpdateUserHandler:", err)
+
+		return
+	}
 }
 
 // GetUserHandler godoc
@@ -128,7 +159,7 @@ func (u *UserHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if r.Method != http.MethodPatch {
+	if r.Method != http.MethodPut {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
 		return
@@ -136,18 +167,28 @@ func (u *UserHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.Requ
 
 	ctx := r.Context()
 
-	userWithoutPassword, err := usecases.ValidateUserWithoutID(r.Body)
+	userWithoutPassword, err := usecases.ValidateUserWithoutPassword(r.Body)
 	if err != nil {
 		handleErr(w, "in SignUpHandler:", err)
 
 		return
 	}
 
-	updataDataMap := structToMap(userWithoutPassword)
+	updateDataMap := structToMap(userWithoutPassword)
 
-	err := u.Storage.UpdateUser(ctx, userWithoutID)
+	id, ok := updateDataMap["ID"].(uint64)
+	if !ok {
+		log.Printf("in FullyUpdateUserHandler")
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delete(updateDataMap, "ID")
+
+	err = u.Storage.UpdateUser(ctx, id, updateDataMap)
 	if err != nil {
-		handleErr(w, "error in SignUpHandler:", err)
+		handleErr(w, "error in FullyUpdateUserHandler:", err)
 
 		return
 	}
