@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"log"
 
 	"github.com/Masterminds/squirrel"
@@ -61,16 +62,16 @@ func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models
 	return user, fmt.Errorf(myerrors.ErrTemplate, err)
 }
 
-func (u *UserStorage) getUserByID(ctx context.Context, tx pgx.Tx, id uint64) (*models.User, error) {
-	SQLGetUserByID := `SELECT email, phone, name, password, birthday FROM public."user" WHERE id=$1;`
+func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx, id uint64) (*models.UserWithoutPassword, error) { //nolint:lll
+	SQLGetUserByID := `SELECT email, phone, name, birthday FROM public."user" WHERE id=$1;`
 	userLine := tx.QueryRow(ctx, SQLGetUserByID, id)
 
-	user := models.User{ //nolint:exhaustruct
+	user := models.UserWithoutPassword{ //nolint:exhaustruct
 		ID: id,
 	}
 
-	if err := userLine.Scan(&user.Email, &user.Phone, &user.Name, &user.Password, &user.Birthday); err != nil {
-		log.Printf("error in GetUserByID: %+v", err)
+	if err := userLine.Scan(&user.Email, &user.Phone, &user.Name, &user.Birthday); err != nil {
+		log.Printf("error in GetUserWithoutPasswordByID: %+v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -78,11 +79,11 @@ func (u *UserStorage) getUserByID(ctx context.Context, tx pgx.Tx, id uint64) (*m
 	return &user, nil
 }
 
-func (u *UserStorage) GetUserByID(ctx context.Context, id uint64) (*models.User, error) {
-	var user *models.User
+func (u *UserStorage) GetUserWithoutPasswordByID(ctx context.Context, id uint64) (*models.UserWithoutPassword, error) {
+	var user *models.UserWithoutPassword
 
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		userInner, err := u.getUserByID(ctx, tx, id)
+		userInner, err := u.getUserWithoutPasswordByID(ctx, tx, id)
 		user = userInner
 
 		return err
@@ -286,6 +287,58 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 	user.Name = preUser.Name
 	user.Password = preUser.Password
 	user.Birthday = preUser.Birthday
+
+	return &user, nil
+}
+
+//func (u *UserStorage) getUser(ctx context.Context, tx pgx.Tx, email string, password string) (*models.User, error) {
+//	SQLGetUserByEmail := `SELECT id, email, phone, name, password, birthday FROM public."user" WHERE email=$1 and password=$2;`
+//	userLine := tx.QueryRow(ctx, SQLGetUserByEmail, email, password)
+//
+//	user := models.User{ //nolint:exhaustruct
+//		Email:    email,
+//		Password: password,
+//	}
+//
+//	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Password, &user.Birthday); err != nil {
+//		log.Printf("error in GetUser: %+v", err)
+//
+//		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+//	}
+//
+//	return &user, nil
+//}
+
+func (u *UserStorage) GetUser(ctx context.Context, email string, password string) (*models.User, error) {
+	var user models.User
+
+	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
+		emailBusy, err := u.isEmailBusy(ctx, tx, email)
+		if err != nil {
+			log.Printf("preUser=%+v Error in GetUser: %+v", email, err)
+
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+
+		if !emailBusy {
+			log.Printf("in AddUser: email=%s already busy", email)
+
+			return ErrEmailBusy
+		}
+
+		user, err := u.getUserByEmail(ctx, tx, email)
+		if err != nil || utils.ComparePassAndHash([]byte(user.Password), password) {
+			log.Printf("preUser=%+v Error in GetUser: %+v", email, err)
+
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
 
 	return &user, nil
 }

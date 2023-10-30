@@ -1,7 +1,9 @@
 package delivery
 
 import (
+	"encoding/json"
 	"errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"log"
 	"net/http"
 	"time"
@@ -127,7 +129,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Method != http.MethodPost {
+	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
 		return
@@ -135,30 +137,18 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userWithoutID, err := usecases.ValidateUserWithoutID(r.Body)
+	decoder := json.NewDecoder(r.Body)
+
+	userWithoutID := new(models.UserWithoutID)
+	if err := decoder.Decode(userWithoutID); err != nil {
+		log.Printf("in AddPostHandler: %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
+
+		return
+	}
+
+	user, err := a.Storage.GetUser(ctx, userWithoutID.Email, userWithoutID.Password)
 	if err != nil {
-		handleErr(w, "in SignUpHandler:", err)
-
-		return
-	}
-
-	emailBusy, err := a.Storage.IsEmailBusy(ctx, userWithoutID.Email)
-	if err != nil {
-		log.Printf("in SignInHandler: %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
-
-	if !emailBusy {
-		log.Printf("in SignInHandler: user is not exists %+v\n", userWithoutID)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
-
-		return
-	}
-
-	user, err := a.Storage.GetUserByEmail(ctx, userWithoutID.Email)
-	if err != nil || userWithoutID.Password != user.Password {
 		log.Printf("in SignInHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
 
