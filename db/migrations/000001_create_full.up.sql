@@ -8,17 +8,17 @@ CREATE SEQUENCE IF NOT EXISTS favourite_id_seq;
 CREATE TABLE IF NOT EXISTS public."user"
 (
     id       BIGINT DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
-    email    VARCHAR(256) UNIQUE                             NOT NULL CHECK (email <> ''),
-    phone    VARCHAR(18) UNIQUE                              NOT NULL CHECK (phone <> ''),
-    name     VARCHAR(256)                                    NOT NULL CHECK (name <> ''),
-    password VARCHAR(256)                                    NOT NULL CHECK (password <> ''),
+    email    TEXT UNIQUE                                     NOT NULL CHECK (email <> '') CHECK (length(email) <= 256),
+    phone    TEXT UNIQUE                                     NOT NULL CHECK (phone <> '') CHECK (length(phone) <= 18),
+    name     TEXT                                            NOT NULL CHECK (name <> '') CHECK (length(name) <= 256),
+    password TEXT                                            NOT NULL CHECK (password <> '') CHECK (length(password) <= 256),
     birthday TIMESTAMP WITH TIME ZONE
 );
 
 CREATE TABLE IF NOT EXISTS public."category"
 (
     id        BIGINT DEFAULT NEXTVAL('category_id_seq'::regclass) NOT NULL PRIMARY KEY,
-    name      VARCHAR(256) UNIQUE                                 NOT NULL CHECK (name <> ''),
+    name      TEXT UNIQUE                                         NOT NULL CHECK (name <> '') CHECK (length(name) <= 256),
     parent_id BIGINT DEFAULT NULL REFERENCES public."category" (id)
 );
 
@@ -27,14 +27,14 @@ CREATE TABLE IF NOT EXISTS public."product"
     id              BIGINT                   DEFAULT NEXTVAL('product_id_seq'::regclass) NOT NULL PRIMARY KEY,
     saler_id        BIGINT                                                               NOT NULL REFERENCES public."user" (id),
     category_id     BIGINT                                                               NOT NULL REFERENCES public."category" (id),
-    title           VARCHAR(256)                                                         NOT NULL CHECK (title <> ''),
+    title           TEXT                                                                 NOT NULL CHECK (title <> '') CHECK (length(title) <= 256),
     description     TEXT                                                                 NOT NULL CHECK (description <> '')
         CONSTRAINT max_len_description CHECK (LENGTH(description) <= 4000),
     price           BIGINT                   DEFAULT 0                                   NOT NULL CHECK (price >= 0),
     created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()                               NOT NULL,
     views           INT                      DEFAULT 0                                   NOT NULL CHECK (views >= 0),
     available_count INT                      DEFAULT 0                                   NOT NULL CHECK (available_count >= 0),
-    city            VARCHAR(256)                                                         NOT NULL CHECK (city <> ''),
+city            TEXT                                                                     NOT NULL CHECK (city <> '') CHECK (length(city) <= 256),
     delivery        BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     is_active       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS public."order"
 CREATE TABLE IF NOT EXISTS public."image"
 (
     id         BIGINT DEFAULT NEXTVAL('image_id_seq'::regclass) NOT NULL PRIMARY KEY,
-    url        VARCHAR(256)                                     NOT NULL CHECK (url <> ''),
+    url        TEXT                                             NOT NULL CHECK (url <> '') CHECK (length(url) <= 256),
     product_id BIGINT                                           NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE
 );
 
