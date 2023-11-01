@@ -1,15 +1,16 @@
 package delivery
 
 import (
-	"encoding/json"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"log"
 	"net/http"
 	"reflect"
 	"strconv"
+	"encoding/json"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 )
 
 func structToMap(data interface{}) map[string]interface{} {
@@ -32,7 +33,7 @@ func structToMap(data interface{}) map[string]interface{} {
 	return result
 }
 
-// GetUserHandler godoc
+//  GetUserHandler godoc
 //
 //	@Summary    get profile
 //	@Description  get profile by id
@@ -87,12 +88,12 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 //	@Description  update some fields of profile
 //	@Accept      json
 //	@Produce    json
-//	@Param      id  path uint64 true  "user id"
+//	@Param      user  body models.UserWithoutPassword true  "user data for updating"
 //	@Success    200  {object} ProfileResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /profile/get/{id} [get]
+//	@Router      /user/partiallyupdate/ [Patch]
 func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, u.AddrOrigin)
@@ -139,18 +140,18 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 	}
 }
 
-// GetUserHandler godoc
+// FullyUpdateUserHandler godoc
 //
-//	@Summary    get profile
-//	@Description  get profile by id
+//	@Summary    update profile
+//	@Description  update all fields of profile
 //	@Accept      json
 //	@Produce    json
-//	@Param      id  path uint64 true  "user id"
-//	@Success    200  {object} PostResponse
+//	@Param      user  body models.UserWithoutPassword true  "user data for updating"
+//	@Success    200  {object} ProfileResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /profile/get/{id} [get]
+//	@Router      /user/fullyupdate/ [Patch]
 func (u *UserHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, u.AddrOrigin)
