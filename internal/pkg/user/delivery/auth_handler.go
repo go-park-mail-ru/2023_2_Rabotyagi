@@ -1,12 +1,10 @@
 package delivery
 
 import (
-	"errors"
 	"log"
 	"net/http"
 	"time"
 
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
@@ -20,21 +18,6 @@ const (
 type AuthHandler struct {
 	Storage    usecases.IUserStorage
 	AddrOrigin string
-}
-
-// handleErr this function handle err. If err is myerror.
-// Error then we built this error and client get it, otherwise it is internal error and client shouldn`t get it.
-func handleErr(w http.ResponseWriter, message string, err error) {
-	log.Printf("%s %+v\n", message, err)
-
-	myErr := &myerrors.Error{}
-	if errors.As(err, &myErr) {
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, err.Error()))
-
-		return
-	}
-
-	delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 }
 
 // SignUpHandler godoc
@@ -72,14 +55,14 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	userWithoutID, err := usecases.ValidateUserWithoutID(r.Body)
 	if err != nil {
-		handleErr(w, "in SignUpHandler:", err)
+		delivery.HandleErr(w, "in SignUpHandler:", err)
 
 		return
 	}
 
 	user, err := a.Storage.AddUser(ctx, userWithoutID)
 	if err != nil {
-		handleErr(w, "error in SignUpHandler:", err)
+		delivery.HandleErr(w, "error in SignUpHandler:", err)
 
 		return
 	}
@@ -137,7 +120,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	userWithoutID, err := usecases.ValidateUserWithoutID(r.Body)
 	if err != nil {
-		handleErr(w, "in SignUpHandler:", err)
+		delivery.HandleErr(w, "in SignUpHandler:", err)
 
 		return
 	}

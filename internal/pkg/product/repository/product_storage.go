@@ -13,12 +13,6 @@ var (
 	ErrNoSuchCountOfProducts = myerrors.NewError("n > products count")
 )
 
-type ProductStorage interface {
-	GetProduct(productID uint64) (*models.Product, error)
-	GetNProducts() []*models.PreProduct
-	AddProduct(user *models.UserWithoutID)
-}
-
 type ProductStorageMap struct {
 	counterProducts uint64
 	products        map[uint64]*models.Product
@@ -29,20 +23,20 @@ func GenerateProducts(productStorageMap *ProductStorageMap) *ProductStorageMap {
 	for i := 1; i <= 40; i++ {
 		productID := productStorageMap.generateProductID()
 		productStorageMap.products[productID] = &models.Product{
-			ID:       productID,
-			AuthorID: 1,
-			Title:    fmt.Sprintf("product %d", productID),
-			Image: models.Image{
+			ID:      productID,
+			SalerID: 1,
+			Title:   fmt.Sprintf("product %d", productID),
+			Images: []models.Image{{
 				URL: "http://84.23.53.28:8080/api/v1/img/" +
 					"�%7D�̙�%7F�w���f%7C.WebP",
 				Alt: "http://84.23.53.28:8080/api/v1/img/" +
 					"�%7D�̙�%7F�w���f%7C.WebP",
-			},
-			Description:     fmt.Sprintf("description of product %d", productID),
-			Price:           uint(100 * productID),
-			SafeTransaction: true,
-			Delivery:        true,
-			City:            "Moscow",
+			}},
+			Description: fmt.Sprintf("description of product %d", productID),
+			Price:       100 * productID,
+			SafeDeal:    true,
+			Delivery:    true,
+			City:        "Moscow",
 		}
 	}
 
@@ -90,18 +84,15 @@ func (a *ProductStorageMap) AddProduct(product *models.PreProduct) {
 	id := a.generateProductID()
 
 	a.products[id] = &models.Product{
-		ID:       id,
-		AuthorID: product.AuthorID,
-		Title:    product.Title,
-		Image: models.Image{
-			URL: product.Image.URL,
-			Alt: product.Image.Alt,
-		},
-		Description:     product.Description,
-		Price:           product.Price,
-		SafeTransaction: product.SafeTransaction,
-		Delivery:        product.Delivery,
-		City:            product.City,
+		ID:          id,
+		SalerID:     product.SalerID,
+		Title:       product.Title,
+		Images:      product.Images,
+		Description: product.Description,
+		Price:       product.Price,
+		SafeDeal:    product.SafeDeal,
+		Delivery:    product.Delivery,
+		City:        product.City,
 	}
 }
 
@@ -119,16 +110,13 @@ func (a *ProductStorageMap) GetNProducts(n int) ([]*models.ProductInFeed, error)
 		n--
 
 		productsInFeedSlice = append(productsInFeedSlice, &models.ProductInFeed{
-			ID:    product.ID,
-			Title: product.Title,
-			Image: models.Image{
-				URL: product.Image.URL,
-				Alt: product.Image.Alt,
-			},
-			Price:           product.Price,
-			SafeTransaction: product.SafeTransaction,
-			Delivery:        product.Delivery,
-			City:            product.City,
+			ID:       product.ID,
+			Title:    product.Title,
+			Images:   product.Images,
+			Price:    product.Price,
+			SafeDeal: product.SafeDeal,
+			Delivery: product.Delivery,
+			City:     product.City,
 		})
 
 		if n == 0 {

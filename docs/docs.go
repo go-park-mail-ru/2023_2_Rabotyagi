@@ -359,7 +359,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Image": {
+        "models.Images": {
             "type": "object",
             "properties": {
                 "alt": {
@@ -386,7 +386,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "image": {
-                    "$ref": "#/definitions/models.Image"
+                    "$ref": "#/definitions/models.Images"
                 },
                 "price": {
                     "type": "integer"
@@ -418,7 +418,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "image": {
-                    "$ref": "#/definitions/models.Image"
+                    "$ref": "#/definitions/models.Images"
                 },
                 "price": {
                     "type": "integer"
@@ -444,7 +444,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "image": {
-                    "$ref": "#/definitions/models.Image"
+                    "$ref": "#/definitions/models.Images"
                 },
                 "price": {
                     "type": "integer"

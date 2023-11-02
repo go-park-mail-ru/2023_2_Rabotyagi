@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
+	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/mux"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
@@ -29,8 +30,9 @@ func (s *Server) Run(config *config.Config) error {
 	}
 
 	userStorage := userrepo.NewUserStorage(pool)
+	productStorage := productrepo.NewProductStorage(pool)
 
-	handler := mux.NewMux(baseCtx, config.AllowOrigin, userStorage)
+	handler := mux.NewMux(baseCtx, config.AllowOrigin, userStorage, productStorage)
 
 	s.httpServer = &http.Server{ //nolint:exhaustruct
 		Addr:           ":" + config.PortServer,

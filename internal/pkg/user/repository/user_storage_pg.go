@@ -64,7 +64,6 @@ func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models
 func (u *UserStorage) getUserByID(ctx context.Context, tx pgx.Tx, id uint64) (*models.User, error) {
 	SQLGetUserByID := `SELECT email, phone, name, password, birthday FROM public."user" WHERE id=$1;`
 	userLine := tx.QueryRow(ctx, SQLGetUserByID, id)
-
 	user := models.User{ //nolint:exhaustruct
 		ID: id,
 	}

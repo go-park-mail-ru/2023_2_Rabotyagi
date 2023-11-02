@@ -24,11 +24,11 @@ package delivery_test
 //
 //func TestAddPostHandler(t *testing.T) {
 //	prePost := &models.PreProduct{
-//		AuthorID:        1,
+//		SalerID:        1,
 //		Title:           "Test Product",
 //		Description:     "This is a test product",
 //		Price:           100,
-//		SafeTransaction: true,
+//		SafeDeal: true,
 //		Delivery:        true,
 //		City:            "Moscow",
 //	}
@@ -81,22 +81,22 @@ package delivery_test
 //
 //func TestGetPostHandler(t *testing.T) {
 //	prePost := &models.PreProduct{
-//		AuthorID:        1,
+//		SalerID:        1,
 //		Title:           "Test Product",
 //		Description:     "This is a test product",
 //		Price:           100,
-//		SafeTransaction: true,
+//		SafeDeal: true,
 //		Delivery:        true,
 //		City:            "Moscow",
 //	}
 //
 //	post := &models.Product{
 //		ID:              1,
-//		AuthorID:        1,
+//		SalerID:        1,
 //		Title:           "Test Product",
 //		Description:     "This is a test product",
 //		Price:           100,
-//		SafeTransaction: true,
+//		SafeDeal: true,
 //		Delivery:        true,
 //		City:            "Moscow",
 //	}
@@ -163,15 +163,15 @@ package delivery_test
 //			inputParamCount: 1,
 //			handler:         &postdelivery.PostHandler{Storage: repository.NewPostStorageMap()},
 //			postsForStorage: []models.PreProduct{{
-//				AuthorID: 1,
+//				SalerID: 1,
 //				Title:    "Test Product",
-//				Image: models.Image{
+//				Images: models.Images{
 //					URL: "test_url",
 //					Alt: "test_alt",
 //				},
 //				Description:     "This is a test product",
 //				Price:           100,
-//				SafeTransaction: true,
+//				SafeDeal: true,
 //				Delivery:        true,
 //				City:            "Moscow",
 //			}},
@@ -180,12 +180,12 @@ package delivery_test
 //				Body: []*models.ProductInFeed{{
 //					ID:    1,
 //					Title: "Test Product",
-//					Image: models.Image{
+//					Images: models.Images{
 //						URL: "test_url",
 //						Alt: "test_alt",
 //					},
 //					Price:           100,
-//					SafeTransaction: true,
+//					SafeDeal: true,
 //					Delivery:        true,
 //					City:            "Moscow",
 //				}},

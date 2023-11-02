@@ -142,3 +142,8 @@ linters-settings:
         deny:
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package
+  tagliatelle:
+    case:
+      use-field-name: true
+      rules:
+        json:     snake
