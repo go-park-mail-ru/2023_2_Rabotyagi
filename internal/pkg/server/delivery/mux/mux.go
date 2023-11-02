@@ -36,10 +36,11 @@ func NewMux(ctx context.Context, addrOrigin string, userStorage userusecases.IUs
 	)
 
 	router.Handle("/api/v1/img/", imgHandler)
-	
+
 	router.Handle("/api/v1/signup", middleware.Context(ctx, userHandler.SignUpHandler))
 	router.Handle("/api/v1/signin", middleware.Context(ctx, userHandler.SignInHandler))
 	router.Handle("/api/v1/logout", middleware.Context(ctx, userHandler.LogOutHandler))
+	router.Handle("/api/v1/profile/get/", middleware.Context(ctx, userHandler.GetUserHandler))
 
 	router.Handle("/api/v1/post/add", middleware.Context(ctx, postHandler.AddPostHandler))
 	router.Handle("/api/v1/post/get/", middleware.Context(ctx, postHandler.GetPostHandler))

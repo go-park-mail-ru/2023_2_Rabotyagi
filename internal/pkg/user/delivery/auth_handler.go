@@ -141,7 +141,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	userWithoutID := new(models.UserWithoutID)
 	if err := decoder.Decode(userWithoutID); err != nil {
-		log.Printf("in AddPostHandler: %+v\n", err)
+		log.Printf("in SignInHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
 
 		return
