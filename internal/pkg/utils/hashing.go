@@ -28,14 +28,16 @@ func HashPass(plainPassword string) (string, error) {
 }
 
 func hashPassWithSalt(salt []byte, plainPassword string) []byte {
-	hashedPass := argon2.IDKey([]byte(plainPassword), []byte(salt), time, memory, threads, keyLen)
+	hashedPass := argon2.IDKey([]byte(plainPassword), salt, time, memory, threads, keyLen)
 
 	return append(salt, hashedPass...)
 }
 
 func ComparePassAndHash(passHash []byte, plainPassword string) bool {
 	var passHashCopy = make([]byte, len(passHash))
+
 	copy(passHashCopy, passHash)
+
 	salt := passHashCopy[0:saltLen]
 	userPassHash := hashPassWithSalt(salt[:saltLen], plainPassword)
 

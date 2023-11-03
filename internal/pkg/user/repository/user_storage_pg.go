@@ -17,9 +17,10 @@ import (
 )
 
 var (
-	ErrEmailBusy     = myerrors.NewError("same email already in use")
-	ErrPhoneBusy     = myerrors.NewError("same phone already in use")
-	ErrWrongPassword = myerrors.NewError("password is wrong")
+	ErrEmailBusy      = myerrors.NewError("same email already in use")
+	ErrPhoneBusy      = myerrors.NewError("same phone already in use")
+	ErrWrongPassword  = myerrors.NewError("password is wrong")
+	ErrNoUpdateFields = myerrors.NewError("Map of updating fields is empty")
 
 	NameSeqUser = pgx.Identifier{"public", "user_id_seq"} //nolint:gochecknoglobals
 )
@@ -200,13 +201,16 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 func (u *UserStorage) updateUser(ctx context.Context,
 	tx pgx.Tx, userID uint64, updateDataMap map[string]interface{},
 ) error {
-	query := squirrel.Update(`public."user"`).
-		Where(squirrel.Eq{"id": userID})
-	query.SetMap(updateDataMap)
+	if len(updateDataMap) == 0 {
+		return ErrNoUpdateFields
+	}
+
+	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Update(`public."user"`).
+		Where(squirrel.Eq{"id": userID}).SetMap(updateDataMap)
 
 	queryString, args, err := query.ToSql()
 	if err != nil {
-		log.Printf("in updateUser: while converting ToSql: %+v", err)
+		log.Printf("in updateUser while converting ToSql: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -221,14 +225,33 @@ func (u *UserStorage) updateUser(ctx context.Context,
 	return nil
 }
 
-func (u *UserStorage) UpdateUser(ctx context.Context, userID uint64, updateData map[string]interface{}) error {
+func (u *UserStorage) UpdateUser(ctx context.Context,
+	userID uint64, updateData map[string]interface{}) (*models.UserWithoutPassword, error) {
+	userWithoutPass := &models.UserWithoutPassword{}
+
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
 		err := u.updateUser(ctx, tx, userID, updateData)
+		if err != nil {
+			log.Printf("in UpdateUser: %+v\n", err)
 
-		return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+
+		userWithoutPass, err = u.getUserWithoutPasswordByID(ctx, tx, userID)
+		if err != nil {
+			log.Printf("in UpdateUser: %+v\n", err)
+
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+
+		return nil
 	})
 
-	return fmt.Errorf(myerrors.ErrTemplate, err)
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return userWithoutPass, nil
 }
 
 func (u *UserStorage) getLastValSeq(ctx context.Context, tx pgx.Tx, nameTable pgx.Identifier) (uint64, error) {
