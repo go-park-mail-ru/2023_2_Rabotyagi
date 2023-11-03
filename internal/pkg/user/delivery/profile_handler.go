@@ -1,12 +1,10 @@
 package delivery
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
@@ -89,19 +87,16 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	ctx := r.Context()
 
-	decoder := json.NewDecoder(r.Body)
-
-	userWithoutPassword := new(models.UserWithoutPassword)
-	if err := decoder.Decode(userWithoutPassword); err != nil {
-		log.Printf("in PartiallyUpdateUserHandler: %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, delivery.ErrBadRequest))
+	userWithoutPassword, err := usecases.ValidatePartOfUserWithoutPassword(r.Body)
+	if err != nil {
+		handleErr(w, "in PartiallyUpdateUserHandler:", err)
 
 		return
 	}
 
 	updateDataMap := utils.StructToMap(userWithoutPassword)
 
-	id, ok := updateDataMap["ID"].(uint64)
+	userID, ok := updateDataMap["ID"].(uint64)
 	if !ok {
 		log.Printf("in PartiallyUpdateUserHandler")
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
@@ -111,7 +106,7 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	delete(updateDataMap, "ID")
 
-	updatedUser, err := u.Storage.UpdateUser(ctx, id, updateDataMap)
+	updatedUser, err := u.Storage.UpdateUser(ctx, userID, updateDataMap)
 	if err != nil {
 		handleErr(w, "error in PartiallyUpdateUserHandler:", err)
 
@@ -119,7 +114,7 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 	}
 
 	delivery.SendOkResponse(w, NewProfileResponse(delivery.StatusResponseSuccessful, updatedUser))
-	log.Printf("Successfully updated: %+v", id)
+	log.Printf("Successfully updated: %+v", userID)
 }
 
 // FullyUpdateUserHandler godoc
@@ -159,7 +154,7 @@ func (u *UserHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.Requ
 
 	updateDataMap := utils.StructToMap(userWithoutPassword)
 
-	id, ok := updateDataMap["ID"].(uint64)
+	userID, ok := updateDataMap["ID"].(uint64)
 	if !ok {
 		log.Printf("in FullyUpdateUserHandler")
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
@@ -169,7 +164,7 @@ func (u *UserHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.Requ
 
 	delete(updateDataMap, "ID")
 
-	updatedUser, err := u.Storage.UpdateUser(ctx, id, updateDataMap)
+	updatedUser, err := u.Storage.UpdateUser(ctx, userID, updateDataMap)
 	if err != nil {
 		handleErr(w, "error in PartiallyUpdateUserHandler:", err)
 
@@ -177,5 +172,5 @@ func (u *UserHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	delivery.SendOkResponse(w, NewProfileResponse(delivery.StatusResponseSuccessful, updatedUser))
-	log.Printf("Successfully updated: %+v", id)
+	log.Printf("Successfully updated: %+v", userID)
 }
