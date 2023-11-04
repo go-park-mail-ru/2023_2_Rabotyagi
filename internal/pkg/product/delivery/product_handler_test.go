@@ -58,10 +58,10 @@ package delivery_test
 //
 //	postStorageMap := repository.NewPostStorageMap()
 //	postHandler := &postdelivery.PostHandler{
-//		Storage: postStorageMap,
+//		storage: postStorageMap,
 //	}
 //
-//	postHandler.AddPostHandler(w, req)
+//	postHandler.AddProductHandler(w, req)
 //
 //	resp := w.Result()
 //
@@ -122,10 +122,10 @@ package delivery_test
 //
 //	postStorageMap := repository.NewPostStorageMap()
 //	postHandler := &postdelivery.PostHandler{
-//		Storage: postStorageMap,
+//		storage: postStorageMap,
 //	}
 //
-//	postHandler.Storage.AddPost(prePost)
+//	postHandler.storage.AddPost(prePost)
 //
 //	postHandler.GetPostHandler(w, req)
 //
@@ -161,7 +161,7 @@ package delivery_test
 //		{
 //			name:            "test basic work",
 //			inputParamCount: 1,
-//			handler:         &postdelivery.PostHandler{Storage: repository.NewPostStorageMap()},
+//			handler:         &postdelivery.PostHandler{storage: repository.NewPostStorageMap()},
 //			postsForStorage: []models.PreProduct{{
 //				SalerID: 1,
 //				Title:    "Test Product",
@@ -200,7 +200,7 @@ package delivery_test
 //			t.Parallel()
 //
 //			for _, v := range testCase.postsForStorage {
-//				testCase.handler.Storage.AddPost(&v)
+//				testCase.handler.storage.AddPost(&v)
 //			}
 //
 //			req := httptest.NewRequest(http.MethodGet,

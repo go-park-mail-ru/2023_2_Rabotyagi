@@ -32,7 +32,8 @@ func (s *Server) Run(config *config.Config) error {
 	userStorage := userrepo.NewUserStorage(pool)
 	productStorage := productrepo.NewProductStorage(pool)
 
-	handler := mux.NewMux(baseCtx, config.AllowOrigin, userStorage, productStorage)
+	handler := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin, config.Schema, config.PortServer),
+		userStorage, productStorage)
 
 	s.httpServer = &http.Server{ //nolint:exhaustruct
 		Addr:           ":" + config.PortServer,

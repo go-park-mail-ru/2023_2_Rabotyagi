@@ -15,8 +15,17 @@ const (
 )
 
 type AuthHandler struct {
-	Storage    usecases.IUserStorage
-	AddrOrigin string
+	storage    usecases.IUserStorage
+	addrOrigin string
+	schema     string
+}
+
+func NewAuthHandler(storage usecases.IUserStorage, addrOrigin string, schema string) *AuthHandler {
+	return &AuthHandler{
+		storage:    storage,
+		addrOrigin: addrOrigin,
+		schema:     schema,
+	}
 }
 
 // SignUpHandler godoc
@@ -38,7 +47,7 @@ type AuthHandler struct {
 //	@Router      /signup [post]
 func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, a.AddrOrigin)
+	delivery.SetupCORS(w, a.addrOrigin, a.schema)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -59,7 +68,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.Storage.AddUser(ctx, userWithoutID)
+	user, err := a.storage.AddUser(ctx, userWithoutID)
 	if err != nil {
 		delivery.HandleErr(w, "error in SignUpHandler:", err)
 
@@ -103,7 +112,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /signin [post]
 func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, a.AddrOrigin)
+	delivery.SetupCORS(w, a.addrOrigin, a.schema)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -124,7 +133,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	emailBusy, err := a.Storage.IsEmailBusy(ctx, userWithoutID.Email)
+	emailBusy, err := a.storage.IsEmailBusy(ctx, userWithoutID.Email)
 	if err != nil {
 		log.Printf("in SignInHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
@@ -139,7 +148,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.Storage.GetUserByEmail(ctx, userWithoutID.Email)
+	user, err := a.storage.GetUserByEmail(ctx, userWithoutID.Email)
 	if err != nil || userWithoutID.Password != user.Password {
 		log.Printf("in SignInHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
@@ -188,7 +197,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /logout [post]
 func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, a.AddrOrigin)
+	delivery.SetupCORS(w, a.addrOrigin, a.schema)
 
 	if r.Method == http.MethodOptions {
 		return

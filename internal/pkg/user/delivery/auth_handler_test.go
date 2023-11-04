@@ -50,7 +50,7 @@ package delivery_test
 //
 //			authStorageMap := repository.NewAuthStorageMap()
 //			authHandler := &userdelivery.AuthHandler{
-//				Storage: authStorageMap,
+//				storage: authStorageMap,
 //			}
 //
 //			authHandler.SignUpHandler(w, req)
@@ -118,7 +118,7 @@ package delivery_test
 //			}
 //
 //			authHandler := &userdelivery.AuthHandler{
-//				Storage: authStorageMap,
+//				storage: authStorageMap,
 //			}
 //
 //			authHandler.SignInHandler(w, req)
@@ -182,7 +182,7 @@ package delivery_test
 //
 //			authStorageMap := repository.NewAuthStorageMap()
 //			authHandler := &userdelivery.AuthHandler{
-//				Storage: authStorageMap,
+//				storage: authStorageMap,
 //			}
 //
 //			authHandler.LogOutHandler(w, req)

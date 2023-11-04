@@ -10,9 +10,10 @@ const (
 	HTTPStatusOk    = 200
 	HTTPStatusError = 222
 
-	StatusResponseSuccessful = 200
-	StatusErrBadRequest      = 400
-	StatusErrInternalServer  = 500
+	StatusResponseSuccessful      = 200
+	StatusRedirectAfterSuccessful = 303
+	StatusErrBadRequest           = 400
+	StatusErrInternalServer       = 500
 )
 
 const (
@@ -38,6 +39,19 @@ func NewResponse(status int, message string) *Response {
 		Status: status,
 		Body:   ResponseBody{message},
 	}
+}
+
+type RedirectBody struct {
+	RedirectURL string `json:"redirect_url"`
+}
+
+type ResponseRedirect struct {
+	Status int          `json:"status"`
+	Body   RedirectBody `json:"body"`
+}
+
+func NewResponseRedirect(redirectURL string) *ResponseRedirect {
+	return &ResponseRedirect{Status: StatusRedirectAfterSuccessful, Body: RedirectBody{RedirectURL: redirectURL}}
 }
 
 type ResponseBodyError struct {

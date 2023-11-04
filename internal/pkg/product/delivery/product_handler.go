@@ -12,11 +12,28 @@ import (
 )
 
 type PostHandler struct {
-	Storage    usecases.IProductStorage
-	AddrOrigin string
+	storage    usecases.IProductStorage
+	addrOrigin string
+	schema     string
+	portServer string
 }
 
-// AddPostHandler godoc
+func NewPostHandler(storage usecases.IProductStorage,
+	addrOrigin string, schema string, portServer string,
+) *PostHandler {
+	return &PostHandler{
+		storage:    storage,
+		addrOrigin: addrOrigin,
+		schema:     schema,
+		portServer: portServer,
+	}
+}
+
+func (p *PostHandler) createURLToProductFromID(productID uint64) string {
+	return fmt.Sprintf("%s%s:%s/api/v1/post/get/%d", p.schema, p.addrOrigin, p.portServer, productID)
+}
+
+// AddProductHandler godoc
 //
 //	@Summary    add product
 //	@Description  add product by data
@@ -27,14 +44,14 @@ type PostHandler struct {
 //	@Accept      json
 //	@Produce    json
 //	@Param      product  body models.PreProduct true  "product data for adding"
-//	@Success    200  {object} delivery.Response
+//	@Success    200  {object} delivery.ResponseRedirect
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/add [post]
-func (p *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
+func (p *PostHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, p.AddrOrigin)
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -48,19 +65,20 @@ func (p *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	preProduct, err := usecases.ValidatePreProduct(r.Body)
 	if err != nil {
-		delivery.HandleErr(w, "in AddPostHandler:", err)
+		delivery.HandleErr(w, "in AddProductHandler:", err)
 
 		return
 	}
 
-	err = p.Storage.AddProduct(ctx, preProduct)
+	productID, err := p.storage.AddProduct(ctx, preProduct)
 	if err != nil {
-		delivery.HandleErr(w, "in AddPostHandler:", err)
+		log.Printf("in AddProductHandler: %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddPost))
+	delivery.SendOkResponse(w, delivery.NewResponseRedirect(p.createURLToProductFromID(productID)))
 	log.Printf("added product: %+v", preProduct)
 }
 
@@ -78,7 +96,7 @@ func (p *PostHandler) AddPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /product/get/{id} [get]
 func (p *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, p.AddrOrigin)
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -102,7 +120,7 @@ func (p *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := p.Storage.GetProduct(ctx, uint64(postID), userID)
+	post, err := p.storage.GetProduct(ctx, uint64(postID), userID)
 	if err != nil {
 		log.Printf("in GetPostHandler: product with this id is not exists %+v\n", postID)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrPostNotExist))
@@ -131,7 +149,7 @@ func (p *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 ////	@Router      /product/get_list [get]
 //func (p *PostHandler) GetPostsListHandler(w http.ResponseWriter, r *http.Request) {
 //	defer r.Body.Close()
-//	delivery.SetupCORS(w, p.AddrOrigin)
+//		delivery.SetupCORS(w, p.addrOrigin, p.schema)
 //
 //	if r.Method == http.MethodOptions {
 //		return
@@ -152,7 +170,7 @@ func (p *PostHandler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 //		return
 //	}
 //
-//	posts, err := p.Storage.GetNProducts(count)
+//	posts, err := p.storage.GetNProducts(count)
 //	if err != nil {
 //		log.Printf("in GetPostsListHandler: n > posts count %+v\n", count)
 //		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrNoSuchCountOfPosts))

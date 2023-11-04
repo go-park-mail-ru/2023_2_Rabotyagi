@@ -3,24 +3,28 @@ package config
 import "os"
 
 const (
-	standardAllowOrigin = "localhost:3000"
+	standardAllowOrigin = "localhost"
+	standardSchema      = "http://"
 	standardPort        = "8080"
 	standardURLDataBase = "postgres://postgres:password@localhost:5432/youla?sslmode=disable"
 
 	envAllowOrigin = "ALLOW_ORIGIN"
+	envSchema      = "SCHEMA"
 	envPortBackend = "PORT_BACKEND"
 	envURLDataBase = "URL_DATA_BASE"
 )
 
 type Config struct {
-	PortServer  string
 	AllowOrigin string
+	Schema      string
+	PortServer  string
 	URLDataBase string
 }
 
 func New() *Config {
 	return &Config{
 		AllowOrigin: getEnvStr(envAllowOrigin, standardAllowOrigin),
+		Schema:      getEnvStr(envSchema, standardSchema),
 		PortServer:  getEnvStr(envPortBackend, standardPort),
 		URLDataBase: getEnvStr(envURLDataBase, standardURLDataBase),
 	}

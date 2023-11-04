@@ -9,6 +9,7 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -212,22 +213,6 @@ func (u *UserStorage) UpdateUser(ctx context.Context, userID uint64, updateData 
 	return fmt.Errorf(myerrors.ErrTemplate, err)
 }
 
-func (u *UserStorage) getLastValSeq(ctx context.Context, tx pgx.Tx, nameTable pgx.Identifier) (uint64, error) {
-	sanitizedNameTable := nameTable.Sanitize()
-	SQLGetLastValSeq := fmt.Sprintf(`SELECT last_value FROM %s;`, sanitizedNameTable)
-	seqRow := tx.QueryRow(ctx, SQLGetLastValSeq)
-
-	var count uint64
-
-	if err := seqRow.Scan(&count); err != nil {
-		log.Printf("error in getLastValSeq: %+v", err)
-
-		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return count, nil
-}
-
 func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID) (*models.User, error) {
 	user := models.User{} //nolint:exhaustruct
 
@@ -265,7 +250,7 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		id, err := u.getLastValSeq(ctx, tx, NameSeqUser)
+		id, err := utils.GetLastValSeq(ctx, tx, NameSeqUser)
 		if err != nil {
 			log.Printf("in AddUser: %+v", err)
 

@@ -8,12 +8,17 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var ErrProductNotFound = myerrors.NewError("это объявление не найдено")
+var (
+	ErrProductNotFound = myerrors.NewError("это объявление не найдено")
+
+	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"}
+)
 
 type ProductStorage struct {
 	pool *pgxpool.Pool
@@ -184,17 +189,29 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 	return nil
 }
 
-func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreProduct) error {
+func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error) {
+	var postId uint64
+
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		err := p.insertProduct(ctx, tx, preProduct)
+		if err != nil {
+			return err
+		}
+
+		LastProductID, err := utils.GetLastValSeq(ctx, tx, NameSeqProduct)
+		if err != nil {
+			return err
+		}
+
+		postId = LastProductID
 
 		return err
 	})
 	if err != nil {
 		log.Printf("in AddProduct: %+v\n", err)
 
-		return fmt.Errorf(myerrors.ErrTemplate, err)
+		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return nil
+	return postId, nil
 }

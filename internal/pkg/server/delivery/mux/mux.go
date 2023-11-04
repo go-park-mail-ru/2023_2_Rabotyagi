@@ -11,23 +11,28 @@ import (
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 )
 
-type Handler struct {
-	AuthHandler *userdelivery.AuthHandler
-	PostHandler *productdelivery.PostHandler
+type ConfigMux struct {
+	addrOrigin string
+	schema     string
+	portServer string
 }
 
-func NewMux(ctx context.Context, addrOrigin string, userStorage userusecases.IUserStorage, productStorage productusecases.IProductStorage) http.Handler {
+func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMux {
+	return &ConfigMux{
+		addrOrigin: addrOrigin,
+		schema:     schema,
+		portServer: portServer,
+	}
+}
+
+func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.IUserStorage,
+	productStorage productusecases.IProductStorage,
+) http.Handler {
 	router := http.NewServeMux()
 
-	authHandler := &userdelivery.AuthHandler{
-		Storage:    userStorage,
-		AddrOrigin: addrOrigin,
-	}
+	authHandler := userdelivery.NewAuthHandler(userStorage, configMux.addrOrigin, configMux.schema)
 
-	postHandler := &productdelivery.PostHandler{
-		Storage:    productStorage,
-		AddrOrigin: addrOrigin,
-	}
+	postHandler := productdelivery.NewPostHandler(productStorage, configMux.addrOrigin, configMux.schema, configMux.portServer)
 
 	imgHandler := http.StripPrefix(
 		"/api/v1/img/",
@@ -40,7 +45,7 @@ func NewMux(ctx context.Context, addrOrigin string, userStorage userusecases.IUs
 	router.Handle("/api/v1/signin", middleware.Context(ctx, authHandler.SignInHandler))
 	router.Handle("/api/v1/logout", middleware.Context(ctx, authHandler.LogOutHandler))
 
-	router.Handle("/api/v1/post/add", middleware.Context(ctx, postHandler.AddPostHandler))
+	router.Handle("/api/v1/post/add", middleware.Context(ctx, postHandler.AddProductHandler))
 	router.Handle("/api/v1/post/get/", middleware.Context(ctx, postHandler.GetPostHandler))
 	//router.Handle("/api/v1/post/get_list", middleware.Context(ctx, postHandler.GetPostsListHandler))
 
