@@ -41,7 +41,7 @@ func NewMux(ctx context.Context, addrOrigin string, userStorage userusecases.IUs
 	router.Handle("/api/v1/logout", middleware.Context(ctx, authHandler.LogOutHandler))
 
 	router.Handle("/api/v1/post/add", middleware.Context(ctx, postHandler.AddPostHandler))
-	//router.Handle("/api/v1/post/get/", middleware.Context(ctx, postHandler.GetPostHandler))
+	router.Handle("/api/v1/post/get/", middleware.Context(ctx, postHandler.GetPostHandler))
 	//router.Handle("/api/v1/post/get_list", middleware.Context(ctx, postHandler.GetPostsListHandler))
 
 	mux := http.NewServeMux()

@@ -22,14 +22,12 @@ type ProductStorageMap struct {
 func GenerateProducts(productStorageMap *ProductStorageMap) *ProductStorageMap {
 	for i := 1; i <= 40; i++ {
 		productID := productStorageMap.generateProductID()
-		productStorageMap.products[productID] = &models.Product{
+		productStorageMap.products[productID] = &models.Product{ //nolint:exhaustruct
 			ID:      productID,
 			SalerID: 1,
 			Title:   fmt.Sprintf("product %d", productID),
 			Images: []models.Image{{
 				URL: "http://84.23.53.28:8080/api/v1/img/" +
-					"�%7D�̙�%7F�w���f%7C.WebP",
-				Alt: "http://84.23.53.28:8080/api/v1/img/" +
 					"�%7D�̙�%7F�w���f%7C.WebP",
 			}},
 			Description: fmt.Sprintf("description of product %d", productID),

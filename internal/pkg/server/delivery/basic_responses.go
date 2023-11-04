@@ -16,8 +16,12 @@ const (
 )
 
 const (
-	ErrInternalServer = "Error in server"
-	ErrBadRequest     = "Wrong request"
+	ErrInternalServer = "Ошибка на сервере"
+	ErrBadRequest     = "Некорректный запрос"
+)
+
+const (
+	CookieAuthName = "access_token"
 )
 
 type ResponseBody struct {

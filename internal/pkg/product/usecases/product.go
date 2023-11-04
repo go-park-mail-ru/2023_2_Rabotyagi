@@ -7,7 +7,7 @@ import (
 )
 
 type IProductStorage interface {
-	GetProduct(ctx context.Context, productID uint64) (*models.Product, error)
+	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
 	GetNProducts(ctx context.Context) ([]*models.Product, error)
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) error
 }

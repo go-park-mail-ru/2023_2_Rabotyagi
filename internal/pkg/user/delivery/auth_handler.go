@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	CookieAuthName = "access_token"
-	timeTokenLife  = 24 * time.Hour
+	timeTokenLife = 24 * time.Hour
 )
 
 type AuthHandler struct {
@@ -79,7 +78,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    CookieAuthName,
+		Name:    delivery.CookieAuthName,
 		Value:   jwtStr,
 		Expires: expire,
 		Path:    "/",
@@ -165,7 +164,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    CookieAuthName,
+		Name:    delivery.CookieAuthName,
 		Value:   jwtStr,
 		Expires: expire,
 		Path:    "/",
@@ -201,7 +200,7 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie(CookieAuthName)
+	cookie, err := r.Cookie(delivery.CookieAuthName)
 	if err != nil {
 		log.Printf("in LogOutHandler: %+v\n", err)
 		delivery.SendErrResponse(w, delivery.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
