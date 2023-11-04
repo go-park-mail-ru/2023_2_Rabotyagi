@@ -77,7 +77,8 @@ CREATE TABLE IF NOT EXISTS public."favourite"
 (
     id         BIGINT DEFAULT NEXTVAL('favourite_id_seq'::regclass) NOT NULL PRIMARY KEY,
     owner_id   BIGINT                                               NOT NULL REFERENCES public."user" (id),
-    product_id BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE
+    product_id BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE,
+        CONSTRAINT uniq_together_product_id_owner_id unique (owner_id, product_id)
 );
 
 CREATE OR REPLACE FUNCTION updated_at_now()
