@@ -55,7 +55,7 @@ const docTemplate = `{
         },
         "/product/add": {
             "post": {
-                "description": "add product by data",
+                "description": "add product by data\nError.status can be:\nStatusErrBadRequest      = 400\nStatusErrInternalServer  = 500",
                 "consumes": [
                     "application/json"
                 ],
@@ -78,7 +78,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.Response"
+                            "$ref": "#/definitions/delivery.ResponseRedirect"
                         }
                     },
                     "222": {
@@ -125,7 +125,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.PostResponse"
+                            "$ref": "#/definitions/delivery.ProductResponse"
                         }
                     },
                     "222": {
@@ -151,19 +151,26 @@ const docTemplate = `{
         },
         "/product/get_list": {
             "get": {
-                "description": "get posts by count",
+                "description": "get product by count",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "get posts",
+                "summary": "get product",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "count posts",
+                        "description": "count products",
                         "name": "count",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "last product id ",
+                        "name": "last_id",
                         "in": "query",
                         "required": true
                     }
@@ -172,7 +179,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.PostsListResponse"
+                            "$ref": "#/definitions/delivery.ProductListResponse"
                         }
                     },
                     "222": {
@@ -307,18 +314,7 @@ const docTemplate = `{
                 }
             }
         },
-        "delivery.PostResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/models.Product"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "delivery.PostsListResponse": {
+        "delivery.ProductListResponse": {
             "type": "object",
             "properties": {
                 "body": {
@@ -329,6 +325,25 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "delivery.ProductResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/models.Product"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "delivery.RedirectBody": {
+            "type": "object",
+            "properties": {
+                "redirect_url": {
+                    "type": "string"
                 }
             }
         },
@@ -359,12 +374,20 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Images": {
+        "delivery.ResponseRedirect": {
             "type": "object",
             "properties": {
-                "alt": {
-                    "type": "string"
+                "body": {
+                    "$ref": "#/definitions/delivery.RedirectBody"
                 },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Image": {
+            "type": "object",
+            "properties": {
                 "url": {
                     "type": "string"
                 }
@@ -373,26 +396,37 @@ const docTemplate = `{
         "models.PreProduct": {
             "type": "object",
             "properties": {
-                "author": {
+                "available_count": {
+                    "type": "integer"
+                },
+                "category_id": {
                     "type": "integer"
                 },
                 "city": {
+                    "description": "nolint",
                     "type": "string"
                 },
                 "delivery": {
                     "type": "boolean"
                 },
                 "description": {
+                    "description": "nolint",
                     "type": "string"
                 },
-                "image": {
-                    "$ref": "#/definitions/models.Images"
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Image"
+                    }
                 },
                 "price": {
                     "type": "integer"
                 },
-                "safe": {
+                "safe_deal": {
                     "type": "boolean"
+                },
+                "saler_id": {
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
@@ -402,32 +436,55 @@ const docTemplate = `{
         "models.Product": {
             "type": "object",
             "properties": {
-                "author": {
+                "available_count": {
+                    "type": "integer"
+                },
+                "category_id": {
                     "type": "integer"
                 },
                 "city": {
+                    "description": "nolint",
+                    "type": "string"
+                },
+                "created_at": {
                     "type": "string"
                 },
                 "delivery": {
                     "type": "boolean"
                 },
                 "description": {
+                    "description": "nolint",
                     "type": "string"
+                },
+                "favourites": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "image": {
-                    "$ref": "#/definitions/models.Images"
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Image"
+                    }
+                },
+                "in_favourite": {
+                    "type": "boolean"
                 },
                 "price": {
                     "type": "integer"
                 },
-                "safe": {
+                "safe_deal": {
                     "type": "boolean"
+                },
+                "saler_id": {
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
+                },
+                "views": {
+                    "type": "integer"
                 }
             }
         },
@@ -440,16 +497,25 @@ const docTemplate = `{
                 "delivery": {
                     "type": "boolean"
                 },
+                "favourites": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },
-                "image": {
-                    "$ref": "#/definitions/models.Images"
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Image"
+                    }
+                },
+                "in_favourite": {
+                    "type": "boolean"
                 },
                 "price": {
                     "type": "integer"
                 },
-                "safe": {
+                "safe_deal": {
                     "type": "boolean"
                 },
                 "title": {

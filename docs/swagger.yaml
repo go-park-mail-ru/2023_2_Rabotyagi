@@ -7,14 +7,7 @@ definitions:
       status:
         type: integer
     type: object
-  delivery.PostResponse:
-    properties:
-      body:
-        $ref: '#/definitions/models.Product'
-      status:
-        type: integer
-    type: object
-  delivery.PostsListResponse:
+  delivery.ProductListResponse:
     properties:
       body:
         items:
@@ -22,6 +15,18 @@ definitions:
         type: array
       status:
         type: integer
+    type: object
+  delivery.ProductResponse:
+    properties:
+      body:
+        $ref: '#/definitions/models.Product'
+      status:
+        type: integer
+    type: object
+  delivery.RedirectBody:
+    properties:
+      redirect_url:
+        type: string
     type: object
   delivery.Response:
     properties:
@@ -40,52 +45,81 @@ definitions:
       error:
         type: string
     type: object
+  delivery.ResponseRedirect:
+    properties:
+      body:
+        $ref: '#/definitions/delivery.RedirectBody'
+      status:
+        type: integer
+    type: object
   models.Image:
     properties:
-      alt:
-        type: string
       url:
         type: string
     type: object
   models.PreProduct:
     properties:
-      author:
+      available_count:
+        type: integer
+      category_id:
         type: integer
       city:
+        description: nolint
         type: string
       delivery:
         type: boolean
       description:
+        description: nolint
         type: string
-      image:
-        $ref: '#/definitions/models.Image'
+      images:
+        items:
+          $ref: '#/definitions/models.Image'
+        type: array
       price:
         type: integer
-      safe:
+      safe_deal:
         type: boolean
+      saler_id:
+        type: integer
       title:
         type: string
     type: object
   models.Product:
     properties:
-      author:
+      available_count:
+        type: integer
+      category_id:
         type: integer
       city:
+        description: nolint
+        type: string
+      created_at:
         type: string
       delivery:
         type: boolean
       description:
+        description: nolint
         type: string
+      favourites:
+        type: integer
       id:
         type: integer
-      image:
-        $ref: '#/definitions/models.Image'
+      images:
+        items:
+          $ref: '#/definitions/models.Image'
+        type: array
+      in_favourite:
+        type: boolean
       price:
         type: integer
-      safe:
+      safe_deal:
         type: boolean
+      saler_id:
+        type: integer
       title:
         type: string
+      views:
+        type: integer
     type: object
   models.ProductInFeed:
     properties:
@@ -93,13 +127,19 @@ definitions:
         type: string
       delivery:
         type: boolean
+      favourites:
+        type: integer
       id:
         type: integer
-      image:
-        $ref: '#/definitions/models.Image'
+      images:
+        items:
+          $ref: '#/definitions/models.Image'
+        type: array
+      in_favourite:
+        type: boolean
       price:
         type: integer
-      safe:
+      safe_deal:
         type: boolean
       title:
         type: string
@@ -156,7 +196,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: add product by data
+      description: |-
+        add product by data
+        Error.status can be:
+        StatusErrBadRequest      = 400
+        StatusErrInternalServer  = 500
       parameters:
       - description: product data for adding
         in: body
@@ -170,7 +214,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/delivery.Response'
+            $ref: '#/definitions/delivery.ResponseRedirect'
         "222":
           description: Error
           schema:
@@ -201,7 +245,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/delivery.PostResponse'
+            $ref: '#/definitions/delivery.ProductResponse'
         "222":
           description: Error
           schema:
@@ -219,11 +263,16 @@ paths:
     get:
       consumes:
       - application/json
-      description: get posts by count
+      description: get product by count
       parameters:
-      - description: count posts
+      - description: count products
         in: query
         name: count
+        required: true
+        type: integer
+      - description: 'last product id '
+        in: query
+        name: last_id
         required: true
         type: integer
       produces:
@@ -232,7 +281,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/delivery.PostsListResponse'
+            $ref: '#/definitions/delivery.ProductListResponse'
         "222":
           description: Error
           schema:
@@ -245,7 +294,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get posts
+      summary: get product
   /signin:
     post:
       consumes:

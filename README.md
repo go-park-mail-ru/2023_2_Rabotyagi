@@ -34,7 +34,10 @@ http://84.23.53.28/
 
 ### Сгенерировать swagger документацию
 
-`swag init -g cmd/app/main.go`
+```shell
+swag init -g cmd/app/main.go
+```
+
 
 
 ## Docker image build
