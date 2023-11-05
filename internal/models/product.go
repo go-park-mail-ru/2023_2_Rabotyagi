@@ -54,7 +54,7 @@ type ProductInFeed struct {
 	City         string  `json:"city"         valid:"required, length(1|256)~City length must be from 1 to 256"`
 	Delivery     bool    `json:"delivery"     valid:"required"`
 	SafeDeal     bool    `json:"safe_deal"    valid:"required"`
-	InFavourites bool    `json:"in_favourite" valid:"required"`
+	InFavourites bool    `json:"in_favourites" valid:"required"`
 	Images       []Image `json:"images"`
 	Favourites   uint64  `json:"favourites"   valid:"required"`
 }

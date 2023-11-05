@@ -34,3 +34,27 @@ func NewProductListResponse(status int, body []*models.ProductInFeed) *ProductLi
 		Body:   body,
 	}
 }
+
+type OrderResponse struct {
+	Status int           `json:"status"`
+	Body   *models.Order `json:"body"`
+}
+
+func NewOrderResponse(status int, body *models.Order) *OrderResponse {
+	return &OrderResponse{
+		Status: status,
+		Body:   body,
+	}
+}
+
+type OrderListResponse struct {
+	Status int                     `json:"status"`
+	Body   []*models.OrderInBasket `json:"body"`
+}
+
+func NewOrderListResponse(status int, body []*models.OrderInBasket) *OrderListResponse {
+	return &OrderListResponse{
+		Status: status,
+		Body:   body,
+	}
+}

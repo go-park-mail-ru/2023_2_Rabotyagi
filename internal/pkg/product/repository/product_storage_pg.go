@@ -288,6 +288,7 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 	_, err := tx.Exec(ctx, SQLInsertProduct, preProduct.SalerID, preProduct.CategoryID,
 		preProduct.Title, preProduct.Description, preProduct.Price, preProduct.AvailableCount,
 		preProduct.City, preProduct.Delivery, preProduct.SafeDeal)
+
 	if err != nil {
 		log.Printf("in insertProduct: %+v\n", err)
 
