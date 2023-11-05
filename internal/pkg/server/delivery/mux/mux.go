@@ -32,7 +32,9 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 
 	authHandler := userdelivery.NewAuthHandler(userStorage, configMux.addrOrigin, configMux.schema)
 
-	postHandler := productdelivery.NewPostHandler(productStorage, configMux.addrOrigin, configMux.schema, configMux.portServer)
+	productHandler := productdelivery.NewProductHandler(productStorage,
+		configMux.addrOrigin, configMux.schema, configMux.portServer,
+	)
 
 	imgHandler := http.StripPrefix(
 		"/api/v1/img/",
@@ -45,9 +47,9 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 	router.Handle("/api/v1/signin", middleware.Context(ctx, authHandler.SignInHandler))
 	router.Handle("/api/v1/logout", middleware.Context(ctx, authHandler.LogOutHandler))
 
-	router.Handle("/api/v1/post/add", middleware.Context(ctx, postHandler.AddProductHandler))
-	router.Handle("/api/v1/post/get/", middleware.Context(ctx, postHandler.GetPostHandler))
-	//router.Handle("/api/v1/post/get_list", middleware.Context(ctx, postHandler.GetPostsListHandler))
+	router.Handle("/api/v1/product/add", middleware.Context(ctx, productHandler.AddProductHandler))
+	router.Handle("/api/v1/product/get/", middleware.Context(ctx, productHandler.GetProductHandler))
+	router.Handle("/api/v1/product/get_list", middleware.Context(ctx, productHandler.GetProductListHandler))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(router))

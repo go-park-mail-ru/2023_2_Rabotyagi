@@ -10,6 +10,7 @@ import (
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -17,7 +18,7 @@ import (
 var (
 	ErrProductNotFound = myerrors.NewError("это объявление не найдено")
 
-	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"}
+	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
 
 type ProductStorage struct {
@@ -167,8 +168,116 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 	return product, nil
 }
 
-func (p *ProductStorage) GetNProducts(ctx context.Context) ([]*models.Product, error) {
-	return nil, nil
+// selectProductsInFeedWithWhereOrderLimit accepts arguments in the appropriate format:
+//
+// whereClause can be:
+// nil - ignored.
+//
+// map[string]interface{} OR squirrel.Eq - map of SQL expressions to values. Each key is transformed into
+// an expression like "<key> = ?", with the corresponding value bound to the placeholder. If the value is
+// nil, the expression will be "<key> IS NULL". If the value is an array or slice, the expression will be
+// "<key> IN (?,?,...)", with one placeholder for each item in the value.
+//
+// orderByClause:
+// nil - ignored.
+//
+// another cases add ORDER BY expressions to the query
+//
+// limit sets a LIMIT clause on the query.
+func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Context, tx pgx.Tx,
+	limit uint64, whereClause any, orderByClause []string,
+) ([]*models.ProductInFeed, error) {
+	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Select("id, title," +
+		"price, city, delivery, safe_deal").From(`public."product"`).
+		Where(whereClause).OrderBy(orderByClause...).Limit(limit)
+
+	SQLQuery, args, err := query.ToSql()
+	if err != nil {
+		log.Printf("in selectProductsInFeedWithWhereOrderLimit: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsProducts, err := tx.Query(ctx, SQLQuery, args...)
+	if err != nil {
+		log.Printf("in selectProductsInFeedWithWhereOrderLimit: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	curProduct := new(models.ProductInFeed)
+
+	var slProduct []*models.ProductInFeed
+
+	_, err = pgx.ForEachRow(rowsProducts, []any{
+		&curProduct.ID, &curProduct.Title,
+		&curProduct.Price, &curProduct.City,
+		&curProduct.Delivery, &curProduct.SafeDeal,
+	}, func() error {
+		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
+			ID:       curProduct.ID,
+			Title:    curProduct.Title,
+			Price:    curProduct.Price,
+			City:     curProduct.City,
+			Delivery: curProduct.Delivery,
+			SafeDeal: curProduct.SafeDeal,
+		})
+
+		return nil
+	})
+	if err != nil {
+		log.Printf("in selectProductsInFeedWithWhereOrderLimit: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return slProduct, nil
+}
+
+func (p *ProductStorage) GetNewProducts(ctx context.Context,
+	lastProductID uint64, count uint64, userID uint64,
+) ([]*models.ProductInFeed, error) {
+	var slProduct []*models.ProductInFeed
+
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
+			tx, count, squirrel.Gt{"id": lastProductID}, []string{"created_at DESC"})
+		if err != nil {
+			return err
+		}
+
+		for _, product := range slProductInner {
+			images, err := p.selectImagesByProductID(ctx, tx, product.ID)
+			if err != nil {
+				return err
+			}
+
+			countFavourites, err := p.selectCountFavouritesByProductID(ctx, tx, product.ID)
+			if err != nil {
+				return err
+			}
+
+			inFavourites, err := p.selectIsUserFavouriteProduct(ctx, tx, product.ID, userID)
+			if err != nil {
+				return err
+			}
+
+			product.Images = images
+			product.Favourites = countFavourites
+			product.InFavourites = inFavourites
+		}
+
+		slProduct = slProductInner
+
+		return nil
+	})
+	if err != nil {
+		log.Printf("in GetNewProducts: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return slProduct, nil
 }
 
 func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduct *models.PreProduct) error {
@@ -179,7 +288,6 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 	_, err := tx.Exec(ctx, SQLInsertProduct, preProduct.SalerID, preProduct.CategoryID,
 		preProduct.Title, preProduct.Description, preProduct.Price, preProduct.AvailableCount,
 		preProduct.City, preProduct.Delivery, preProduct.SafeDeal)
-
 	if err != nil {
 		log.Printf("in insertProduct: %+v\n", err)
 
@@ -190,7 +298,7 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 }
 
 func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error) {
-	var postId uint64
+	var productID uint64
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		err := p.insertProduct(ctx, tx, preProduct)
@@ -203,7 +311,7 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 			return err
 		}
 
-		postId = LastProductID
+		productID = LastProductID
 
 		return err
 	})
@@ -213,5 +321,5 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return postId, nil
+	return productID, nil
 }

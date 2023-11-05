@@ -8,6 +8,6 @@ import (
 
 type IProductStorage interface {
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
-	GetNProducts(ctx context.Context) ([]*models.Product, error)
+	GetNewProducts(ctx context.Context, lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error)
 }

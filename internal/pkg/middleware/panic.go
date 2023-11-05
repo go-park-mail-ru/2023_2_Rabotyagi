@@ -10,7 +10,7 @@ func Panic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println("panic recovered: ", err)
+				log.Printf("panic recovered: %+v\n", err)
 				delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 			}
 		}()

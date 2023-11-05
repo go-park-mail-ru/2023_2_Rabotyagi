@@ -34,7 +34,7 @@ package delivery_test
 //	}
 //
 //	expectedResponse, err := json.Marshal(delivery.NewResponse(
-//		delivery.StatusResponseSuccessful, postdelivery.ResponseSuccessfulAddPost))
+//		delivery.StatusResponseSuccessful, postdelivery.ResponseSuccessfulAddProduct))
 //	if err != nil {
 //		t.Fatalf("Failed to marshall expepectedResponse. Error: %v", err)
 //	}
@@ -57,7 +57,7 @@ package delivery_test
 //	w := httptest.NewRecorder()
 //
 //	postStorageMap := repository.NewPostStorageMap()
-//	postHandler := &postdelivery.PostHandler{
+//	postHandler := &postdelivery.ProductHandler{
 //		storage: postStorageMap,
 //	}
 //
@@ -101,7 +101,7 @@ package delivery_test
 //		City:            "Moscow",
 //	}
 //
-//	ResponseSuccessfulGetPost := postdelivery.PostResponse{
+//	ResponseSuccessfulGetPost := postdelivery.ProductResponse{
 //		Status: delivery.StatusResponseSuccessful,
 //		Body:   post,
 //	}
@@ -121,13 +121,13 @@ package delivery_test
 //	w := httptest.NewRecorder()
 //
 //	postStorageMap := repository.NewPostStorageMap()
-//	postHandler := &postdelivery.PostHandler{
+//	postHandler := &postdelivery.ProductHandler{
 //		storage: postStorageMap,
 //	}
 //
 //	postHandler.storage.AddPost(prePost)
 //
-//	postHandler.GetPostHandler(w, req)
+//	postHandler.GetProductHandler(w, req)
 //
 //	resp := w.Result()
 //
@@ -152,16 +152,16 @@ package delivery_test
 //	type TestCase struct {
 //		name             string
 //		inputParamCount  int
-//		handler          *postdelivery.PostHandler
+//		handler          *postdelivery.ProductHandler
 //		postsForStorage  []models.PreProduct
-//		expectedResponse postdelivery.PostsListResponse
+//		expectedResponse postdelivery.ProductListResponse
 //	}
 //
 //	testCases := [...]TestCase{
 //		{
 //			name:            "test basic work",
 //			inputParamCount: 1,
-//			handler:         &postdelivery.PostHandler{storage: repository.NewPostStorageMap()},
+//			handler:         &postdelivery.ProductHandler{storage: repository.NewPostStorageMap()},
 //			postsForStorage: []models.PreProduct{{
 //				SalerID: 1,
 //				Title:    "Test Product",
@@ -175,7 +175,7 @@ package delivery_test
 //				Delivery:        true,
 //				City:            "Moscow",
 //			}},
-//			expectedResponse: postdelivery.PostsListResponse{
+//			expectedResponse: postdelivery.ProductListResponse{
 //				Status: delivery.StatusResponseSuccessful,
 //				Body: []*models.ProductInFeed{{
 //					ID:    1,
@@ -208,7 +208,7 @@ package delivery_test
 //
 //			w := httptest.NewRecorder()
 //
-//			testCase.handler.GetPostsListHandler(w, req)
+//			testCase.handler.GetProductListHandler(w, req)
 //
 //			resp := w.Result()
 //			defer resp.Body.Close()
@@ -218,7 +218,7 @@ package delivery_test
 //				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 //			}
 //
-//			var resultResponse postdelivery.PostsListResponse
+//			var resultResponse postdelivery.ProductListResponse
 //
 //			err = json.Unmarshal(receivedResponse, &resultResponse)
 //			if err != nil {

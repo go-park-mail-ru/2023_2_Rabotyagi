@@ -5,31 +5,31 @@ import (
 )
 
 const (
-	ResponseSuccessfulAddPost = "Successful add product"
+	ResponseSuccessfulAddProduct = "Successful add product"
 
-	ErrPostNotExist       = "Product not exists"
-	ErrNoSuchCountOfPosts = "not enough posts in storage"
+	ErrProductNotExist      = "Product not exists"
+	ErrNoSuchCountOfProduct = "not enough products in storage"
 )
 
-type PostResponse struct {
+type ProductResponse struct {
 	Status int             `json:"status"`
 	Body   *models.Product `json:"body"`
 }
 
-func NewPostResponse(status int, body *models.Product) *PostResponse {
-	return &PostResponse{
+func NewProductResponse(status int, body *models.Product) *ProductResponse {
+	return &ProductResponse{
 		Status: status,
 		Body:   body,
 	}
 }
 
-type PostsListResponse struct {
+type ProductListResponse struct {
 	Status int                     `json:"status"`
 	Body   []*models.ProductInFeed `json:"body"`
 }
 
-func NewPostsListResponse(status int, body []*models.ProductInFeed) *PostsListResponse {
-	return &PostsListResponse{
+func NewProductListResponse(status int, body []*models.ProductInFeed) *ProductListResponse {
+	return &ProductListResponse{
 		Status: status,
 		Body:   body,
 	}
