@@ -316,6 +316,69 @@ paths:
           schema:
             type: string
       summary: get product
+  /product/update:
+    patch:
+      consumes:
+      - application/json
+      description: update product by id
+      parameters:
+      - description: product data for updating
+        in: body
+        name: preProduct
+        required: true
+        schema:
+          $ref: '#/definitions/models.PreProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.ResponseRedirect'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update product
+    put:
+      consumes:
+      - application/json
+      description: update product by id
+      parameters:
+      - description: product data for updating
+        in: body
+        name: preProduct
+        required: true
+        schema:
+          $ref: '#/definitions/models.PreProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.ResponseRedirect'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update product
   /profile/get/{id}:
     get:
       consumes:

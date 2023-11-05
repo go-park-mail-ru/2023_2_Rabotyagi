@@ -4,19 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 	"log"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
-
-	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
 	ErrProductNotFound = myerrors.NewError("Это объявление не найдено")
+	ErrNoUpdateFields  = myerrors.NewError("Вы пытаетесь обновить пустое количество полей объявления")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
@@ -288,6 +288,7 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 	_, err := tx.Exec(ctx, SQLInsertProduct, preProduct.SalerID, preProduct.CategoryID,
 		preProduct.Title, preProduct.Description, preProduct.Price, preProduct.AvailableCount,
 		preProduct.City, preProduct.Delivery, preProduct.SafeDeal)
+
 	if err != nil {
 		log.Printf("in insertProduct: %+v\n", err)
 
@@ -306,7 +307,7 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 			return err
 		}
 
-		LastProductID, err := utils.GetLastValSeq(ctx, tx, NameSeqProduct)
+		LastProductID, err := repository.GetLastValSeq(ctx, tx, NameSeqProduct)
 		if err != nil {
 			return err
 		}
@@ -322,4 +323,48 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 	}
 
 	return productID, nil
+}
+
+func (p *ProductStorage) updateProduct(ctx context.Context, tx pgx.Tx,
+	productID uint64, updateFields map[string]interface{},
+) error {
+	if len(updateFields) == 0 {
+		return ErrNoUpdateFields
+	}
+
+	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Update(`public."product"`).
+		Where(squirrel.Eq{"id": productID}).SetMap(updateFields)
+
+	queryString, args, err := query.ToSql()
+	if err != nil {
+		log.Printf("in updateProduct: %+v", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	_, err = tx.Exec(ctx, queryString, args...)
+	if err != nil {
+		log.Printf("updateProduct: %+v", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
+	updateFields map[string]interface{},
+) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		err := p.updateProduct(ctx, tx, productID, updateFields)
+
+		return err
+	})
+	if err != nil {
+		log.Printf("in UpdateProduct: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
 }

@@ -39,7 +39,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userIDStr := utils.GetPathParam(r.URL.Path)
+	userIDStr := delivery.GetPathParam(r.URL.Path)
 
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {

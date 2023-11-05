@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
 	"github.com/Masterminds/squirrel"
@@ -178,7 +179,7 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	if preUser.Birthday.IsZero() {
+	if preUser.Birthday == nil || preUser.Birthday.IsZero() {
 		SQLCreateUser = `INSERT INTO public."user" (email, phone, name, password) VALUES ($1, $2, $3, $4);`
 		_, err = tx.Exec(ctx, SQLCreateUser,
 			preUser.Email, preUser.Phone, preUser.Name, preUser.Password)
@@ -291,7 +292,7 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		id, err := utils.GetLastValSeq(ctx, tx, NameSeqUser)
+		id, err := repository.GetLastValSeq(ctx, tx, NameSeqUser)
 		if err != nil {
 			log.Printf("in AddUser: %+v", err)
 

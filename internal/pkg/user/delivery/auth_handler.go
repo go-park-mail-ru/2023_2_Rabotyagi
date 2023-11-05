@@ -126,7 +126,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userWithoutID, err := usecases.ValidateUserWithoutID(r.Body)
+	userWithoutID, err := usecases.ValidateUserWithoutID(r.Body) // TODO не требовать phone только email и пароль
 	if err != nil {
 		delivery.HandleErr(w, "in SignUpHandler:", err)
 

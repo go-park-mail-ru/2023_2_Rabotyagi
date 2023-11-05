@@ -15,6 +15,7 @@ func StructToMap(data interface{}) map[string]interface{} {
 	for i := 0; i < value.NumField(); i++ {
 		field := value.Field(i)
 		fieldName := typeOf.Field(i).Name
+		fieldName = CamelToSnakeCase(fieldName)
 
 		if field.IsZero() {
 			continue

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
@@ -59,6 +60,8 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
 	}
 
 	ctx := r.Context()
@@ -104,12 +107,14 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
 	}
 
 	ctx := r.Context()
-	productIDStr := utils.GetPathParam(r.URL.Path)
+	productIDStr := delivery.GetPathParam(r.URL.Path)
 
-	userID := usecases.GetUserIDFromCookie(r)
+	userID := delivery.GetUserIDFromCookie(r)
 
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
@@ -155,6 +160,8 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
 	}
 
 	countStr := r.URL.Query().Get("count")
@@ -181,7 +188,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	ctx := r.Context()
 
-	userID := usecases.GetUserIDFromCookie(r)
+	userID := delivery.GetUserIDFromCookie(r)
 
 	products, err := p.storage.GetNewProducts(ctx, lastID, count, userID)
 	if err != nil {
@@ -193,4 +200,84 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	delivery.SendOkResponse(w, NewProductListResponse(delivery.StatusResponseSuccessful, products))
 	log.Printf("in GetProductListHandler: get product list: %+v", products)
+}
+
+// UpdateProductHandler godoc
+//
+//	@Summary    update product
+//	@Description  update product by id
+//	@Accept      json
+//	@Produce    json
+//	@Param      product_id  path uint64 true  "id of product"
+//	@Param      preProduct  body models.PreProduct true  "product data for updating"
+//	@Success    200  {object} delivery.ResponseRedirect
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /product/update [patch]
+//	@Router      /product/update [put]
+func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodPatch && r.Method != http.MethodPut {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	productIDStr := delivery.GetPathParam(r.URL.Path)
+
+	productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	if err != nil {
+		log.Printf("in UpdateProductHandler: %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest,
+			fmt.Sprintf("%s product id == %s But shoud be integer", delivery.ErrBadRequest, productIDStr)))
+
+		return
+	}
+
+	ctx := r.Context()
+
+	userID := delivery.GetUserIDFromCookie(r)
+
+	var preProduct *models.PreProduct
+
+	if r.Method == http.MethodPatch {
+		preProduct, err = usecases.ValidatePartOfPreProduct(r.Body)
+		if err != nil {
+			delivery.HandleErr(w, "in PartiallyUpdateUserHandler:", err)
+
+			return
+		}
+	} else {
+		preProduct, err = usecases.ValidatePreProduct(r.Body)
+		if err != nil {
+			delivery.HandleErr(w, "in PartiallyUpdateUserHandler:", err)
+
+			return
+		}
+	}
+
+	if preProduct.SalerID != userID {
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserPermissionsChange))
+
+		return
+	}
+
+	updateFieldsMap := utils.StructToMap(preProduct)
+
+	err = p.storage.UpdateProduct(ctx, productID, updateFieldsMap)
+	if err != nil {
+		delivery.HandleErr(w, "in PartiallyUpdateUserHandler:", err)
+
+		return
+	}
+
+	delivery.SendOkResponse(w, delivery.NewResponseRedirect(p.createURLToProductFromID(productID)))
+	log.Printf("in GetProductListHandler: updated product with id = %+v", productID)
 }

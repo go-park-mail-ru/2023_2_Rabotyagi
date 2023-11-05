@@ -5,10 +5,11 @@ import (
 )
 
 const (
-	ResponseSuccessfulAddProduct = "Successful add product"
+	ResponseSuccessfulAddProduct = "Объявление успешно добавлено"
 
-	ErrProductNotExist      = "Product not exists"
-	ErrNoSuchCountOfProduct = "not enough products in storage"
+	ErrProductNotExist       = "Такое объявление не существует"
+	ErrUserPermissionsChange = "Вы не можете изменить чужое объявление"
+	ErrNoSuchCountOfProduct  = "not enough products in storage"
 )
 
 type ProductResponse struct {

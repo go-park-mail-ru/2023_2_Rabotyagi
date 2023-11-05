@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"reflect"
 	"strings"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
@@ -70,16 +69,18 @@ func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 
 func ValidatePartOfUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
 	userWithoutPassword, err := validateUserWithoutPassword(r)
+	if userWithoutPassword == nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
 	if err != nil {
 		validationErrors := govalidator.ErrorsByField(err)
-		value := reflect.ValueOf(userWithoutPassword)
 
 		for field, err := range validationErrors {
-			fieldValue := value.FieldByName(field)
-			if field == "ID" || !fieldValue.IsZero() {
+			if err != "non zero value required" {
 				log.Printf("in ValidateUserWithoutPassword: %+v\n", err)
 
-				return nil, myerrors.NewError("%s", err)
+				return nil, myerrors.NewError("%s error: %s", field, err)
 			}
 		}
 	}
