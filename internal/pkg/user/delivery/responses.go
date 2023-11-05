@@ -9,8 +9,8 @@ const (
 	ResponseSuccessfulSignIn = "Successful sign in"
 	ResponseSuccessfulLogOut = "Successful log out"
 
-	ErrWrongCredentials = "Uncorrected login or password"
-	ErrUnauthorized     = "You unauthorized"
+	ErrWrongCredentials = "Не корректный логин или пароль"
+	ErrUnauthorized     = "Вы не авторизованны"
 )
 
 type ProfileResponse struct {

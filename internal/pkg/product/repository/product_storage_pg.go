@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	ErrProductNotFound = myerrors.NewError("это объявление не найдено")
+	ErrProductNotFound = myerrors.NewError("Это объявление не найдено")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )

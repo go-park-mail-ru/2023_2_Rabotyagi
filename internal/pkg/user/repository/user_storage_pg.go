@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	ErrEmailBusy      = myerrors.NewError("same email already in use")
-	ErrPhoneBusy      = myerrors.NewError("same phone already in use")
-	ErrWrongPassword  = myerrors.NewError("password is wrong")
-	ErrNoUpdateFields = myerrors.NewError("Map of updating fields is empty")
+	ErrEmailBusy      = myerrors.NewError("Такой email уже занят")
+	ErrPhoneBusy      = myerrors.NewError("Такой телефон уже занят")
+	ErrWrongPassword  = myerrors.NewError("Некорректный пароль")
+	ErrNoUpdateFields = myerrors.NewError("Вы пытаетесь обновить пустое количество полей")
 
 	NameSeqUser = pgx.Identifier{"public", "user_id_seq"} //nolint:gochecknoglobals
 )
