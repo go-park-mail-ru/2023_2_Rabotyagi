@@ -48,7 +48,6 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 	router.Handle("/api/v1/logout", middleware.Context(ctx, userHandler.LogOutHandler))
 
 	router.Handle("/api/v1/profile/get/", middleware.Context(ctx, userHandler.GetUserHandler))
-	router.Handle("/api/v1/profile/rebuild", middleware.Context(ctx, userHandler.FullyUpdateUserHandler))
 	router.Handle("/api/v1/profile/update", middleware.Context(ctx, userHandler.PartiallyUpdateUserHandler))
 
 	router.Handle("/api/v1/product/add", middleware.Context(ctx, productHandler.AddProductHandler))

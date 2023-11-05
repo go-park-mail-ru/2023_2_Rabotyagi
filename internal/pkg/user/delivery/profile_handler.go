@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
@@ -17,7 +18,7 @@ import (
 //		@Accept      json
 //		@Produce    json
 //		@Param      id  path uint64 true  "user id"
-//		@Success    200  {object} PostResponse
+//		@Success    200  {object} ProfileResponse
 //		@Failure    405  {string} string
 //		@Failure    500  {string} string
 //		@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -70,7 +71,8 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /user/partiallyupdate/ [patch|put]
+//	@Router      /profile/update [patch]
+//	@Router      /profile/update [put]
 func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, u.addrOrigin, u.schema)
@@ -79,7 +81,7 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if r.Method != http.MethodPatch {
+	if r.Method != http.MethodPatch && r.Method != http.MethodPut {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
 		return
@@ -87,86 +89,41 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	ctx := r.Context()
 
-	userWithoutPassword, err := usecases.ValidatePartOfUserWithoutPassword(r.Body)
+	var userWithoutPassword *models.UserWithoutPassword
+
+	var err error
+
+	if r.Method == http.MethodPatch {
+		userWithoutPassword, err = usecases.ValidatePartOfUserWithoutPassword(r.Body)
+		if err != nil {
+			delivery.HandleErr(w, "in PartiallyUpdateUserHandler:", err)
+
+			return
+		}
+	} else {
+		userWithoutPassword, err = usecases.ValidateUserWithoutPassword(r.Body)
+		if err != nil {
+			delivery.HandleErr(w, "in PartiallyUpdateUserHandler:", err)
+
+			return
+		}
+	}
+
+	updateDataMap := utils.StructToMap(userWithoutPassword)
+
+	userID, ok := updateDataMap["ID"].(uint64)
+	if !ok {
+		log.Printf("in PartiallyUpdateUserHandler: userID isn`t uint64")
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delete(updateDataMap, "ID")
+
+	updatedUser, err := u.storage.UpdateUser(ctx, userID, updateDataMap)
 	if err != nil {
 		delivery.HandleErr(w, "in PartiallyUpdateUserHandler:", err)
-
-		return
-	}
-
-	updateDataMap := utils.StructToMap(userWithoutPassword)
-
-	userID, ok := updateDataMap["ID"].(uint64)
-	if !ok {
-		log.Printf("in PartiallyUpdateUserHandler")
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
-
-	delete(updateDataMap, "ID")
-
-	updatedUser, err := u.storage.UpdateUser(ctx, userID, updateDataMap)
-	if err != nil {
-		delivery.HandleErr(w, "error in PartiallyUpdateUserHandler:", err)
-
-		return
-	}
-
-	delivery.SendOkResponse(w, NewProfileResponse(delivery.StatusResponseSuccessful, updatedUser))
-	log.Printf("Successfully updated: %+v", userID)
-}
-
-// FullyUpdateUserHandler godoc
-//
-//	@Summary    update profile
-//	@Description  update all fields of profile
-//	@Accept      json
-//	@Produce    json
-//	@Param      user  body models.UserWithoutPassword true  "user data for updating"
-//	@Success    200  {object} ProfileResponse
-//	@Failure    405  {string} string
-//	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /user/fullyupdate/ [Patch]
-func (u *UserHandler) FullyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	delivery.SetupCORS(w, u.addrOrigin, u.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
-	if r.Method != http.MethodPut {
-		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
-
-		return
-	}
-
-	ctx := r.Context()
-
-	userWithoutPassword, err := usecases.ValidateUserWithoutPassword(r.Body)
-	if err != nil {
-		delivery.HandleErr(w, "in FullyUpdateUserHandler:", err)
-
-		return
-	}
-
-	updateDataMap := utils.StructToMap(userWithoutPassword)
-
-	userID, ok := updateDataMap["ID"].(uint64)
-	if !ok {
-		log.Printf("in FullyUpdateUserHandler")
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
-
-	delete(updateDataMap, "ID")
-
-	updatedUser, err := u.storage.UpdateUser(ctx, userID, updateDataMap)
-	if err != nil {
-		delivery.HandleErr(w, "error in PartiallyUpdateUserHandler:", err)
 
 		return
 	}

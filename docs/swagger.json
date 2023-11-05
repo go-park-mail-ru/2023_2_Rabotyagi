@@ -200,6 +200,149 @@
                 }
             }
         },
+        "/profile/get/{id}": {
+            "get": {
+                "description": "get profile by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "get profile",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/delivery.ProfileResponse"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/profile/update": {
+            "put": {
+                "description": "update some fields of profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "update profile",
+                "parameters": [
+                    {
+                        "description": "user data for updating",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserWithoutPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/delivery.ProfileResponse"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "update some fields of profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "update profile",
+                "parameters": [
+                    {
+                        "description": "user data for updating",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserWithoutPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/delivery.ProfileResponse"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/signin": {
             "post": {
                 "description": "signin in app",
@@ -330,6 +473,17 @@
             "properties": {
                 "body": {
                     "$ref": "#/definitions/models.Product"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "delivery.ProfileResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/models.UserWithoutPassword"
                 },
                 "status": {
                     "type": "integer"
@@ -531,10 +685,31 @@
                     "type": "string"
                 },
                 "name": {
-                    "description": "nolint",
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "nolint",
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserWithoutPassword": {
+            "type": "object",
+            "properties": {
+                "birthday": {
+                    "description": "nolint",
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 },
                 "phone": {

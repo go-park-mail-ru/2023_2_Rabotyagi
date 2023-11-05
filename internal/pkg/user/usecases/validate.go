@@ -38,7 +38,7 @@ func ValidateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
 	return userWithoutID, nil
 }
 
-func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
+func validateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
 	decoder := json.NewDecoder(r)
 
 	userWithoutPassword := new(models.UserWithoutPassword)
@@ -53,6 +53,12 @@ func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 	userWithoutPassword.Phone = strings.TrimSpace(userWithoutPassword.Phone)
 
 	_, err := govalidator.ValidateStruct(userWithoutPassword)
+
+	return userWithoutPassword, err //nolint:wrapcheck
+}
+
+func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
+	userWithoutPassword, err := validateUserWithoutPassword(r)
 	if err != nil {
 		log.Printf("in ValidateUserWithoutPassword: %+v\n", err)
 
@@ -63,20 +69,7 @@ func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 }
 
 func ValidatePartOfUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
-	decoder := json.NewDecoder(r)
-
-	userWithoutPassword := new(models.UserWithoutPassword)
-	if err := decoder.Decode(userWithoutPassword); err != nil {
-		log.Printf("in ValidateUserWithoutPassword: %+v\n", err)
-
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	userWithoutPassword.Email = strings.TrimSpace(userWithoutPassword.Email)
-	userWithoutPassword.Name = strings.TrimSpace(userWithoutPassword.Name)
-	userWithoutPassword.Phone = strings.TrimSpace(userWithoutPassword.Phone)
-
-	_, err := govalidator.ValidateStruct(userWithoutPassword)
+	userWithoutPassword, err := validateUserWithoutPassword(r)
 	if err != nil {
 		validationErrors := govalidator.ErrorsByField(err)
 		value := reflect.ValueOf(userWithoutPassword)
@@ -86,7 +79,7 @@ func ValidatePartOfUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword
 			if field == "ID" || !fieldValue.IsZero() {
 				log.Printf("in ValidateUserWithoutPassword: %+v\n", err)
 
-				return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+				return nil, myerrors.NewError("%s", err)
 			}
 		}
 	}
