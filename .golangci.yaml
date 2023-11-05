@@ -139,6 +139,7 @@ linters-settings:
           - github.com/jackc/pgx/v5
           - github.com/asaskevich/govalidator
           - github.com/Masterminds/squirrel
+          - golang.org/x/crypto/argon2
         deny:
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package

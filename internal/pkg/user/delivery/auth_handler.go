@@ -14,14 +14,14 @@ const (
 	timeTokenLife = 24 * time.Hour
 )
 
-type AuthHandler struct {
+type UserHandler struct {
 	storage    usecases.IUserStorage
 	addrOrigin string
 	schema     string
 }
 
-func NewAuthHandler(storage usecases.IUserStorage, addrOrigin string, schema string) *AuthHandler {
-	return &AuthHandler{
+func NewUserHandler(storage usecases.IUserStorage, addrOrigin string, schema string) *UserHandler {
+	return &UserHandler{
 		storage:    storage,
 		addrOrigin: addrOrigin,
 		schema:     schema,
@@ -45,9 +45,9 @@ func NewAuthHandler(storage usecases.IUserStorage, addrOrigin string, schema str
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signup [post]
-func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, a.addrOrigin, a.schema)
+	delivery.SetupCORS(w, u.addrOrigin, u.schema)
 
 	if r.Method == http.MethodOptions {
 		return
@@ -68,7 +68,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.storage.AddUser(ctx, userWithoutID)
+	user, err := u.storage.AddUser(ctx, userWithoutID)
 	if err != nil {
 		delivery.HandleErr(w, "error in SignUpHandler:", err)
 
@@ -110,15 +110,15 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signin [post]
-func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, a.addrOrigin, a.schema)
+	delivery.SetupCORS(w, u.addrOrigin, u.schema)
 
 	if r.Method == http.MethodOptions {
 		return
 	}
 
-	if r.Method != http.MethodPost {
+	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
 		return
@@ -133,25 +133,9 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	emailBusy, err := a.storage.IsEmailBusy(ctx, userWithoutID.Email)
+	user, err := u.storage.GetUser(ctx, userWithoutID.Email, userWithoutID.Password)
 	if err != nil {
-		log.Printf("in SignInHandler: %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
-
-	if !emailBusy {
-		log.Printf("in SignInHandler: user is not exists %+v\n", userWithoutID)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
-
-		return
-	}
-
-	user, err := a.storage.GetUserByEmail(ctx, userWithoutID.Email)
-	if err != nil || userWithoutID.Password != user.Password {
-		log.Printf("in SignInHandler: %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongCredentials))
+		delivery.HandleErr(w, "in SignInHandler:", err)
 
 		return
 	}
@@ -195,9 +179,9 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /logout [post]
-func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	delivery.SetupCORS(w, a.addrOrigin, a.schema)
+	delivery.SetupCORS(w, u.addrOrigin, u.schema)
 
 	if r.Method == http.MethodOptions {
 		return

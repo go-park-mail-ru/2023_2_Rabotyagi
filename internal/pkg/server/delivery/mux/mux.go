@@ -30,7 +30,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 ) http.Handler {
 	router := http.NewServeMux()
 
-	authHandler := userdelivery.NewAuthHandler(userStorage, configMux.addrOrigin, configMux.schema)
+	userHandler := userdelivery.NewUserHandler(userStorage, configMux.addrOrigin, configMux.schema)
 
 	productHandler := productdelivery.NewProductHandler(productStorage,
 		configMux.addrOrigin, configMux.schema, configMux.portServer,
@@ -43,9 +43,13 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 
 	router.Handle("/api/v1/img/", imgHandler)
 
-	router.Handle("/api/v1/signup", middleware.Context(ctx, authHandler.SignUpHandler))
-	router.Handle("/api/v1/signin", middleware.Context(ctx, authHandler.SignInHandler))
-	router.Handle("/api/v1/logout", middleware.Context(ctx, authHandler.LogOutHandler))
+	router.Handle("/api/v1/signup", middleware.Context(ctx, userHandler.SignUpHandler))
+	router.Handle("/api/v1/signin", middleware.Context(ctx, userHandler.SignInHandler))
+	router.Handle("/api/v1/logout", middleware.Context(ctx, userHandler.LogOutHandler))
+
+	router.Handle("/api/v1/profile/get/", middleware.Context(ctx, userHandler.GetUserHandler))
+	router.Handle("/api/v1/profile/rebuild", middleware.Context(ctx, userHandler.FullyUpdateUserHandler))
+	router.Handle("/api/v1/profile/update", middleware.Context(ctx, userHandler.PartiallyUpdateUserHandler))
 
 	router.Handle("/api/v1/product/add", middleware.Context(ctx, productHandler.AddProductHandler))
 	router.Handle("/api/v1/product/get/", middleware.Context(ctx, productHandler.GetProductHandler))

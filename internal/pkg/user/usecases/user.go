@@ -7,10 +7,11 @@ import (
 )
 
 type IUserStorage interface {
-	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
-	GetUserByID(ctx context.Context, id uint64) (*models.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*models.User, error) // TODO maybe unuseful
+	GetUserWithoutPasswordByID(ctx context.Context, id uint64) (*models.UserWithoutPassword, error)
 	AddUser(ctx context.Context, preUser *models.UserWithoutID) (*models.User, error)
-	UpdateUser(ctx context.Context, userID uint64, updateData map[string]interface{}) error
+	GetUser(ctx context.Context, email string, password string) (*models.UserWithoutPassword, error)
+	UpdateUser(ctx context.Context, userID uint64, updateData map[string]interface{}) (*models.UserWithoutPassword, error)
 	IsEmailBusy(ctx context.Context, email string) (bool, error) // TODO maybe unuseful in outside
 	IsPhoneBusy(ctx context.Context, phone string) (bool, error) // TODO maybe unuseful in outside
 }

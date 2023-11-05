@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/hex"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -15,15 +16,15 @@ const (
 	keyLen  = 32
 )
 
-func HashPass(plainPassword string) ([]byte, error) {
+func HashPass(plainPassword string) (string, error) {
 	salt := make([]byte, saltLen)
 
 	_, err := rand.Read(salt)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return hashPassWithSalt(salt, plainPassword), nil
+	return hex.EncodeToString(hashPassWithSalt(salt, plainPassword)), nil
 }
 
 func hashPassWithSalt(salt []byte, plainPassword string) []byte {
@@ -33,8 +34,12 @@ func hashPassWithSalt(salt []byte, plainPassword string) []byte {
 }
 
 func ComparePassAndHash(passHash []byte, plainPassword string) bool {
-	salt := passHash[:saltLen]
-	userPassHash := hashPassWithSalt(salt, plainPassword)
+	var passHashCopy = make([]byte, len(passHash))
+
+	copy(passHashCopy, passHash)
+
+	salt := passHashCopy[0:saltLen]
+	userPassHash := hashPassWithSalt(salt[:saltLen], plainPassword)
 
 	return bytes.Equal(userPassHash, passHash)
 }
