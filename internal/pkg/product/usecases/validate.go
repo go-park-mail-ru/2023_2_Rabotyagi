@@ -80,7 +80,7 @@ func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 	if err != nil {
 		log.Printf("in ValidatePreOrder: %+v\n", err)
 
-		return nil, myerrors.NewError(myerrors.ErrTemplate, err)
+		return nil, myerrors.NewError(err.Error())
 	}
 
 	return preOrder, nil
