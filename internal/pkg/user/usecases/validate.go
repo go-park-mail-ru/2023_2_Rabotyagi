@@ -12,7 +12,9 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-func ValidateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
+var ErrWrongCredentials = myerrors.NewError("Некорректный логин или пароль")
+
+func validateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
 	decoder := json.NewDecoder(r)
 
 	userWithoutID := new(models.UserWithoutID)
@@ -25,10 +27,32 @@ func ValidateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
 	userWithoutID.Trim()
 
 	_, err := govalidator.ValidateStruct(userWithoutID)
+
+	return userWithoutID, err //nolint:wrapcheck
+}
+
+func ValidateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
+	userWithoutID, err := validateUserWithoutID(r)
 	if err != nil {
 		log.Printf("in ValidateUserWithoutID: %+v\n", err)
 
 		return nil, myerrors.NewError(err.Error())
+	}
+
+	return userWithoutID, nil
+}
+
+func ValidateUserCredentials(r io.Reader) (*models.UserWithoutID, error) {
+	userWithoutID, err := validateUserWithoutID(r)
+	if userWithoutID == nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	if err != nil && (govalidator.ErrorByField(err, "email") != "" ||
+		govalidator.ErrorByField(err, "password") != "") {
+		log.Printf("in ValidateUserCredentials: %+v\n", err)
+
+		return nil, ErrWrongCredentials
 	}
 
 	return userWithoutID, nil
