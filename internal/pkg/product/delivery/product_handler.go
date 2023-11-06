@@ -109,7 +109,6 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	ctx := r.Context()
 	productIDStr := delivery.GetPathParam(r.URL.Path)
-
 	userID := delivery.GetUserIDFromCookie(r)
 
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
@@ -223,7 +222,6 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	ctx := r.Context()
-
 	userID := delivery.GetUserIDFromCookie(r)
 
 	var preProduct *models.PreProduct
@@ -298,7 +296,6 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 	}
 
 	ctx := r.Context()
-
 	userID := delivery.GetUserIDFromCookie(r)
 
 	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, userID)
@@ -311,4 +308,55 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 
 	delivery.SendOkResponse(w, NewProductListResponse(delivery.StatusResponseSuccessful, products))
 	log.Printf("in GetListProductOfSalerHandler: get product list: %+v", products)
+}
+
+// CloseProductHandler godoc
+//
+//	@Summary     close product
+//	@Description  close product for saler using user id from cookies\jwt.
+//	@Description  This does product not active.
+//	@Accept      json
+//	@Produce    json
+//	@Param      productID  path uint64 true  "product id"
+//	@Success    200  {object} delivery.Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /product/close/ [patch]
+func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodPatch {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+	userID := delivery.GetUserIDFromCookie(r)
+	productIDStr := delivery.GetPathParam(r.URL.String())
+
+	productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	if err != nil {
+		log.Printf("in CloseProductHandler: %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+
+		return
+	}
+
+	err = p.storage.CloseProduct(ctx, productID, userID)
+	if err != nil {
+		log.Printf("in CloseProductHandler %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
+	log.Printf("in CloseProductHandler: close product id=%d", productID)
 }

@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	ErrWrongCount  = myerrors.NewError("Получили некорректный count параметр. Он должен быть целым")
-	ErrWrongLastID = myerrors.NewError("Получили некорректный last_id параметр. Он должен быть целым")
+	ErrWrongCount     = myerrors.NewError("Получили некорректный count параметр. Он должен быть целым")
+	ErrWrongLastID    = myerrors.NewError("Получили некорректный last_id параметр. Он должен быть целым")
+	ErrWrongProductID = myerrors.NewError("Получили некорректный product_id параметр. Он должен быть целым")
 )
 
 func (p *ProductHandler) createURLToProductFromID(productID uint64) string {

@@ -62,7 +62,9 @@ func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 	return images, nil
 }
 
-func (p *ProductStorage) selectProductByIDAndSalerID(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) (*models.Product, error) {
+func (p *ProductStorage) selectProductByIDAndSalerID(ctx context.Context,
+	tx pgx.Tx, productID uint64, userID uint64,
+) (*models.Product, error) {
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city,
        delivery, safe_deal FROM public."product" WHERE id=$1 AND saler_id=$2`
@@ -193,7 +195,7 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 		return nil
 	})
 	if err != nil {
-		log.Printf("in AddProduct: %+v\n", err)
+		log.Printf("in GetProduct: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -333,7 +335,7 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		log.Printf("in GetNewProducts: %+v\n", err)
+		log.Printf("in GetProductsOfSaler: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -423,6 +425,37 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 	})
 	if err != nil {
 		log.Printf("in UpdateProduct: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) closeProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
+	SQLCloseProduct := `UPDATE public."product" SET available_count=0, is_active=false WHERE id=$1 AND saler_id=$2`
+
+	_, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
+	if err != nil {
+		log.Printf("in closeProduct: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) CloseProduct(ctx context.Context, productID uint64, userID uint64) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		err := p.closeProduct(ctx, tx, productID, userID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Printf("in CloseProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
