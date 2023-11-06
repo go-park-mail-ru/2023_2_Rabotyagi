@@ -12,6 +12,7 @@ type IBasketStorage interface {
 	UpdateOrderCount(ctx context.Context, userID uint64, orderID uint64, newCount uint32) error
 	UpdateOrderStatus(ctx context.Context, userID uint64, orderID uint64, newStatus uint8) error
 	BuyFullBasket(ctx context.Context, userID uint64) error
+	DeleteOrder(ctx context.Context, orderID uint64, ownerID uint64) error
 }
 
 type IProductStorage interface {

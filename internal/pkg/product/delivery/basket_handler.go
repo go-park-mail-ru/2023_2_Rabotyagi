@@ -3,6 +3,7 @@ package delivery
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
@@ -244,4 +245,56 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulBuyFullBasket))
 	log.Printf("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
+}
+
+// DeleteOrderHandler godoc
+//
+//	@Summary     delete order
+//	@Description  delete order for owner using user id from cookies\jwt.
+//	@Description  This totally removed order. Recovery will be impossible
+//	@Tags order
+//	@Accept      json
+//	@Produce    json
+//	@Param      orderID  path uint64 true  "order id"
+//	@Success    200  {object} delivery.Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /order/delete/ [delete]
+func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodDelete {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+	userID := delivery.GetUserIDFromCookie(r)
+	orderIDStr := delivery.GetPathParam(r.URL.String())
+
+	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
+	if err != nil {
+		log.Printf("in DeleteOrderHandler: %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+
+		return
+	}
+
+	err = p.storage.DeleteOrder(ctx, orderID, userID)
+	if err != nil {
+		log.Printf("in DeleteOrderHandler %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
+	log.Printf("in DeleteOrderHandler: delete order id=%d", orderID)
 }

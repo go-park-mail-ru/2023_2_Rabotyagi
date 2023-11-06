@@ -7,6 +7,8 @@ definitions:
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket:
     properties:
+      available_count:
+        type: integer
       city:
         type: string
       count:
@@ -124,9 +126,8 @@ definitions:
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword:
     properties:
       birthday:
-        allOf:
-        - $ref: '#/definitions/sql.NullTime'
         description: nolint
+        type: string
       email:
         type: string
       id:
@@ -190,20 +191,6 @@ definitions:
         type: integer
     type: object
   internal_models.UserWithoutID:
-    properties:
-      birthday:
-        allOf:
-        - $ref: '#/definitions/sql.NullTime'
-        description: nolint
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      phone:
-        description: nolint
-        type: string
     type: object
   internal_pkg_product_delivery.OrderListResponse:
     properties:
@@ -236,14 +223,6 @@ definitions:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
       status:
         type: integer
-    type: object
-  sql.NullTime:
-    properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
     type: object
 host: 84.23.53.28:8080
 info:
@@ -338,6 +317,41 @@ paths:
           schema:
             type: string
       summary: buy all orders from basket
+      tags:
+      - order
+  /order/delete/:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        delete order for owner using user id from cookies\jwt.
+        This totally removed order. Recovery will be impossible
+      parameters:
+      - description: order id
+        in: path
+        name: orderID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: delete order
       tags:
       - order
   /order/get_basket:

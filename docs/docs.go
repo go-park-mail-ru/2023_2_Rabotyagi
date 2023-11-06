@@ -149,6 +149,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/order/delete/": {
+            "delete": {
+                "description": "delete order for owner using user id from cookies\\jwt.\nThis totally removed order. Recovery will be impossible",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "delete order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "order id",
+                        "name": "orderID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/order/get_basket": {
             "get": {
                 "description": "get basket of orders by user id from cookie\\jwt token",
@@ -981,6 +1031,9 @@ const docTemplate = `{
         "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket": {
             "type": "object",
             "properties": {
+                "available_count": {
+                    "type": "integer"
+                },
                 "city": {
                     "type": "string"
                 },
@@ -1157,11 +1210,7 @@ const docTemplate = `{
             "properties": {
                 "birthday": {
                     "description": "nolint",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/sql.NullTime"
-                        }
-                    ]
+                    "type": "string"
                 },
                 "email": {
                     "type": "string"
@@ -1261,30 +1310,7 @@ const docTemplate = `{
             }
         },
         "internal_models.UserWithoutID": {
-            "type": "object",
-            "properties": {
-                "birthday": {
-                    "description": "nolint",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/sql.NullTime"
-                        }
-                    ]
-                },
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "phone": {
-                    "description": "nolint",
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "internal_pkg_product_delivery.OrderListResponse": {
             "type": "object",
@@ -1333,18 +1359,6 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
-                }
-            }
-        },
-        "sql.NullTime": {
-            "type": "object",
-            "properties": {
-                "time": {
-                    "type": "string"
-                },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
                 }
             }
         }

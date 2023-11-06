@@ -367,3 +367,36 @@ func (p *ProductStorage) BuyFullBasket(ctx context.Context, userID uint64) error
 
 	return nil
 }
+
+func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context, tx pgx.Tx, orderID uint64, ownerID uint64) error {
+	SQLDeleteOrderByID :=
+		`DELETE FROM public."order"
+		 WHERE id=$1 AND owner_id=$2`
+
+	_, err := tx.Exec(ctx, SQLDeleteOrderByID, models.OrderStatusInProcessing, orderID, ownerID)
+	if err != nil {
+		log.Printf("in deleteOrderByID: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) DeleteOrder(ctx context.Context, orderID uint64, ownerID uint64) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		err := p.deleteOrderByOrderIDAndOwnerID(ctx, tx, orderID, ownerID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Printf("in DeleteOrderByID: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
