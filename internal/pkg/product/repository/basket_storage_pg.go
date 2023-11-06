@@ -336,6 +336,7 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context, userID uint64, pr
 
 func (p *ProductStorage) updateStatusFullBasket(ctx context.Context, tx pgx.Tx, userID uint64) error {
 	SQLUpdateFullBasket := `UPDATE public."order" SET status=$1 WHERE owner_id=$2`
+
 	_, err := tx.Exec(ctx, SQLUpdateFullBasket, models.OrderStatusInProcessing, userID)
 	if err != nil {
 		log.Printf("in updateStatusFullBasket: %+v\n", err)

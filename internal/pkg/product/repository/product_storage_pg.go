@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 	"log"
 
-	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
+
+	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -61,13 +62,13 @@ func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 	return images, nil
 }
 
-func (p *ProductStorage) selectProductByID(ctx context.Context, tx pgx.Tx, productID uint64) (*models.Product, error) {
+func (p *ProductStorage) selectProductByIDAndSalerID(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) (*models.Product, error) {
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city,
-       delivery, safe_deal FROM public."product" WHERE id=$1`
+       delivery, safe_deal FROM public."product" WHERE id=$1 AND saler_id=$2`
 	product := &models.Product{ID: productID} //nolint:exhaustruct
 
-	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID)
+	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID, userID)
 	if err := productRow.Scan(&product.SalerID, &product.CategoryID,
 		&product.Title, &product.Description, &product.Price, &product.CreatedAt,
 		&product.Views, &product.AvailableCount, &product.City, &product.Delivery,
@@ -80,6 +81,9 @@ func (p *ProductStorage) selectProductByID(ctx context.Context, tx pgx.Tx, produ
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
+
+	product.ID = productID
+	product.SalerID = userID
 
 	return product, nil
 }
@@ -128,36 +132,65 @@ func (p *ProductStorage) selectIsUserFavouriteProduct(ctx context.Context,
 	return true, nil
 }
 
+type productAddition struct {
+	favourites  uint64
+	images      []models.Image
+	inFavourite bool
+}
+
+func (p *ProductStorage) getProductAddition(ctx context.Context,
+	tx pgx.Tx, productID uint64, userID uint64,
+) (*productAddition, error) {
+	innerProductAddition := new(productAddition)
+
+	images, err := p.selectImagesByProductID(ctx, tx, productID)
+	if err != nil {
+		log.Printf("in getProductAddition: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	favouritesCount, err := p.selectCountFavouritesByProductID(ctx, tx, productID)
+	if err != nil {
+		log.Printf("in getProductAddition: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	inFavouriteProduct, err := p.selectIsUserFavouriteProduct(ctx, tx, productID, userID)
+	if err != nil {
+		log.Printf("in getProductAddition: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	innerProductAddition.images = images
+	innerProductAddition.favourites = favouritesCount
+	innerProductAddition.inFavourite = inFavouriteProduct
+
+	return innerProductAddition, nil
+}
+
 func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error) {
 	var product *models.Product
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		productInner, err := p.selectProductByID(ctx, tx, productID)
+		productInner, err := p.selectProductByIDAndSalerID(ctx, tx, productID, userID)
 		if err != nil {
 			return err
 		}
 
-		images, err := p.selectImagesByProductID(ctx, tx, productID)
-		if err != nil {
-			return err
-		}
-
-		favouritesCount, err := p.selectCountFavouritesByProductID(ctx, tx, productID)
-		if err != nil {
-			return err
-		}
-
-		inFavouriteProduct, err := p.selectIsUserFavouriteProduct(ctx, tx, productID, userID)
+		productAdditionInner, err := p.getProductAddition(ctx, tx, productID, userID)
 		if err != nil {
 			return err
 		}
 
 		product = productInner
-		product.Images = images
-		product.Favourites = favouritesCount
-		product.InFavourite = inFavouriteProduct
+		product.Images = productAdditionInner.images
+		product.Favourites = productAdditionInner.favourites
+		product.InFavourites = productAdditionInner.inFavourite
 
-		return err
+		return nil
 	})
 	if err != nil {
 		log.Printf("in AddProduct: %+v\n", err)
@@ -247,27 +280,55 @@ func (p *ProductStorage) GetNewProducts(ctx context.Context,
 		}
 
 		for _, product := range slProductInner {
-			images, err := p.selectImagesByProductID(ctx, tx, product.ID)
+			productAdditionInner, err := p.getProductAddition(ctx, tx, product.ID, userID)
 			if err != nil {
 				return err
 			}
 
-			countFavourites, err := p.selectCountFavouritesByProductID(ctx, tx, product.ID)
-			if err != nil {
-				return err
-			}
+			product.Images = productAdditionInner.images
+			product.Favourites = productAdditionInner.favourites
+			product.InFavourites = productAdditionInner.inFavourite
 
-			inFavourites, err := p.selectIsUserFavouriteProduct(ctx, tx, product.ID, userID)
-			if err != nil {
-				return err
-			}
-
-			product.Images = images
-			product.Favourites = countFavourites
-			product.InFavourites = inFavourites
+			slProduct = append(slProduct, product)
 		}
 
-		slProduct = slProductInner
+		return nil
+	})
+	if err != nil {
+		log.Printf("in GetNewProducts: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return slProduct, nil
+}
+
+func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
+	lastProductID uint64, count uint64, userID uint64,
+) ([]*models.ProductInFeed, error) {
+	var slProduct []*models.ProductInFeed
+
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		whereClause := fmt.Sprintf("id > %d AND saler_id = %d", lastProductID, userID)
+
+		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
+			tx, count, whereClause, []string{"created_at DESC"})
+		if err != nil {
+			return err
+		}
+
+		for _, product := range slProductInner {
+			productAdditionInner, err := p.getProductAddition(ctx, tx, product.ID, userID)
+			if err != nil {
+				return err
+			}
+
+			product.Images = productAdditionInner.images
+			product.Favourites = productAdditionInner.favourites
+			product.InFavourites = productAdditionInner.inFavourite
+
+			slProduct = append(slProduct, product)
+		}
 
 		return nil
 	})

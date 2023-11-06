@@ -23,7 +23,7 @@ type Product struct {
 	City           string    `json:"city"            valid:"required, length(1|256)~City length must be from 1 to 256"` //nolint
 	Delivery       bool      `json:"delivery"        valid:"required"`
 	SafeDeal       bool      `json:"safe_deal"       valid:"required"`
-	InFavourite    bool      `json:"in_favourite"    valid:"required"`
+	InFavourites   bool      `json:"in_favourites"   valid:"required"`
 	Images         []Image   `json:"images"`
 	Favourites     uint64    `json:"favourites"      valid:"required"`
 }
@@ -48,13 +48,13 @@ func (p *PreProduct) Trim() {
 }
 
 type ProductInFeed struct {
-	ID           uint64  `json:"id"           valid:"required"`
-	Title        string  `json:"title"        valid:"required, length(1|256)~Title length must be from 1 to 256"`
-	Price        uint64  `json:"price"        valid:"required"`
-	City         string  `json:"city"         valid:"required, length(1|256)~City length must be from 1 to 256"`
-	Delivery     bool    `json:"delivery"     valid:"required"`
-	SafeDeal     bool    `json:"safe_deal"    valid:"required"`
+	ID           uint64  `json:"id"            valid:"required"`
+	Title        string  `json:"title"         valid:"required, length(1|256)~Title length must be from 1 to 256"`
+	Price        uint64  `json:"price"         valid:"required"`
+	City         string  `json:"city"          valid:"required, length(1|256)~City length must be from 1 to 256"`
+	Delivery     bool    `json:"delivery"      valid:"required"`
+	SafeDeal     bool    `json:"safe_deal"     valid:"required"`
 	InFavourites bool    `json:"in_favourites" valid:"required"`
 	Images       []Image `json:"images"`
-	Favourites   uint64  `json:"favourites"   valid:"required"`
+	Favourites   uint64  `json:"favourites"    valid:"required"`
 }

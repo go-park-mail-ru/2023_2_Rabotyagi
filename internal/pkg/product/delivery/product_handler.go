@@ -30,10 +30,6 @@ func NewProductHandler(storage usecases.IProductStorage,
 	}
 }
 
-func (p *ProductHandler) createURLToProductFromID(productID uint64) string {
-	return fmt.Sprintf("%s%s:%s/api/v1/product/get/%d", p.schema, p.addrOrigin, p.portServer, productID)
-}
-
 // AddProductHandler godoc
 //
 //	@Summary    add product
@@ -164,24 +160,9 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	countStr := r.URL.Query().Get("count")
-
-	count, err := strconv.ParseUint(countStr, 10, 64)
+	count, lastID, err := parseCountAndLastIDFromRequest(r)
 	if err != nil {
-		log.Printf("in GetProductListHandler: %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest,
-			fmt.Sprintf("%s count products == %s But shoud be integer", delivery.ErrBadRequest, countStr)))
-
-		return
-	}
-
-	lastIDStr := r.URL.Query().Get("last_id")
-
-	lastID, err := strconv.ParseUint(lastIDStr, 10, 64)
-	if err != nil {
-		log.Printf("in GetProductListHandler: %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest,
-			fmt.Sprintf("%s last_id products == %s But shoud be integer", delivery.ErrBadRequest, lastIDStr)))
+		delivery.HandleErr(w, "in GetListProductOfSalerHandler:", err)
 
 		return
 	}
@@ -280,4 +261,54 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 
 	delivery.SendOkResponse(w, delivery.NewResponseRedirect(p.createURLToProductFromID(productID)))
 	log.Printf("in GetProductListHandler: updated product with id = %+v", productID)
+}
+
+// GetListProductOfSalerHandler godoc
+//
+//	@Summary     get list of products for saler
+//	@Description  get list of products for saler using user id from cookies\jwt
+//	@Accept      json
+//	@Produce    json
+//	@Param      count  query uint64 true  "count products"
+//	@Param      last_id  query uint64 true  "last product id "
+//	@Success    200  {object} ProductListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /product/get_list_of_saler [get]
+func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	count, lastID, err := parseCountAndLastIDFromRequest(r)
+	if err != nil {
+		delivery.HandleErr(w, "in GetListProductOfSalerHandler:", err)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	userID := delivery.GetUserIDFromCookie(r)
+
+	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, userID)
+	if err != nil {
+		log.Printf("in GetListProductOfSalerHandler %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delivery.SendOkResponse(w, NewProductListResponse(delivery.StatusResponseSuccessful, products))
+	log.Printf("in GetListProductOfSalerHandler: get product list: %+v", products)
 }
