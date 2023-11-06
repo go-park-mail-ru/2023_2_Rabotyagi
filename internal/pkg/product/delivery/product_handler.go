@@ -37,6 +37,7 @@ func NewProductHandler(storage usecases.IProductStorage,
 //	@Description Error.status can be:
 //	@Description StatusErrBadRequest      = 400
 //	@Description  StatusErrInternalServer  = 500
+//	@Tags product
 //
 //	@Accept      json
 //	@Produce    json
@@ -85,6 +86,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 //
 //	@Summary    get product
 //	@Description  get product by id
+//	@Tags product
 //	@Accept      json
 //	@Produce    json
 //	@Param      id  path uint64 true  "product id"
@@ -136,6 +138,7 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 //
 //	@Summary    get product
 //	@Description  get product by count
+//	@Tags product
 //	@Accept      json
 //	@Produce    json
 //	@Param      count  query uint64 true  "count products"
@@ -186,6 +189,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 //
 //	@Summary    update product
 //	@Description  update product by id
+//	@Tags product
 //	@Accept      json
 //	@Produce    json
 //	@Param      product_id  path uint64 true  "id of product"
@@ -265,6 +269,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 //
 //	@Summary     get list of products for saler
 //	@Description  get list of products for saler using user id from cookies\jwt
+//	@Tags product
 //	@Accept      json
 //	@Produce    json
 //	@Param      count  query uint64 true  "count products"
@@ -315,6 +320,7 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 //	@Summary     close product
 //	@Description  close product for saler using user id from cookies\jwt.
 //	@Description  This does product not active.
+//	@Tags product
 //	@Accept      json
 //	@Produce    json
 //	@Param      productID  path uint64 true  "product id"
@@ -366,6 +372,7 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 //	@Summary     delete product
 //	@Description  delete product for saler using user id from cookies\jwt.
 //	@Description  This totally removed product. Recovery will be impossible
+//	@Tags product
 //	@Accept      json
 //	@Produce    json
 //	@Param      productID  path uint64 true  "product id"

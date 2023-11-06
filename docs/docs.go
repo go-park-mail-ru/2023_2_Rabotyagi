@@ -24,6 +24,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "auth"
+                ],
                 "summary": "logout",
                 "responses": {
                     "200": {
@@ -61,6 +64,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "order"
                 ],
                 "summary": "add order to basket",
                 "parameters": [
@@ -109,6 +115,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "order"
+                ],
                 "summary": "buy all orders from basket",
                 "responses": {
                     "200": {
@@ -147,6 +156,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "order"
+                ],
                 "summary": "get basket of orders",
                 "responses": {
                     "200": {
@@ -182,6 +194,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "order"
                 ],
                 "summary": "update order status",
                 "parameters": [
@@ -232,6 +247,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "add product",
                 "parameters": [
                     {
@@ -281,6 +299,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "close product",
                 "parameters": [
                     {
@@ -327,6 +348,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "product"
                 ],
                 "summary": "delete product",
                 "parameters": [
@@ -375,6 +399,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "get product",
                 "parameters": [
                     {
@@ -421,6 +448,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "product"
                 ],
                 "summary": "get product",
                 "parameters": [
@@ -476,6 +506,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "get list of products for saler",
                 "parameters": [
                     {
@@ -530,6 +563,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "update product",
                 "parameters": [
                     {
@@ -576,6 +612,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "product"
                 ],
                 "summary": "update product",
                 "parameters": [
@@ -626,6 +665,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "profile"
+                ],
                 "summary": "get profile",
                 "parameters": [
                     {
@@ -673,6 +715,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "profile"
+                ],
                 "summary": "update profile",
                 "parameters": [
                     {
@@ -719,6 +764,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "profile"
                 ],
                 "summary": "update profile",
                 "parameters": [
@@ -769,6 +817,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "auth"
+                ],
                 "summary": "signin",
                 "parameters": [
                     {
@@ -817,6 +868,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "auth"
                 ],
                 "summary": "signup",
                 "parameters": [

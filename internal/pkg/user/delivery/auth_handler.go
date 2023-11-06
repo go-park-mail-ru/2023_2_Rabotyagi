@@ -36,6 +36,7 @@ func NewUserHandler(storage usecases.IUserStorage, addrOrigin string, schema str
 //	@Description Error.status can be:
 //	@Description StatusErrBadRequest      = 400
 //	@Description  StatusErrInternalServer  = 500
+//	@Tags auth
 //
 //	@Accept      json
 //	@Produce    json
@@ -102,6 +103,7 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //
 //	@Summary    signin
 //	@Description  signin in app
+//	@Tags auth
 //	@Accept      json
 //	@Produce    json
 //	@Param      preUser  body internal_models.UserWithoutID true  "user data for signin"
@@ -172,6 +174,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //
 //	@Summary    logout
 //	@Description  logout in app
+//	@Tags auth
 //	@Accept      json
 //	@Produce    json
 //	@Success    200  {object} delivery.Response

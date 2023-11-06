@@ -15,14 +15,17 @@ import (
 //
 //		@Summary    get profile
 //		@Description  get profile by id
-//		@Accept      json
-//		@Produce    json
-//		@Param      id  path uint64 true  "user id"
-//		@Success    200  {object} ProfileResponse
-//		@Failure    405  {string} string
-//		@Failure    500  {string} string
-//		@Failure    222  {object} delivery.ErrorResponse "Error"
-//		@Router      /profile/get/{id} [get]
+//
+// @Tags profile
+//
+//	@Accept      json
+//	@Produce    json
+//	@Param      id  path uint64 true  "user id"
+//	@Success    200  {object} ProfileResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /profile/get/{id} [get]
 func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, u.addrOrigin, u.schema)
@@ -64,6 +67,9 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 //
 //	@Summary    update profile
 //	@Description  update some fields of profile
+//
+// @Tags profile
+//
 //	@Accept      json
 //	@Produce    json
 //	@Param      user  body models.UserWithoutPassword true  "user data for updating"

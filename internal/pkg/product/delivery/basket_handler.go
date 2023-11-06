@@ -12,6 +12,7 @@ import (
 //
 //	@Summary    get basket of orders
 //	@Description  get basket of orders by user id from cookie\jwt token
+//	@Tags order
 //	@Accept      json
 //	@Produce    json
 //	@Success    200  {object} OrderListResponse
@@ -53,6 +54,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 //
 //	@Summary    update order count
 //	@Description  update order count using user id from cookie\jwt token
+//	@Tags order
 //	@Accept      json
 //	@Produce    json
 //
@@ -104,6 +106,7 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 //
 //	@Summary    update order status
 //	@Description  update order status using user id from cookie\jwt token
+//	@Tags order
 //	@Accept      json
 //	@Produce    json
 //
@@ -155,6 +158,7 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 //
 //	@Summary    add order to basket
 //	@Description   add product in basket
+//	@Tags order
 //	@Accept      json
 //	@Produce    json
 //
@@ -205,6 +209,7 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 //
 //	@Summary    buy all orders from basket
 //	@Description   buy all orders from basket
+//	@Tags order
 //	@Accept      json
 //	@Produce    json
 //	@Success    200  {object} delivery.Response

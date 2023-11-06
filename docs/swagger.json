@@ -21,6 +21,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "auth"
+                ],
                 "summary": "logout",
                 "responses": {
                     "200": {
@@ -58,6 +61,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "order"
                 ],
                 "summary": "add order to basket",
                 "parameters": [
@@ -106,6 +112,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "order"
+                ],
                 "summary": "buy all orders from basket",
                 "responses": {
                     "200": {
@@ -144,6 +153,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "order"
+                ],
                 "summary": "get basket of orders",
                 "responses": {
                     "200": {
@@ -179,6 +191,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "order"
                 ],
                 "summary": "update order status",
                 "parameters": [
@@ -229,6 +244,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "add product",
                 "parameters": [
                     {
@@ -278,6 +296,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "close product",
                 "parameters": [
                     {
@@ -324,6 +345,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "product"
                 ],
                 "summary": "delete product",
                 "parameters": [
@@ -372,6 +396,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "get product",
                 "parameters": [
                     {
@@ -418,6 +445,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "product"
                 ],
                 "summary": "get product",
                 "parameters": [
@@ -473,6 +503,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "get list of products for saler",
                 "parameters": [
                     {
@@ -527,6 +560,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "product"
+                ],
                 "summary": "update product",
                 "parameters": [
                     {
@@ -573,6 +609,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "product"
                 ],
                 "summary": "update product",
                 "parameters": [
@@ -623,6 +662,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "profile"
+                ],
                 "summary": "get profile",
                 "parameters": [
                     {
@@ -670,6 +712,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "profile"
+                ],
                 "summary": "update profile",
                 "parameters": [
                     {
@@ -716,6 +761,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "profile"
                 ],
                 "summary": "update profile",
                 "parameters": [
@@ -766,6 +814,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "auth"
+                ],
                 "summary": "signin",
                 "parameters": [
                     {
@@ -814,6 +865,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "auth"
                 ],
                 "summary": "signup",
                 "parameters": [
