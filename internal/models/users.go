@@ -1,10 +1,9 @@
 package models
 
 import (
-	"strings"
-	"time"
-
+	"database/sql"
 	"github.com/asaskevich/govalidator"
+	"strings"
 )
 
 const MinLenPassword = 6
@@ -28,20 +27,20 @@ func init() {
 }
 
 type User struct {
-	ID       uint64     `json:"id"       valid:"required"`
-	Email    string     `json:"email"    valid:"required,email~Not valid email"`
-	Phone    string     `json:"phone"    valid:"required, numeric~Phone may contain only numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
-	Name     string     `json:"name"     valid:"required, regexp=^[а-яА-Яa-zA-Z0-9\s]+$~Name may contain only russian, english letter, numbers and spaces"`
-	Password string     `json:"password" valid:"required,password~Password must be at least 6 symbols"`
-	Birthday *time.Time `json:"birthday"` //nolint
+	ID       uint64       `json:"id"       valid:"required"`
+	Email    string       `json:"email"    valid:"required,email~Not valid email"`
+	Phone    string       `json:"phone"    valid:"required, numeric~Phone may contain only numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
+	Name     string       `json:"name"     valid:"required, regexp=^[а-яА-Яa-zA-Z0-9\s]+$~Name may contain only russian, english letter, numbers and spaces"`
+	Password string       `json:"password" valid:"required,password~Password must be at least 6 symbols"`
+	Birthday sql.NullTime `json:"birthday"` //nolint
 }
 
 type UserWithoutPassword struct {
-	ID       uint64     `json:"id"       valid:"required"`
-	Email    string     `json:"email"    valid:"required,email~Not valid email"`
-	Phone    string     `json:"phone"    valid:"required, numeric~Phone may contain only numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
-	Name     string     `json:"name"     valid:"required, regexp=^[а-яА-Яa-zA-Z0-9\s]+$~Name may contain only russian, english letter, numbers and spaces"`
-	Birthday *time.Time `json:"birthday"` //nolint
+	ID       uint64       `json:"id"       valid:"required"`
+	Email    string       `json:"email"    valid:"required,email~Not valid email"`
+	Phone    string       `json:"phone"    valid:"required, numeric~Phone may contain only numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
+	Name     string       `json:"name"     valid:"required, regexp=^[а-яА-Яa-zA-Z0-9\s]+$~Name may contain only russian, english letter, numbers and spaces"`
+	Birthday sql.NullTime `json:"birthday"` //nolint
 }
 
 func (u *UserWithoutPassword) Trim() {
@@ -51,11 +50,11 @@ func (u *UserWithoutPassword) Trim() {
 }
 
 type UserWithoutID struct {
-	Email    string     `json:"email"    valid:"required,email~Not valid email"`
-	Phone    string     `json:"phone"    valid:"required, numeric~Phone may contain only numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
-	Name     string     `json:"name"     valid:"required, regexp=^[а-яА-Яa-zA-Z0-9\s]+$~Name may contain only russian, english letter, numbers and spaces"`
-	Password string     `json:"password" valid:"required,password~Password must be at least 6 symbols"`
-	Birthday *time.Time `json:"birthday"` //nolint
+	Email    string       `json:"email"    valid:"required,email~Not valid email"`
+	Phone    string       `json:"phone"    valid:"required, numeric~Phone may contain only numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
+	Name     string       `json:"name"     valid:"required, regexp=^[а-яА-Яa-zA-Z0-9\s]+$~Name may contain only russian, english letter, numbers and spaces"`
+	Password string       `json:"password" valid:"required,password~Password must be at least 6 symbols"`
+	Birthday sql.NullTime `json:"birthday"` //nolint
 }
 
 func (u *UserWithoutID) Trim() {

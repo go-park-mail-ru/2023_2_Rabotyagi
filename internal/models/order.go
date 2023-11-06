@@ -1,18 +1,19 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 )
 
 type Order struct {
-	ID        uint64    `json:"id"          valid:"required"`
-	OwnerID   uint64    `json:"owner_id"    valid:"required"`
-	ProductID uint64    `json:"product_id"  valid:"required"`
-	Count     uint32    `json:"count"       valid:"required"`
-	Status    uint8     `json:"status"      valid:"required"`
-	CreatedAt time.Time `json:"created_at"  valid:"required"`
-	UpdatedAt time.Time `json:"updated_at"  valid:"required"`
-	ClosedAt  time.Time `json:"closed_at"   valid:"required"`
+	ID        uint64       `json:"id"          valid:"required"`
+	OwnerID   uint64       `json:"owner_id"    valid:"required"`
+	ProductID uint64       `json:"product_id"  valid:"required"`
+	Count     uint32       `json:"count"       valid:"required"`
+	Status    uint8        `json:"status"      valid:"required"`
+	CreatedAt time.Time    `json:"created_at"  valid:"required"`
+	UpdatedAt time.Time    `json:"updated_at"  valid:"required"`
+	ClosedAt  sql.NullTime `json:"closed_at"   valid:"required"`
 }
 
 type OrderInBasket struct {

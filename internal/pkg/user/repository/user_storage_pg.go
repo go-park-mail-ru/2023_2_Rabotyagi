@@ -179,7 +179,7 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	if preUser.Birthday == nil || preUser.Birthday.IsZero() {
+	if !preUser.Birthday.Valid || preUser.Birthday.Time.IsZero() {
 		SQLCreateUser = `INSERT INTO public."user" (email, phone, name, password) VALUES ($1, $2, $3, $4);`
 		_, err = tx.Exec(ctx, SQLCreateUser,
 			preUser.Email, preUser.Phone, preUser.Name, preUser.Password)
