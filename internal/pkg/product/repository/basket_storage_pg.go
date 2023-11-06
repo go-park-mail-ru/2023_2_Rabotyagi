@@ -66,7 +66,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	var orders []*models.OrderInBasket
 
 	SQLSelectOrdersInBasketByUserID := `SELECT  "order".id, "order".owner_id, "order".product_id,
-        "product".title, "product".price, "product".city, "order".count,
+        "product".title, "product".price, "product".city, "order".count, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM "order"
     INNER JOIN "product" ON "order".product_id = "product".id WHERE owner_id=$1 AND status=0;`
 
@@ -82,20 +82,22 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	_, err = pgx.ForEachRow(ordersInBasketRows, []any{
 		&curOrder.ID, &curOrder.OwnerID, &curOrder.ProductID,
 		&curOrder.Title, &curOrder.Price, &curOrder.City,
-		&curOrder.Count, &curOrder.Delivery, &curOrder.SafeDeal, &curOrder.SalerID,
+		&curOrder.Count, &curOrder.AvailableCount, &curOrder.Delivery,
+		&curOrder.SafeDeal, &curOrder.SalerID,
 	}, func() error {
 		orders = append(orders, &models.OrderInBasket{ //nolint:exhaustruct
-			ID:           curOrder.ID,
-			OwnerID:      curOrder.OwnerID,
-			ProductID:    curOrder.ProductID,
-			Title:        curOrder.Title,
-			Price:        curOrder.Price,
-			City:         curOrder.City,
-			Count:        curOrder.Count,
-			Delivery:     curOrder.Delivery,
-			SafeDeal:     curOrder.SafeDeal,
-			InFavourites: curOrder.InFavourites,
-			SalerID:      curOrder.SalerID,
+			ID:             curOrder.ID,
+			OwnerID:        curOrder.OwnerID,
+			ProductID:      curOrder.ProductID,
+			Title:          curOrder.Title,
+			Price:          curOrder.Price,
+			City:           curOrder.City,
+			Count:          curOrder.Count,
+			AvailableCount: curOrder.AvailableCount,
+			Delivery:       curOrder.Delivery,
+			SafeDeal:       curOrder.SafeDeal,
+			InFavourites:   curOrder.InFavourites,
+			SalerID:        curOrder.SalerID,
 		})
 
 		return nil
