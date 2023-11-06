@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	ResponseSuccessfulAddProduct = "Объявление успешно добавлено"
-	ResponseSuccessfulAddOrder   = "Заказ успешно добавлен"
+	ResponseSuccessfulAddProduct       = "Объявление успешно добавлено"
+	ResponseSuccessfulAddOrder         = "Заказ успешно добавлен"
+	ResponseSuccessfulUpdateCountOrder = "Успешно изменено количество заказа"
 
 	ErrProductNotExist       = "Такое объявление не существует"
 	ErrUserPermissionsChange = "Вы не можете изменить чужое объявление"

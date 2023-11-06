@@ -53,17 +53,19 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 }
 
 // UpdateOrderCountHandler godoc
-// TODO change to correct
 //
-//	@Summary    get basket of orders
-//	@Description  get basket of orders by user id from cookie\jwt token
+//	@Summary    update order count
+//	@Description  update order count using user id from cookie\jwt token
 //	@Accept      json
 //	@Produce    json
-//	@Success    200  {object} OrderListResponse
+//
+// @Param count  body internal_models.OrderChanges true  "order data for updating"
+//
+//	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /order/get_basket [get]
+//	@Router      /order/get_basket [path]
 func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
@@ -80,35 +82,25 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	ctx := r.Context()
 
-	newOrder := struct {
-		ID    uint64 `json:"id"          valid:"required"`
-		Count uint32 `json:"count"       valid:"required"`
-	}{}
-
-	decoder := json.NewDecoder(r.Body)
-
-	if err := decoder.Decode(&newOrder); err != nil {
-		delivery.HandleErr(w, "in UpdateOrderCountHandler:", err)
-
-		return
-	}
-
-	_, err := govalidator.ValidateStruct(newOrder)
+	orderChanges, err := usecases.ValidateOrderChangesCount(r.Body)
 	if err != nil {
 		delivery.HandleErr(w, "in UpdateOrderCountHandler:", err)
 
 		return
 	}
 
-	updatedOrder, err := p.storage.UpdateOrderCount(ctx, newOrder.ID, newOrder.Count)
+	userID := delivery.GetUserIDFromCookie(r)
+
+	err = p.storage.UpdateOrderCount(ctx, userID, orderChanges.ID, orderChanges.Count)
 	if err != nil {
 		delivery.HandleErr(w, "in UpdateOrderCountHandler:", err)
 
 		return
 	}
 
-	delivery.SendOkResponse(w, NewOrderResponse(delivery.StatusResponseSuccessful, updatedOrder))
-	log.Printf("in UpdateOrderCountHandler: update order count: %+v", updatedOrder)
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateCountOrder))
+	log.Printf("in UpdateOrderCountHandler: updated order count=%d for order id=%d for user id=%d:",
+		orderChanges.Count, orderChanges.ID, userID)
 }
 
 func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {

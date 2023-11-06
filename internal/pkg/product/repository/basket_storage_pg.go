@@ -144,13 +144,13 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 }
 
 func (p *ProductStorage) updateOrderCountByOrderID(ctx context.Context,
-	tx pgx.Tx, orderID uint64, newCount uint32,
+	tx pgx.Tx, userID uint64, orderID uint64, newCount uint32,
 ) error {
 	SQLUpdateOrderCountByOrderID := `UPDATE public."order"
 		 SET count=$1
-		 WHERE id=$2`
+		 WHERE id=$2 AND owner_id=$3`
 
-	_, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newCount, orderID)
+	_, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newCount, orderID, userID)
 	if err != nil {
 		log.Printf("in updateOrderCountByOrderID: %+v", err)
 
@@ -181,16 +181,9 @@ func (p *ProductStorage) getOrderByID(ctx context.Context, tx pgx.Tx, orderID ui
 	return &order, nil
 }
 
-func (p *ProductStorage) UpdateOrderCount(ctx context.Context, orderID uint64, newCount uint32) (*models.Order, error) {
-	updatedOrder := &models.Order{} //nolint:exhaustruct
-
+func (p *ProductStorage) UpdateOrderCount(ctx context.Context, userID uint64, orderID uint64, newCount uint32) error {
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		err := p.updateOrderCountByOrderID(ctx, tx, orderID, newCount)
-		if err != nil {
-			return err
-		}
-
-		updatedOrder, err = p.getOrderByID(ctx, tx, orderID)
+		err := p.updateOrderCountByOrderID(ctx, tx, userID, orderID, newCount)
 		if err != nil {
 			return err
 		}
@@ -200,10 +193,10 @@ func (p *ProductStorage) UpdateOrderCount(ctx context.Context, orderID uint64, n
 	if err != nil {
 		log.Printf("in UpdateOrderCount: %+v\n", err)
 
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return updatedOrder, nil
+	return nil
 }
 
 func (p *ProductStorage) updateOrderStatusByOrderID(ctx context.Context,
@@ -307,11 +300,12 @@ func (p *ProductStorage) insertOrder(ctx context.Context, tx pgx.Tx,
 	userID uint64, productID uint64, count uint32,
 ) error {
 	SQLInsertOrder := `INSERT INTO public."order"(owner_id, product_id, count) VALUES ($1, $2, $3)`
+
 	_, err := tx.Exec(ctx, SQLInsertOrder, userID, productID, count)
 	if err != nil {
 		log.Printf("in insertOrder: %+v\n", err)
 
-		return err
+		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return nil
