@@ -12,7 +12,10 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-var ErrDecodePreProduct = myerrors.NewError("Некорректный json объявления")
+var (
+	ErrDecodePreProduct = myerrors.NewError("Некорректный json объявления")
+	ErrDecodePreOrder   = myerrors.NewError("Некорректный json заказа")
+)
 
 func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
 	decoder := json.NewDecoder(r)
@@ -61,4 +64,24 @@ func ValidatePartOfPreProduct(r io.Reader) (*models.PreProduct, error) {
 	}
 
 	return preProduct, nil
+}
+
+func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
+	preOrder := new(models.PreOrder)
+	decoder := json.NewDecoder(r)
+
+	if err := decoder.Decode(preOrder); err != nil {
+		log.Printf("in ValidatePreOrder: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreOrder)
+	}
+
+	_, err := govalidator.ValidateStruct(preOrder)
+	if err != nil {
+		log.Printf("in ValidatePreOrder: %+v\n", err)
+
+		return nil, myerrors.NewError(myerrors.ErrTemplate, err)
+	}
+
+	return preOrder, nil
 }

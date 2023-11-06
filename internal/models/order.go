@@ -16,6 +16,11 @@ type Order struct {
 	ClosedAt  sql.NullTime `json:"closed_at"   valid:"required"`
 }
 
+type PreOrder struct {
+	ProductID uint64 `json:"product_id"  valid:"required"`
+	Count     uint32 `json:"count"       valid:"required"`
+}
+
 type OrderInBasket struct {
 	ID           uint64  `json:"id"            valid:"required"`
 	OwnerID      uint64  `json:"owner_id"      valid:"required"`

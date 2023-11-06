@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 
 	"github.com/asaskevich/govalidator"
@@ -31,6 +32,8 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
 	}
 
 	ctx := r.Context()
@@ -50,6 +53,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 }
 
 // UpdateOrderCountHandler godoc
+// TODO change to correct
 //
 //	@Summary    get basket of orders
 //	@Description  get basket of orders by user id from cookie\jwt token
@@ -70,6 +74,8 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
 	}
 
 	ctx := r.Context()
@@ -115,6 +121,8 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
 	}
 
 	ctx := r.Context()
@@ -148,4 +156,54 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 
 	delivery.SendOkResponse(w, NewOrderResponse(delivery.StatusResponseSuccessful, updatedOrder))
 	log.Printf("in UpdateOrderStatusHandler: update order status: %+v", updatedOrder)
+}
+
+// AddOrderHandler godoc
+//
+//	@Summary    add order to basket
+//	@Description   add product in basket
+//	@Accept      json
+//	@Produce    json
+//
+// @Param preOrder  body internal_models.PreOrder true  "order data for adding"
+//
+//	@Success    200  {object} delivery.Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /order/add [post]
+func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	userID := delivery.GetUserIDFromCookie(r)
+
+	preOrder, err := usecases.ValidatePreOrder(r.Body)
+	if err != nil {
+		delivery.HandleErr(w, "in AddOrderHandler:", err)
+
+		return
+	}
+
+	err = p.storage.AddOrderInBasket(ctx, userID, preOrder.ProductID, preOrder.Count)
+	if err != nil {
+		delivery.HandleErr(w, "in AddOrderHandler:", err)
+
+		return
+	}
+
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddOrder))
+	log.Printf("in AddOrderHandler: add order on productID=%d for userID=%d", preOrder.ProductID, userID)
 }

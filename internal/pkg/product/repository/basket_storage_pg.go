@@ -302,3 +302,35 @@ func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
 
 	return updatedOrder, nil
 }
+
+func (p *ProductStorage) insertOrder(ctx context.Context, tx pgx.Tx,
+	userID uint64, productID uint64, count uint32,
+) error {
+	SQLInsertOrder := `INSERT INTO public."order"(owner_id, product_id, count) VALUES ($1, $2, $3)`
+	_, err := tx.Exec(ctx, SQLInsertOrder, userID, productID, count)
+	if err != nil {
+		log.Printf("in insertOrder: %+v\n", err)
+
+		return err
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) AddOrderInBasket(ctx context.Context, userID uint64, productID uint64, count uint32) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		err := p.insertOrder(ctx, tx, userID, productID, count)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Printf("in AddOrderInBasket: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}

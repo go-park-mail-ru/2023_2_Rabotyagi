@@ -171,6 +171,13 @@ definitions:
       status:
         type: integer
     type: object
+  internal_models.PreOrder:
+    properties:
+      count:
+        type: integer
+      product_id:
+        type: integer
+    type: object
   internal_models.UserWithoutID:
     properties:
       birthday:
@@ -259,6 +266,38 @@ paths:
           schema:
             type: string
       summary: logout
+  /order/add:
+    post:
+      consumes:
+      - application/json
+      description: add product in basket
+      parameters:
+      - description: order data for adding
+        in: body
+        name: preOrder
+        required: true
+        schema:
+          $ref: '#/definitions/internal_models.PreOrder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: add order to basket
   /order/get_basket:
     get:
       consumes:
