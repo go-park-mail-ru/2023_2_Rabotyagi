@@ -136,8 +136,8 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 // GetProductListHandler godoc
 //
-//	@Summary    get product
-//	@Description  get product by count
+//	@Summary    get products list
+//	@Description  get products by count and last_id return new products
 //	@Tags product
 //	@Accept      json
 //	@Produce    json

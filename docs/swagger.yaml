@@ -278,32 +278,6 @@ paths:
       tags:
       - auth
   /order/add:
-    patch:
-      consumes:
-      - application/json
-      description: buy all orders from basket
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
-        "222":
-          description: Error
-          schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
-        "405":
-          description: Method Not Allowed
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: buy all orders from basket
-      tags:
-      - order
     post:
       consumes:
       - application/json
@@ -337,6 +311,33 @@ paths:
       summary: add order to basket
       tags:
       - order
+  /order/buy_full_basket:
+    patch:
+      consumes:
+      - application/json
+      description: buy all orders from basket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: buy all orders from basket
+      tags:
+      - order
   /order/get_basket:
     get:
       consumes:
@@ -364,6 +365,41 @@ paths:
       summary: get basket of orders
       tags:
       - order
+  /order/update_count:
+    patch:
+      consumes:
+      - application/json
+      description: update order count using user id from cookie\jwt token
+      parameters:
+      - description: order data for updating use only id and count
+        in: body
+        name: orderChanges
+        required: true
+        schema:
+          $ref: '#/definitions/internal_models.OrderChanges'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update order count
+      tags:
+      - order
+  /order/update_status:
     patch:
       consumes:
       - application/json
@@ -542,7 +578,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: get product by count
+      description: get products by count and last_id return new products
       parameters:
       - description: count products
         in: query
@@ -573,7 +609,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get product
+      summary: get products list
       tags:
       - product
   /product/get_list_of_saler:

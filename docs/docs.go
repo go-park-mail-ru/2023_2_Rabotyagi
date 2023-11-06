@@ -106,7 +106,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/order/buy_full_basket": {
             "patch": {
                 "description": "buy all orders from basket",
                 "consumes": [
@@ -186,7 +188,61 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/order/update_count": {
+            "patch": {
+                "description": "update order count using user id from cookie\\jwt token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "update order count",
+                "parameters": [
+                    {
+                        "description": "order data for updating use only id and count",
+                        "name": "orderChanges",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_models.OrderChanges"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/order/update_status": {
             "patch": {
                 "description": "update order status using user id from cookie\\jwt token",
                 "consumes": [
@@ -442,7 +498,7 @@ const docTemplate = `{
         },
         "/product/get_list": {
             "get": {
-                "description": "get product by count",
+                "description": "get products by count and last_id return new products",
                 "consumes": [
                     "application/json"
                 ],
@@ -452,7 +508,7 @@ const docTemplate = `{
                 "tags": [
                     "product"
                 ],
-                "summary": "get product",
+                "summary": "get products list",
                 "parameters": [
                     {
                         "type": "integer",
