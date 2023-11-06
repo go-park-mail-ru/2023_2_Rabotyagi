@@ -9,6 +9,7 @@ const (
 	ResponseSuccessfulAddOrder          = "Заказ успешно добавлен"
 	ResponseSuccessfulUpdateCountOrder  = "Успешно изменено количество заказа"
 	ResponseSuccessfulUpdateStatusOrder = "Успешно изменен статус заказа"
+	ResponseSuccessfulBuyFullBasket     = "Успешная покупка всего из корзины"
 
 	ErrProductNotExist       = "Такое объявление не существует"
 	ErrUserPermissionsChange = "Вы не можете изменить чужое объявление"

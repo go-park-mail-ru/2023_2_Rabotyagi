@@ -200,3 +200,43 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddOrder))
 	log.Printf("in AddOrderHandler: add order on productID=%d for userID=%d\n", preOrder.ProductID, userID)
 }
+
+// BuyFullBasketHandler godoc
+//
+//	@Summary    buy all orders from basket
+//	@Description   buy all orders from basket
+//	@Accept      json
+//	@Produce    json
+//	@Success    200  {object} delivery.Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /order/add [patch]
+func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodPatch {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	userID := delivery.GetUserIDFromCookie(r)
+
+	err := p.storage.BuyFullBasket(ctx, userID)
+	if err != nil {
+		delivery.HandleErr(w, "in BuyFullBasketHandler:", err)
+
+		return
+	}
+
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulBuyFullBasket))
+	log.Printf("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
+}

@@ -333,3 +333,33 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context, userID uint64, pr
 
 	return nil
 }
+
+func (p *ProductStorage) updateStatusFullBasket(ctx context.Context, tx pgx.Tx, userID uint64) error {
+	SQLUpdateFullBasket := `UPDATE public."order" SET status=$1 WHERE owner_id=$2`
+	_, err := tx.Exec(ctx, SQLUpdateFullBasket, models.OrderStatusInProcessing, userID)
+	if err != nil {
+		log.Printf("in updateStatusFullBasket: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) BuyFullBasket(ctx context.Context, userID uint64) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		err := p.updateStatusFullBasket(ctx, tx, userID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Printf("in BuyFullBasketHandler: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
