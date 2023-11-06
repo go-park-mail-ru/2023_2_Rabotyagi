@@ -67,7 +67,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 
 	SQLSelectOrdersInBasketByUserID := `SELECT  "order".id, "order".owner_id, "order".product_id,
         "product".title, "product".price, "product".city, "order".count,
-        "product".delivery, "product".safe_deal FROM "order"
+        "product".delivery, "product".safe_deal, "product".saler_id FROM "order"
     INNER JOIN "product" ON "order".product_id = "product".id WHERE owner_id=$1 AND status=0;`
 
 	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
@@ -82,7 +82,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	_, err = pgx.ForEachRow(ordersInBasketRows, []any{
 		&curOrder.ID, &curOrder.OwnerID, &curOrder.ProductID,
 		&curOrder.Title, &curOrder.Price, &curOrder.City,
-		&curOrder.Count, &curOrder.Delivery, &curOrder.SafeDeal,
+		&curOrder.Count, &curOrder.Delivery, &curOrder.SafeDeal, &curOrder.SalerID,
 	}, func() error {
 		orders = append(orders, &models.OrderInBasket{ //nolint:exhaustruct
 			ID:           curOrder.ID,
@@ -95,6 +95,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 			Delivery:     curOrder.Delivery,
 			SafeDeal:     curOrder.SafeDeal,
 			InFavourites: curOrder.InFavourites,
+			SalerID:      curOrder.SalerID,
 		})
 
 		return nil

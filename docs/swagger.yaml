@@ -29,6 +29,8 @@ definitions:
         type: integer
       safe_deal:
         type: boolean
+      saler_id:
+        type: integer
       title:
         type: string
     type: object

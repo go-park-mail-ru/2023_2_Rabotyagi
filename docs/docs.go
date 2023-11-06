@@ -1014,6 +1014,9 @@ const docTemplate = `{
                 "safe_deal": {
                     "type": "boolean"
                 },
+                "saler_id": {
+                    "type": "integer"
+                },
                 "title": {
                     "type": "string"
                 }

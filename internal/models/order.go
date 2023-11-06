@@ -30,6 +30,7 @@ type PreOrder struct {
 type OrderInBasket struct {
 	ID           uint64  `json:"id"            valid:"required"`
 	OwnerID      uint64  `json:"owner_id"      valid:"required"`
+	SalerID      uint64  `json:"saler_id"      valid:"required"`
 	ProductID    uint64  `json:"product_id"    valid:"required"`
 	Title        string  `json:"title"         valid:"required, length(1|256)~Title length must be from 1 to 256"`
 	Price        uint64  `json:"price"         valid:"required"`
