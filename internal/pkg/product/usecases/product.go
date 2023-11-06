@@ -11,4 +11,7 @@ type IProductStorage interface {
 	GetNewProducts(ctx context.Context, lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error)
 	UpdateProduct(ctx context.Context, productID uint64, updateFields map[string]interface{}) error
+	GetOrdersInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
+	UpdateOrderCount(ctx context.Context, orderID uint64, newCount uint32) (*models.Order, error)
+	UpdateOrderStatus(ctx context.Context, orderID uint64, newStatus uint8) (*models.Order, error)
 }
