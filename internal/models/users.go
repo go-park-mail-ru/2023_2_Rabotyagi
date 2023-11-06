@@ -2,8 +2,9 @@ package models
 
 import (
 	"database/sql"
-	"github.com/asaskevich/govalidator"
 	"strings"
+
+	"github.com/asaskevich/govalidator"
 )
 
 const MinLenPassword = 6

@@ -35,7 +35,7 @@ http://84.23.53.28/
 ### Сгенерировать swagger документацию
 
 ```shell
-swag init -g cmd/app/main.go
+swag init --parseDependency -g cmd/app/main.go
 ```
 
 

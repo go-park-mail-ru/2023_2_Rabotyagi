@@ -10,6 +10,17 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
+// GetBasketHandler godoc
+//
+//	@Summary    get basket of orders
+//	@Description  get basket of orders by user id from cookie\jwt token
+//	@Accept      json
+//	@Produce    json
+//	@Success    200  {object} OrderListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /order/get_basket [get]
 func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
@@ -35,9 +46,20 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	delivery.SendOkResponse(w, NewOrderListResponse(delivery.StatusResponseSuccessful, orders))
-	log.Printf("in GetBasketHandler: get order list: %+v", orders)
+	log.Printf("in GetBasketHandler: get basket of orders: %+v", orders)
 }
 
+// UpdateOrderCountHandler godoc
+//
+//	@Summary    get basket of orders
+//	@Description  get basket of orders by user id from cookie\jwt token
+//	@Accept      json
+//	@Produce    json
+//	@Success    200  {object} OrderListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /order/get_basket [get]
 func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)

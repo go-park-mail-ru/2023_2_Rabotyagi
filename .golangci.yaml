@@ -147,4 +147,4 @@ linters-settings:
     case:
       use-field-name: true
       rules:
-        json:     snake
+        json: snake

@@ -29,13 +29,51 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.Response"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/order/get_basket": {
+            "get": {
+                "description": "get basket of orders by user id from cookie\\jwt token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "get basket of orders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_pkg_product_delivery.OrderListResponse"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -70,7 +108,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PreProduct"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct"
                         }
                     }
                 ],
@@ -78,13 +116,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ResponseRedirect"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -125,13 +163,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ProductResponse"
+                            "$ref": "#/definitions/internal_pkg_product_delivery.ProductResponse"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -179,13 +217,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ProductListResponse"
+                            "$ref": "#/definitions/internal_pkg_product_delivery.ProductListResponse"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -220,7 +258,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PreProduct"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct"
                         }
                     }
                 ],
@@ -228,13 +266,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ResponseRedirect"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -267,7 +305,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PreProduct"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct"
                         }
                     }
                 ],
@@ -275,13 +313,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ResponseRedirect"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -322,13 +360,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ProfileResponse"
+                            "$ref": "#/definitions/internal_pkg_user_delivery.ProfileResponse"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -363,7 +401,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserWithoutPassword"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword"
                         }
                     }
                 ],
@@ -371,13 +409,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ProfileResponse"
+                            "$ref": "#/definitions/internal_pkg_user_delivery.ProfileResponse"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -410,7 +448,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserWithoutPassword"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword"
                         }
                     }
                 ],
@@ -418,13 +456,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ProfileResponse"
+                            "$ref": "#/definitions/internal_pkg_user_delivery.ProfileResponse"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -459,7 +497,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserWithoutID"
+                            "$ref": "#/definitions/internal_models.UserWithoutID"
                         }
                     }
                 ],
@@ -467,13 +505,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.Response"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -508,7 +546,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserWithoutID"
+                            "$ref": "#/definitions/internal_models.UserWithoutID"
                         }
                     }
                 ],
@@ -516,13 +554,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/delivery.Response"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response"
                         }
                     },
                     "222": {
                         "description": "Error",
                         "schema": {
-                            "$ref": "#/definitions/delivery.ErrorResponse"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
                         }
                     },
                     "405": {
@@ -542,100 +580,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "delivery.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/delivery.ResponseBodyError"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "delivery.ProductListResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ProductInFeed"
-                    }
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "delivery.ProductResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/models.Product"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "delivery.ProfileResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/models.UserWithoutPassword"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "delivery.RedirectBody": {
-            "type": "object",
-            "properties": {
-                "redirect_url": {
-                    "type": "string"
-                }
-            }
-        },
-        "delivery.Response": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/delivery.ResponseBody"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "delivery.ResponseBody": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "delivery.ResponseBodyError": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                }
-            }
-        },
-        "delivery.ResponseRedirect": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/delivery.RedirectBody"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.Image": {
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image": {
             "type": "object",
             "properties": {
                 "url": {
@@ -643,7 +588,48 @@ const docTemplate = `{
                 }
             }
         },
-        "models.PreProduct": {
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "delivery": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image"
+                    }
+                },
+                "in_favourites": {
+                    "type": "boolean"
+                },
+                "owner_id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "safe_deal": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct": {
             "type": "object",
             "properties": {
                 "available_count": {
@@ -666,7 +652,7 @@ const docTemplate = `{
                 "images": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Image"
+                        "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image"
                     }
                 },
                 "price": {
@@ -683,7 +669,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Product": {
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Product": {
             "type": "object",
             "properties": {
                 "available_count": {
@@ -715,7 +701,7 @@ const docTemplate = `{
                 "images": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Image"
+                        "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image"
                     }
                 },
                 "in_favourite": {
@@ -738,7 +724,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ProductInFeed": {
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.ProductInFeed": {
             "type": "object",
             "properties": {
                 "city": {
@@ -756,10 +742,10 @@ const docTemplate = `{
                 "images": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Image"
+                        "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image"
                     }
                 },
-                "in_favourite": {
+                "in_favourites": {
                     "type": "boolean"
                 },
                 "price": {
@@ -773,12 +759,99 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserWithoutID": {
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword": {
             "type": "object",
             "properties": {
                 "birthday": {
                     "description": "nolint",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sql.NullTime"
+                        }
+                    ]
+                },
+                "email": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "nolint",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyError"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.RedirectBody": {
+            "type": "object",
+            "properties": {
+                "redirect_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.RedirectBody"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_models.UserWithoutID": {
+            "type": "object",
+            "properties": {
+                "birthday": {
+                    "description": "nolint",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sql.NullTime"
+                        }
+                    ]
                 },
                 "email": {
                     "type": "string"
@@ -795,25 +868,65 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserWithoutPassword": {
+        "internal_pkg_product_delivery.OrderListResponse": {
             "type": "object",
             "properties": {
-                "birthday": {
-                    "description": "nolint",
-                    "type": "string"
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket"
+                    }
                 },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
+                "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "internal_pkg_product_delivery.ProductListResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.ProductInFeed"
+                    }
                 },
-                "name": {
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_pkg_product_delivery.ProductResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Product"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_pkg_user_delivery.ProfileResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "sql.NullTime": {
+            "type": "object",
+            "properties": {
+                "time": {
                     "type": "string"
                 },
-                "phone": {
-                    "description": "nolint",
-                    "type": "string"
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
                 }
             }
         }

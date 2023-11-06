@@ -61,11 +61,10 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 ) ([]*models.OrderInBasket, error) {
 	var orders []*models.OrderInBasket
 
-	SQLSelectOrdersInBasketByUserID := `SELECT  "order".id, "order".owner_id, "order".product_id, 
-         "product".title, "product".price, "product".city, "order".count, 
-         "product".delivery, "product".safe_deal, "product".in_favourites, 
-		 FROM public."order" WHERE owner_id=$1 AND status=0
-		 LEFT JOIN public."product" ON "order".product_id = "product".id`
+	SQLSelectOrdersInBasketByUserID := `SELECT  "order".id, "order".owner_id, "order".product_id,
+        "product".title, "product".price, "product".city, "order".count,
+        "product".delivery, "product".safe_deal FROM "order"
+    INNER JOIN "product" ON "order".product_id = "product".id WHERE owner_id=$1 AND status=0;`
 
 	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
 	if err != nil {
@@ -80,7 +79,6 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 		&curOrder.ID, &curOrder.OwnerID, &curOrder.ProductID,
 		&curOrder.Title, &curOrder.Price, &curOrder.City,
 		&curOrder.Count, &curOrder.Delivery, &curOrder.SafeDeal,
-		&curOrder.InFavourites,
 	}, func() error {
 		orders = append(orders, &models.OrderInBasket{ //nolint:exhaustruct
 			ID:           curOrder.ID,
@@ -123,7 +121,13 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 				return err
 			}
 
+			inFavourites, err := p.selectIsUserFavouriteProduct(ctx, tx, order.ProductID, userID)
+			if err != nil {
+				return err
+			}
+
 			order.Images = images
+			order.InFavourites = inFavourites
 		}
 
 		orders = ordersInner

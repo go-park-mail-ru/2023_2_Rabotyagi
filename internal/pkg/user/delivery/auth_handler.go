@@ -39,7 +39,7 @@ func NewUserHandler(storage usecases.IUserStorage, addrOrigin string, schema str
 //
 //	@Accept      json
 //	@Produce    json
-//	@Param      preUser  body models.UserWithoutID true  "user data for signup"
+//	@Param      preUser  body internal_models.UserWithoutID true  "user data for signup"
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -104,7 +104,7 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Description  signin in app
 //	@Accept      json
 //	@Produce    json
-//	@Param      preUser  body models.UserWithoutID true  "user data for signin"
+//	@Param      preUser  body internal_models.UserWithoutID true  "user data for signin"
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
