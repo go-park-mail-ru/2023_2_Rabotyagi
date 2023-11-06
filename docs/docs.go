@@ -138,6 +138,53 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "update order status using user id from cookie\\jwt token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "update order status",
+                "parameters": [
+                    {
+                        "description": "order data for updating use only id and status",
+                        "name": "orderChanges",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_models.OrderChanges"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/product/add": {
@@ -885,6 +932,20 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.RedirectBody"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_models.OrderChanges": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "status": {
                     "type": "integer"

@@ -62,7 +62,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /order/get_basket [path]
+//	@Router      /order/get_basket [patch]
 func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
@@ -113,7 +113,7 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /order/get_basket [path]
+//	@Router      /order/get_basket [patch]
 func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
