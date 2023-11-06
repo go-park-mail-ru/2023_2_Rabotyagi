@@ -22,5 +22,6 @@ type IProductStorage interface {
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error)
 	UpdateProduct(ctx context.Context, productID uint64, updateFields map[string]interface{}) error
 	CloseProduct(ctx context.Context, productID uint64, userID uint64) error
+	DeleteProduct(ctx context.Context, productID uint64, userID uint64) error
 	IBasketStorage
 }

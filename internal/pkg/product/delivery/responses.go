@@ -11,6 +11,7 @@ const (
 	ResponseSuccessfulUpdateStatusOrder = "Успешно изменен статус заказа"
 	ResponseSuccessfulBuyFullBasket     = "Успешная покупка всего из корзины"
 	ResponseSuccessfulCloseProduct      = "Объявление успешно закрыто"
+	ResponseSuccessfulDeleteProduct     = "Объявление успешно удалено"
 
 	ErrProductNotExist       = "Такое объявление не существует"
 	ErrUserPermissionsChange = "Вы не можете изменить чужое объявление"

@@ -360,3 +360,54 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
 	log.Printf("in CloseProductHandler: close product id=%d", productID)
 }
+
+// DeleteProductHandler godoc
+//
+//	@Summary     delete product
+//	@Description  delete product for saler using user id from cookies\jwt.
+//	@Description  This totally removed product. Recovery will be impossible
+//	@Accept      json
+//	@Produce    json
+//	@Param      productID  path uint64 true  "product id"
+//	@Success    200  {object} delivery.Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /product/delete/ [delete]
+func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodDelete {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+	userID := delivery.GetUserIDFromCookie(r)
+	productIDStr := delivery.GetPathParam(r.URL.String())
+
+	productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	if err != nil {
+		log.Printf("in CloseProductHandler: %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+
+		return
+	}
+
+	err = p.storage.DeleteProduct(ctx, productID, userID)
+	if err != nil {
+		log.Printf("in CloseProductHandler %+v\n", err)
+		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
+	log.Printf("in DeleteProductHandler: delete product id=%d", productID)
+}

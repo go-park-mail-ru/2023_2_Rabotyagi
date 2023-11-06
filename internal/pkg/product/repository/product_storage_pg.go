@@ -462,3 +462,34 @@ func (p *ProductStorage) CloseProduct(ctx context.Context, productID uint64, use
 
 	return nil
 }
+
+func (p *ProductStorage) deleteProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
+	SQLCloseProduct := `DELETE FROM public."product" WHERE id=$1 AND saler_id=$2`
+
+	_, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
+	if err != nil {
+		log.Printf("in deleteProduct: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) DeleteProduct(ctx context.Context, productID uint64, userID uint64) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		err := p.deleteProduct(ctx, tx, productID, userID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Printf("in DeleteProduct: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
