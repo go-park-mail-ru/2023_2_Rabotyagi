@@ -11,10 +11,10 @@ import (
 var Secret = []byte("super-secret")
 
 var (
-	ErrNilToken           = myerrors.NewError("get nil token")
-	ErrWrongSigningMethod = myerrors.NewError("unexpected signing method")
-	ErrInvalidToken       = myerrors.NewError("invalid token")
-	ErrParseToken         = myerrors.NewError("error parsing token")
+	ErrNilToken           = myerrors.NewError("Получили токен = nil")
+	ErrWrongSigningMethod = myerrors.NewError("Неожиданный signing метод ")
+	ErrInvalidToken       = myerrors.NewError("Некорректный токен")
+	ErrParseToken         = myerrors.NewError("Ошибка парсинга токена")
 )
 
 type UserJwtPayload struct {

@@ -12,7 +12,10 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-var ErrWrongCredentials = myerrors.NewError("Некорректный логин или пароль")
+var (
+	ErrWrongCredentials = myerrors.NewError("Некорректный логин или пароль")
+	ErrDecodeUser       = myerrors.NewError("Некорректный json пользователя")
+)
 
 func validateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
 	decoder := json.NewDecoder(r)
@@ -21,7 +24,7 @@ func validateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
 	if err := decoder.Decode(userWithoutID); err != nil {
 		log.Printf("in ValidateUserWithoutID: %+v\n", err)
 
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeUser)
 	}
 
 	userWithoutID.Trim()
@@ -65,7 +68,7 @@ func validateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 	if err := decoder.Decode(userWithoutPassword); err != nil {
 		log.Printf("in ValidateUserWithoutPassword: %+v\n", err)
 
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeUser)
 	}
 
 	userWithoutPassword.Trim()

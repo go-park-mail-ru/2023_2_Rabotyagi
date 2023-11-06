@@ -12,7 +12,7 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-var ErrDecodePreProduct = myerrors.NewError("incorrect json of Product")
+var ErrDecodePreProduct = myerrors.NewError("Некорректный json объявления")
 
 func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
 	decoder := json.NewDecoder(r)
