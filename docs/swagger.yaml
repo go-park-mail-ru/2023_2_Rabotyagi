@@ -83,7 +83,7 @@ definitions:
         items:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
         type: array
-      in_favourite:
+      in_favourites:
         type: boolean
       price:
         type: integer
@@ -276,6 +276,30 @@ paths:
             type: string
       summary: logout
   /order/add:
+    patch:
+      consumes:
+      - application/json
+      description: buy all orders from basket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: buy all orders from basket
     post:
       consumes:
       - application/json
@@ -466,6 +490,42 @@ paths:
           schema:
             type: string
       summary: get product
+  /product/get_list_of_saler:
+    get:
+      consumes:
+      - application/json
+      description: get list of products for saler using user id from cookies\jwt
+      parameters:
+      - description: count products
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: 'last product id '
+        in: query
+        name: last_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get list of products for saler
   /product/update:
     patch:
       consumes:

@@ -100,6 +100,42 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "buy all orders from basket",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "buy all orders from basket",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/order/get_basket": {
@@ -293,6 +329,60 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "get product",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "count products",
+                        "name": "count",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "last product id ",
+                        "name": "last_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_pkg_product_delivery.ProductListResponse"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/get_list_of_saler": {
+            "get": {
+                "description": "get list of products for saler using user id from cookies\\jwt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "get list of products for saler",
                 "parameters": [
                     {
                         "type": "integer",
@@ -800,7 +890,7 @@ const docTemplate = `{
                         "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image"
                     }
                 },
-                "in_favourite": {
+                "in_favourites": {
                     "type": "boolean"
                 },
                 "price": {
