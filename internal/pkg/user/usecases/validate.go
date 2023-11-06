@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
@@ -23,9 +22,7 @@ func ValidateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	userWithoutID.Email = strings.TrimSpace(userWithoutID.Email)
-	userWithoutID.Name = strings.TrimSpace(userWithoutID.Name)
-	userWithoutID.Phone = strings.TrimSpace(userWithoutID.Phone)
+	userWithoutID.Trim()
 
 	_, err := govalidator.ValidateStruct(userWithoutID)
 	if err != nil {
@@ -47,9 +44,7 @@ func validateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	userWithoutPassword.Email = strings.TrimSpace(userWithoutPassword.Email)
-	userWithoutPassword.Name = strings.TrimSpace(userWithoutPassword.Name)
-	userWithoutPassword.Phone = strings.TrimSpace(userWithoutPassword.Phone)
+	userWithoutPassword.Trim()
 
 	_, err := govalidator.ValidateStruct(userWithoutPassword)
 

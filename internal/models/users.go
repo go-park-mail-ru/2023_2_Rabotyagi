@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strings"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -43,10 +44,22 @@ type UserWithoutPassword struct {
 	Birthday *time.Time `json:"birthday"` //nolint
 }
 
+func (u *UserWithoutPassword) Trim() {
+	u.Email = strings.TrimSpace(u.Email)
+	u.Name = strings.TrimSpace(u.Name)
+	u.Phone = strings.TrimSpace(u.Phone)
+}
+
 type UserWithoutID struct {
 	Email    string     `json:"email"    valid:"required,email~Not valid email"`
 	Phone    string     `json:"phone"    valid:"required, numeric~Phone may contain only numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
 	Name     string     `json:"name"     valid:"required, regexp=^[а-яА-Яa-zA-Z0-9\s]+$~Name may contain only russian, english letter, numbers and spaces"`
 	Password string     `json:"password" valid:"required,password~Password must be at least 6 symbols"`
 	Birthday *time.Time `json:"birthday"` //nolint
+}
+
+func (u *UserWithoutID) Trim() {
+	u.Email = strings.TrimSpace(u.Email)
+	u.Name = strings.TrimSpace(u.Name)
+	u.Phone = strings.TrimSpace(u.Phone)
 }
