@@ -4,12 +4,17 @@ import (
 	"context"
 	"net/http"
 
+	filedelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/delivery"
+	filerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
+	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/middleware"
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/delivery"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 )
+
+const baseDir = "./db/img/"
 
 type ConfigMux struct {
 	addrOrigin string
@@ -36,12 +41,12 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 		configMux.addrOrigin, configMux.schema, configMux.portServer,
 	)
 
-	imgHandler := http.StripPrefix(
-		"/api/v1/img/",
-		http.FileServer(http.Dir("./db/img")),
-	)
+	fileStorage := filerepo.NewFileSystemStorage(baseDir)
+	fileService := fileusecases.NewFileService(fileStorage)
+	fileHandler := filedelivery.NewFileHandler(baseDir, fileService)
 
-	router.Handle("/api/v1/img/", imgHandler)
+	router.Handle("/api/v1/img/", fileHandler)
+	router.Handle("/api/v1/img/upload", middleware.Context(ctx, fileHandler.UploadFileHandler))
 
 	router.Handle("/api/v1/signup", middleware.Context(ctx, userHandler.SignUpHandler))
 	router.Handle("/api/v1/signin", middleware.Context(ctx, userHandler.SignInHandler))
