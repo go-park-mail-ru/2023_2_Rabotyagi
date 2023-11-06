@@ -1,14 +1,11 @@
 package delivery
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-
-	"github.com/asaskevich/govalidator"
 )
 
 // GetBasketHandler godoc
@@ -49,7 +46,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	delivery.SendOkResponse(w, NewOrderListResponse(delivery.StatusResponseSuccessful, orders))
-	log.Printf("in GetBasketHandler: get basket of orders: %+v", orders)
+	log.Printf("in GetBasketHandler: get basket of orders: %+v\n", orders)
 }
 
 // UpdateOrderCountHandler godoc
@@ -59,7 +56,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 //	@Accept      json
 //	@Produce    json
 //
-// @Param count  body internal_models.OrderChanges true  "order data for updating"
+// @Param orderChanges  body internal_models.OrderChanges true  "order data for updating use only id and count"
 //
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
@@ -99,10 +96,24 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 	}
 
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateCountOrder))
-	log.Printf("in UpdateOrderCountHandler: updated order count=%d for order id=%d for user id=%d:",
+	log.Printf("in UpdateOrderCountHandler: updated order count=%d for order id=%d for user id=%d\n",
 		orderChanges.Count, orderChanges.ID, userID)
 }
 
+// UpdateOrderStatusHandler godoc
+//
+//	@Summary    update order status
+//	@Description  update order status using user id from cookie\jwt token
+//	@Accept      json
+//	@Produce    json
+//
+// @Param orderChanges  body internal_models.OrderChanges true  "order data for updating use only id and status"
+//
+//	@Success    200  {object} delivery.Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /order/get_basket [path]
 func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
@@ -117,37 +128,27 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 		return
 	}
 
+	orderChanges, err := usecases.ValidateOrderChangesStatus(r.Body)
+	if err != nil {
+		delivery.HandleErr(w, "in UpdateOrderStatusHandler:", err)
+
+		return
+	}
+
 	ctx := r.Context()
+	userID := delivery.GetUserIDFromCookie(r)
 
-	newOrder := struct {
-		ID     uint64 `json:"id"          valid:"required"`
-		Status uint8  `json:"status"       valid:"required"`
-	}{}
-
-	decoder := json.NewDecoder(r.Body)
-
-	if err := decoder.Decode(&newOrder); err != nil {
-		delivery.HandleErr(w, "in UpdateOrderStatusHandler:", err)
-
-		return
-	}
-
-	_, err := govalidator.ValidateStruct(newOrder)
+	err = p.storage.UpdateOrderStatus(ctx, userID, orderChanges.ID, orderChanges.Status)
 	if err != nil {
 		delivery.HandleErr(w, "in UpdateOrderStatusHandler:", err)
 
 		return
 	}
 
-	updatedOrder, err := p.storage.UpdateOrderStatus(ctx, newOrder.ID, newOrder.Status)
-	if err != nil {
-		delivery.HandleErr(w, "in UpdateOrderStatusHandler:", err)
-
-		return
-	}
-
-	delivery.SendOkResponse(w, NewOrderResponse(delivery.StatusResponseSuccessful, updatedOrder))
-	log.Printf("in UpdateOrderStatusHandler: update order status: %+v", updatedOrder)
+	delivery.SendOkResponse(w,
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateStatusOrder))
+	log.Printf("in UpdateOrderStatusHandler: updated order id=%d with status=%d for user id=%d\n",
+		orderChanges.ID, orderChanges.Status, userID)
 }
 
 // AddOrderHandler godoc
@@ -197,5 +198,5 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddOrder))
-	log.Printf("in AddOrderHandler: add order on productID=%d for userID=%d", preOrder.ProductID, userID)
+	log.Printf("in AddOrderHandler: add order on productID=%d for userID=%d\n", preOrder.ProductID, userID)
 }

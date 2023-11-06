@@ -10,7 +10,7 @@ type IBasketStorage interface {
 	AddOrderInBasket(ctx context.Context, userID uint64, productID uint64, count uint32) error
 	GetOrdersInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
 	UpdateOrderCount(ctx context.Context, userID uint64, orderID uint64, newCount uint32) error
-	UpdateOrderStatus(ctx context.Context, orderID uint64, newStatus uint8) (*models.Order, error)
+	UpdateOrderStatus(ctx context.Context, userID uint64, orderID uint64, newStatus uint8) error
 }
 
 type IProductStorage interface {

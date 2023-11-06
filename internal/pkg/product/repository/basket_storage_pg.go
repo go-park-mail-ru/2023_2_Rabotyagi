@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -11,7 +12,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var ErrLessStatus = myerrors.NewError("статус заказа должен только увеличиваться")
+var (
+	ErrLessStatus    = myerrors.NewError("Статус заказа должен только увеличиваться")
+	ErrNotFoundOrder = myerrors.NewError("Не получилось найти такой заказ для изменения")
+)
 
 func (p *ProductStorage) selectOrdersByUserID(ctx context.Context, tx pgx.Tx, userID uint64) ([]*models.Order, error) {
 	var orders []*models.Order
@@ -216,34 +220,38 @@ func (p *ProductStorage) updateOrderStatusByOrderID(ctx context.Context,
 	return nil
 }
 
-func (p *ProductStorage) getStatusByOrderID(ctx context.Context, tx pgx.Tx, orderID uint64) (uint8, error) {
-	SQLGetOrderByID := `SELECT status 
-		 FROM public."order" WHERE id=$1`
+func (p *ProductStorage) getStatusAndCountByOrderID(ctx context.Context,
+	tx pgx.Tx, userID uint64, orderID uint64,
+) (uint8, uint32, error) {
+	SQLGetOrderByID := `SELECT status, count
+		 FROM public."order" WHERE owner_id=$1 AND id=$2`
 
-	orderRow := tx.QueryRow(ctx, SQLGetOrderByID, orderID)
+	orderRow := tx.QueryRow(ctx, SQLGetOrderByID, userID, orderID)
 
 	var status uint8
-	err := orderRow.Scan(status)
 
+	var count uint32
+
+	err := orderRow.Scan(&status, &count)
 	if err != nil {
-		log.Printf("in getStatusByOrderID: %+v", err)
+		log.Printf("in getStatusAndCountByOrderID: %+v", err)
 
-		return 255, fmt.Errorf(myerrors.ErrTemplate, err)
+		return models.OrderStatusError, 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return status, nil
+	return status, count, nil
 }
 
-func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context, tx pgx.Tx, orderID uint64) error {
+func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context, tx pgx.Tx, orderID uint64, count uint32) error {
 	SQLDecreaseAvailableCountByOrderID := `UPDATE public."product"
-		 SET available_count = available_count - 1
+		 SET available_count = available_count - $1
 		 WHERE id = (
 			SELECT product_id
 			FROM public."order"
-			WHERE id = $1
+			WHERE id = $2
 		 )`
 
-	_, err := tx.Exec(ctx, SQLDecreaseAvailableCountByOrderID, orderID)
+	_, err := tx.Exec(ctx, SQLDecreaseAvailableCountByOrderID, count, orderID)
 	if err != nil {
 		log.Printf("in decreaseAvailableCountByOrderID: %+v", err)
 
@@ -254,13 +262,15 @@ func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context, tx
 }
 
 func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
-	orderID uint64, newStatus uint8,
-) (*models.Order, error) {
-	updatedOrder := &models.Order{} //nolint:exhaustruct
-
+	userID uint64, orderID uint64, newStatus uint8,
+) error {
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		curStatus, err := p.getStatusByOrderID(ctx, tx, orderID)
+		curStatus, count, err := p.getStatusAndCountByOrderID(ctx, tx, userID, orderID)
 		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return fmt.Errorf(myerrors.ErrTemplate, ErrNotFoundOrder)
+			}
+
 			return err
 		}
 
@@ -269,7 +279,7 @@ func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
 		}
 
 		if curStatus == 0 {
-			err = p.decreaseAvailableCountByOrderID(ctx, tx, orderID)
+			err = p.decreaseAvailableCountByOrderID(ctx, tx, orderID, count)
 			if err != nil {
 				return err
 			}
@@ -280,20 +290,15 @@ func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
 			return err
 		}
 
-		updatedOrder, err = p.getOrderByID(ctx, tx, orderID)
-		if err != nil {
-			return err
-		}
-
 		return nil
 	})
 	if err != nil {
 		log.Printf("in UpdateOrderStatus: %+v\n", err)
 
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return updatedOrder, nil
+	return nil
 }
 
 func (p *ProductStorage) insertOrder(ctx context.Context, tx pgx.Tx,

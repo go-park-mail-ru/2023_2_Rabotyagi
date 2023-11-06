@@ -16,6 +16,7 @@ var (
 	ErrDecodePreProduct   = myerrors.NewError("Некорректный json объявления")
 	ErrDecodePreOrder     = myerrors.NewError("Некорректный json заказа")
 	ErrDecodeOrderChanges = myerrors.NewError("Некорректный json изменения заказа")
+	ErrNotExistingStatus  = myerrors.NewError("Статус заказа не может быть больше %d", models.OrderStatusClosed)
 )
 
 func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
@@ -98,7 +99,8 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 	}
 
 	_, err := govalidator.ValidateStruct(orderChanges)
-	return orderChanges, err
+
+	return orderChanges, err //nolint:wrapcheck
 }
 
 func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
@@ -107,9 +109,35 @@ func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	if err != nil && (govalidator.ErrorByField(err, "count") != "" ||
-		govalidator.ErrorByField(err, "id") != "") {
-		return nil, myerrors.NewError(err.Error())
+	if err != nil {
+		errID := govalidator.ErrorByField(err, "id")
+		errCount := govalidator.ErrorByField(err, "count")
+
+		if errID != "" || errCount != "" {
+			return nil, myerrors.NewError("%s\n%s", errCount, errID)
+		}
+	}
+
+	return orderChanges, nil
+}
+
+func ValidateOrderChangesStatus(r io.Reader) (*models.OrderChanges, error) {
+	orderChanges, err := validateOrderChanges(r)
+	if orderChanges == nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	if err != nil {
+		errStatus := govalidator.ErrorByField(err, "status")
+		errID := govalidator.ErrorByField(err, "id")
+
+		if errID != "" || errStatus != "" {
+			return nil, myerrors.NewError("%s\n%s", errStatus, errID)
+		}
+	}
+
+	if orderChanges.Status > models.OrderStatusClosed {
+		return nil, ErrNotExistingStatus
 	}
 
 	return orderChanges, nil

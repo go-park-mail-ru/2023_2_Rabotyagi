@@ -40,3 +40,11 @@ type OrderInBasket struct {
 	InFavourites bool    `json:"in_favourites" valid:"required"`
 	Images       []Image `json:"images"`
 }
+
+const (
+	OrderStatusInBasket = iota
+	OrderStatusInProcessing
+	OrderStatusPaid
+	OrderStatusClosed
+	OrderStatusError = 255
+)
