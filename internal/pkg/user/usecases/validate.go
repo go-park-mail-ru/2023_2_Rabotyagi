@@ -45,12 +45,15 @@ func ValidateUserWithoutID(logger *zap.SugaredLogger, r io.Reader) (*models.User
 	return userWithoutID, nil
 }
 
-func ValidateUserCredentials(logger *zap.SugaredLogger, r io.Reader) (*models.UserWithoutID, error) {
-	userWithoutID, err := validateUserWithoutID(logger, r)
-	if userWithoutID == nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
+func ValidateUserCredentials(logger *zap.SugaredLogger, email string, password string) (*models.UserWithoutID, error) {
+	userWithoutID := new(models.UserWithoutID)
 
+	userWithoutID.Email = email
+	userWithoutID.Password = password
+	userWithoutID.Trim()
+	logger.Infoln(userWithoutID)
+
+	_, err := govalidator.ValidateStruct(userWithoutID)
 	if err != nil && (govalidator.ErrorByField(err, "email") != "" ||
 		govalidator.ErrorByField(err, "password") != "") {
 		logger.Errorf("in ValidateUserCredentials: %+v\n", err)

@@ -864,17 +864,21 @@ paths:
       tags:
       - profile
   /signin:
-    post:
+    get:
       consumes:
       - application/json
       description: signin in app
       parameters:
-      - description: user data for signin
-        in: body
-        name: preUser
+      - description: user email for signin
+        in: query
+        name: email
         required: true
-        schema:
-          $ref: '#/definitions/internal_models.UserWithoutID'
+        type: string
+      - description: user password for signin
+        in: query
+        name: password
+        required: true
+        type: string
       produces:
       - application/json
       responses:

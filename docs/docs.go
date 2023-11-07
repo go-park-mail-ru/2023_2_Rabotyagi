@@ -915,7 +915,7 @@ const docTemplate = `{
             }
         },
         "/signin": {
-            "post": {
+            "get": {
                 "description": "signin in app",
                 "consumes": [
                     "application/json"
@@ -929,13 +929,18 @@ const docTemplate = `{
                 "summary": "signin",
                 "parameters": [
                     {
-                        "description": "user data for signin",
-                        "name": "preUser",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_models.UserWithoutID"
-                        }
+                        "type": "string",
+                        "description": "user email for signin",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user password for signin",
+                        "name": "password",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
