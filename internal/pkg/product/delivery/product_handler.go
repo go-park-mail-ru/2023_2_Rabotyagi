@@ -48,7 +48,6 @@ func NewProductHandler(storage usecases.IProductStorage,
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/add [post]
 func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
 	if r.Method == http.MethodOptions {
@@ -96,7 +95,6 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/get/{id} [get]
 func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
 	if r.Method == http.MethodOptions {
@@ -149,7 +147,6 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/get_list [get]
 func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
 	if r.Method == http.MethodOptions {
@@ -201,7 +198,6 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 //	@Router      /product/update [patch]
 //	@Router      /product/update [put]
 func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
 	if r.Method == http.MethodOptions {
@@ -280,7 +276,6 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/get_list_of_saler [get]
 func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
 	if r.Method == http.MethodOptions {
@@ -330,7 +325,6 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/close/ [patch]
 func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
 	if r.Method == http.MethodOptions {
@@ -382,7 +376,6 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/delete/ [delete]
 func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
 	if r.Method == http.MethodOptions {

@@ -47,7 +47,6 @@ func NewUserHandler(storage usecases.IUserStorage, addrOrigin string, schema str
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signup [post]
 func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, u.addrOrigin, u.schema)
 
 	if r.Method == http.MethodOptions {
@@ -113,7 +112,6 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signin [post]
 func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, u.addrOrigin, u.schema)
 
 	if r.Method == http.MethodOptions {
@@ -183,7 +181,6 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /logout [post]
 func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	delivery.SetupCORS(w, u.addrOrigin, u.schema)
 
 	if r.Method == http.MethodOptions {
