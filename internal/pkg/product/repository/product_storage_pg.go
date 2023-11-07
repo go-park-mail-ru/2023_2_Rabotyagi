@@ -16,8 +16,9 @@ import (
 )
 
 var (
-	ErrProductNotFound = myerrors.NewError("Это объявление не найдено")
-	ErrNoUpdateFields  = myerrors.NewError("Вы пытаетесь обновить пустое количество полей объявления")
+	ErrProductNotFound       = myerrors.NewError("Это объявление не найдено")
+	ErrNoUpdateFields        = myerrors.NewError("Вы пытаетесь обновить пустое количество полей объявления")
+	ErrNoAffectedProductRows = myerrors.NewError("Не получилось обновить данные товара")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
@@ -405,11 +406,16 @@ func (p *ProductStorage) updateProduct(ctx context.Context, tx pgx.Tx,
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	_, err = tx.Exec(ctx, queryString, args...)
+	result, err := tx.Exec(ctx, queryString, args...)
 	if err != nil {
 		log.Printf("updateProduct: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedProductRows)
 	}
 
 	return nil
@@ -435,11 +441,16 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 func (p *ProductStorage) closeProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
 	SQLCloseProduct := `UPDATE public."product" SET available_count=0, is_active=false WHERE id=$1 AND saler_id=$2`
 
-	_, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
+	result, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
 	if err != nil {
 		log.Printf("in closeProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedProductRows)
 	}
 
 	return nil
@@ -466,11 +477,16 @@ func (p *ProductStorage) CloseProduct(ctx context.Context, productID uint64, use
 func (p *ProductStorage) deleteProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
 	SQLCloseProduct := `DELETE FROM public."product" WHERE id=$1 AND saler_id=$2`
 
-	_, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
+	result, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
 	if err != nil {
 		log.Printf("in deleteProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedProductRows)
 	}
 
 	return nil

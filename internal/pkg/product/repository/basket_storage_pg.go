@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	ErrLessStatus    = myerrors.NewError("Статус заказа должен только увеличиваться")
-	ErrNotFoundOrder = myerrors.NewError("Не получилось найти такой заказ для изменения")
+	ErrLessStatus          = myerrors.NewError("Статус заказа должен только увеличиваться")
+	ErrNotFoundOrder       = myerrors.NewError("Не получилось найти такой заказ для изменения")
+	ErrNoAffectedOrderRows = myerrors.NewError("Не получилось обновить данные заказа")
 )
 
 func (p *ProductStorage) selectOrdersByUserID(ctx context.Context, tx pgx.Tx, userID uint64) ([]*models.Order, error) {
@@ -157,11 +158,16 @@ func (p *ProductStorage) updateOrderCountByOrderID(ctx context.Context,
 		 SET count=$1
 		 WHERE id=$2 AND owner_id=$3`
 
-	_, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newCount, orderID, userID)
+	result, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newCount, orderID, userID)
 	if err != nil {
 		log.Printf("in updateOrderCountByOrderID: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedOrderRows)
 	}
 
 	return nil
@@ -213,11 +219,16 @@ func (p *ProductStorage) updateOrderStatusByOrderID(ctx context.Context,
 		 SET status=$1
 		 WHERE id=$2`
 
-	_, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newStatus, orderID)
+	result, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newStatus, orderID)
 	if err != nil {
 		log.Printf("in updateOrderStatusByOrderID: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedOrderRows)
 	}
 
 	return nil
@@ -254,11 +265,16 @@ func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context, tx
 			WHERE id = $2
 		 )`
 
-	_, err := tx.Exec(ctx, SQLDecreaseAvailableCountByOrderID, count, orderID)
+	result, err := tx.Exec(ctx, SQLDecreaseAvailableCountByOrderID, count, orderID)
 	if err != nil {
 		log.Printf("in decreaseAvailableCountByOrderID: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedOrderRows)
 	}
 
 	return nil
@@ -373,11 +389,16 @@ func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context, tx 
 		`DELETE FROM public."order"
 		 WHERE id=$1 AND owner_id=$2`
 
-	_, err := tx.Exec(ctx, SQLDeleteOrderByID, models.OrderStatusInProcessing, orderID, ownerID)
+	result, err := tx.Exec(ctx, SQLDeleteOrderByID, models.OrderStatusInProcessing, orderID, ownerID)
 	if err != nil {
 		log.Printf("in deleteOrderByID: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedOrderRows)
 	}
 
 	return nil

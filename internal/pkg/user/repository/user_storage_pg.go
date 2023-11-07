@@ -18,10 +18,11 @@ import (
 )
 
 var (
-	ErrEmailBusy      = myerrors.NewError("Такой email уже занят")
-	ErrPhoneBusy      = myerrors.NewError("Такой телефон уже занят")
-	ErrWrongPassword  = myerrors.NewError("Некорректный пароль")
-	ErrNoUpdateFields = myerrors.NewError("Вы пытаетесь обновить пустое количество полей")
+	ErrEmailBusy          = myerrors.NewError("Такой email уже занят")
+	ErrPhoneBusy          = myerrors.NewError("Такой телефон уже занят")
+	ErrWrongPassword      = myerrors.NewError("Некорректный пароль")
+	ErrNoUpdateFields     = myerrors.NewError("Вы пытаетесь обновить пустое количество полей")
+	ErrNoAffectedUserRows = myerrors.NewError("Не получилось обновить данные пользователя")
 
 	NameSeqUser = pgx.Identifier{"public", "user_id_seq"} //nolint:gochecknoglobals
 )
@@ -215,11 +216,16 @@ func (u *UserStorage) updateUser(ctx context.Context,
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	_, err = tx.Exec(ctx, queryString, args...)
+	result, err := tx.Exec(ctx, queryString, args...)
 	if err != nil {
 		log.Printf("Error in UpdateUser while executing: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedUserRows)
 	}
 
 	return nil
