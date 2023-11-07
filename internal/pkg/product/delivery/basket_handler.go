@@ -46,6 +46,10 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	for _, order := range orders {
+		order.Sanitize()
+	}
+
 	delivery.SendOkResponse(w, NewOrderListResponse(delivery.StatusResponseSuccessful, orders))
 	log.Printf("in GetBasketHandler: get basket of orders: %+v\n", orders)
 }

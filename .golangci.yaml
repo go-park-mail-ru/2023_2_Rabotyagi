@@ -140,6 +140,7 @@ linters-settings:
           - github.com/asaskevich/govalidator
           - github.com/Masterminds/squirrel
           - golang.org/x/crypto/argon2
+          - github.com/microcosm-cc/bluemonday
         deny:
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package

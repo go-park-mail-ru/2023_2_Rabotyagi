@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"github.com/microcosm-cc/bluemonday"
 	"time"
 )
 
@@ -50,3 +51,10 @@ const (
 	OrderStatusClosed
 	OrderStatusError = 255
 )
+
+func (o *OrderInBasket) Sanitize() {
+	sanitizer := bluemonday.UGCPolicy()
+
+	o.City = sanitizer.Sanitize(o.City)
+	o.Title = sanitizer.Sanitize(o.Title)
+}

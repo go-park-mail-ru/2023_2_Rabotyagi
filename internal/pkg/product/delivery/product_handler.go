@@ -128,6 +128,8 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	product.Sanitize()
+
 	delivery.SendOkResponse(w, NewProductResponse(delivery.StatusResponseSuccessful, product))
 	log.Printf("in GetProductHandler: get product: %+v", product)
 }
@@ -176,6 +178,10 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
+	}
+
+	for _, product := range products {
+		product.Sanitize()
 	}
 
 	delivery.SendOkResponse(w, NewProductListResponse(delivery.StatusResponseSuccessful, products))
@@ -304,6 +310,10 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
+	}
+
+	for _, product := range products {
+		product.Sanitize()
 	}
 
 	delivery.SendOkResponse(w, NewProductListResponse(delivery.StatusResponseSuccessful, products))

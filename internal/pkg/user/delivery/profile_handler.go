@@ -58,6 +58,8 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user.Sanitize()
+
 	delivery.SendOkResponse(w, NewProfileResponse(delivery.StatusResponseSuccessful, user))
 	log.Printf("in GetPostHandler: get product: %+v", user)
 }
@@ -131,6 +133,8 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 		return
 	}
+
+	updatedUser.Sanitize()
 
 	delivery.SendOkResponse(w, NewProfileResponse(delivery.StatusResponseSuccessful, updatedUser))
 	log.Printf("Successfully updated: %+v", userID)

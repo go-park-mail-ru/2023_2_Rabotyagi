@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"github.com/microcosm-cc/bluemonday"
 	"strings"
 
 	"github.com/asaskevich/govalidator"
@@ -62,4 +63,12 @@ func (u *UserWithoutID) Trim() {
 	u.Email = strings.TrimSpace(u.Email)
 	u.Name = strings.TrimSpace(u.Name)
 	u.Phone = strings.TrimSpace(u.Phone)
+}
+
+func (u *UserWithoutPassword) Sanitize() {
+	sanitizer := bluemonday.UGCPolicy()
+
+	u.Email = sanitizer.Sanitize(u.Email)
+	u.Phone = sanitizer.Sanitize(u.Phone)
+	u.Name = sanitizer.Sanitize(u.Name)
 }
