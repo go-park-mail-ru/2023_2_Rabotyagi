@@ -85,7 +85,8 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.Secret)
 	if err != nil {
 		u.logger.Errorf("in SignUpHandler: %+v\n", err)
-		delivery.SendErrResponse(w, u.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendErrResponse(w, u.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -109,12 +110,13 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Tags auth
 //	@Accept      json
 //	@Produce    json
-//	@Param      preUser  body internal_models.UserWithoutID true  "user data for signin"
+//	@Param      email  query string true  "user email for signin"
+//	@Param      password  query string true  "user password for signin"
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /signin [post]
+//	@Router      /signin [get]
 func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	delivery.SetupCORS(w, u.addrOrigin, u.schema)
 
@@ -130,7 +132,8 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userWithoutID, err := userusecases.ValidateUserCredentials(u.logger, r.Body)
+	userWithoutID, err := userusecases.ValidateUserCredentials(u.logger,
+		r.URL.Query().Get("email"), r.URL.Query().Get("password"))
 	if err != nil {
 		u.logger.Errorf("in SignInHandler: %+v\n", err)
 		delivery.HandleErr(w, u.logger, err)
