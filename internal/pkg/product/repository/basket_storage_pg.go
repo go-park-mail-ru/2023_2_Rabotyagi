@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 
 	"github.com/jackc/pgx/v5"
 )
 
 var (
-	NameSeqOrder = pgx.Identifier{"public", "order_id_seq"}
+	NameSeqOrder = pgx.Identifier{"public", "order_id_seq"} //nolint:gochecknoglobals
 
 	ErrLessStatus              = myerrors.NewError("Статус заказа должен только увеличиваться")
 	ErrNotFoundOrder           = myerrors.NewError("Не получилось найти такой заказ для изменения")
@@ -421,13 +421,12 @@ func (p *ProductStorage) BuyFullBasket(ctx context.Context, userID uint64) error
 func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context,
 	tx pgx.Tx, orderID uint64, ownerID uint64,
 ) error {
-	SQLDeleteOrderByID :=
-		`DELETE FROM public."order"
+	SQLDeleteOrderByID := `DELETE FROM public."order"
 		 WHERE id=$1 AND owner_id=$2`
 
 	result, err := tx.Exec(ctx, SQLDeleteOrderByID, models.OrderStatusInProcessing, orderID, ownerID)
 	if err != nil {
-		p.logger.Errorf("in deleteOrderByID: %+v\n", err)
+		p.logger.Errorf("in deleteOrderByOrderIDAndOwnerID: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -450,7 +449,7 @@ func (p *ProductStorage) DeleteOrder(ctx context.Context, orderID uint64, ownerI
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in DeleteOrderByID: %+v\n", err)
+		p.logger.Errorf("in DeleteOrder: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}

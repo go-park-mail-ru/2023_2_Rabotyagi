@@ -76,13 +76,14 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 	productID, err := p.storage.AddProduct(ctx, preProduct)
 	if err != nil {
 		p.logger.Errorf("in AddProductHandler: %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
 	delivery.SendOkResponse(w, p.logger, delivery.NewResponseRedirect(p.createURLToProductFromID(productID)))
-	p.logger.Infof("added product: %+v", preProduct)
+	p.logger.Infof("in AddProductHandler: added product: %+v", preProduct)
 }
 
 // GetProductHandler godoc
@@ -180,7 +181,8 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 	products, err := p.storage.GetNewProducts(ctx, lastID, count, userID)
 	if err != nil {
 		p.logger.Errorf("in GetListProductOfSalerHandler: %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -240,7 +242,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 	if r.Method == http.MethodPatch {
 		preProduct, err = usecases.ValidatePartOfPreProduct(p.logger, r.Body)
 		if err != nil {
-			p.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
+			p.logger.Errorf("in UpdateProductHandler: %+v\n", err)
 			delivery.HandleErr(w, p.logger, err)
 
 			return
@@ -248,7 +250,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 	} else {
 		preProduct, err = usecases.ValidatePreProduct(p.logger, r.Body)
 		if err != nil {
-			p.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
+			p.logger.Errorf("in UpdateProductHandler: %+v\n", err)
 			delivery.HandleErr(w, p.logger, err)
 
 			return
@@ -265,14 +267,14 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 
 	err = p.storage.UpdateProduct(ctx, productID, updateFieldsMap)
 	if err != nil {
-		p.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
+		p.logger.Errorf("in UpdateProductHandler: %+v\n", err)
 		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	delivery.SendOkResponse(w, p.logger, delivery.NewResponseRedirect(p.createURLToProductFromID(productID)))
-	p.logger.Infof("in GetProductListHandler: updated product with id = %+v", productID)
+	p.logger.Infof("in UpdateProductHandler: updated product with id = %+v", productID)
 }
 
 // GetListProductOfSalerHandler godoc
@@ -316,7 +318,8 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, userID)
 	if err != nil {
 		p.logger.Errorf("in GetListProductOfSalerHandler: %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -363,7 +366,8 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
 		p.logger.Errorf("in CloseProductHandler: %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
 
 		return
 	}
@@ -371,12 +375,14 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 	err = p.storage.CloseProduct(ctx, productID, userID)
 	if err != nil {
 		p.logger.Errorf("in CloseProductHandler: %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
+	delivery.SendOkResponse(w, p.logger,
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
 	p.logger.Infof("in CloseProductHandler: close product id=%d", productID)
 }
 
@@ -414,7 +420,8 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
 		p.logger.Errorf("in DeleteProductHandler: %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
 
 		return
 	}
@@ -422,11 +429,13 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 	err = p.storage.DeleteProduct(ctx, productID, userID)
 	if err != nil {
 		p.logger.Errorf("in DeleteProductHandler: %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
+	delivery.SendOkResponse(w, p.logger,
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
 	p.logger.Infof("in DeleteProductHandler: delete product id=%d", productID)
 }

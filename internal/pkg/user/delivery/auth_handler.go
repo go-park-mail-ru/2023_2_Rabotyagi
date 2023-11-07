@@ -132,7 +132,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	userWithoutID, err := userusecases.ValidateUserCredentials(u.logger, r.Body)
 	if err != nil {
-		u.logger.Errorf("in SignUpHandler: %+v\n", err)
+		u.logger.Errorf("in SignInHandler: %+v\n", err)
 		delivery.HandleErr(w, u.logger, err)
 
 		return
@@ -140,7 +140,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.storage.GetUser(ctx, userWithoutID.Email, userWithoutID.Password)
 	if err != nil {
-		u.logger.Errorf("in SignUpHandler: %+v\n", err)
+		u.logger.Errorf("in SignInHandler: %+v\n", err)
 		delivery.HandleErr(w, u.logger, err)
 
 		return
@@ -156,8 +156,9 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		jwt.Secret,
 	)
 	if err != nil {
-		u.logger.Errorf("in SignUpHandler: %+v\n", err)
-		delivery.SendErrResponse(w, u.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		u.logger.Errorf("in SignInHandler: %+v\n", err)
+		delivery.SendErrResponse(w, u.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}

@@ -45,7 +45,8 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
 		u.logger.Errorf("in GetUserHandler: %+v", err)
-		delivery.SendErrResponse(w, u.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendErrResponse(w, u.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -61,7 +62,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	user.Sanitize()
 
 	delivery.SendOkResponse(w, u.logger, NewProfileResponse(delivery.StatusResponseSuccessful, user))
-	u.logger.Infof("in GetPostHandler: get product: %+v", user)
+	u.logger.Infof("in GetUserHandler: get product: %+v", user)
 }
 
 // PartiallyUpdateUserHandler godoc

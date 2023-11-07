@@ -81,7 +81,7 @@ func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx,
 	}
 
 	if err := userLine.Scan(&user.Email, &user.Phone, &user.Name, &user.Birthday); err != nil {
-		u.logger.Errorf("error in GetUserWithoutPasswordByID: %+v", err)
+		u.logger.Errorf("error in getUserWithoutPasswordByID: %+v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -117,7 +117,7 @@ func (u *UserStorage) isEmailBusy(ctx context.Context, tx pgx.Tx, email string) 
 			return false, nil
 		}
 
-		u.logger.Errorf("error in isEmailBusy: %+v", err)
+		u.logger.Errorf("in isEmailBusy: %+v", err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -149,7 +149,7 @@ func (u *UserStorage) isPhoneBusy(ctx context.Context, tx pgx.Tx, phone string) 
 			return false, nil
 		}
 
-		u.logger.Errorf("error in isPhoneBusy: %+v", err)
+		u.logger.Errorf("in isPhoneBusy: %+v", err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -177,7 +177,7 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 	preUser.Password, err = utils.HashPass(preUser.Password)
 
 	if err != nil {
-		u.logger.Errorf("preUser=%+v Error in hashingUser: %+v", preUser, err)
+		u.logger.Errorf("in createUser: preUser=%+v error in hashingUser: %+v", preUser, err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -193,7 +193,7 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 	}
 
 	if err != nil {
-		u.logger.Errorf("preUser=%+v Error in createUser: %+v", preUser, err)
+		u.logger.Errorf("in createUser: preUser=%+v err=%+v", preUser, err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -213,14 +213,14 @@ func (u *UserStorage) updateUser(ctx context.Context,
 
 	queryString, args, err := query.ToSql()
 	if err != nil {
-		u.logger.Errorf("in updateUser while converting ToSql: %+v", err)
+		u.logger.Errorf("in updateUser: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	result, err := tx.Exec(ctx, queryString, args...)
 	if err != nil {
-		u.logger.Errorf("Error in UpdateUser while executing: %+v", err)
+		u.logger.Errorf("in updateUser: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -295,7 +295,7 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 
 		err = u.createUser(ctx, tx, preUser)
 		if err != nil {
-			u.logger.Errorf("preUser=%+v Error in AddUser: %+v", preUser, err)
+			u.logger.Errorf("in AddUser: preUser=%+v err=%+v", preUser, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -331,7 +331,7 @@ func (u *UserStorage) GetUser(ctx context.Context, email string, password string
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
 		emailBusy, err := u.isEmailBusy(ctx, tx, email)
 		if err != nil {
-			u.logger.Errorf("preUser=%+v Error in GetUser: %+v", email, err)
+			u.logger.Errorf("in GetUser: email=%+v err=%+v", email, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -344,14 +344,14 @@ func (u *UserStorage) GetUser(ctx context.Context, email string, password string
 
 		user, err = u.getUserByEmail(ctx, tx, email)
 		if err != nil {
-			u.logger.Errorf("preUser=%+v Error in GetUser: %+v", email, err)
+			u.logger.Errorf("in GetUser: email=%+v err=%+v", email, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		hashPass, err := hex.DecodeString(user.Password)
 		if err != nil {
-			u.logger.Errorf("preUser=%+v Error in converting password: %+v", email, err)
+			u.logger.Errorf("in GetUser: eamil=%+v err= %+v", email, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
