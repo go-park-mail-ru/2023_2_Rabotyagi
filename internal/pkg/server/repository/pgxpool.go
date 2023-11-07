@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 
 	"github.com/jackc/pgx/v5/pgxpool"

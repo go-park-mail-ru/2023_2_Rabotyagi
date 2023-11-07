@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -67,6 +68,15 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		u.logger.Errorf("in SignUpHandler: %+v\n", err)
 		delivery.HandleErr(w, u.logger, err)
+
+		return
+	}
+
+	userWithoutID.Password, err = utils.HashPass(userWithoutID.Password)
+	if err != nil {
+		u.logger.Errorf("in SignUpHandler: %+v", err)
+		delivery.SendErrResponse(w, u.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}

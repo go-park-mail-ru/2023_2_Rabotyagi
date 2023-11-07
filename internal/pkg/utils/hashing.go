@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -21,7 +23,7 @@ func HashPass(plainPassword string) (string, error) {
 
 	_, err := rand.Read(salt)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return hex.EncodeToString(hashPassWithSalt(salt, plainPassword)), nil

@@ -175,13 +175,6 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 	var SQLCreateUser string
 
 	var err error
-	preUser.Password, err = utils.HashPass(preUser.Password)
-
-	if err != nil {
-		u.logger.Errorf("in createUser: preUser=%+v error in hashingUser: %+v", preUser, err)
-
-		return fmt.Errorf(myerrors.ErrTemplate, err)
-	}
 
 	if !preUser.Birthday.Valid || preUser.Birthday.Time.IsZero() {
 		SQLCreateUser = `INSERT INTO public."user" (email, phone, name, password) VALUES ($1, $2, $3, $4);`

@@ -56,5 +56,5 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@lat
 ```
 ### Пример команды, чтобы отменить миграцию
 ```shell
- migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations up
+ migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations down
 ```

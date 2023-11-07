@@ -6,7 +6,7 @@ const (
 	standardAllowOrigin = "localhost"
 	standardSchema      = "http://"
 	standardPort        = "8080"
-	standardURLDataBase = "postgres://postgres:password@localhost:5432/youla?sslmode=disable"
+	standardURLDataBase = "postgres://postgres:postgres@postgres:5432/youla?sslmode=disable"
 
 	envAllowOrigin = "ALLOW_ORIGIN"
 	envSchema      = "SCHEMA"
