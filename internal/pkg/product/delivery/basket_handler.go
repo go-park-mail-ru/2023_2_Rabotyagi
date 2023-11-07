@@ -40,7 +40,8 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 	orders, err := p.storage.GetOrdersInBasketByUserID(ctx, userID)
 	if err != nil {
 		p.logger.Errorf("in GetBasketHandler %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -101,7 +102,8 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateCountOrder))
+	delivery.SendOkResponse(w, p.logger,
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateCountOrder))
 	p.logger.Infof("in UpdateOrderCountHandler: updated order count=%d for order id=%d for user id=%d\n",
 		orderChanges.Count, orderChanges.ID, userID)
 }
@@ -169,7 +171,7 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 //
 // @Param preOrder  body internal_models.PreOrder true  "order data for adding"
 //
-//	@Success    200  {object} delivery.Response
+//	@Success    200  {object} OrderResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -199,7 +201,7 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err = p.storage.AddOrderInBasket(ctx, userID, preOrder.ProductID, preOrder.Count)
+	orderInBasket, err := p.storage.AddOrderInBasket(ctx, userID, preOrder.ProductID, preOrder.Count)
 	if err != nil {
 		p.logger.Errorf("in AddOrderHandler: %+v\n", err)
 		delivery.HandleErr(w, p.logger, err)
@@ -207,7 +209,7 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddOrder))
+	delivery.SendOkResponse(w, p.logger, NewOrderResponse(delivery.StatusResponseSuccessful, orderInBasket))
 	p.logger.Infof("in AddOrderHandler: add order on productID=%d for userID=%d\n", preOrder.ProductID, userID)
 }
 
@@ -248,7 +250,8 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulBuyFullBasket))
+	delivery.SendOkResponse(w, p.logger,
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulBuyFullBasket))
 	p.logger.Infof("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
 }
 
@@ -286,7 +289,8 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
 	if err != nil {
 		p.logger.Errorf("in DeleteOrderHandler: %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
 
 		return
 	}
@@ -294,11 +298,13 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 	err = p.storage.DeleteOrder(ctx, orderID, userID)
 	if err != nil {
 		p.logger.Errorf("in DeleteOrderHandler %+v\n", err)
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
+	delivery.SendOkResponse(w, p.logger,
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
 	p.logger.Infof("in DeleteOrderHandler: delete order id=%d", orderID)
 }

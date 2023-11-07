@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
@@ -12,53 +13,14 @@ import (
 )
 
 var (
-	ErrLessStatus          = myerrors.NewError("Статус заказа должен только увеличиваться")
-	ErrNotFoundOrder       = myerrors.NewError("Не получилось найти такой заказ для изменения")
-	ErrNoAffectedOrderRows = myerrors.NewError("Не получилось обновить данные заказа")
+	NameSeqOrder = pgx.Identifier{"public", "order_id_seq"}
+
+	ErrLessStatus              = myerrors.NewError("Статус заказа должен только увеличиваться")
+	ErrNotFoundOrder           = myerrors.NewError("Не получилось найти такой заказ для изменения")
+	ErrNotFoundOrdersInBasket  = myerrors.NewError("Не получилось найти заказы для покупки")
+	ErrNoAffectedOrderRows     = myerrors.NewError("Не получилось обновить данные заказа")
+	ErrAvailableCountNotEnough = myerrors.NewError("Товара доступно меньше, чем вы пытаетесь довавить в корзину")
 )
-
-func (p *ProductStorage) selectOrdersByUserID(ctx context.Context, tx pgx.Tx, userID uint64) ([]*models.Order, error) {
-	var orders []*models.Order
-
-	SQLSelectBasketByUserID := `SELECT  id, owner_id, product_id, count, status, created_at, updated_at, closed_at 
-								FROM public."order" WHERE owner_id=$1 AND status=0`
-
-	ordersRows, err := tx.Query(ctx, SQLSelectBasketByUserID, userID)
-	if err != nil {
-		p.logger.Errorf("in selectBasketByUserID: %+v\n", err)
-
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	curOrder := new(models.Order)
-
-	_, err = pgx.ForEachRow(ordersRows, []any{
-		&curOrder.ID, &curOrder.OwnerID,
-		&curOrder.ProductID, &curOrder.Count,
-		&curOrder.Status, &curOrder.CreatedAt,
-		&curOrder.UpdatedAt, &curOrder.ClosedAt,
-	}, func() error {
-		orders = append(orders, &models.Order{
-			ID:        curOrder.ID,
-			OwnerID:   curOrder.OwnerID,
-			ProductID: curOrder.ProductID,
-			Count:     curOrder.Count,
-			Status:    curOrder.Status,
-			CreatedAt: curOrder.CreatedAt,
-			UpdatedAt: curOrder.UpdatedAt,
-			ClosedAt:  curOrder.ClosedAt,
-		})
-
-		return nil
-	})
-	if err != nil {
-		p.logger.Errorf("in selectBasketByUserID: %+v\n", err)
-
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return orders, nil
-}
 
 func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	tx pgx.Tx, userID uint64,
@@ -255,7 +217,9 @@ func (p *ProductStorage) getStatusAndCountByOrderID(ctx context.Context,
 	return status, count, nil
 }
 
-func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context, tx pgx.Tx, orderID uint64, count uint32) error {
+func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context,
+	tx pgx.Tx, orderID uint64, count uint32,
+) error {
 	SQLDecreaseAvailableCountByOrderID := `UPDATE public."product"
 		 SET available_count = available_count - $1
 		 WHERE id = (
@@ -279,31 +243,42 @@ func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context, tx
 	return nil
 }
 
+func (p *ProductStorage) updateOrderStatus(ctx context.Context,
+	tx pgx.Tx, userID uint64, orderID uint64, newStatus uint8,
+) error {
+	curStatus, count, err := p.getStatusAndCountByOrderID(ctx, tx, userID, orderID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf(myerrors.ErrTemplate, ErrNotFoundOrder)
+		}
+
+		return err
+	}
+
+	if newStatus <= curStatus {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrLessStatus)
+	}
+
+	if curStatus == 0 {
+		err = p.decreaseAvailableCountByOrderID(ctx, tx, orderID, count)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = p.updateOrderStatusByOrderID(ctx, tx, orderID, newStatus)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
 	userID uint64, orderID uint64, newStatus uint8,
 ) error {
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		curStatus, count, err := p.getStatusAndCountByOrderID(ctx, tx, userID, orderID)
-		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				return fmt.Errorf(myerrors.ErrTemplate, ErrNotFoundOrder)
-			}
-
-			return err
-		}
-
-		if newStatus <= curStatus {
-			return fmt.Errorf(myerrors.ErrTemplate, ErrLessStatus)
-		}
-
-		if curStatus == 0 {
-			err = p.decreaseAvailableCountByOrderID(ctx, tx, orderID, count)
-			if err != nil {
-				return err
-			}
-		}
-
-		err = p.updateOrderStatusByOrderID(ctx, tx, orderID, newStatus)
+		err := p.updateOrderStatus(ctx, tx, userID, orderID, newStatus)
 		if err != nil {
 			return err
 		}
@@ -334,32 +309,92 @@ func (p *ProductStorage) insertOrder(ctx context.Context, tx pgx.Tx,
 	return nil
 }
 
-func (p *ProductStorage) AddOrderInBasket(ctx context.Context, userID uint64, productID uint64, count uint32) error {
+func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
+	userID uint64, productID uint64, count uint32,
+) (*models.OrderInBasket, error) {
+	orderInBasket := new(models.OrderInBasket)
+
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		err := p.insertOrder(ctx, tx, userID, productID, count)
+		productInner, err := p.getProduct(ctx, tx, productID, userID)
 		if err != nil {
 			return err
 		}
+
+		if productInner.AvailableCount < count {
+			return ErrAvailableCountNotEnough
+		}
+
+		err = p.insertOrder(ctx, tx, userID, productID, count)
+		if err != nil {
+			return err
+		}
+
+		idOrder, err := repository.GetLastValSeq(ctx, tx, p.logger, NameSeqOrder)
+		if err != nil {
+			return err
+		}
+
+		orderInBasket.ID = idOrder
+		orderInBasket.OwnerID = userID
+		orderInBasket.ProductID = productID
+		orderInBasket.Count = count
+		orderInBasket.SalerID = productInner.SalerID
+		orderInBasket.Title = productInner.Title
+		orderInBasket.Price = productInner.Price
+		orderInBasket.City = productInner.City
+		orderInBasket.AvailableCount = productInner.AvailableCount
+		orderInBasket.Delivery = productInner.Delivery
+		orderInBasket.SafeDeal = productInner.SafeDeal
+		orderInBasket.InFavourites = productInner.InFavourites
+		orderInBasket.Images = productInner.Images
 
 		return nil
 	})
 	if err != nil {
 		p.logger.Errorf("in AddOrderInBasket: %+v\n", err)
 
-		return fmt.Errorf(myerrors.ErrTemplate, err)
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return nil
+	return orderInBasket, nil
 }
 
 func (p *ProductStorage) updateStatusFullBasket(ctx context.Context, tx pgx.Tx, userID uint64) error {
-	SQLUpdateFullBasket := `UPDATE public."order" SET status=$1 WHERE owner_id=$2`
+	SQLSelectFullBasket := `SELECT id FROM public."order" WHERE owner_id=$1 AND status=0`
 
-	_, err := tx.Exec(ctx, SQLUpdateFullBasket, models.OrderStatusInProcessing, userID)
+	rows, err := tx.Query(ctx, SQLSelectFullBasket, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFoundOrdersInBasket
+		}
+
+		p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	var orderID uint64
+
+	var slOrderID []uint64
+
+	_, err = pgx.ForEachRow(rows, []any{&orderID}, func() error {
+		slOrderID = append(slOrderID, orderID)
+
+		return nil
+	})
 	if err != nil {
 		p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	for _, val := range slOrderID {
+		err = p.updateOrderStatus(ctx, tx, userID, val, models.OrderStatusInProcessing)
+		if err != nil {
+			p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
+
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
 	}
 
 	return nil
@@ -375,7 +410,7 @@ func (p *ProductStorage) BuyFullBasket(ctx context.Context, userID uint64) error
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in BuyFullBasketHandler: %+v\n", err)
+		p.logger.Errorf("in BuyFullBasket: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -383,7 +418,9 @@ func (p *ProductStorage) BuyFullBasket(ctx context.Context, userID uint64) error
 	return nil
 }
 
-func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context, tx pgx.Tx, orderID uint64, ownerID uint64) error {
+func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context,
+	tx pgx.Tx, orderID uint64, ownerID uint64,
+) error {
 	SQLDeleteOrderByID :=
 		`DELETE FROM public."order"
 		 WHERE id=$1 AND owner_id=$2`

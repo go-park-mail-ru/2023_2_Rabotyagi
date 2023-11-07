@@ -84,7 +84,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response"
+                            "$ref": "#/definitions/internal_pkg_product_delivery.OrderResponse"
                         }
                     },
                     "222": {
@@ -1347,6 +1347,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket"
                     }
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_pkg_product_delivery.OrderResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket"
                 },
                 "status": {
                     "type": "integer"

@@ -65,15 +65,15 @@ func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 	return images, nil
 }
 
-func (p *ProductStorage) selectProductByIDAndSalerID(ctx context.Context,
-	tx pgx.Tx, productID uint64, userID uint64,
+func (p *ProductStorage) selectProductByID(ctx context.Context,
+	tx pgx.Tx, productID uint64,
 ) (*models.Product, error) {
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city,
-       delivery, safe_deal FROM public."product" WHERE id=$1 AND saler_id=$2`
+       delivery, safe_deal FROM public."product" WHERE id=$1`
 	product := &models.Product{ID: productID} //nolint:exhaustruct
 
-	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID, userID)
+	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID)
 	if err := productRow.Scan(&product.SalerID, &product.CategoryID,
 		&product.Title, &product.Description, &product.Price, &product.CreatedAt,
 		&product.Views, &product.AvailableCount, &product.City, &product.Delivery,
@@ -88,7 +88,6 @@ func (p *ProductStorage) selectProductByIDAndSalerID(ctx context.Context,
 	}
 
 	product.ID = productID
-	product.SalerID = userID
 
 	return product, nil
 }
@@ -176,24 +175,40 @@ func (p *ProductStorage) getProductAddition(ctx context.Context,
 	return innerProductAddition, nil
 }
 
+func (p *ProductStorage) getProduct(ctx context.Context,
+	tx pgx.Tx, productID uint64, userID uint64,
+) (*models.Product, error) {
+	product, err := p.selectProductByID(ctx, tx, productID)
+	if err != nil {
+		p.logger.Errorf("in getProduct: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	productAdditionInner, err := p.getProductAddition(ctx, tx, productID, userID)
+	if err != nil {
+		p.logger.Errorf("in getProduct: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	product.Images = productAdditionInner.images
+	product.Favourites = productAdditionInner.favourites
+	product.InFavourites = productAdditionInner.inFavourite
+
+	return product, nil
+}
+
 func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error) {
 	var product *models.Product
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		productInner, err := p.selectProductByIDAndSalerID(ctx, tx, productID, userID)
-		if err != nil {
-			return err
-		}
-
-		productAdditionInner, err := p.getProductAddition(ctx, tx, productID, userID)
+		productInner, err := p.getProduct(ctx, tx, productID, userID)
 		if err != nil {
 			return err
 		}
 
 		product = productInner
-		product.Images = productAdditionInner.images
-		product.Favourites = productAdditionInner.favourites
-		product.InFavourites = productAdditionInner.inFavourite
 
 		return nil
 	})

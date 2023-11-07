@@ -29,10 +29,12 @@ func (s *Server) Run(config *config.Config) error {
 		return err //nolint:wrapcheck
 	}
 
-	logger, err := usecases.NewLogger()
+	logger, err := usecases.NewLogger([]string{"stdout"}, []string{"stderr"})
 	if err != nil {
 		return err //nolint:wrapcheck
 	}
+
+	defer logger.Sync()
 
 	productStorage := productrepo.NewProductStorage(pool, logger)
 	userStorage := userrepo.NewUserStorage(pool, logger)
