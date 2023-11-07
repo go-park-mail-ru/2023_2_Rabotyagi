@@ -38,31 +38,11 @@ http://84.23.53.28/
 swag init --parseDependency -g cmd/app/main.go
 ```
 
+## Локальное поднятие бека и бд
 
-
-## Docker image build
-
-### Local
-
-Из корня проекта прописываем
 ```shell
-docker build -t rabotyagi/backend .
+docker compose -f  local-docker-compose.yml up
 ```
-
-Далее, чтобы убедиться что image забилдился, прописываем:
-```shell
-docker images
-```
-
-Должны увидеть следующее:
-```shell
-REPOSITORY          TAG       IMAGE ID       CREATED          SIZE
-rabotyagi/backend   latest    25dbaeeef1af   50 seconds ago   307MB
-```
-
-### Запуск контейнера 
-
-`docker run -p 8080:8080 rabotyagi/backend`
 
 
 ### Локальная установка тула для миграций
@@ -72,9 +52,9 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@lat
 
 ### Пример команды, чтобы накатить миграцию
 ```shell
- migrate -database postgres://postgres:password@localhost:5432/youla?sslmode=disable -path db/migrations up
+ migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations up
 ```
 ### Пример команды, чтобы отменить миграцию
 ```shell
- migrate -database postgres://postgres:password@localhost:5432/youla?sslmode=disable -path db/migrations up
+ migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations up
 ```

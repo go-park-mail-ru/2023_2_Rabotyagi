@@ -19,6 +19,7 @@ import (
 
 var (
 	ErrEmailBusy          = myerrors.NewError("Такой email уже занят")
+	ErrEmailNotExist      = myerrors.NewError("Такой email не существует")
 	ErrPhoneBusy          = myerrors.NewError("Такой телефон уже занят")
 	ErrWrongPassword      = myerrors.NewError("Некорректный пароль")
 	ErrNoUpdateFields     = myerrors.NewError("Вы пытаетесь обновить пустое количество полей")
@@ -339,7 +340,7 @@ func (u *UserStorage) GetUser(ctx context.Context, email string, password string
 		if !emailBusy {
 			u.logger.Errorf("in GetUser: email=%s is not exist", email)
 
-			return ErrEmailBusy
+			return ErrEmailNotExist
 		}
 
 		user, err = u.getUserByEmail(ctx, tx, email)
