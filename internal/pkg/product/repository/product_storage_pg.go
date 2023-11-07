@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
@@ -13,6 +12,7 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 )
 
 var (
@@ -24,12 +24,14 @@ var (
 )
 
 type ProductStorage struct {
-	pool *pgxpool.Pool
+	pool   *pgxpool.Pool
+	logger *zap.SugaredLogger
 }
 
-func NewProductStorage(pool *pgxpool.Pool) *ProductStorage {
+func NewProductStorage(pool *pgxpool.Pool, logger *zap.SugaredLogger) *ProductStorage {
 	return &ProductStorage{
-		pool: pool,
+		pool:   pool,
+		logger: logger,
 	}
 }
 
@@ -42,7 +44,7 @@ func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 
 	imagesRows, err := tx.Query(ctx, SQLSelectImages, productID)
 	if err != nil {
-		log.Printf("in selectImagesByProductId: %+v\n", err)
+		p.logger.Errorf("in selectImagesByProductId: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -55,7 +57,7 @@ func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		log.Printf("in selectImagesByProductId: %+v\n", err)
+		p.logger.Errorf("in selectImagesByProductId: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -80,7 +82,7 @@ func (p *ProductStorage) selectProductByIDAndSalerID(ctx context.Context,
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
 		}
 
-		log.Printf("error in selectProductById with productId=%d: %+v", productID, err)
+		p.logger.Errorf("error in selectProductById with productId=%d: %+v", productID, err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -105,7 +107,7 @@ func (p *ProductStorage) selectCountFavouritesByProductID(ctx context.Context,
 			return 0, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
 		}
 
-		log.Printf("in selectCountFavouritesByProductID: %+v\n", err)
+		p.logger.Errorf("in selectCountFavouritesByProductID: %+v\n", err)
 
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -127,7 +129,7 @@ func (p *ProductStorage) selectIsUserFavouriteProduct(ctx context.Context,
 			return false, nil
 		}
 
-		log.Printf("in selectIsUserFavouriteProduct: %+v\n", err)
+		p.logger.Errorf("in selectIsUserFavouriteProduct: %+v\n", err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -148,21 +150,21 @@ func (p *ProductStorage) getProductAddition(ctx context.Context,
 
 	images, err := p.selectImagesByProductID(ctx, tx, productID)
 	if err != nil {
-		log.Printf("in getProductAddition: %+v\n", err)
+		p.logger.Errorf("in getProductAddition: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	favouritesCount, err := p.selectCountFavouritesByProductID(ctx, tx, productID)
 	if err != nil {
-		log.Printf("in getProductAddition: %+v\n", err)
+		p.logger.Errorf("in getProductAddition: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	inFavouriteProduct, err := p.selectIsUserFavouriteProduct(ctx, tx, productID, userID)
 	if err != nil {
-		log.Printf("in getProductAddition: %+v\n", err)
+		p.logger.Errorf("in getProductAddition: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -196,7 +198,7 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 		return nil
 	})
 	if err != nil {
-		log.Printf("in GetProduct: %+v\n", err)
+		p.logger.Errorf("in GetProduct: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -229,14 +231,14 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 
 	SQLQuery, args, err := query.ToSql()
 	if err != nil {
-		log.Printf("in selectProductsInFeedWithWhereOrderLimit: %+v\n", err)
+		p.logger.Errorf("in selectProductsInFeedWithWhereOrderLimit: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	rowsProducts, err := tx.Query(ctx, SQLQuery, args...)
 	if err != nil {
-		log.Printf("in selectProductsInFeedWithWhereOrderLimit: %+v\n", err)
+		p.logger.Errorf("in selectProductsInFeedWithWhereOrderLimit: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -262,7 +264,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 		return nil
 	})
 	if err != nil {
-		log.Printf("in selectProductsInFeedWithWhereOrderLimit: %+v\n", err)
+		p.logger.Errorf("in selectProductsInFeedWithWhereOrderLimit: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -298,7 +300,7 @@ func (p *ProductStorage) GetNewProducts(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		log.Printf("in GetNewProducts: %+v\n", err)
+		p.logger.Errorf("in GetNewProducts: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -336,7 +338,7 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		log.Printf("in GetProductsOfSaler: %+v\n", err)
+		p.logger.Errorf("in GetProductsOfSaler: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -354,7 +356,7 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 		preProduct.City, preProduct.Delivery, preProduct.SafeDeal)
 
 	if err != nil {
-		log.Printf("in insertProduct: %+v\n", err)
+		p.logger.Errorf("in insertProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -371,7 +373,7 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 			return err
 		}
 
-		LastProductID, err := repository.GetLastValSeq(ctx, tx, NameSeqProduct)
+		LastProductID, err := repository.GetLastValSeq(ctx, tx, p.logger, NameSeqProduct)
 		if err != nil {
 			return err
 		}
@@ -381,7 +383,7 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 		return err
 	})
 	if err != nil {
-		log.Printf("in AddProduct: %+v\n", err)
+		p.logger.Errorf("in AddProduct: %+v\n", err)
 
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -401,14 +403,14 @@ func (p *ProductStorage) updateProduct(ctx context.Context, tx pgx.Tx,
 
 	queryString, args, err := query.ToSql()
 	if err != nil {
-		log.Printf("in updateProduct: %+v", err)
+		p.logger.Errorf("in updateProduct: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	result, err := tx.Exec(ctx, queryString, args...)
 	if err != nil {
-		log.Printf("updateProduct: %+v", err)
+		p.logger.Errorf("updateProduct: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -430,7 +432,7 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 		return err
 	})
 	if err != nil {
-		log.Printf("in UpdateProduct: %+v\n", err)
+		p.logger.Errorf("in UpdateProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -443,7 +445,7 @@ func (p *ProductStorage) closeProduct(ctx context.Context, tx pgx.Tx, productID 
 
 	result, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
 	if err != nil {
-		log.Printf("in closeProduct: %+v\n", err)
+		p.logger.Errorf("in closeProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -466,7 +468,7 @@ func (p *ProductStorage) CloseProduct(ctx context.Context, productID uint64, use
 		return nil
 	})
 	if err != nil {
-		log.Printf("in CloseProduct: %+v\n", err)
+		p.logger.Errorf("in CloseProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -479,7 +481,7 @@ func (p *ProductStorage) deleteProduct(ctx context.Context, tx pgx.Tx, productID
 
 	result, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
 	if err != nil {
-		log.Printf("in deleteProduct: %+v\n", err)
+		p.logger.Errorf("in deleteProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -502,7 +504,7 @@ func (p *ProductStorage) DeleteProduct(ctx context.Context, productID uint64, us
 		return nil
 	})
 	if err != nil {
-		log.Printf("in DeleteProduct: %+v\n", err)
+		p.logger.Errorf("in DeleteProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}

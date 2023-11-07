@@ -1,11 +1,10 @@
 package delivery
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
+	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 )
 
@@ -36,12 +35,12 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 	ctx := r.Context()
 
-	userID := delivery.GetUserIDFromCookie(r)
+	userID := delivery.GetUserIDFromCookie(r, p.logger)
 
 	orders, err := p.storage.GetOrdersInBasketByUserID(ctx, userID)
 	if err != nil {
-		log.Printf("in GetBasketHandler %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		p.logger.Errorf("in GetBasketHandler %+v\n", err)
+		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -50,8 +49,8 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 		order.Sanitize()
 	}
 
-	delivery.SendOkResponse(w, NewOrderListResponse(delivery.StatusResponseSuccessful, orders))
-	log.Printf("in GetBasketHandler: get basket of orders: %+v\n", orders)
+	delivery.SendOkResponse(w, p.logger, NewOrderListResponse(delivery.StatusResponseSuccessful, orders))
+	p.logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", orders)
 }
 
 // UpdateOrderCountHandler godoc
@@ -84,24 +83,26 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	ctx := r.Context()
 
-	orderChanges, err := usecases.ValidateOrderChangesCount(r.Body)
+	orderChanges, err := productusecases.ValidateOrderChangesCount(p.logger, r.Body)
 	if err != nil {
-		delivery.HandleErr(w, "in UpdateOrderCountHandler:", err)
+		p.logger.Errorf("in in UpdateOrderCountHandler: %+v\n", err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	userID := delivery.GetUserIDFromCookie(r)
+	userID := delivery.GetUserIDFromCookie(r, p.logger)
 
 	err = p.storage.UpdateOrderCount(ctx, userID, orderChanges.ID, orderChanges.Count)
 	if err != nil {
-		delivery.HandleErr(w, "in UpdateOrderCountHandler:", err)
+		p.logger.Errorf("in in UpdateOrderCountHandler: %+v\n", err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateCountOrder))
-	log.Printf("in UpdateOrderCountHandler: updated order count=%d for order id=%d for user id=%d\n",
+	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateCountOrder))
+	p.logger.Infof("in UpdateOrderCountHandler: updated order count=%d for order id=%d for user id=%d\n",
 		orderChanges.Count, orderChanges.ID, userID)
 }
 
@@ -133,26 +134,28 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	orderChanges, err := usecases.ValidateOrderChangesStatus(r.Body)
+	orderChanges, err := productusecases.ValidateOrderChangesStatus(p.logger, r.Body)
 	if err != nil {
-		delivery.HandleErr(w, "in UpdateOrderStatusHandler:", err)
+		p.logger.Errorf("in UpdateOrderStatusHandler: %+v\n", err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	ctx := r.Context()
-	userID := delivery.GetUserIDFromCookie(r)
+	userID := delivery.GetUserIDFromCookie(r, p.logger)
 
 	err = p.storage.UpdateOrderStatus(ctx, userID, orderChanges.ID, orderChanges.Status)
 	if err != nil {
-		delivery.HandleErr(w, "in UpdateOrderStatusHandler:", err)
+		p.logger.Errorf("in UpdateOrderStatusHandler: %+v\n", err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendOkResponse(w,
+	delivery.SendOkResponse(w, p.logger,
 		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateStatusOrder))
-	log.Printf("in UpdateOrderStatusHandler: updated order id=%d with status=%d for user id=%d\n",
+	p.logger.Infof("in UpdateOrderStatusHandler: updated order id=%d with status=%d for user id=%d\n",
 		orderChanges.ID, orderChanges.Status, userID)
 }
 
@@ -186,24 +189,26 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 
 	ctx := r.Context()
 
-	userID := delivery.GetUserIDFromCookie(r)
+	userID := delivery.GetUserIDFromCookie(r, p.logger)
 
-	preOrder, err := usecases.ValidatePreOrder(r.Body)
+	preOrder, err := productusecases.ValidatePreOrder(p.logger, r.Body)
 	if err != nil {
-		delivery.HandleErr(w, "in AddOrderHandler:", err)
+		p.logger.Errorf("in AddOrderHandler: %+v\n", err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.storage.AddOrderInBasket(ctx, userID, preOrder.ProductID, preOrder.Count)
 	if err != nil {
-		delivery.HandleErr(w, "in AddOrderHandler:", err)
+		p.logger.Errorf("in AddOrderHandler: %+v\n", err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddOrder))
-	log.Printf("in AddOrderHandler: add order on productID=%d for userID=%d\n", preOrder.ProductID, userID)
+	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulAddOrder))
+	p.logger.Infof("in AddOrderHandler: add order on productID=%d for userID=%d\n", preOrder.ProductID, userID)
 }
 
 // BuyFullBasketHandler godoc
@@ -233,17 +238,18 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 
 	ctx := r.Context()
 
-	userID := delivery.GetUserIDFromCookie(r)
+	userID := delivery.GetUserIDFromCookie(r, p.logger)
 
 	err := p.storage.BuyFullBasket(ctx, userID)
 	if err != nil {
-		delivery.HandleErr(w, "in BuyFullBasketHandler:", err)
+		p.logger.Errorf("in BuyFullBasketHandler: %+v\n", err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulBuyFullBasket))
-	log.Printf("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
+	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulBuyFullBasket))
+	p.logger.Infof("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
 }
 
 // DeleteOrderHandler godoc
@@ -274,25 +280,25 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	ctx := r.Context()
-	userID := delivery.GetUserIDFromCookie(r)
+	userID := delivery.GetUserIDFromCookie(r, p.logger)
 	orderIDStr := delivery.GetPathParam(r.URL.String())
 
 	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
 	if err != nil {
-		log.Printf("in DeleteOrderHandler: %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+		p.logger.Errorf("in DeleteOrderHandler: %+v\n", err)
+		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
 
 		return
 	}
 
 	err = p.storage.DeleteOrder(ctx, orderID, userID)
 	if err != nil {
-		log.Printf("in DeleteOrderHandler %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		p.logger.Errorf("in DeleteOrderHandler %+v\n", err)
+		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
-	log.Printf("in DeleteOrderHandler: delete order id=%d", orderID)
+	delivery.SendOkResponse(w, p.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
+	p.logger.Infof("in DeleteOrderHandler: delete order id=%d", orderID)
 }

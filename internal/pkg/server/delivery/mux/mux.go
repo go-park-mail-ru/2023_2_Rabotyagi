@@ -2,6 +2,7 @@ package mux
 
 import (
 	"context"
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/middleware"
@@ -26,14 +27,14 @@ func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMu
 }
 
 func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.IUserStorage,
-	productStorage productusecases.IProductStorage,
+	productStorage productusecases.IProductStorage, logger *zap.SugaredLogger,
 ) http.Handler {
 	router := http.NewServeMux()
 
-	userHandler := userdelivery.NewUserHandler(userStorage, configMux.addrOrigin, configMux.schema)
+	userHandler := userdelivery.NewUserHandler(userStorage, configMux.addrOrigin, configMux.schema, logger)
 
 	productHandler := productdelivery.NewProductHandler(productStorage,
-		configMux.addrOrigin, configMux.schema, configMux.portServer,
+		configMux.addrOrigin, configMux.schema, configMux.portServer, logger,
 	)
 
 	imgHandler := http.StripPrefix(
@@ -67,7 +68,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 	router.Handle("/api/v1/order/delete/", middleware.Context(ctx, productHandler.DeleteOrderHandler))
 
 	mux := http.NewServeMux()
-	mux.Handle("/", middleware.Panic(router))
+	mux.Handle("/", middleware.Panic(router, logger))
 
 	return mux
 }

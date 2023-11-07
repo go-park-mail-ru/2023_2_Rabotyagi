@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
@@ -15,6 +14,7 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 )
 
 var (
@@ -28,12 +28,14 @@ var (
 )
 
 type UserStorage struct {
-	pool *pgxpool.Pool
+	pool   *pgxpool.Pool
+	logger *zap.SugaredLogger
 }
 
-func NewUserStorage(pool *pgxpool.Pool) *UserStorage {
+func NewUserStorage(pool *pgxpool.Pool, logger *zap.SugaredLogger) *UserStorage {
 	return &UserStorage{
-		pool: pool,
+		pool:   pool,
+		logger: logger,
 	}
 }
 
@@ -46,7 +48,7 @@ func (u *UserStorage) getUserByEmail(ctx context.Context, tx pgx.Tx, email strin
 	}
 
 	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Password, &user.Birthday); err != nil {
-		log.Printf("error in getUserByEmail: %+v", err)
+		u.logger.Errorf("error in getUserByEmail: %+v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -79,7 +81,7 @@ func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx,
 	}
 
 	if err := userLine.Scan(&user.Email, &user.Phone, &user.Name, &user.Birthday); err != nil {
-		log.Printf("error in GetUserWithoutPasswordByID: %+v", err)
+		u.logger.Errorf("error in GetUserWithoutPasswordByID: %+v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -115,7 +117,7 @@ func (u *UserStorage) isEmailBusy(ctx context.Context, tx pgx.Tx, email string) 
 			return false, nil
 		}
 
-		log.Printf("error in isEmailBusy: %+v", err)
+		u.logger.Errorf("error in isEmailBusy: %+v", err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -147,7 +149,7 @@ func (u *UserStorage) isPhoneBusy(ctx context.Context, tx pgx.Tx, phone string) 
 			return false, nil
 		}
 
-		log.Printf("error in isPhoneBusy: %+v", err)
+		u.logger.Errorf("error in isPhoneBusy: %+v", err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -175,7 +177,7 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 	preUser.Password, err = utils.HashPass(preUser.Password)
 
 	if err != nil {
-		log.Printf("preUser=%+v Error in hashingUser: %+v", preUser, err)
+		u.logger.Errorf("preUser=%+v Error in hashingUser: %+v", preUser, err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -191,7 +193,7 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 	}
 
 	if err != nil {
-		log.Printf("preUser=%+v Error in createUser: %+v", preUser, err)
+		u.logger.Errorf("preUser=%+v Error in createUser: %+v", preUser, err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -211,14 +213,14 @@ func (u *UserStorage) updateUser(ctx context.Context,
 
 	queryString, args, err := query.ToSql()
 	if err != nil {
-		log.Printf("in updateUser while converting ToSql: %+v", err)
+		u.logger.Errorf("in updateUser while converting ToSql: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	result, err := tx.Exec(ctx, queryString, args...)
 	if err != nil {
-		log.Printf("Error in UpdateUser while executing: %+v", err)
+		u.logger.Errorf("Error in UpdateUser while executing: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -239,14 +241,14 @@ func (u *UserStorage) UpdateUser(ctx context.Context,
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
 		err := u.updateUser(ctx, tx, userID, updateData)
 		if err != nil {
-			log.Printf("in UpdateUser: %+v\n", err)
+			u.logger.Errorf("in UpdateUser: %+v\n", err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		userWithoutPass, err = u.getUserWithoutPasswordByID(ctx, tx, userID)
 		if err != nil {
-			log.Printf("in UpdateUser: %+v\n", err)
+			u.logger.Errorf("in UpdateUser: %+v\n", err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -267,40 +269,40 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
 		emailBusy, err := u.isEmailBusy(ctx, tx, preUser.Email)
 		if err != nil {
-			log.Printf("in AddUser: %+v\n", err)
+			u.logger.Errorf("in AddUser: %+v\n", err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		if emailBusy {
-			log.Printf("in AddUser: email=%s already busy", preUser.Email)
+			u.logger.Errorf("in AddUser: email=%s already busy", preUser.Email)
 
 			return ErrEmailBusy
 		}
 
 		phoneBusy, err := u.isPhoneBusy(ctx, tx, preUser.Phone)
 		if err != nil {
-			log.Printf("in AddUser: %+v\n", err)
+			u.logger.Errorf("in AddUser: %+v\n", err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		if phoneBusy {
-			log.Printf("in AddUser: email=%s already busy", preUser.Email)
+			u.logger.Errorf("in AddUser: email=%s already busy", preUser.Email)
 
 			return ErrPhoneBusy
 		}
 
 		err = u.createUser(ctx, tx, preUser)
 		if err != nil {
-			log.Printf("preUser=%+v Error in AddUser: %+v", preUser, err)
+			u.logger.Errorf("preUser=%+v Error in AddUser: %+v", preUser, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		id, err := repository.GetLastValSeq(ctx, tx, NameSeqUser)
+		id, err := repository.GetLastValSeq(ctx, tx, u.logger, NameSeqUser)
 		if err != nil {
-			log.Printf("in AddUser: %+v", err)
+			u.logger.Errorf("in AddUser: %+v", err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -329,27 +331,27 @@ func (u *UserStorage) GetUser(ctx context.Context, email string, password string
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
 		emailBusy, err := u.isEmailBusy(ctx, tx, email)
 		if err != nil {
-			log.Printf("preUser=%+v Error in GetUser: %+v", email, err)
+			u.logger.Errorf("preUser=%+v Error in GetUser: %+v", email, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		if !emailBusy {
-			log.Printf("in GetUser: email=%s is not exist", email)
+			u.logger.Errorf("in GetUser: email=%s is not exist", email)
 
 			return ErrEmailBusy
 		}
 
 		user, err = u.getUserByEmail(ctx, tx, email)
 		if err != nil {
-			log.Printf("preUser=%+v Error in GetUser: %+v", email, err)
+			u.logger.Errorf("preUser=%+v Error in GetUser: %+v", email, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		hashPass, err := hex.DecodeString(user.Password)
 		if err != nil {
-			log.Printf("preUser=%+v Error in converting password: %+v", email, err)
+			u.logger.Errorf("preUser=%+v Error in converting password: %+v", email, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}

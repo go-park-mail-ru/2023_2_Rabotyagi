@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
@@ -26,7 +25,7 @@ func (p *ProductStorage) selectOrdersByUserID(ctx context.Context, tx pgx.Tx, us
 
 	ordersRows, err := tx.Query(ctx, SQLSelectBasketByUserID, userID)
 	if err != nil {
-		log.Printf("in selectBasketByUserID: %+v\n", err)
+		p.logger.Errorf("in selectBasketByUserID: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -53,7 +52,7 @@ func (p *ProductStorage) selectOrdersByUserID(ctx context.Context, tx pgx.Tx, us
 		return nil
 	})
 	if err != nil {
-		log.Printf("in selectBasketByUserID: %+v\n", err)
+		p.logger.Errorf("in selectBasketByUserID: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -73,7 +72,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 
 	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
 	if err != nil {
-		log.Printf("in selectOrdersInBasketByUserID: %+v\n", err)
+		p.logger.Errorf("in selectOrdersInBasketByUserID: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -104,7 +103,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		log.Printf("in selectOrdersInBasketByUserID: %+v\n", err)
+		p.logger.Errorf("in selectOrdersInBasketByUserID: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -143,7 +142,7 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		log.Printf("in GetOrdersInBasketByUserID: %+v\n", err)
+		p.logger.Errorf("in GetOrdersInBasketByUserID: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -160,7 +159,7 @@ func (p *ProductStorage) updateOrderCountByOrderID(ctx context.Context,
 
 	result, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newCount, orderID, userID)
 	if err != nil {
-		log.Printf("in updateOrderCountByOrderID: %+v", err)
+		p.logger.Errorf("in updateOrderCountByOrderID: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -186,7 +185,7 @@ func (p *ProductStorage) getOrderByID(ctx context.Context, tx pgx.Tx, orderID ui
 		&order.UpdatedAt, &order.CreatedAt)
 
 	if err != nil {
-		log.Printf("in getOrderByID: %+v", err)
+		p.logger.Errorf("in getOrderByID: %+v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -204,7 +203,7 @@ func (p *ProductStorage) UpdateOrderCount(ctx context.Context, userID uint64, or
 		return nil
 	})
 	if err != nil {
-		log.Printf("in UpdateOrderCount: %+v\n", err)
+		p.logger.Errorf("in UpdateOrderCount: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -221,7 +220,7 @@ func (p *ProductStorage) updateOrderStatusByOrderID(ctx context.Context,
 
 	result, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newStatus, orderID)
 	if err != nil {
-		log.Printf("in updateOrderStatusByOrderID: %+v", err)
+		p.logger.Errorf("in updateOrderStatusByOrderID: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -248,7 +247,7 @@ func (p *ProductStorage) getStatusAndCountByOrderID(ctx context.Context,
 
 	err := orderRow.Scan(&status, &count)
 	if err != nil {
-		log.Printf("in getStatusAndCountByOrderID: %+v", err)
+		p.logger.Errorf("in getStatusAndCountByOrderID: %+v", err)
 
 		return models.OrderStatusError, 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -267,7 +266,7 @@ func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context, tx
 
 	result, err := tx.Exec(ctx, SQLDecreaseAvailableCountByOrderID, count, orderID)
 	if err != nil {
-		log.Printf("in decreaseAvailableCountByOrderID: %+v", err)
+		p.logger.Errorf("in decreaseAvailableCountByOrderID: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -312,7 +311,7 @@ func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		log.Printf("in UpdateOrderStatus: %+v\n", err)
+		p.logger.Errorf("in UpdateOrderStatus: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -327,7 +326,7 @@ func (p *ProductStorage) insertOrder(ctx context.Context, tx pgx.Tx,
 
 	_, err := tx.Exec(ctx, SQLInsertOrder, userID, productID, count)
 	if err != nil {
-		log.Printf("in insertOrder: %+v\n", err)
+		p.logger.Errorf("in insertOrder: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -345,7 +344,7 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context, userID uint64, pr
 		return nil
 	})
 	if err != nil {
-		log.Printf("in AddOrderInBasket: %+v\n", err)
+		p.logger.Errorf("in AddOrderInBasket: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -358,7 +357,7 @@ func (p *ProductStorage) updateStatusFullBasket(ctx context.Context, tx pgx.Tx, 
 
 	_, err := tx.Exec(ctx, SQLUpdateFullBasket, models.OrderStatusInProcessing, userID)
 	if err != nil {
-		log.Printf("in updateStatusFullBasket: %+v\n", err)
+		p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -376,7 +375,7 @@ func (p *ProductStorage) BuyFullBasket(ctx context.Context, userID uint64) error
 		return nil
 	})
 	if err != nil {
-		log.Printf("in BuyFullBasketHandler: %+v\n", err)
+		p.logger.Errorf("in BuyFullBasketHandler: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -391,7 +390,7 @@ func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context, tx 
 
 	result, err := tx.Exec(ctx, SQLDeleteOrderByID, models.OrderStatusInProcessing, orderID, ownerID)
 	if err != nil {
-		log.Printf("in deleteOrderByID: %+v\n", err)
+		p.logger.Errorf("in deleteOrderByID: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -414,7 +413,7 @@ func (p *ProductStorage) DeleteOrder(ctx context.Context, orderID uint64, ownerI
 		return nil
 	})
 	if err != nil {
-		log.Printf("in DeleteOrderByID: %+v\n", err)
+		p.logger.Errorf("in DeleteOrderByID: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}

@@ -34,7 +34,7 @@ func hashPassWithSalt(salt []byte, plainPassword string) []byte {
 }
 
 func ComparePassAndHash(passHash []byte, plainPassword string) bool {
-	var passHashCopy = make([]byte, len(passHash))
+	passHashCopy := make([]byte, len(passHash))
 
 	copy(passHashCopy, passHash)
 

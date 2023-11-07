@@ -2,7 +2,7 @@ package delivery
 
 import (
 	"encoding/json"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -70,10 +70,10 @@ func NewErrResponse(status int, err string) *ErrorResponse {
 	}
 }
 
-func sendResponse(w http.ResponseWriter, response any) {
+func sendResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
 	responseSend, err := json.Marshal(response)
 	if err != nil {
-		log.Printf("in sendResponse: %+v\n", err)
+		logger.Errorf("in sendResponse: %+v\n", err)
 		http.Error(w, ErrInternalServer, http.StatusInternalServerError)
 
 		return
@@ -81,19 +81,19 @@ func sendResponse(w http.ResponseWriter, response any) {
 
 	_, err = w.Write(responseSend)
 	if err != nil {
-		log.Printf("in sendResponse: %+v\n", err)
+		logger.Errorf("in sendResponse: %+v\n", err)
 		http.Error(w, ErrInternalServer, http.StatusInternalServerError)
 	}
 }
 
-func SendErrResponse(w http.ResponseWriter, response any) {
+func SendErrResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(HTTPStatusError)
-	sendResponse(w, response)
+	sendResponse(w, logger, response)
 }
 
-func SendOkResponse(w http.ResponseWriter, response any) {
+func SendOkResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(HTTPStatusOk)
-	sendResponse(w, response)
+	sendResponse(w, logger, response)
 }

@@ -1,13 +1,12 @@
 package delivery
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
+	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 )
 
@@ -45,23 +44,24 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
-		log.Printf("in GetUserHandler: %+v", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		u.logger.Errorf("in GetUserHandler: %+v", err)
+		delivery.SendErrResponse(w, u.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
 	user, err := u.storage.GetUserWithoutPasswordByID(ctx, uint64(userID))
 	if err != nil {
-		delivery.HandleErr(w, "error in GetUserHandler:", err)
+		u.logger.Errorf("in GetUserHandler: %+v", err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
 
 	user.Sanitize()
 
-	delivery.SendOkResponse(w, NewProfileResponse(delivery.StatusResponseSuccessful, user))
-	log.Printf("in GetPostHandler: get product: %+v", user)
+	delivery.SendOkResponse(w, u.logger, NewProfileResponse(delivery.StatusResponseSuccessful, user))
+	u.logger.Infof("in GetPostHandler: get product: %+v", user)
 }
 
 // PartiallyUpdateUserHandler godoc
@@ -95,21 +95,23 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	ctx := r.Context()
 
-	var userWithoutPassword *models.UserWithoutPassword
-
 	var err error
 
+	var userWithoutPassword *models.UserWithoutPassword
+
 	if r.Method == http.MethodPatch {
-		userWithoutPassword, err = usecases.ValidatePartOfUserWithoutPassword(r.Body)
+		userWithoutPassword, err = userusecases.ValidatePartOfUserWithoutPassword(u.logger, r.Body)
 		if err != nil {
-			delivery.HandleErr(w, "in PartiallyUpdateUserHandler:", err)
+			u.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
+			delivery.HandleErr(w, u.logger, err)
 
 			return
 		}
 	} else {
-		userWithoutPassword, err = usecases.ValidateUserWithoutPassword(r.Body)
+		userWithoutPassword, err = userusecases.ValidateUserWithoutPassword(u.logger, r.Body)
 		if err != nil {
-			delivery.HandleErr(w, "in PartiallyUpdateUserHandler:", err)
+			u.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
+			delivery.HandleErr(w, u.logger, err)
 
 			return
 		}
@@ -119,8 +121,9 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	userID, ok := updateDataMap["ID"].(uint64)
 	if !ok {
-		log.Printf("in PartiallyUpdateUserHandler: userID isn`t uint64")
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		u.logger.Errorf("in PartiallyUpdateUserHandler: userID isn`t uint64")
+		delivery.SendErrResponse(w, u.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -129,13 +132,14 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	updatedUser, err := u.storage.UpdateUser(ctx, userID, updateDataMap)
 	if err != nil {
-		delivery.HandleErr(w, "in PartiallyUpdateUserHandler:", err)
+		u.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
 
 	updatedUser.Sanitize()
 
-	delivery.SendOkResponse(w, NewProfileResponse(delivery.StatusResponseSuccessful, updatedUser))
-	log.Printf("Successfully updated: %+v", userID)
+	delivery.SendOkResponse(w, u.logger, NewProfileResponse(delivery.StatusResponseSuccessful, updatedUser))
+	u.logger.Infof("Successfully updated: %+v", userID)
 }

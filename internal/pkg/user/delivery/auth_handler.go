@@ -1,13 +1,13 @@
 package delivery
 
 import (
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
+	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 )
 
 const (
@@ -15,16 +15,18 @@ const (
 )
 
 type UserHandler struct {
-	storage    usecases.IUserStorage
+	storage    userusecases.IUserStorage
 	addrOrigin string
 	schema     string
+	logger     *zap.SugaredLogger
 }
 
-func NewUserHandler(storage usecases.IUserStorage, addrOrigin string, schema string) *UserHandler {
+func NewUserHandler(storage userusecases.IUserStorage, addrOrigin string, schema string, logger *zap.SugaredLogger) *UserHandler {
 	return &UserHandler{
 		storage:    storage,
 		addrOrigin: addrOrigin,
 		schema:     schema,
+		logger:     logger,
 	}
 }
 
@@ -61,16 +63,18 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userWithoutID, err := usecases.ValidateUserWithoutID(r.Body)
+	userWithoutID, err := userusecases.ValidateUserWithoutID(u.logger, r.Body)
 	if err != nil {
-		delivery.HandleErr(w, "in SignUpHandler:", err)
+		u.logger.Errorf("in SignUpHandler: %+v\n", err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
 
 	user, err := u.storage.AddUser(ctx, userWithoutID)
 	if err != nil {
-		delivery.HandleErr(w, "error in SignUpHandler:", err)
+		u.logger.Errorf("in SignUpHandler: %+v\n", err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
@@ -80,8 +84,8 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	jwtStr, err := jwt.GenerateJwtToken(
 		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.Secret)
 	if err != nil {
-		log.Printf("in SignUpHandler: %+v", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		u.logger.Errorf("in SignUpHandler: %+v\n", err)
+		delivery.SendErrResponse(w, u.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -94,8 +98,8 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignUp))
-	log.Printf("in SignUpHandler: added user: %+v", user)
+	delivery.SendOkResponse(w, u.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignUp))
+	u.logger.Infof("in SignUpHandler: added user: %+v", user)
 }
 
 // SignInHandler godoc
@@ -126,16 +130,18 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userWithoutID, err := usecases.ValidateUserCredentials(r.Body)
+	userWithoutID, err := userusecases.ValidateUserCredentials(u.logger, r.Body)
 	if err != nil {
-		delivery.HandleErr(w, "in SignUpHandler:", err)
+		u.logger.Errorf("in SignUpHandler: %+v\n", err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
 
 	user, err := u.storage.GetUser(ctx, userWithoutID.Email, userWithoutID.Password)
 	if err != nil {
-		delivery.HandleErr(w, "in SignInHandler:", err)
+		u.logger.Errorf("in SignUpHandler: %+v\n", err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
@@ -150,8 +156,8 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		jwt.Secret,
 	)
 	if err != nil {
-		log.Printf("in SignInHandler: %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		u.logger.Errorf("in SignUpHandler: %+v\n", err)
+		delivery.SendErrResponse(w, u.logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
@@ -164,8 +170,8 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignIn))
-	log.Printf("in SignInHandler: signin user: %+v", user)
+	delivery.SendOkResponse(w, u.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulSignIn))
+	u.logger.Infof("in SignInHandler: signin user: %+v", user)
 }
 
 // LogOutHandler godoc
@@ -195,8 +201,8 @@ func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie(delivery.CookieAuthName)
 	if err != nil {
-		log.Printf("in LogOutHandler: %+v\n", err)
-		delivery.SendErrResponse(w, delivery.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
+		u.logger.Errorf("in LogOutHandler: %+v\n", err)
+		delivery.SendErrResponse(w, u.logger, delivery.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
 
 		return
 	}
@@ -204,6 +210,6 @@ func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie.Expires = time.Now()
 
 	http.SetCookie(w, cookie)
-	delivery.SendOkResponse(w, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulLogOut))
-	log.Printf("in LogOutHandler: logout user with cookie: %+v", cookie)
+	delivery.SendOkResponse(w, u.logger, delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulLogOut))
+	u.logger.Infof("in LogOutHandler: logout user with cookie: %+v", cookie)
 }
