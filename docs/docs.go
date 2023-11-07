@@ -1210,7 +1210,11 @@ const docTemplate = `{
             "properties": {
                 "birthday": {
                     "description": "nolint",
-                    "type": "string"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sql.NullTime"
+                        }
+                    ]
                 },
                 "email": {
                     "type": "string"
@@ -1310,7 +1314,30 @@ const docTemplate = `{
             }
         },
         "internal_models.UserWithoutID": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "birthday": {
+                    "description": "nolint",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sql.NullTime"
+                        }
+                    ]
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "nolint",
+                    "type": "string"
+                }
+            }
         },
         "internal_pkg_product_delivery.OrderListResponse": {
             "type": "object",
@@ -1359,6 +1386,18 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "sql.NullTime": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
                 }
             }
         }
