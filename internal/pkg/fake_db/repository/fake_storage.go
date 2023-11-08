@@ -3,13 +3,14 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/fake_db/usecases"
-	"github.com/jackc/pgx/v5"
-	"go.uber.org/zap"
 	"time"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/fake_db/usecases"
+
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 )
 
 type FakeStorage struct {
@@ -17,15 +18,15 @@ type FakeStorage struct {
 	Logger *zap.SugaredLogger
 }
 
-func (f *FakeStorage) InsertUsersWithoutID(ctx context.Context, tx pgx.Tx, count uint) error {
+func (f *FakeStorage) InsertUsersWithoutID(ctx context.Context, tx pgx.Tx, userCount uint) error {
 	slUser := [][]any{}
 	columns := []string{"email", "phone", "name", "password", "birthday"}
 
 	f.Logger.Infof("start filling users")
 
-	for i := 0; i < int(count); i++ {
-		if i%(int(count)%100) == 0 {
-			f.Logger.Infof("filled i=%d of %d users", i, count)
+	for i := 0; i < int(userCount); i++ {
+		if i%(int(userCount)%100) == 0 {
+			f.Logger.Infof("filled i=%d of %d users", i, userCount)
 		}
 
 		user, err := usecases.FakeUserWihtoutID(i)
@@ -58,9 +59,8 @@ func (f *FakeStorage) InsertUsersWithoutID(ctx context.Context, tx pgx.Tx, count
 
 // InsertCategories open new connection because categories have constraint referenses on parent_id.
 // At this reason I insert parent categories in second connection
-func (f *FakeStorage) InsertCategories(ctx context.Context, tx pgx.Tx, count uint) error {
-	count %= 10
-	count++
+func (f *FakeStorage) InsertCategories(ctx context.Context, tx pgx.Tx, categoriesCount uint) error {
+	categoriesCount++
 
 	slBaseCategories := [][]any{}
 	slCategories := [][]any{}
@@ -74,7 +74,7 @@ func (f *FakeStorage) InsertCategories(ctx context.Context, tx pgx.Tx, count uin
 	idxTotal := 1
 
 	for key, subCategory := range categories {
-		if idxCategory > int(count) {
+		if idxCategory > int(categoriesCount) {
 			break
 		}
 
@@ -139,8 +139,9 @@ func (f *FakeStorage) InsertCategories(ctx context.Context, tx pgx.Tx, count uin
 	return nil
 }
 
-func (f *FakeStorage) InsertProducts(ctx context.Context, tx pgx.Tx, count uint) error {
-	productCount := 2 * count
+func (f *FakeStorage) InsertProducts(ctx context.Context,
+	tx pgx.Tx, productCount uint, userMaxCount uint, categoryMaxCount uint,
+) error {
 	slProduct := [][]any{}
 	columns := []string{
 		"saler_id", "category_id", "title", "description", "price",
@@ -150,11 +151,11 @@ func (f *FakeStorage) InsertProducts(ctx context.Context, tx pgx.Tx, count uint)
 	f.Logger.Infof("start filling users")
 
 	for i := 0; i < int(productCount); i++ {
-		if i%(int(count)%100) == 0 {
+		if i%(int(productCount)%100) == 0 {
 			f.Logger.Infof("filled i=%d of %d products", i, productCount)
 		}
 
-		preProduct := usecases.FakePreProduct(count)
+		preProduct := usecases.FakePreProduct(userMaxCount, categoryMaxCount)
 
 		slProduct = append(slProduct,
 			[]any{

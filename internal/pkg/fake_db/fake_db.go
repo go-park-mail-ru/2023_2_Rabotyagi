@@ -11,6 +11,10 @@ import (
 )
 
 func RunScriptFillDB(URLDataBase string, logger *zap.SugaredLogger, baseCount uint) error {
+
+	userMaxCount := baseCount
+	categoryMaxCount := userMaxCount%10 + 1
+	productMaxCount := userMaxCount * 3
 	baseCtx := context.Background()
 
 	pool, err := serverrepo.NewPgxPool(baseCtx, URLDataBase)
@@ -23,7 +27,7 @@ func RunScriptFillDB(URLDataBase string, logger *zap.SugaredLogger, baseCount ui
 	fakeStorage := repository.FakeStorage{Pool: pool, Logger: logger}
 
 	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
-		err = fakeStorage.InsertUsersWithoutID(baseCtx, tx, baseCount)
+		err = fakeStorage.InsertUsersWithoutID(baseCtx, tx, userMaxCount)
 		if err != nil {
 			return err
 		}
@@ -37,7 +41,7 @@ func RunScriptFillDB(URLDataBase string, logger *zap.SugaredLogger, baseCount ui
 	}
 
 	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
-		err = fakeStorage.InsertCategories(baseCtx, tx, baseCount)
+		err = fakeStorage.InsertCategories(baseCtx, tx, categoryMaxCount)
 		if err != nil {
 			return err
 		}
@@ -51,7 +55,9 @@ func RunScriptFillDB(URLDataBase string, logger *zap.SugaredLogger, baseCount ui
 	}
 
 	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
-		err = fakeStorage.InsertProducts(baseCtx, tx, baseCount)
+		err = fakeStorage.InsertProducts(baseCtx,
+			tx, productMaxCount, userMaxCount, categoryMaxCount,
+		)
 		if err != nil {
 			return err
 		}

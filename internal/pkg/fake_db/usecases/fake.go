@@ -29,9 +29,7 @@ func FakeUserWihtoutID(index int) (*models.UserWithoutID, error) {
 	return user, nil
 }
 
-func FakePreProduct(baseCount uint) *models.PreProduct {
-	userMaxCount := baseCount
-	categoryMaxCount := baseCount%10 + 2
+func FakePreProduct(userMaxCount uint, categoryMaxCount uint) *models.PreProduct {
 	wordsInDescription := 10
 	maxPrice := 1000
 	maxAvailableCount := 10
