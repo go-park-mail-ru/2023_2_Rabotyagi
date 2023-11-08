@@ -1,4 +1,4 @@
-package category
+package usecases_
 
 import "context"
 

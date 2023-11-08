@@ -13,39 +13,39 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
-  pgadmin:
-    image: dpage/pgadmin4:7.8
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
-      PGADMIN_DEFAULT_PASSWORD: password
-      PGADMIN_LISTEN_PORT: 80
-    ports:
-      - 15432:80
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-    depends_on:
-      - postgres
+#  pgadmin:
+#    image: dpage/pgadmin4:7.8
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+#      PGADMIN_DEFAULT_PASSWORD: password
+#      PGADMIN_LISTEN_PORT: 80
+#    ports:
+#      - 15432:80
+#    volumes:
+#      - pgadmin:/var/lib/pgadmin
+#    depends_on:
+#      - postgres
 
-  backend:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    # image: nikdemi/rabotyagi-backend:dev-latest
-    environment:
-      - ALLOW_ORIGIN=localhost:3000
-      - PORT_BACKEND=8080
-      - POSTGRES_DB=youla # для обратной совместимости пока оставил
-      - POSTGRES_USER=postgres # для обратной совместимости пока оставил
-      - POSTGRES_PASSWORD=postgres # для обратной совместимости пока оставил
-      - URL_DATA_BASE=postgres://postgres:postgres@postgres:5432/youla?sslmode=disable
-      - SCHEMA=http://
-    ports:
-      - 8080:8080
-    depends_on:
-      - postgres
-    volumes:
-      - ./db/img:/var/backend/db/img
+#  backend:
+#    build:
+#      context: ./
+#      dockerfile: Dockerfile
+#    # image: nikdemi/rabotyagi-backend:dev-latest
+#    environment:
+#      - ALLOW_ORIGIN=localhost:3000
+#      - PORT_BACKEND=8080
+#      - POSTGRES_DB=youla # для обратной совместимости пока оставил
+#      - POSTGRES_USER=postgres # для обратной совместимости пока оставил
+#      - POSTGRES_PASSWORD=postgres # для обратной совместимости пока оставил
+#      - URL_DATA_BASE=postgres://postgres:postgres@postgres:5432/youla?sslmode=disable
+#      - SCHEMA=http://
+#    ports:
+#      - 8080:8080
+#    depends_on:
+#      - postgres
+#    volumes:
+#      - ./db/img:/var/backend/db/img
 
 volumes:
   postgres:
-  pgadmin:
+#  pgadmin:
