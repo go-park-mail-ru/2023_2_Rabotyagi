@@ -16,6 +16,7 @@ func RunScriptFillDB(URLDataBase string, logger *zap.SugaredLogger, baseCount ui
 	categoryMaxCount := userMaxCount/10 + 1
 	productMaxCount := userMaxCount * 4
 	orderMaxCount := userMaxCount * 2
+	favouritesMaxCount := userMaxCount
 	baseCtx := context.Background()
 
 	pool, err := serverrepo.NewPgxPool(baseCtx, URLDataBase)
@@ -74,6 +75,22 @@ func RunScriptFillDB(URLDataBase string, logger *zap.SugaredLogger, baseCount ui
 	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
 		err = fakeStorage.InsertOrders(baseCtx,
 			tx, userMaxCount, orderMaxCount, productMaxCount,
+		)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		logger.Error(err)
+
+		return err
+	}
+
+	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
+		err = fakeStorage.InsertFavourites(baseCtx,
+			tx, favouritesMaxCount, userMaxCount, productMaxCount,
 		)
 		if err != nil {
 			return err
