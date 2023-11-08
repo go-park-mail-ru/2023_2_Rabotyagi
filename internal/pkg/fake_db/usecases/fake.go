@@ -47,3 +47,13 @@ func FakePreProduct(userMaxCount uint, categoryMaxCount uint) *models.PreProduct
 
 	return preProduct
 }
+
+func FakePreOrder(userMaxCount uint, productMaxCount uint) *models.Order {
+	preOrder := new(models.Order)
+
+	preOrder.Count = 1
+	preOrder.ProductID = uint64(gofakeit.Number(1, int(productMaxCount)))
+	preOrder.OwnerID = uint64(gofakeit.Number(1, int(userMaxCount)))
+
+	return preOrder
+}

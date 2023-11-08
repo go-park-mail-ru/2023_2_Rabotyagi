@@ -181,5 +181,43 @@ func (f *FakeStorage) InsertProducts(ctx context.Context,
 	f.Logger.Infof("end filling products\n")
 
 	return nil
+}
 
+func (f *FakeStorage) InsertOrders(ctx context.Context,
+	tx pgx.Tx, userMaxCount uint, ordersMaxCount uint, productMaxCount uint,
+) error {
+	slOrder := [][]any{}
+	columns := []string{
+		"owner_id", "product_id", "count",
+	}
+
+	f.Logger.Infof("start filling orders")
+
+	for i := 0; i < int(ordersMaxCount); i++ {
+		if i%(int(ordersMaxCount)%100) == 0 {
+			f.Logger.Infof("filled i=%d of %d orders", i, ordersMaxCount)
+		}
+
+		preOrder := usecases.FakePreOrder(userMaxCount, productMaxCount)
+
+		slOrder = append(slOrder,
+			[]any{preOrder.OwnerID, preOrder.ProductID, preOrder.Count},
+		)
+	}
+
+	_, err := tx.CopyFrom(
+		ctx,
+		pgx.Identifier{"public", "order"},
+		columns,
+		pgx.CopyFromRows(slOrder),
+	)
+	if err != nil {
+		f.Logger.Error(err)
+
+		return err
+	}
+
+	f.Logger.Infof("end filling orders\n")
+
+	return nil
 }
