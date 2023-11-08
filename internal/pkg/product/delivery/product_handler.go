@@ -429,8 +429,7 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 	err = p.storage.DeleteProduct(ctx, productID, userID)
 	if err != nil {
 		p.logger.Errorf("in DeleteProductHandler: %+v\n", err)
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
