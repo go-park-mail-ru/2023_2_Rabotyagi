@@ -28,8 +28,8 @@ services:
 
   backend:
     build:
-      context: ./
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: ./Dockerfile
     # image: nikdemi/rabotyagi-backend:dev-latest
     environment:
       - ALLOW_ORIGIN=localhost:3000
@@ -45,7 +45,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./db/img:/var/backend/db/img
+      - ../db/img:/var/backend/db/img
 
 volumes:
   postgres:

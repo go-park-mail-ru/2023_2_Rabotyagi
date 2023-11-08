@@ -20,9 +20,16 @@ https://www.figma.com/file/YLSZ9uY9gVn6bMDJchrEzD?node-id=23:2127&mode=design#56
 ### Приложение
 http://84.23.53.28/
 
-### Запуск локально
+## Запуск локально из терминала / ide
 
-`go run cmd/app/main.go`
+Запускаем бд
+```shell
+docker compose -f deployments/db-local-docker-compose.yml up -d
+```
+Запускаем бек
+```shell 
+go run cmd/app/main.go
+```
 
 ### Тестирование 
 
@@ -38,10 +45,10 @@ http://84.23.53.28/
 swag init --parseDependency -g cmd/app/main.go
 ```
 
-## Локальное поднятие бека и бд
+## Локальное поднятие бека, бд, pgadmin вместе
 
 ```shell
-docker compose -f  local-docker-compose.yml up
+docker compose -f  deployments/local-docker-compose.yml up -d
 ```
 
 
@@ -50,7 +57,7 @@ docker compose -f  local-docker-compose.yml up
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 ```
 
-### Заполнение бд при поднятии через компоус
+### Заполнение бд при поднятии бека через компоус
 ```shell
  docker exec -it 2023_2_rabotyagi-backend-1  go run cmd/fake_db/main.go
 ```

@@ -98,7 +98,11 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	var err error
 
-	var userWithoutPassword *models.UserWithoutPassword
+	userID := delivery.GetUserIDFromCookie(r, u.logger)
+
+	userWithoutPassword := &models.UserWithoutPassword{
+		ID: userID,
+	}
 
 	if r.Method == http.MethodPatch {
 		userWithoutPassword, err = userusecases.ValidatePartOfUserWithoutPassword(u.logger, r.Body)
@@ -120,14 +124,14 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	updateDataMap := utils.StructToMap(userWithoutPassword)
 
-	userID, ok := updateDataMap["ID"].(uint64)
-	if !ok {
-		u.logger.Errorf("in PartiallyUpdateUserHandler: userID isn`t uint64")
-		delivery.SendErrResponse(w, u.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
+	//userID, ok := updateDataMap["ID"].(uint64)
+	//if !ok {
+	//	u.logger.Errorf("in PartiallyUpdateUserHandler: userID isn`t uint64")
+	//	delivery.SendErrResponse(w, u.logger,
+	//		delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+	//
+	//	return
+	//}
 
 	delete(updateDataMap, "ID")
 
