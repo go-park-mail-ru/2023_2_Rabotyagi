@@ -32,9 +32,8 @@ func NewCategoryHandler(storage usecases.ICategoryStorage,
 //	@Summary    get all categories
 //	@Description  get all categories
 //	@Tags category
-//	@Accept      json
 //	@Produce    json
-//	@Success    200  {object} OrderListResponse
+//	@Success    200  {object} CategoryListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -53,8 +52,6 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 	}
 
 	ctx := r.Context()
-
-	//userID := delivery.GetUserIDFromCookie(r, p.logger)
 
 	categories, err := c.storage.GetFullCategories(ctx)
 	if err != nil {
