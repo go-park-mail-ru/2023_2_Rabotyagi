@@ -54,10 +54,9 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@lat
 ```shell
  docker exec -it 2023_2_rabotyagi-backend-1  go run cmd/fake_db/main.go
 ```
-
-### Заполнить базу поднятую через компоус
+### Пример команды, чтобы накатить миграцию
 ```shell
-docker exec -it 2023_2_rabotyagi-backend-1  go run cmd/fake_db/main.go
+ migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations up
 ```
 
 ### Пример команды, чтобы отменить миграцию

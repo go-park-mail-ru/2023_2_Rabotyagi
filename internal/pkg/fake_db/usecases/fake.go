@@ -122,7 +122,7 @@ func NewFakeGeneratorImg(maxNameImage uint, pathToRoot string) (*FakeGeneratorIm
 }
 
 func (f *FakeGeneratorImg) GetURLs(countURL uint) []string {
-	minCount := min[int, int](int(countURL), len(f.imgStorage))
+	minCount := min(int(countURL), len(f.imgStorage))
 	result := make([]string, minCount)
 
 	i := 0
