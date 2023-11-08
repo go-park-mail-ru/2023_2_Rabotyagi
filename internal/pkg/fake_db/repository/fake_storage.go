@@ -25,7 +25,7 @@ func (f *FakeStorage) InsertUsersWithoutID(ctx context.Context, tx pgx.Tx, userC
 	f.Logger.Infof("start filling users")
 
 	for i := 0; i < int(userCount); i++ {
-		if i%(int(userCount)%100) == 0 {
+		if i%(int(userCount)/100+1) == 0 {
 			f.Logger.Infof("filled i=%d of %d users", i, userCount)
 		}
 
@@ -151,7 +151,7 @@ func (f *FakeStorage) InsertProducts(ctx context.Context,
 	f.Logger.Infof("start filling users")
 
 	for i := 0; i < int(productCount); i++ {
-		if i%(int(productCount)%100) == 0 {
+		if i%(int(productCount)/100+1) == 0 {
 			f.Logger.Infof("filled i=%d of %d products", i, productCount)
 		}
 
@@ -194,7 +194,7 @@ func (f *FakeStorage) InsertOrders(ctx context.Context,
 	f.Logger.Infof("start filling orders")
 
 	for i := 0; i < int(ordersMaxCount); i++ {
-		if i%(int(ordersMaxCount)%100) == 0 {
+		if i%(int(ordersMaxCount)/100+1) == 0 {
 			f.Logger.Infof("filled i=%d of %d orders", i, ordersMaxCount)
 		}
 
@@ -218,6 +218,46 @@ func (f *FakeStorage) InsertOrders(ctx context.Context,
 	}
 
 	f.Logger.Infof("end filling orders\n")
+
+	return nil
+}
+
+// InsertFavourites TODO fix troubles with uniq together
+func (f *FakeStorage) InsertFavourites(ctx context.Context,
+	tx pgx.Tx, maxCountFavourites uint, maxCountUsers uint, maxCountProducts uint,
+) error {
+	slOrder := [][]any{}
+	columns := []string{
+		"owner_id", "product_id",
+	}
+
+	f.Logger.Infof("start filling favourites")
+
+	for i := 0; i < int(maxCountFavourites); i++ {
+		if i%(int(maxCountFavourites)/100+1) == 0 {
+			f.Logger.Infof("filled i=%d of %d favourites", i, maxCountFavourites)
+		}
+
+		ownerID, productID := usecases.FakeFavourite(maxCountUsers, maxCountProducts)
+
+		slOrder = append(slOrder,
+			[]any{ownerID, productID},
+		)
+	}
+
+	_, err := tx.CopyFrom(
+		ctx,
+		pgx.Identifier{"public", "favourite"},
+		columns,
+		pgx.CopyFromRows(slOrder),
+	)
+	if err != nil {
+		f.Logger.Error(err)
+
+		return err
+	}
+
+	f.Logger.Infof("end filling favourites\n")
 
 	return nil
 }

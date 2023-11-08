@@ -50,9 +50,9 @@ docker compose -f  local-docker-compose.yml up
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 ```
 
-### Пример команды, чтобы накатить миграцию
+### Заполнение бд при поднятии через компоус
 ```shell
- migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations up
+ docker exec -it 2023_2_rabotyagi-backend-1  go run cmd/fake_db/main.go
 ```
 ### Пример команды, чтобы отменить миграцию
 ```shell

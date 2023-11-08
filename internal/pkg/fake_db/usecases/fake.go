@@ -57,3 +57,10 @@ func FakePreOrder(userMaxCount uint, productMaxCount uint) *models.Order {
 
 	return preOrder
 }
+
+func FakeFavourite(userMaxCount uint, productMaxCount uint) (uint64, uint64) {
+	ownerID := uint64(gofakeit.Number(1, int(userMaxCount)))
+	productID := uint64(gofakeit.Number(1, int(productMaxCount)))
+
+	return ownerID, productID
+}
