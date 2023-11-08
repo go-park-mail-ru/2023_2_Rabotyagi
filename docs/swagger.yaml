@@ -1,5 +1,14 @@
 basePath: /api/v1
 definitions:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      parent_id:
+        type: integer
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image:
     properties:
       url:
@@ -126,9 +135,8 @@ definitions:
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword:
     properties:
       birthday:
-        allOf:
-        - $ref: '#/definitions/sql.NullTime'
         description: nolint
+        type: string
       email:
         type: string
       id:
@@ -192,20 +200,15 @@ definitions:
         type: integer
     type: object
   internal_models.UserWithoutID:
+    type: object
+  internal_pkg_category_delivery.CategoryListResponse:
     properties:
-      birthday:
-        allOf:
-        - $ref: '#/definitions/sql.NullTime'
-        description: nolint
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      phone:
-        description: nolint
-        type: string
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category'
+        type: array
+      status:
+        type: integer
     type: object
   internal_pkg_product_delivery.OrderListResponse:
     properties:
@@ -246,14 +249,6 @@ definitions:
       status:
         type: integer
     type: object
-  sql.NullTime:
-    properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
-    type: object
 host: 84.23.53.28:8080
 info:
   contact: {}
@@ -261,6 +256,31 @@ info:
   title: YULA project API
   version: "1.0"
 paths:
+  /category/get_full:
+    get:
+      description: get all categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_category_delivery.CategoryListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get all categories
+      tags:
+      - category
   /logout:
     post:
       consumes:

@@ -15,6 +15,44 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/category/get_full": {
+            "get": {
+                "description": "get all categories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "get all categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_pkg_category_delivery.CategoryListResponse"
+                        }
+                    },
+                    "222": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/logout": {
             "post": {
                 "description": "logout in app",
@@ -1025,6 +1063,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image": {
             "type": "object",
             "properties": {
@@ -1215,11 +1267,7 @@ const docTemplate = `{
             "properties": {
                 "birthday": {
                     "description": "nolint",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/sql.NullTime"
-                        }
-                    ]
+                    "type": "string"
                 },
                 "email": {
                     "type": "string"
@@ -1319,28 +1367,19 @@ const docTemplate = `{
             }
         },
         "internal_models.UserWithoutID": {
+            "type": "object"
+        },
+        "internal_pkg_category_delivery.CategoryListResponse": {
             "type": "object",
             "properties": {
-                "birthday": {
-                    "description": "nolint",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/sql.NullTime"
-                        }
-                    ]
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category"
+                    }
                 },
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "phone": {
-                    "description": "nolint",
-                    "type": "string"
+                "status": {
+                    "type": "integer"
                 }
             }
         },
@@ -1402,18 +1441,6 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
-                }
-            }
-        },
-        "sql.NullTime": {
-            "type": "object",
-            "properties": {
-                "time": {
-                    "type": "string"
-                },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
                 }
             }
         }
