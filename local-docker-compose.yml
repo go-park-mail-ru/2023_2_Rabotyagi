@@ -38,6 +38,7 @@ services:
       - POSTGRES_USER=postgres # для обратной совместимости пока оставил
       - POSTGRES_PASSWORD=postgres # для обратной совместимости пока оставил
       - URL_DATA_BASE=postgres://postgres:postgres@postgres:5432/youla?sslmode=disable
+      - PATH_TO_ROOT=/var/backend
       - SCHEMA=http://
     ports:
       - 8080:8080
