@@ -28,3 +28,24 @@ func FakeUserWihtoutID(index int) (*models.UserWithoutID, error) {
 
 	return user, nil
 }
+
+func FakePreProduct(baseCount uint) *models.PreProduct {
+	userMaxCount := baseCount
+	categoryMaxCount := baseCount%10 + 2
+	wordsInDescription := 10
+	maxPrice := 1000
+	maxAvailableCount := 10
+	preProduct := new(models.PreProduct)
+
+	preProduct.SalerID = uint64(gofakeit.Number(1, int(userMaxCount)))
+	preProduct.CategoryID = uint64(gofakeit.Number(1, int(categoryMaxCount)))
+	preProduct.Title = gofakeit.BookTitle()
+	preProduct.Description = gofakeit.Sentence(wordsInDescription)
+	preProduct.Price = uint64(gofakeit.Number(1, maxPrice))
+	preProduct.AvailableCount = uint32(gofakeit.Number(1, maxAvailableCount))
+	preProduct.City = gofakeit.City()
+	preProduct.Delivery = gofakeit.Bool()
+	preProduct.SafeDeal = gofakeit.Bool()
+
+	return preProduct
+}

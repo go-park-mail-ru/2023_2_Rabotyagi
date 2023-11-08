@@ -138,3 +138,47 @@ func (f *FakeStorage) InsertCategories(ctx context.Context, tx pgx.Tx, count uin
 
 	return nil
 }
+
+func (f *FakeStorage) InsertProducts(ctx context.Context, tx pgx.Tx, count uint) error {
+	productCount := 2 * count
+	slProduct := [][]any{}
+	columns := []string{
+		"saler_id", "category_id", "title", "description", "price",
+		"available_count", "city", "delivery", "safe_deal",
+	}
+
+	f.Logger.Infof("start filling users")
+
+	for i := 0; i < int(productCount); i++ {
+		if i%(int(count)%100) == 0 {
+			f.Logger.Infof("filled i=%d of %d products", i, productCount)
+		}
+
+		preProduct := usecases.FakePreProduct(count)
+
+		slProduct = append(slProduct,
+			[]any{
+				preProduct.SalerID, preProduct.CategoryID, preProduct.Title,
+				preProduct.Description, preProduct.Price, preProduct.AvailableCount, preProduct.City,
+				preProduct.Delivery, preProduct.SafeDeal,
+			},
+		)
+	}
+
+	_, err := tx.CopyFrom(
+		ctx,
+		pgx.Identifier{"public", "product"},
+		columns,
+		pgx.CopyFromRows(slProduct),
+	)
+	if err != nil {
+		f.Logger.Error(err)
+
+		return err
+	}
+
+	f.Logger.Infof("end filling products\n")
+
+	return nil
+
+}

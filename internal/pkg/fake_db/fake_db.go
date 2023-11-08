@@ -28,7 +28,30 @@ func RunScriptFillDB(URLDataBase string, logger *zap.SugaredLogger, baseCount ui
 			return err
 		}
 
+		return nil
+	})
+	if err != nil {
+		logger.Error(err)
+
+		return err
+	}
+
+	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
 		err = fakeStorage.InsertCategories(baseCtx, tx, baseCount)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		logger.Error(err)
+
+		return err
+	}
+
+	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
+		err = fakeStorage.InsertProducts(baseCtx, tx, baseCount)
 		if err != nil {
 			return err
 		}
