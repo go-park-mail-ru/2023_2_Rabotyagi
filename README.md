@@ -26,7 +26,7 @@ http://84.23.53.28/
 
 ### Тестирование 
 
-`mkdir -p bin && go test -v  -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html`
+`mkdir -p bin && go test -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html && go tool cover --func bin/cover.out`
 
 ## Документация
  Ссылка https://app.swaggerhub.com/apis/IVN15072002/yula-project_api/1.0
@@ -34,29 +34,27 @@ http://84.23.53.28/
 
 ### Сгенерировать swagger документацию
 
-`swag init -g cmd/app/main.go`
-
-
-## Docker image build
-
-### Local
-
-Из корня проекта прописываем
 ```shell
-docker build -t rabotyagi/backend .
+swag init --parseDependency -g cmd/app/main.go
 ```
 
-Далее, чтобы убедиться что image забилдился, прописываем:
+## Локальное поднятие бека и бд
+
 ```shell
-docker images
+docker compose -f  local-docker-compose.yml up
 ```
 
-Должны увидеть следующее:
+
+### Локальная установка тула для миграций
 ```shell
-REPOSITORY          TAG       IMAGE ID       CREATED          SIZE
-rabotyagi/backend   latest    25dbaeeef1af   50 seconds ago   307MB
+go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 ```
 
-### Запуск контейнера 
-
-`docker run -p 8080:8080 rabotyagi/backend`
+### Заполнение бд при поднятии через компоус
+```shell
+ docker exec -it 2023_2_rabotyagi-backend-1  go run cmd/fake_db/main.go
+```
+### Пример команды, чтобы отменить миграцию
+```shell
+ migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations down
+```

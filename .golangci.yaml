@@ -7,7 +7,6 @@ linters:
     - containedctx
     - contextcheck
     - cyclop
-    - deadcode
     - decorder
     - depguard
     - dogsled
@@ -40,7 +39,6 @@ linters:
     - gofumpt
     - goheader
     - goimports
-    - golint
     - gomnd
     - gomoddirectives
     - gomodguard
@@ -50,17 +48,14 @@ linters:
     - gosmopolitan
     - govet
     - grouper
-    - ifshort
     - importas
     - ineffassign
     - interfacebloat
-    - interfacer
     - ireturn
     - lll
     - loggercheck
     - maintidx
     - makezero
-    - maligned
     - mirror
     - misspell
     - musttag
@@ -72,7 +67,6 @@ linters:
     - noctx
     - nolintlint
     - nonamedreturns
-    - nosnakecase
     - nosprintfhostport
     - paralleltest
     - prealloc
@@ -81,10 +75,8 @@ linters:
     - reassign
     - revive
     - rowserrcheck
-    - scopelint
     - sqlclosecheck
     - staticcheck
-    - structcheck
     - stylecheck
     - tagalign
     - tagliatelle
@@ -98,16 +90,25 @@ linters:
     - unparam
     - unused
     - usestdlibvars
-    - varcheck
     - varnamelen
     - wastedassign
     - whitespace
     - wrapcheck
     - wsl
     - zerologlint
+
   disable:
     - forbidigo
     - exhaustivestruct
+    - deadcode
+    - golint
+    - varcheck
+    - scopelint
+    - structcheck
+    - interfacer
+    - nosnakecase
+    - maligned
+    - ifshort
 
   presets:
     - bugs
@@ -133,7 +134,20 @@ linters-settings:
         allow:
           - $gostd
           - github.com/go-park-mail-ru/2023_2_Rabotyagi
-          - github.com/dgrijalva/jwt-go
+          - github.com/golang-jwt/jwt
+          - github.com/stretchr/testify/assert
+          - github.com/jackc/pgx/v5
+          - github.com/asaskevich/govalidator
+          - github.com/Masterminds/squirrel
+          - golang.org/x/crypto/argon2
+          - github.com/microcosm-cc/bluemonday
+          - go.uber.org/zap
+          - github.com/brianvoe/gofakeit/v6
         deny:
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package
+  tagliatelle:
+    case:
+      use-field-name: true
+      rules:
+        json: snake

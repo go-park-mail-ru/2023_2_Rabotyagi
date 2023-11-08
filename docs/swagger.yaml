@@ -1,80 +1,258 @@
 basePath: /api/v1
 definitions:
-  handler.ErrorResponse:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image:
     properties:
-      body:
-        $ref: '#/definitions/handler.ResponseBodyError'
-      status:
-        type: integer
+      url:
+        type: string
     type: object
-  handler.PostsListResponse:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket:
     properties:
-      body:
+      available_count:
+        type: integer
+      city:
+        type: string
+      count:
+        type: integer
+      delivery:
+        type: boolean
+      id:
+        type: integer
+      images:
         items:
-          $ref: '#/definitions/storage.Post'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
         type: array
-      status:
+      in_favourites:
+        type: boolean
+      owner_id:
+        type: integer
+      price:
+        type: integer
+      product_id:
+        type: integer
+      safe_deal:
+        type: boolean
+      saler_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct:
+    properties:
+      available_count:
+        type: integer
+      category_id:
+        type: integer
+      city:
+        description: nolint
+        type: string
+      delivery:
+        type: boolean
+      description:
+        description: nolint
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
+        type: array
+      price:
+        type: integer
+      safe_deal:
+        type: boolean
+      saler_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Product:
+    properties:
+      available_count:
+        type: integer
+      category_id:
+        type: integer
+      city:
+        description: nolint
+        type: string
+      created_at:
+        type: string
+      delivery:
+        type: boolean
+      description:
+        description: nolint
+        type: string
+      favourites:
+        type: integer
+      id:
+        type: integer
+      images:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
+        type: array
+      in_favourites:
+        type: boolean
+      price:
+        type: integer
+      safe_deal:
+        type: boolean
+      saler_id:
+        type: integer
+      title:
+        type: string
+      views:
         type: integer
     type: object
-  handler.Response:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.ProductInFeed:
+    properties:
+      city:
+        type: string
+      delivery:
+        type: boolean
+      favourites:
+        type: integer
+      id:
+        type: integer
+      images:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
+        type: array
+      in_favourites:
+        type: boolean
+      price:
+        type: integer
+      safe_deal:
+        type: boolean
+      title:
+        type: string
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword:
+    properties:
+      birthday:
+        allOf:
+        - $ref: '#/definitions/sql.NullTime'
+        description: nolint
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        description: nolint
+        type: string
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse:
     properties:
       body:
-        $ref: '#/definitions/handler.ResponseBody'
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyError'
       status:
         type: integer
     type: object
-  handler.ResponseBody:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody'
+      status:
+        type: integer
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody:
     properties:
       message:
         type: string
     type: object
-  handler.ResponseBodyError:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyError:
     properties:
       error:
         type: string
     type: object
-  storage.Post:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID:
     properties:
-      author:
-        type: integer
-      city:
-        type: string
-      delivery:
-        type: boolean
-      description:
-        type: string
       id:
         type: integer
-      price:
-        type: integer
-      safe:
-        type: boolean
-      title:
-        type: string
     type: object
-  storage.PrePost:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID:
     properties:
-      author:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID'
+      status:
         type: integer
-      city:
-        type: string
-      delivery:
-        type: boolean
-      description:
-        type: string
-      price:
-        type: integer
-      safe:
-        type: boolean
-      title:
-        type: string
     type: object
-  storage.PreUser:
+  internal_models.OrderChanges:
     properties:
+      count:
+        type: integer
+      id:
+        type: integer
+      status:
+        type: integer
+    type: object
+  internal_models.PreOrder:
+    properties:
+      count:
+        type: integer
+      product_id:
+        type: integer
+    type: object
+  internal_models.UserWithoutID:
+    properties:
+      birthday:
+        allOf:
+        - $ref: '#/definitions/sql.NullTime'
+        description: nolint
       email:
+        type: string
+      name:
         type: string
       password:
         type: string
+      phone:
+        description: nolint
+        type: string
+    type: object
+  internal_pkg_product_delivery.OrderListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket'
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_pkg_product_delivery.OrderResponse:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket'
+      status:
+        type: integer
+    type: object
+  internal_pkg_product_delivery.ProductListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.ProductInFeed'
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_pkg_product_delivery.ProductResponse:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Product'
+      status:
+        type: integer
+    type: object
+  internal_pkg_user_delivery.ProfileResponse:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
+      status:
+        type: integer
+    type: object
+  sql.NullTime:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
     type: object
 host: 84.23.53.28:8080
 info:
@@ -94,7 +272,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -104,25 +286,31 @@ paths:
           schema:
             type: string
       summary: logout
-  /post/add:
+      tags:
+      - auth
+  /order/add:
     post:
       consumes:
       - application/json
-      description: add post by data
+      description: add product in basket
       parameters:
-      - description: post data for adding
+      - description: order data for adding
         in: body
-        name: post
+        name: preOrder
         required: true
         schema:
-          $ref: '#/definitions/storage.PrePost'
+          $ref: '#/definitions/internal_models.PreOrder'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_pkg_product_delivery.OrderResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -131,14 +319,281 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: add post
-  /post/get/{id}:
+      summary: add order to basket
+      tags:
+      - order
+  /order/buy_full_basket:
+    patch:
+      consumes:
+      - application/json
+      description: buy all orders from basket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: buy all orders from basket
+      tags:
+      - order
+  /order/delete/:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        delete order for owner using user id from cookies\jwt.
+        This totally removed order. Recovery will be impossible
+      parameters:
+      - description: order id
+        in: path
+        name: orderID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: delete order
+      tags:
+      - order
+  /order/get_basket:
     get:
       consumes:
       - application/json
-      description: get post by id
+      description: get basket of orders by user id from cookie\jwt token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_product_delivery.OrderListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get basket of orders
+      tags:
+      - order
+  /order/update_count:
+    patch:
+      consumes:
+      - application/json
+      description: update order count using user id from cookie\jwt token
       parameters:
-      - description: post id
+      - description: order data for updating use only id and count
+        in: body
+        name: orderChanges
+        required: true
+        schema:
+          $ref: '#/definitions/internal_models.OrderChanges'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update order count
+      tags:
+      - order
+  /order/update_status:
+    patch:
+      consumes:
+      - application/json
+      description: update order status using user id from cookie\jwt token
+      parameters:
+      - description: order data for updating use only id and status
+        in: body
+        name: orderChanges
+        required: true
+        schema:
+          $ref: '#/definitions/internal_models.OrderChanges'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update order status
+      tags:
+      - order
+  /product/add:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        add product by data
+        Error.status can be:
+        StatusErrBadRequest      = 400
+        StatusErrInternalServer  = 500
+      parameters:
+      - description: product data for adding
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: add product
+      tags:
+      - product
+  /product/close/:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        close product for saler using user id from cookies\jwt.
+        This does product not active.
+      parameters:
+      - description: product id
+        in: path
+        name: productID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: close product
+      tags:
+      - product
+  /product/delete/:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        delete product for saler using user id from cookies\jwt.
+        This totally removed product. Recovery will be impossible
+      parameters:
+      - description: product id
+        in: path
+        name: productID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: delete product
+      tags:
+      - product
+  /product/get/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get product by id
+      parameters:
+      - description: product id
         in: path
         name: id
         required: true
@@ -149,7 +604,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_pkg_product_delivery.ProductResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -158,16 +617,23 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get post
-  /post/get_list:
+      summary: get product
+      tags:
+      - product
+  /product/get_list:
     get:
       consumes:
       - application/json
-      description: get posts by count
+      description: get products by count and last_id return new products
       parameters:
-      - description: count posts
+      - description: count products
         in: query
         name: count
+        required: true
+        type: integer
+      - description: 'last product id '
+        in: query
+        name: last_id
         required: true
         type: integer
       produces:
@@ -176,7 +642,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -185,26 +655,241 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get posts
-  /signin:
-    post:
+      summary: get products list
+      tags:
+      - product
+  /product/get_list_of_saler:
+    get:
       consumes:
       - application/json
-      description: signin in app
+      description: get list of products for saler using user id from cookies\jwt
       parameters:
-      - description: user data for signin
-        in: body
-        name: preUser
+      - description: count products
+        in: query
+        name: count
         required: true
-        schema:
-          $ref: '#/definitions/storage.PreUser'
+        type: integer
+      - description: 'last product id '
+        in: query
+        name: last_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get list of products for saler
+      tags:
+      - product
+  /product/update:
+    patch:
+      consumes:
+      - application/json
+      description: update product by id
+      parameters:
+      - description: product data for updating
+        in: body
+        name: preProduct
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update product
+      tags:
+      - product
+    put:
+      consumes:
+      - application/json
+      description: update product by id
+      parameters:
+      - description: product data for updating
+        in: body
+        name: preProduct
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update product
+      tags:
+      - product
+  /profile/get/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get profile by id
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_user_delivery.ProfileResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get profile
+      tags:
+      - profile
+  /profile/update:
+    patch:
+      consumes:
+      - application/json
+      description: update some fields of profile
+      parameters:
+      - description: user data for updating
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_user_delivery.ProfileResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update profile
+      tags:
+      - profile
+    put:
+      consumes:
+      - application/json
+      description: update some fields of profile
+      parameters:
+      - description: user data for updating
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_user_delivery.ProfileResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update profile
+      tags:
+      - profile
+  /signin:
+    get:
+      consumes:
+      - application/json
+      description: signin in app
+      parameters:
+      - description: user email for signin
+        in: query
+        name: email
+        required: true
+        type: string
+      - description: user password for signin
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -214,25 +899,35 @@ paths:
           schema:
             type: string
       summary: signin
+      tags:
+      - auth
   /signup:
     post:
       consumes:
       - application/json
-      description: signup in app
+      description: |-
+        signup in app
+        Error.status can be:
+        StatusErrBadRequest      = 400
+        StatusErrInternalServer  = 500
       parameters:
       - description: user data for signup
         in: body
         name: preUser
         required: true
         schema:
-          $ref: '#/definitions/storage.PreUser'
+          $ref: '#/definitions/internal_models.UserWithoutID'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -242,6 +937,8 @@ paths:
           schema:
             type: string
       summary: signup
+      tags:
+      - auth
 schemes:
 - http
 swagger: "2.0"
