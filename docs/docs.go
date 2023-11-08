@@ -372,7 +372,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID"
                         }
                     },
                     "222": {
@@ -688,7 +688,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID"
                         }
                     },
                     "222": {
@@ -738,7 +738,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect"
+                            "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID"
                         }
                     },
                     "222": {
@@ -1247,14 +1247,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.RedirectBody": {
-            "type": "object",
-            "properties": {
-                "redirect_url": {
-                    "type": "string"
-                }
-            }
-        },
         "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response": {
             "type": "object",
             "properties": {
@@ -1282,11 +1274,19 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect": {
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID": {
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.RedirectBody"
+                    "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID"
                 },
                 "status": {
                     "type": "integer"

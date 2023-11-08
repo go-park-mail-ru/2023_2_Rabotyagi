@@ -146,11 +146,6 @@ definitions:
       status:
         type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.RedirectBody:
-    properties:
-      redirect_url:
-        type: string
-    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response:
     properties:
       body:
@@ -168,10 +163,15 @@ definitions:
       error:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID:
+    properties:
+      id:
+        type: integer
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID:
     properties:
       body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.RedirectBody'
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID'
       status:
         type: integer
     type: object
@@ -501,7 +501,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
         "222":
           description: Error
           schema:
@@ -714,7 +714,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
         "222":
           description: Error
           schema:
@@ -747,7 +747,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
         "222":
           description: Error
           schema:

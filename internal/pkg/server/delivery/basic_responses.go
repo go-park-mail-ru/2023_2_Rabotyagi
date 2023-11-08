@@ -41,17 +41,17 @@ func NewResponse(status int, message string) *Response {
 	}
 }
 
-type RedirectBody struct {
-	RedirectURL string `json:"redirect_url"`
+type ResponseBodyID struct {
+	ID uint64 `json:"id"`
 }
 
-type ResponseRedirect struct {
-	Status int          `json:"status"`
-	Body   RedirectBody `json:"body"`
+type ResponseID struct {
+	Status int            `json:"status"`
+	Body   ResponseBodyID `json:"body"`
 }
 
-func NewResponseRedirect(redirectURL string) *ResponseRedirect {
-	return &ResponseRedirect{Status: StatusRedirectAfterSuccessful, Body: RedirectBody{RedirectURL: redirectURL}}
+func NewResponseID(ID uint64) *ResponseID {
+	return &ResponseID{Status: StatusRedirectAfterSuccessful, Body: ResponseBodyID{ID: ID}}
 }
 
 type ResponseBodyError struct {

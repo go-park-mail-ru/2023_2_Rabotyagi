@@ -45,7 +45,7 @@ func NewProductHandler(storage usecases.IProductStorage,
 //	@Accept      json
 //	@Produce    json
 //	@Param      product  body models.PreProduct true  "product data for adding"
-//	@Success    200  {object} delivery.ResponseRedirect
+//	@Success    200  {object} delivery.ResponseID
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -82,7 +82,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponseRedirect(p.createURLToProductFromID(productID)))
+	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(productID))
 	p.logger.Infof("in AddProductHandler: added product: %+v", preProduct)
 }
 
@@ -204,7 +204,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 //	@Produce    json
 //	@Param      product_id  path uint64 true  "id of product"
 //	@Param      preProduct  body models.PreProduct true  "product data for updating"
-//	@Success    200  {object} delivery.ResponseRedirect
+//	@Success    200  {object} delivery.ResponseID
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -273,7 +273,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponseRedirect(p.createURLToProductFromID(productID)))
+	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(productID))
 	p.logger.Infof("in UpdateProductHandler: updated product with id = %+v", productID)
 }
 
