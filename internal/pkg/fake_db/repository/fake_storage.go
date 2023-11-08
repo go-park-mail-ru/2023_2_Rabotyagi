@@ -145,7 +145,7 @@ func (f *FakeStorage) InsertProducts(ctx context.Context,
 	slProduct := [][]any{}
 	columns := []string{
 		"saler_id", "category_id", "title", "description", "price",
-		"available_count", "city", "delivery", "safe_deal",
+		"available_count", "city", "delivery", "safe_deal", "views",
 	}
 
 	f.Logger.Infof("start filling users")
@@ -155,13 +155,13 @@ func (f *FakeStorage) InsertProducts(ctx context.Context,
 			f.Logger.Infof("filled i=%d of %d products", i, productCount)
 		}
 
-		preProduct := usecases.FakePreProduct(userMaxCount, categoryMaxCount)
+		preProduct := usecases.FakeProduct(userMaxCount, categoryMaxCount)
 
 		slProduct = append(slProduct,
 			[]any{
 				preProduct.SalerID, preProduct.CategoryID, preProduct.Title,
 				preProduct.Description, preProduct.Price, preProduct.AvailableCount, preProduct.City,
-				preProduct.Delivery, preProduct.SafeDeal,
+				preProduct.Delivery, preProduct.SafeDeal, preProduct.Views,
 			},
 		)
 	}
@@ -222,6 +222,52 @@ func (f *FakeStorage) InsertOrders(ctx context.Context,
 	return nil
 }
 
+func (f *FakeStorage) InsertImages(ctx context.Context,
+	tx pgx.Tx, maxNameImage uint, maxCountProducts uint, pathToRoot string,
+) error {
+	fakeGeneratorImg, err := usecases.NewFakeGeneratorImg(maxNameImage, pathToRoot)
+	if err != nil {
+		f.Logger.Error(err)
+
+		return err
+	}
+
+	slImg := [][]any{}
+	columns := []string{
+		"url", "product_id",
+	}
+
+	f.Logger.Infof("start filling images")
+
+	for i := 1; i < int(maxCountProducts); i++ {
+		if i%(int(maxCountProducts)%100) == 0 {
+			f.Logger.Infof("filled images i=%d of %d prodcuts", i, maxCountProducts)
+		}
+
+		URLs := fakeGeneratorImg.GetURLs(uint(gofakeit.Number(0, int(maxNameImage))))
+
+		for _, url := range URLs {
+			slImg = append(slImg, []any{url, i})
+		}
+	}
+
+	_, err = tx.CopyFrom(
+		ctx,
+		pgx.Identifier{"public", "image"},
+		columns,
+		pgx.CopyFromRows(slImg),
+	)
+	if err != nil {
+		f.Logger.Error(err)
+
+		return err
+	}
+
+	f.Logger.Infof("end filling orders\n")
+
+	return nil
+}
+
 // InsertFavourites TODO fix troubles with uniq together
 func (f *FakeStorage) InsertFavourites(ctx context.Context,
 	tx pgx.Tx, maxCountFavourites uint, maxCountUsers uint, maxCountProducts uint,
@@ -249,8 +295,7 @@ func (f *FakeStorage) InsertFavourites(ctx context.Context,
 		ctx,
 		pgx.Identifier{"public", "favourite"},
 		columns,
-		pgx.CopyFromRows(slOrder),
-	)
+		pgx.CopyFromRows(slOrder))
 	if err != nil {
 		f.Logger.Error(err)
 

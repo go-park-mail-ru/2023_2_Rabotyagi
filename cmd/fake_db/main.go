@@ -25,7 +25,8 @@ func main() {
 	}
 	defer logger.Sync()
 
-	err = fake_db.RunScriptFillDB(configServer.URLDataBase, logger, baseCount)
+	err = fake_db.RunScriptFillDB(configServer.URLDataBase,
+		logger, baseCount, configServer.PathToRoot)
 	if err != nil {
 		logger.Error(err)
 	}

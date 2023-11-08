@@ -7,11 +7,13 @@ const (
 	standardSchema      = "http://"
 	standardPort        = "8080"
 	standardURLDataBase = "postgres://postgres:postgres@postgres:5432/youla?sslmode=disable"
+	standardPathToRoot  = "./"
 
 	envAllowOrigin = "ALLOW_ORIGIN"
 	envSchema      = "SCHEMA"
 	envPortBackend = "PORT_BACKEND"
 	envURLDataBase = "URL_DATA_BASE"
+	envPathToRoot  = "PATH_TO_ROOT"
 )
 
 type Config struct {
@@ -19,6 +21,7 @@ type Config struct {
 	Schema      string
 	PortServer  string
 	URLDataBase string
+	PathToRoot  string
 }
 
 func New() *Config {
@@ -27,6 +30,7 @@ func New() *Config {
 		Schema:      getEnvStr(envSchema, standardSchema),
 		PortServer:  getEnvStr(envPortBackend, standardPort),
 		URLDataBase: getEnvStr(envURLDataBase, standardURLDataBase),
+		PathToRoot:  getEnvStr(envPathToRoot, standardPathToRoot),
 	}
 }
 
