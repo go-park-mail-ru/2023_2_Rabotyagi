@@ -204,8 +204,8 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "order id",
-                        "name": "orderID",
-                        "in": "path",
+                        "name": "id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -434,7 +434,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/product/close/": {
+        "/product/close": {
             "patch": {
                 "description": "close product for saler using user id from cookies\\jwt.\nThis does product not active.",
                 "consumes": [
@@ -451,8 +451,8 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "product id",
-                        "name": "productID",
-                        "in": "path",
+                        "name": "id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -484,7 +484,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/product/delete/": {
+        "/product/delete": {
             "delete": {
                 "description": "delete product for saler using user id from cookies\\jwt.\nThis totally removed product. Recovery will be impossible",
                 "consumes": [
@@ -501,8 +501,8 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "product id",
-                        "name": "productID",
-                        "in": "path",
+                        "name": "id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -534,7 +534,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/product/get/{id}": {
+        "/product/get": {
             "get": {
                 "description": "get product by id",
                 "consumes": [
@@ -552,7 +552,7 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "product id",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -607,7 +607,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "last product id ",
+                        "description": "last product id",
                         "name": "last_id",
                         "in": "query",
                         "required": true
@@ -714,16 +714,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "id of product",
-                        "name": "product_id",
+                        "description": "product id",
+                        "name": "id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "description": "product data for updating",
+                        "description": "полностью опционален",
                         "name": "preProduct",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct"
                         }
@@ -771,16 +770,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "id of product",
-                        "name": "product_id",
+                        "description": "product id",
+                        "name": "id",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "description": "product data for updating",
+                        "description": "полностью опционален",
                         "name": "preProduct",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct"
                         }
@@ -814,7 +812,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/profile/get/{id}": {
+        "/profile/get": {
             "get": {
                 "description": "get profile by id",
                 "consumes": [
@@ -832,7 +830,7 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "user id",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -879,10 +877,9 @@ const docTemplate = `{
                 "summary": "update profile",
                 "parameters": [
                     {
-                        "description": "user data for updating",
+                        "description": "полностью опционален",
                         "name": "user",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword"
                         }
@@ -929,10 +926,9 @@ const docTemplate = `{
                 "summary": "update profile",
                 "parameters": [
                     {
-                        "description": "user data for updating",
+                        "description": "полностью опционален",
                         "name": "user",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword"
                         }
@@ -1087,7 +1083,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parent_id": {
-                    "type": "integer"
+                    "description": "nolint",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sql.NullInt64"
+                        }
+                    ]
                 }
             }
         },
@@ -1147,6 +1148,7 @@ const docTemplate = `{
             }
         },
         "github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct": {
+            "description": "safe_deal optional delivery optional",
             "type": "object",
             "properties": {
                 "available_count": {
@@ -1482,6 +1484,18 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "sql.NullInt64": {
+            "type": "object",
+            "properties": {
+                "int64": {
+                    "type": "integer"
+                },
+                "valid": {
+                    "description": "Valid is true if Int64 is not NULL",
+                    "type": "boolean"
                 }
             }
         },

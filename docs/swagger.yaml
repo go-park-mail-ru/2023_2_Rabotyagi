@@ -7,7 +7,9 @@ definitions:
       name:
         type: string
       parent_id:
-        type: integer
+        allOf:
+        - $ref: '#/definitions/sql.NullInt64'
+        description: nolint
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image:
     properties:
@@ -46,6 +48,7 @@ definitions:
         type: string
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct:
+    description: safe_deal optional delivery optional
     properties:
       available_count:
         type: integer
@@ -264,6 +267,14 @@ definitions:
       status:
         type: integer
     type: object
+  sql.NullInt64:
+    properties:
+      int64:
+        type: integer
+      valid:
+        description: Valid is true if Int64 is not NULL
+        type: boolean
+    type: object
   sql.NullTime:
     properties:
       time:
@@ -401,8 +412,8 @@ paths:
         This totally removed order. Recovery will be impossible
       parameters:
       - description: order id
-        in: path
-        name: orderID
+        in: query
+        name: id
         required: true
         type: integer
       produces:
@@ -560,7 +571,7 @@ paths:
       summary: add product
       tags:
       - product
-  /product/close/:
+  /product/close:
     patch:
       consumes:
       - application/json
@@ -569,8 +580,8 @@ paths:
         This does product not active.
       parameters:
       - description: product id
-        in: path
-        name: productID
+        in: query
+        name: id
         required: true
         type: integer
       produces:
@@ -595,7 +606,7 @@ paths:
       summary: close product
       tags:
       - product
-  /product/delete/:
+  /product/delete:
     delete:
       consumes:
       - application/json
@@ -604,8 +615,8 @@ paths:
         This totally removed product. Recovery will be impossible
       parameters:
       - description: product id
-        in: path
-        name: productID
+        in: query
+        name: id
         required: true
         type: integer
       produces:
@@ -630,14 +641,14 @@ paths:
       summary: delete product
       tags:
       - product
-  /product/get/{id}:
+  /product/get:
     get:
       consumes:
       - application/json
       description: get product by id
       parameters:
       - description: product id
-        in: path
+        in: query
         name: id
         required: true
         type: integer
@@ -674,7 +685,7 @@ paths:
         name: count
         required: true
         type: integer
-      - description: 'last product id '
+      - description: last product id
         in: query
         name: last_id
         required: true
@@ -745,15 +756,14 @@ paths:
       - application/json
       description: update product by id
       parameters:
-      - description: id of product
+      - description: product id
         in: query
-        name: product_id
+        name: id
         required: true
         type: integer
-      - description: product data for updating
+      - description: полностью опционален
         in: body
         name: preProduct
-        required: true
         schema:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
       produces:
@@ -783,15 +793,14 @@ paths:
       - application/json
       description: update product by id
       parameters:
-      - description: id of product
+      - description: product id
         in: query
-        name: product_id
+        name: id
         required: true
         type: integer
-      - description: product data for updating
+      - description: полностью опционален
         in: body
         name: preProduct
-        required: true
         schema:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
       produces:
@@ -816,14 +825,14 @@ paths:
       summary: update product
       tags:
       - product
-  /profile/get/{id}:
+  /profile/get:
     get:
       consumes:
       - application/json
       description: get profile by id
       parameters:
       - description: user id
-        in: path
+        in: query
         name: id
         required: true
         type: integer
@@ -855,10 +864,9 @@ paths:
       - application/json
       description: update some fields of profile
       parameters:
-      - description: user data for updating
+      - description: полностью опционален
         in: body
         name: user
-        required: true
         schema:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
       produces:
@@ -888,10 +896,9 @@ paths:
       - application/json
       description: update some fields of profile
       parameters:
-      - description: user data for updating
+      - description: полностью опционален
         in: body
         name: user
-        required: true
         schema:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
       produces:
