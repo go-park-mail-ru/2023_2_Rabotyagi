@@ -3,9 +3,9 @@ FROM golang:1.21.1-alpine3.18
 WORKDIR /var/backend
 
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-COPY cmd cmd
-COPY static static
+COPY static/images_for_fake_db static/images_for_fake_db
 COPY static/img static/img
+COPY cmd cmd
 COPY internal internal
 COPY db/migrations db/migrations
 COPY go.mod .
