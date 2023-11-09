@@ -2,29 +2,37 @@ package mux
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"net/http"
 
 	categorydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/delivery"
 	categoryusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
+	filedelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/delivery"
+	filerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
+	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/middleware"
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/delivery"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
+
+	"go.uber.org/zap"
 )
 
+const urlPrefixPathFS = "img/"
+
 type ConfigMux struct {
-	addrOrigin string
-	schema     string
-	portServer string
+	addrOrigin     string
+	schema         string
+	portServer     string
+	fileServiceDir string
 }
 
-func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMux {
+func NewConfigMux(addrOrigin string, schema string, portServer string, fileServiceDir string) *ConfigMux {
 	return &ConfigMux{
-		addrOrigin: addrOrigin,
-		schema:     schema,
-		portServer: portServer,
+		addrOrigin:     addrOrigin,
+		schema:         schema,
+		portServer:     portServer,
+		fileServiceDir: fileServiceDir,
 	}
 }
 
@@ -44,12 +52,12 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 		configMux.addrOrigin, configMux.schema, configMux.portServer, logger,
 	)
 
-	imgHandler := http.StripPrefix(
-		"/api/v1/img/",
-		http.FileServer(http.Dir("./db/img")),
-	)
+	fileStorage := filerepo.NewFileSystemStorage(configMux.fileServiceDir)
+	fileService := fileusecases.NewFileService(fileStorage, urlPrefixPathFS)
+	fileHandler := filedelivery.NewFileHandler(configMux.fileServiceDir, fileService, logger)
 
-	router.Handle("/api/v1/img/", imgHandler)
+	router.Handle("/api/v1/img/", fileHandler.Handler)
+	router.Handle("/api/v1/img/upload", middleware.Context(ctx, fileHandler.UploadFileHandler))
 
 	router.Handle("/api/v1/signup", middleware.Context(ctx, userHandler.SignUpHandler))
 	router.Handle("/api/v1/signin", middleware.Context(ctx, userHandler.SignInHandler))

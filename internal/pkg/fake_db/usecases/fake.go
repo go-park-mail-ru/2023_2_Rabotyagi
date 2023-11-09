@@ -72,14 +72,15 @@ func FakeFavourite(userMaxCount uint, productMaxCount uint) (uint64, uint64) {
 
 type FakeGeneratorImg struct {
 	pathToRoot string
+	prefixURL  string
 	imgStorage map[string][]byte
 }
 
-func NewFakeGeneratorImg(maxNameImage uint, pathToRoot string) (*FakeGeneratorImg, error) {
+func NewFakeGeneratorImg(maxNameImage uint, prefixURL string, pathToRoot string) (*FakeGeneratorImg, error) {
 	imgStorage := make(map[string][]byte, maxNameImage)
 
 	for i := 1; i <= int(maxNameImage); i++ {
-		file, err := os.Open(fmt.Sprintf("%s/db/images_for_fake_db/%d.png", pathToRoot, i))
+		file, err := os.Open(fmt.Sprintf("%s/static/images_for_fake_db/%d.png", pathToRoot, i))
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +102,7 @@ func NewFakeGeneratorImg(maxNameImage uint, pathToRoot string) (*FakeGeneratorIm
 			return nil, err
 		}
 
-		URLFile, err := os.OpenFile(fmt.Sprintf("%s/db/img/%s", pathToRoot, URLToFile),
+		URLFile, err := os.OpenFile(fmt.Sprintf("%s/static/img/%s", pathToRoot, URLToFile),
 			os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
 			return nil, err
@@ -118,7 +119,8 @@ func NewFakeGeneratorImg(maxNameImage uint, pathToRoot string) (*FakeGeneratorIm
 		}
 	}
 
-	return &FakeGeneratorImg{imgStorage: imgStorage, pathToRoot: pathToRoot}, nil
+	return &FakeGeneratorImg{
+		imgStorage: imgStorage, pathToRoot: pathToRoot, prefixURL: prefixURL}, nil
 }
 
 func (f *FakeGeneratorImg) GetURLs(countURL uint) []string {
@@ -126,12 +128,12 @@ func (f *FakeGeneratorImg) GetURLs(countURL uint) []string {
 	result := make([]string, minCount)
 
 	i := 0
-	for url := range f.imgStorage {
+	for filename := range f.imgStorage {
 		if i == minCount {
 			break
 		}
 
-		result[i] = url
+		result[i] = f.prefixURL + filename
 		i++
 	}
 
