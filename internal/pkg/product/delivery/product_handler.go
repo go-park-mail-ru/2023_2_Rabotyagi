@@ -2,13 +2,11 @@ package delivery
 
 import (
 	"fmt"
-	"net/http"
-	"strconv"
-
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
+	"net/http"
 
 	"go.uber.org/zap"
 )
@@ -93,12 +91,12 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Tags product
 //	@Accept      json
 //	@Produce    json
-//	@Param      id  path uint64 true  "product id"
+//	@Param      id  query uint64 true  "product id"
 //	@Success    200  {object} ProductResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /product/get/{id} [get]
+//	@Router      /product/get [get]
 func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
@@ -113,14 +111,14 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	ctx := r.Context()
-	productIDStr := delivery.GetPathParam(r.URL.Path)
+
 	userID := delivery.GetUserIDFromCookie(r, p.logger)
 
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	productID, err := parseIDFromRequest(r, p.logger)
 	if err != nil {
 		p.logger.Errorf("in GetProductHandler: %+v\n", err)
 		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest,
-			fmt.Sprintf("%s product id == %s But shoud be integer", delivery.ErrBadRequest, productIDStr)))
+			fmt.Sprintf("%s product id == %v But shoud be integer", delivery.ErrBadRequest, productID)))
 
 		return
 	}
@@ -147,7 +145,7 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Accept      json
 //	@Produce    json
 //	@Param      count  query uint64 true  "count products"
-//	@Param      last_id  query uint64 true  "last product id "
+//	@Param      last_id  query uint64 true  "last product id"
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -202,8 +200,8 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 //	@Tags product
 //	@Accept      json
 //	@Produce    json
-//	@Param      product_id  path uint64 true  "id of product"
-//	@Param      preProduct  body models.PreProduct true  "product data for updating"
+//	@Param      id  query uint64 true  "product id"
+//	@Param      preProduct  body models.PreProduct false  "полностью опционален"
 //	@Success    200  {object} delivery.ResponseID
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -223,13 +221,11 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	productIDStr := delivery.GetPathParam(r.URL.Path)
-
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	productID, err := parseIDFromRequest(r, p.logger)
 	if err != nil {
 		p.logger.Errorf("in UpdateProductHandler: %+v\n", err)
 		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest,
-			fmt.Sprintf("%s product id == %s But shoud be integer", delivery.ErrBadRequest, productIDStr)))
+			fmt.Sprintf("%s product id == %v But shoud be integer", delivery.ErrBadRequest, productID)))
 
 		return
 	}
@@ -340,12 +336,12 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 //	@Tags product
 //	@Accept      json
 //	@Produce    json
-//	@Param      productID  path uint64 true  "product id"
+//	@Param      id  query uint64 true  "product id"
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /product/close/ [patch]
+//	@Router      /product/close [patch]
 func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) {
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
@@ -361,9 +357,8 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 
 	ctx := r.Context()
 	userID := delivery.GetUserIDFromCookie(r, p.logger)
-	productIDStr := delivery.GetPathParam(r.URL.String())
 
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	productID, err := parseIDFromRequest(r, p.logger)
 	if err != nil {
 		p.logger.Errorf("in CloseProductHandler: %+v\n", err)
 		delivery.SendErrResponse(w, p.logger,
@@ -394,12 +389,12 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 //	@Tags product
 //	@Accept      json
 //	@Produce    json
-//	@Param      productID  path uint64 true  "product id"
+//	@Param      id  query uint64 true  "product id"
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /product/delete/ [delete]
+//	@Router      /product/delete [delete]
 func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
 	delivery.SetupCORS(w, p.addrOrigin, p.schema)
 
@@ -415,9 +410,8 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 
 	ctx := r.Context()
 	userID := delivery.GetUserIDFromCookie(r, p.logger)
-	productIDStr := delivery.GetPathParam(r.URL.String())
 
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	productID, err := parseIDFromRequest(r, p.logger)
 	if err != nil {
 		p.logger.Errorf("in DeleteProductHandler: %+v\n", err)
 		delivery.SendErrResponse(w, p.logger,

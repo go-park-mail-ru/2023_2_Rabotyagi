@@ -43,3 +43,18 @@ func parseCountAndLastIDFromRequest(r *http.Request, logger *zap.SugaredLogger) 
 
 	return count, lastID, nil
 }
+
+func parseIDFromRequest(r *http.Request, logger *zap.SugaredLogger) (uint64, error) {
+	IDStr := r.URL.Query().Get("id")
+
+	ID, err := strconv.ParseUint(IDStr, 10, 64)
+	if err != nil {
+		err := fmt.Errorf("%w id=%s", ErrWrongProductID, IDStr)
+
+		logger.Errorf("in parseIDFromRequest: %+v\n", err)
+
+		return 0, err
+	}
+
+	return ID, err
+}

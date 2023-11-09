@@ -1,11 +1,9 @@
 package delivery
 
 import (
-	"net/http"
-	"strconv"
-
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	"net/http"
 )
 
 // GetBasketHandler godoc
@@ -263,7 +261,7 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 //	@Tags order
 //	@Accept      json
 //	@Produce    json
-//	@Param      orderID  path uint64 true  "order id"
+//	@Param      id  query uint64 true  "order id"
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -284,9 +282,8 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 
 	ctx := r.Context()
 	userID := delivery.GetUserIDFromCookie(r, p.logger)
-	orderIDStr := delivery.GetPathParam(r.URL.String())
 
-	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
+	orderID, err := parseIDFromRequest(r, p.logger)
 	if err != nil {
 		p.logger.Errorf("in DeleteOrderHandler: %+v\n", err)
 		delivery.SendErrResponse(w, p.logger,
