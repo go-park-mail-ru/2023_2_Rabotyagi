@@ -37,8 +37,8 @@ type PreProduct struct {
 	Price          uint64  `json:"price"           valid:"required"`
 	City           string  `json:"city"            valid:"required, length(1|256)~City length must be from 1 to 256"` //nolint
 	AvailableCount uint32  `json:"available_count" valid:"required"`
-	Delivery       bool    `json:"delivery"        valid:"required"`
-	SafeDeal       bool    `json:"safe_deal"       valid:"required"`
+	Delivery       bool    `json:"delivery"`
+	SafeDeal       bool    `json:"safe_deal"`
 	Images         []Image `json:"images"`
 }
 

@@ -22,7 +22,10 @@ var (
 func validatePreProduct(logger *zap.SugaredLogger, r io.Reader) (*models.PreProduct, error) {
 	decoder := json.NewDecoder(r)
 
-	preProduct := new(models.PreProduct)
+	preProduct := &models.PreProduct{
+		Delivery: false,
+		SafeDeal: false,
+	}
 	if err := decoder.Decode(preProduct); err != nil {
 		logger.Errorf("in ValidatePreProduct: %+v\n", err)
 

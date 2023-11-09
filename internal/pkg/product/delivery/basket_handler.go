@@ -13,7 +13,7 @@ import (
 //	@Summary    get basket of orders
 //	@Description  get basket of orders by user id from cookie\jwt token
 //	@Tags order
-//	@Accept      json
+//	@Accept     json
 //	@Produce    json
 //	@Success    200  {object} OrderListResponse
 //	@Failure    405  {string} string
