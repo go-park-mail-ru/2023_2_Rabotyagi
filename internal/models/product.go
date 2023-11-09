@@ -29,6 +29,9 @@ type Product struct {
 	Favourites     uint64    `json:"favourites"      valid:"required"`
 }
 
+// PreProduct
+// @Description safe_deal optional
+// @Description delivery optional
 type PreProduct struct {
 	SalerID        uint64  `json:"saler_id"        valid:"required"`
 	CategoryID     uint64  `json:"category_id"     valid:"required"`
@@ -37,8 +40,8 @@ type PreProduct struct {
 	Price          uint64  `json:"price"           valid:"required"`
 	City           string  `json:"city"            valid:"required, length(1|256)~City length must be from 1 to 256"` //nolint
 	AvailableCount uint32  `json:"available_count" valid:"required"`
-	Delivery       bool    `json:"delivery"`
-	SafeDeal       bool    `json:"safe_deal"`
+	Delivery       bool    `json:"delivery"        valid:"optional"`
+	SafeDeal       bool    `json:"safe_deal"       valid:"optional"`
 	Images         []Image `json:"images"`
 }
 
