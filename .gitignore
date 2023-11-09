@@ -18,7 +18,7 @@
 # vendor/
 
 # Images
-static/img
+static/img/*
 
 # Go workspace file
 go.work
