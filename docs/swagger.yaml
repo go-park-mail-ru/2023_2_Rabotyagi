@@ -135,8 +135,9 @@ definitions:
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword:
     properties:
       birthday:
+        allOf:
+        - $ref: '#/definitions/sql.NullTime'
         description: nolint
-        type: string
       email:
         type: string
       id:
@@ -200,6 +201,20 @@ definitions:
         type: integer
     type: object
   internal_models.UserWithoutID:
+    properties:
+      birthday:
+        allOf:
+        - $ref: '#/definitions/sql.NullTime'
+        description: nolint
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        description: nolint
+        type: string
     type: object
   internal_pkg_category_delivery.CategoryListResponse:
     properties:
@@ -248,6 +263,14 @@ definitions:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
       status:
         type: integer
+    type: object
+  sql.NullTime:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
     type: object
 host: 84.23.53.28:8080
 info:
@@ -722,6 +745,11 @@ paths:
       - application/json
       description: update product by id
       parameters:
+      - description: id of product
+        in: query
+        name: product_id
+        required: true
+        type: integer
       - description: product data for updating
         in: body
         name: preProduct
@@ -755,6 +783,11 @@ paths:
       - application/json
       description: update product by id
       parameters:
+      - description: id of product
+        in: query
+        name: product_id
+        required: true
+        type: integer
       - description: product data for updating
         in: body
         name: preProduct

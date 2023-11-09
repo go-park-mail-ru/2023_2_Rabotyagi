@@ -713,6 +713,13 @@ const docTemplate = `{
                 "summary": "update product",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "id of product",
+                        "name": "product_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "product data for updating",
                         "name": "preProduct",
                         "in": "body",
@@ -762,6 +769,13 @@ const docTemplate = `{
                 ],
                 "summary": "update product",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of product",
+                        "name": "product_id",
+                        "in": "query",
+                        "required": true
+                    },
                     {
                         "description": "product data for updating",
                         "name": "preProduct",
@@ -1267,7 +1281,11 @@ const docTemplate = `{
             "properties": {
                 "birthday": {
                     "description": "nolint",
-                    "type": "string"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sql.NullTime"
+                        }
+                    ]
                 },
                 "email": {
                     "type": "string"
@@ -1367,7 +1385,30 @@ const docTemplate = `{
             }
         },
         "internal_models.UserWithoutID": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "birthday": {
+                    "description": "nolint",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sql.NullTime"
+                        }
+                    ]
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "nolint",
+                    "type": "string"
+                }
+            }
         },
         "internal_pkg_category_delivery.CategoryListResponse": {
             "type": "object",
@@ -1441,6 +1482,18 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "sql.NullTime": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
                 }
             }
         }

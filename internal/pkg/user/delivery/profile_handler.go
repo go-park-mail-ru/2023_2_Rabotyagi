@@ -10,10 +10,10 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 )
 
-//	 GetUserHandler godoc
+//	GetUserHandler godoc
 //
-//		@Summary    get profile
-//		@Description  get profile by id
+// @Summary    get profile
+// @Description  get profile by id
 //
 // @Tags profile
 //

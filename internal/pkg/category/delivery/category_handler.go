@@ -27,7 +27,7 @@ func NewCategoryHandler(storage usecases.ICategoryStorage,
 	}
 }
 
-// GetBasketHandler godoc
+// GetFullCategories godoc
 //
 //	@Summary    get all categories
 //	@Description  get all categories
