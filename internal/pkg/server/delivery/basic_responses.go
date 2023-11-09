@@ -2,7 +2,7 @@ package delivery
 
 import (
 	"encoding/json"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -41,17 +41,17 @@ func NewResponse(status int, message string) *Response {
 	}
 }
 
-type RedirectBody struct {
-	RedirectURL string `json:"redirect_url"`
+type ResponseBodyID struct {
+	ID uint64 `json:"id"`
 }
 
-type ResponseRedirect struct {
-	Status int          `json:"status"`
-	Body   RedirectBody `json:"body"`
+type ResponseID struct {
+	Status int            `json:"status"`
+	Body   ResponseBodyID `json:"body"`
 }
 
-func NewResponseRedirect(redirectURL string) *ResponseRedirect {
-	return &ResponseRedirect{Status: StatusRedirectAfterSuccessful, Body: RedirectBody{RedirectURL: redirectURL}}
+func NewResponseID(ID uint64) *ResponseID {
+	return &ResponseID{Status: StatusRedirectAfterSuccessful, Body: ResponseBodyID{ID: ID}}
 }
 
 type ResponseBodyError struct {
@@ -70,10 +70,10 @@ func NewErrResponse(status int, err string) *ErrorResponse {
 	}
 }
 
-func sendResponse(w http.ResponseWriter, response any) {
+func sendResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
 	responseSend, err := json.Marshal(response)
 	if err != nil {
-		log.Printf("in sendResponse: %+v\n", err)
+		logger.Errorf("in sendResponse: %+v\n", err)
 		http.Error(w, ErrInternalServer, http.StatusInternalServerError)
 
 		return
@@ -81,19 +81,19 @@ func sendResponse(w http.ResponseWriter, response any) {
 
 	_, err = w.Write(responseSend)
 	if err != nil {
-		log.Printf("in sendResponse: %+v\n", err)
+		logger.Errorf("in sendResponse: %+v\n", err)
 		http.Error(w, ErrInternalServer, http.StatusInternalServerError)
 	}
 }
 
-func SendErrResponse(w http.ResponseWriter, response any) {
+func SendErrResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(HTTPStatusError)
-	sendResponse(w, response)
+	sendResponse(w, logger, response)
 }
 
-func SendOkResponse(w http.ResponseWriter, response any) {
+func SendOkResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(HTTPStatusOk)
-	sendResponse(w, response)
+	sendResponse(w, logger, response)
 }

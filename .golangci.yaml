@@ -140,6 +140,10 @@ linters-settings:
           - github.com/asaskevich/govalidator
           - github.com/Masterminds/squirrel
           - golang.org/x/crypto/argon2
+          - github.com/microcosm-cc/bluemonday
+          - go.uber.org/zap
+          - github.com/brianvoe/gofakeit/v6
+          - golang.org/x/image/webp
         deny:
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package

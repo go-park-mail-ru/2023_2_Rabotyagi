@@ -2,7 +2,7 @@ package delivery
 
 import (
 	"fmt"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"strconv"
 
@@ -19,14 +19,14 @@ func (p *ProductHandler) createURLToProductFromID(productID uint64) string {
 	return fmt.Sprintf("%s%s:%s/api/v1/product/get/%d", p.schema, p.addrOrigin, p.portServer, productID)
 }
 
-func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {
+func parseCountAndLastIDFromRequest(r *http.Request, logger *zap.SugaredLogger) (uint64, uint64, error) {
 	countStr := r.URL.Query().Get("count")
 
 	count, err := strconv.ParseUint(countStr, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("%w count=%s", ErrWrongCount, countStr)
 
-		log.Printf("in parseCountAndLastIDFromRequest: %+v\n", err)
+		logger.Errorf("in parseCountAndLastIDFromRequest: %+v\n", err)
 
 		return 0, 0, err
 	}
@@ -36,7 +36,7 @@ func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {
 	lastID, err := strconv.ParseUint(lastIDStr, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("%w last_id=%s", ErrWrongLastID, lastIDStr)
-		log.Printf("in parseCountAndLastIDFromRequest: %+v\n", err)
+		logger.Errorf("in parseCountAndLastIDFromRequest: %+v\n", err)
 
 		return 0, 0, err
 	}

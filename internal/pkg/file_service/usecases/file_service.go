@@ -30,16 +30,13 @@ type IFileStorage interface {
 	SaveFile(content []byte, fileName string) error
 }
 
-type IFileService interface {
-	SaveImage(r io.Reader) (string, error)
-}
-
 type FileService struct {
-	fileStorage IFileStorage
+	urlPrefixPath string
+	fileStorage   IFileStorage
 }
 
-func NewFileService(fileStorage IFileStorage) *FileService {
-	return &FileService{fileStorage: fileStorage}
+func NewFileService(fileStorage IFileStorage, urlPrefixPath string) *FileService {
+	return &FileService{fileStorage: fileStorage, urlPrefixPath: urlPrefixPath}
 }
 
 func (f *FileService) SaveImage(reader io.Reader) (string, error) {
@@ -66,5 +63,5 @@ func (f *FileService) SaveImage(reader io.Reader) (string, error) {
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return fileName, nil
+	return f.urlPrefixPath + fileName, nil
 }

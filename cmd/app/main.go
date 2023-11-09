@@ -1,8 +1,7 @@
 package main
 
 import (
-	"log"
-
+	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server"
 )
@@ -16,10 +15,10 @@ import (
 // @BasePath  /api/v1
 func main() {
 	configServer := config.New()
-	log.Printf("Config: %+v\n", configServer)
 
 	srv := new(server.Server)
 	if err := srv.Run(configServer); err != nil {
-		log.Fatalf("Error in server: %s", err.Error())
+		fmt.Printf("Error in server: %s", err.Error())
+
 	}
 }

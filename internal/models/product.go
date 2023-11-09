@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/microcosm-cc/bluemonday"
 	"strings"
 	"time"
 	"unicode"
@@ -57,4 +58,19 @@ type ProductInFeed struct {
 	InFavourites bool    `json:"in_favourites" valid:"required"`
 	Images       []Image `json:"images"`
 	Favourites   uint64  `json:"favourites"    valid:"required"`
+}
+
+func (p *Product) Sanitize() {
+	sanitizer := bluemonday.UGCPolicy()
+
+	p.City = sanitizer.Sanitize(p.City)
+	p.Title = sanitizer.Sanitize(p.Title)
+	p.Description = sanitizer.Sanitize(p.Description)
+}
+
+func (p *ProductInFeed) Sanitize() {
+	sanitizer := bluemonday.UGCPolicy()
+
+	p.City = sanitizer.Sanitize(p.City)
+	p.Title = sanitizer.Sanitize(p.Title)
 }

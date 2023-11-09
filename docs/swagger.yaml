@@ -1,5 +1,14 @@
 basePath: /api/v1
 definitions:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      parent_id:
+        type: integer
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image:
     properties:
       url:
@@ -7,6 +16,8 @@ definitions:
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket:
     properties:
+      available_count:
+        type: integer
       city:
         type: string
       count:
@@ -29,6 +40,8 @@ definitions:
         type: integer
       safe_deal:
         type: boolean
+      saler_id:
+        type: integer
       title:
         type: string
     type: object
@@ -142,11 +155,6 @@ definitions:
       status:
         type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.RedirectBody:
-    properties:
-      redirect_url:
-        type: string
-    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response:
     properties:
       body:
@@ -164,10 +172,15 @@ definitions:
       error:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID:
+    properties:
+      id:
+        type: integer
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID:
     properties:
       body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.RedirectBody'
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID'
       status:
         type: integer
     type: object
@@ -203,12 +216,40 @@ definitions:
         description: nolint
         type: string
     type: object
+  internal_pkg_category_delivery.CategoryListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category'
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_pkg_file_service_delivery.ResponseURL:
+    properties:
+      body:
+        $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURLBody'
+      status:
+        type: integer
+    type: object
+  internal_pkg_file_service_delivery.ResponseURLBody:
+    properties:
+      url:
+        type: string
+    type: object
   internal_pkg_product_delivery.OrderListResponse:
     properties:
       body:
         items:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket'
         type: array
+      status:
+        type: integer
+    type: object
+  internal_pkg_product_delivery.OrderResponse:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket'
       status:
         type: integer
     type: object
@@ -250,6 +291,65 @@ info:
   title: YULA project API
   version: "1.0"
 paths:
+  /category/get_full:
+    get:
+      description: get all categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_category_delivery.CategoryListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get all categories
+      tags:
+      - category
+  /img/upload:
+    post:
+      description: |-
+        upload photo to file service and return its url
+        @Accept      multipart-form-data TODO fix
+      parameters:
+      - description: photo row TODO fix type
+        in: body
+        name: photo
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURL'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: upload photo
+      tags:
+      - fileService
   /logout:
     post:
       consumes:
@@ -275,7 +375,43 @@ paths:
           schema:
             type: string
       summary: logout
+      tags:
+      - auth
   /order/add:
+    post:
+      consumes:
+      - application/json
+      description: add product in basket
+      parameters:
+      - description: order data for adding
+        in: body
+        name: preOrder
+        required: true
+        schema:
+          $ref: '#/definitions/internal_models.PreOrder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_product_delivery.OrderResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: add order to basket
+      tags:
+      - order
+  /order/buy_full_basket:
     patch:
       consumes:
       - application/json
@@ -300,17 +436,21 @@ paths:
           schema:
             type: string
       summary: buy all orders from basket
-    post:
+      tags:
+      - order
+  /order/delete/:
+    delete:
       consumes:
       - application/json
-      description: add product in basket
+      description: |-
+        delete order for owner using user id from cookies\jwt.
+        This totally removed order. Recovery will be impossible
       parameters:
-      - description: order data for adding
-        in: body
-        name: preOrder
+      - description: order id
+        in: path
+        name: orderID
         required: true
-        schema:
-          $ref: '#/definitions/internal_models.PreOrder'
+        type: integer
       produces:
       - application/json
       responses:
@@ -330,7 +470,9 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: add order to basket
+      summary: delete order
+      tags:
+      - order
   /order/get_basket:
     get:
       consumes:
@@ -356,6 +498,43 @@ paths:
           schema:
             type: string
       summary: get basket of orders
+      tags:
+      - order
+  /order/update_count:
+    patch:
+      consumes:
+      - application/json
+      description: update order count using user id from cookie\jwt token
+      parameters:
+      - description: order data for updating use only id and count
+        in: body
+        name: orderChanges
+        required: true
+        schema:
+          $ref: '#/definitions/internal_models.OrderChanges'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update order count
+      tags:
+      - order
+  /order/update_status:
     patch:
       consumes:
       - application/json
@@ -387,6 +566,8 @@ paths:
           schema:
             type: string
       summary: update order status
+      tags:
+      - order
   /product/add:
     post:
       consumes:
@@ -409,7 +590,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
         "222":
           description: Error
           schema:
@@ -423,6 +604,8 @@ paths:
           schema:
             type: string
       summary: add product
+      tags:
+      - product
   /product/close/:
     patch:
       consumes:
@@ -456,6 +639,8 @@ paths:
           schema:
             type: string
       summary: close product
+      tags:
+      - product
   /product/delete/:
     delete:
       consumes:
@@ -489,6 +674,8 @@ paths:
           schema:
             type: string
       summary: delete product
+      tags:
+      - product
   /product/get/{id}:
     get:
       consumes:
@@ -520,11 +707,13 @@ paths:
           schema:
             type: string
       summary: get product
+      tags:
+      - product
   /product/get_list:
     get:
       consumes:
       - application/json
-      description: get product by count
+      description: get products by count and last_id return new products
       parameters:
       - description: count products
         in: query
@@ -555,7 +744,9 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get product
+      summary: get products list
+      tags:
+      - product
   /product/get_list_of_saler:
     get:
       consumes:
@@ -592,6 +783,8 @@ paths:
           schema:
             type: string
       summary: get list of products for saler
+      tags:
+      - product
   /product/update:
     patch:
       consumes:
@@ -610,7 +803,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
         "222":
           description: Error
           schema:
@@ -624,6 +817,8 @@ paths:
           schema:
             type: string
       summary: update product
+      tags:
+      - product
     put:
       consumes:
       - application/json
@@ -641,7 +836,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseRedirect'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
         "222":
           description: Error
           schema:
@@ -655,6 +850,8 @@ paths:
           schema:
             type: string
       summary: update product
+      tags:
+      - product
   /profile/get/{id}:
     get:
       consumes:
@@ -686,6 +883,8 @@ paths:
           schema:
             type: string
       summary: get profile
+      tags:
+      - profile
   /profile/update:
     patch:
       consumes:
@@ -718,6 +917,8 @@ paths:
           schema:
             type: string
       summary: update profile
+      tags:
+      - profile
     put:
       consumes:
       - application/json
@@ -749,18 +950,24 @@ paths:
           schema:
             type: string
       summary: update profile
+      tags:
+      - profile
   /signin:
-    post:
+    get:
       consumes:
       - application/json
       description: signin in app
       parameters:
-      - description: user data for signin
-        in: body
-        name: preUser
+      - description: user email for signin
+        in: query
+        name: email
         required: true
-        schema:
-          $ref: '#/definitions/internal_models.UserWithoutID'
+        type: string
+      - description: user password for signin
+        in: query
+        name: password
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -781,6 +988,8 @@ paths:
           schema:
             type: string
       summary: signin
+      tags:
+      - auth
   /signup:
     post:
       consumes:
@@ -817,6 +1026,8 @@ paths:
           schema:
             type: string
       summary: signup
+      tags:
+      - auth
 schemes:
 - http
 swagger: "2.0"

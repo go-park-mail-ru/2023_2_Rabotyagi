@@ -4,61 +4,23 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 
 	"github.com/jackc/pgx/v5"
 )
 
 var (
-	ErrLessStatus    = myerrors.NewError("Статус заказа должен только увеличиваться")
-	ErrNotFoundOrder = myerrors.NewError("Не получилось найти такой заказ для изменения")
+	NameSeqOrder = pgx.Identifier{"public", "order_id_seq"} //nolint:gochecknoglobals
+
+	ErrLessStatus              = myerrors.NewError("Статус заказа должен только увеличиваться")
+	ErrNotFoundOrder           = myerrors.NewError("Не получилось найти такой заказ для изменения")
+	ErrNotFoundOrdersInBasket  = myerrors.NewError("Не получилось найти заказы для покупки")
+	ErrNoAffectedOrderRows     = myerrors.NewError("Не получилось обновить данные заказа")
+	ErrAvailableCountNotEnough = myerrors.NewError("Товара доступно меньше, чем вы пытаетесь довавить в корзину")
 )
-
-func (p *ProductStorage) selectOrdersByUserID(ctx context.Context, tx pgx.Tx, userID uint64) ([]*models.Order, error) {
-	var orders []*models.Order
-
-	SQLSelectBasketByUserID := `SELECT  id, owner_id, product_id, count, status, created_at, updated_at, closed_at 
-								FROM public."order" WHERE owner_id=$1 AND status=0`
-
-	ordersRows, err := tx.Query(ctx, SQLSelectBasketByUserID, userID)
-	if err != nil {
-		log.Printf("in selectBasketByUserID: %+v\n", err)
-
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	curOrder := new(models.Order)
-
-	_, err = pgx.ForEachRow(ordersRows, []any{
-		&curOrder.ID, &curOrder.OwnerID,
-		&curOrder.ProductID, &curOrder.Count,
-		&curOrder.Status, &curOrder.CreatedAt,
-		&curOrder.UpdatedAt, &curOrder.ClosedAt,
-	}, func() error {
-		orders = append(orders, &models.Order{
-			ID:        curOrder.ID,
-			OwnerID:   curOrder.OwnerID,
-			ProductID: curOrder.ProductID,
-			Count:     curOrder.Count,
-			Status:    curOrder.Status,
-			CreatedAt: curOrder.CreatedAt,
-			UpdatedAt: curOrder.UpdatedAt,
-			ClosedAt:  curOrder.ClosedAt,
-		})
-
-		return nil
-	})
-	if err != nil {
-		log.Printf("in selectBasketByUserID: %+v\n", err)
-
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return orders, nil
-}
 
 func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	tx pgx.Tx, userID uint64,
@@ -66,13 +28,13 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	var orders []*models.OrderInBasket
 
 	SQLSelectOrdersInBasketByUserID := `SELECT  "order".id, "order".owner_id, "order".product_id,
-        "product".title, "product".price, "product".city, "order".count,
-        "product".delivery, "product".safe_deal FROM "order"
+        "product".title, "product".price, "product".city, "order".count, "product".available_count,
+        "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product" ON "order".product_id = "product".id WHERE owner_id=$1 AND status=0;`
 
 	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
 	if err != nil {
-		log.Printf("in selectOrdersInBasketByUserID: %+v\n", err)
+		p.logger.Errorf("in selectOrdersInBasketByUserID: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -82,25 +44,28 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	_, err = pgx.ForEachRow(ordersInBasketRows, []any{
 		&curOrder.ID, &curOrder.OwnerID, &curOrder.ProductID,
 		&curOrder.Title, &curOrder.Price, &curOrder.City,
-		&curOrder.Count, &curOrder.Delivery, &curOrder.SafeDeal,
+		&curOrder.Count, &curOrder.AvailableCount, &curOrder.Delivery,
+		&curOrder.SafeDeal, &curOrder.SalerID,
 	}, func() error {
 		orders = append(orders, &models.OrderInBasket{ //nolint:exhaustruct
-			ID:           curOrder.ID,
-			OwnerID:      curOrder.OwnerID,
-			ProductID:    curOrder.ProductID,
-			Title:        curOrder.Title,
-			Price:        curOrder.Price,
-			City:         curOrder.City,
-			Count:        curOrder.Count,
-			Delivery:     curOrder.Delivery,
-			SafeDeal:     curOrder.SafeDeal,
-			InFavourites: curOrder.InFavourites,
+			ID:             curOrder.ID,
+			OwnerID:        curOrder.OwnerID,
+			ProductID:      curOrder.ProductID,
+			Title:          curOrder.Title,
+			Price:          curOrder.Price,
+			City:           curOrder.City,
+			Count:          curOrder.Count,
+			AvailableCount: curOrder.AvailableCount,
+			Delivery:       curOrder.Delivery,
+			SafeDeal:       curOrder.SafeDeal,
+			InFavourites:   curOrder.InFavourites,
+			SalerID:        curOrder.SalerID,
 		})
 
 		return nil
 	})
 	if err != nil {
-		log.Printf("in selectOrdersInBasketByUserID: %+v\n", err)
+		p.logger.Errorf("in selectOrdersInBasketByUserID: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -139,7 +104,7 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		log.Printf("in GetOrdersInBasketByUserID: %+v\n", err)
+		p.logger.Errorf("in GetOrdersInBasketByUserID: %+v\n", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -154,11 +119,16 @@ func (p *ProductStorage) updateOrderCountByOrderID(ctx context.Context,
 		 SET count=$1
 		 WHERE id=$2 AND owner_id=$3`
 
-	_, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newCount, orderID, userID)
+	result, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newCount, orderID, userID)
 	if err != nil {
-		log.Printf("in updateOrderCountByOrderID: %+v", err)
+		p.logger.Errorf("in updateOrderCountByOrderID: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedOrderRows)
 	}
 
 	return nil
@@ -177,7 +147,7 @@ func (p *ProductStorage) getOrderByID(ctx context.Context, tx pgx.Tx, orderID ui
 		&order.UpdatedAt, &order.CreatedAt)
 
 	if err != nil {
-		log.Printf("in getOrderByID: %+v", err)
+		p.logger.Errorf("in getOrderByID: %+v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -195,7 +165,7 @@ func (p *ProductStorage) UpdateOrderCount(ctx context.Context, userID uint64, or
 		return nil
 	})
 	if err != nil {
-		log.Printf("in UpdateOrderCount: %+v\n", err)
+		p.logger.Errorf("in UpdateOrderCount: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -210,11 +180,16 @@ func (p *ProductStorage) updateOrderStatusByOrderID(ctx context.Context,
 		 SET status=$1
 		 WHERE id=$2`
 
-	_, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newStatus, orderID)
+	result, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newStatus, orderID)
 	if err != nil {
-		log.Printf("in updateOrderStatusByOrderID: %+v", err)
+		p.logger.Errorf("in updateOrderStatusByOrderID: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedOrderRows)
 	}
 
 	return nil
@@ -234,7 +209,7 @@ func (p *ProductStorage) getStatusAndCountByOrderID(ctx context.Context,
 
 	err := orderRow.Scan(&status, &count)
 	if err != nil {
-		log.Printf("in getStatusAndCountByOrderID: %+v", err)
+		p.logger.Errorf("in getStatusAndCountByOrderID: %+v", err)
 
 		return models.OrderStatusError, 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -242,7 +217,9 @@ func (p *ProductStorage) getStatusAndCountByOrderID(ctx context.Context,
 	return status, count, nil
 }
 
-func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context, tx pgx.Tx, orderID uint64, count uint32) error {
+func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context,
+	tx pgx.Tx, orderID uint64, count uint32,
+) error {
 	SQLDecreaseAvailableCountByOrderID := `UPDATE public."product"
 		 SET available_count = available_count - $1
 		 WHERE id = (
@@ -251,11 +228,47 @@ func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context, tx
 			WHERE id = $2
 		 )`
 
-	_, err := tx.Exec(ctx, SQLDecreaseAvailableCountByOrderID, count, orderID)
+	result, err := tx.Exec(ctx, SQLDecreaseAvailableCountByOrderID, count, orderID)
 	if err != nil {
-		log.Printf("in decreaseAvailableCountByOrderID: %+v", err)
+		p.logger.Errorf("in decreaseAvailableCountByOrderID: %+v", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedOrderRows)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) updateOrderStatus(ctx context.Context,
+	tx pgx.Tx, userID uint64, orderID uint64, newStatus uint8,
+) error {
+	curStatus, count, err := p.getStatusAndCountByOrderID(ctx, tx, userID, orderID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf(myerrors.ErrTemplate, ErrNotFoundOrder)
+		}
+
+		return err
+	}
+
+	if newStatus <= curStatus {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrLessStatus)
+	}
+
+	if curStatus == 0 {
+		err = p.decreaseAvailableCountByOrderID(ctx, tx, orderID, count)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = p.updateOrderStatusByOrderID(ctx, tx, orderID, newStatus)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -265,27 +278,7 @@ func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
 	userID uint64, orderID uint64, newStatus uint8,
 ) error {
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		curStatus, count, err := p.getStatusAndCountByOrderID(ctx, tx, userID, orderID)
-		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				return fmt.Errorf(myerrors.ErrTemplate, ErrNotFoundOrder)
-			}
-
-			return err
-		}
-
-		if newStatus <= curStatus {
-			return fmt.Errorf(myerrors.ErrTemplate, ErrLessStatus)
-		}
-
-		if curStatus == 0 {
-			err = p.decreaseAvailableCountByOrderID(ctx, tx, orderID, count)
-			if err != nil {
-				return err
-			}
-		}
-
-		err = p.updateOrderStatusByOrderID(ctx, tx, orderID, newStatus)
+		err := p.updateOrderStatus(ctx, tx, userID, orderID, newStatus)
 		if err != nil {
 			return err
 		}
@@ -293,7 +286,7 @@ func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		log.Printf("in UpdateOrderStatus: %+v\n", err)
+		p.logger.Errorf("in UpdateOrderStatus: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -308,7 +301,7 @@ func (p *ProductStorage) insertOrder(ctx context.Context, tx pgx.Tx,
 
 	_, err := tx.Exec(ctx, SQLInsertOrder, userID, productID, count)
 	if err != nil {
-		log.Printf("in insertOrder: %+v\n", err)
+		p.logger.Errorf("in insertOrder: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -316,32 +309,92 @@ func (p *ProductStorage) insertOrder(ctx context.Context, tx pgx.Tx,
 	return nil
 }
 
-func (p *ProductStorage) AddOrderInBasket(ctx context.Context, userID uint64, productID uint64, count uint32) error {
+func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
+	userID uint64, productID uint64, count uint32,
+) (*models.OrderInBasket, error) {
+	orderInBasket := new(models.OrderInBasket)
+
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		err := p.insertOrder(ctx, tx, userID, productID, count)
+		productInner, err := p.getProduct(ctx, tx, productID, userID)
 		if err != nil {
 			return err
 		}
 
+		if productInner.AvailableCount < count {
+			return ErrAvailableCountNotEnough
+		}
+
+		err = p.insertOrder(ctx, tx, userID, productID, count)
+		if err != nil {
+			return err
+		}
+
+		idOrder, err := repository.GetLastValSeq(ctx, tx, p.logger, NameSeqOrder)
+		if err != nil {
+			return err
+		}
+
+		orderInBasket.ID = idOrder
+		orderInBasket.OwnerID = userID
+		orderInBasket.ProductID = productID
+		orderInBasket.Count = count
+		orderInBasket.SalerID = productInner.SalerID
+		orderInBasket.Title = productInner.Title
+		orderInBasket.Price = productInner.Price
+		orderInBasket.City = productInner.City
+		orderInBasket.AvailableCount = productInner.AvailableCount
+		orderInBasket.Delivery = productInner.Delivery
+		orderInBasket.SafeDeal = productInner.SafeDeal
+		orderInBasket.InFavourites = productInner.InFavourites
+		orderInBasket.Images = productInner.Images
+
 		return nil
 	})
 	if err != nil {
-		log.Printf("in AddOrderInBasket: %+v\n", err)
+		p.logger.Errorf("in AddOrderInBasket: %+v\n", err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return orderInBasket, nil
+}
+
+func (p *ProductStorage) updateStatusFullBasket(ctx context.Context, tx pgx.Tx, userID uint64) error {
+	SQLSelectFullBasket := `SELECT id FROM public."order" WHERE owner_id=$1 AND status=0`
+
+	rows, err := tx.Query(ctx, SQLSelectFullBasket, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFoundOrdersInBasket
+		}
+
+		p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return nil
-}
+	var orderID uint64
 
-func (p *ProductStorage) updateStatusFullBasket(ctx context.Context, tx pgx.Tx, userID uint64) error {
-	SQLUpdateFullBasket := `UPDATE public."order" SET status=$1 WHERE owner_id=$2`
+	var slOrderID []uint64
 
-	_, err := tx.Exec(ctx, SQLUpdateFullBasket, models.OrderStatusInProcessing, userID)
+	_, err = pgx.ForEachRow(rows, []any{&orderID}, func() error {
+		slOrderID = append(slOrderID, orderID)
+
+		return nil
+	})
 	if err != nil {
-		log.Printf("in updateStatusFullBasket: %+v\n", err)
+		p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	for _, val := range slOrderID {
+		err = p.updateOrderStatus(ctx, tx, userID, val, models.OrderStatusInProcessing)
+		if err != nil {
+			p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
+
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
 	}
 
 	return nil
@@ -357,7 +410,46 @@ func (p *ProductStorage) BuyFullBasket(ctx context.Context, userID uint64) error
 		return nil
 	})
 	if err != nil {
-		log.Printf("in BuyFullBasketHandler: %+v\n", err)
+		p.logger.Errorf("in BuyFullBasket: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context,
+	tx pgx.Tx, orderID uint64, ownerID uint64,
+) error {
+	SQLDeleteOrderByID := `DELETE FROM public."order"
+		 WHERE id=$1 AND owner_id=$2`
+
+	result, err := tx.Exec(ctx, SQLDeleteOrderByID, models.OrderStatusInProcessing, orderID, ownerID)
+	if err != nil {
+		p.logger.Errorf("in deleteOrderByOrderIDAndOwnerID: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedOrderRows)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) DeleteOrder(ctx context.Context, orderID uint64, ownerID uint64) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		err := p.deleteOrderByOrderIDAndOwnerID(ctx, tx, orderID, ownerID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		p.logger.Errorf("in DeleteOrder: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}

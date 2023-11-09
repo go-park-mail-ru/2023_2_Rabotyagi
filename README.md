@@ -20,61 +20,71 @@ https://www.figma.com/file/YLSZ9uY9gVn6bMDJchrEzD?node-id=23:2127&mode=design#56
 ### Приложение
 http://84.23.53.28/
 
-### Запуск локально
-
-`go run cmd/app/main.go`
-
-### Тестирование 
-
-`mkdir -p bin && go test -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html && go tool cover --func bin/cover.out`
-
-## Документация
- Ссылка https://app.swaggerhub.com/apis/IVN15072002/yula-project_api/1.0
- Также посмотреть информацию по ручками api можно в docs/swagger.yaml 
+### Документация
+[Посмотреть здесь](docs/swagger.yaml)
 
 ### Сгенерировать swagger документацию
 
 ```shell
-swag init --parseDependency -g cmd/app/main.go
+swag init -ot yaml --parseDependency --parseInternal -g cmd/app/main.go
 ```
 
-
-
-## Docker image build
-
-### Local
-
-Из корня проекта прописываем
+## Локальное поднятие бека, бд, pgadmin вместе
+1. Запускаем  все
 ```shell
-docker build -t rabotyagi/backend .
+docker compose -f  deployments/local-docker-compose.yml up --build -d
 ```
-
-Далее, чтобы убедиться что image забилдился, прописываем:
+2. Далее ждем пока поднимется бек. Команда ниже должна дать вывод как ниже 
 ```shell
-docker images
+docker compose -f  deployments/local-docker-compose.yml logs backend
 ```
-
-Должны увидеть следующее:
+Вот такой вывод примерно
+```
+deployments-backend-1  | {"level":"info","ts":1699520968.4875963,"caller":"server/server.go:55","msg":"Start server:8080"}
+```
+3. Далее накатываем миграции
 ```shell
-REPOSITORY          TAG       IMAGE ID       CREATED          SIZE
-rabotyagi/backend   latest    25dbaeeef1af   50 seconds ago   307MB
+docker exec -it deployments-backend-1 migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations up
 ```
+4. Далее заполняем бд данными.
+```shell
+docker exec -it deployments-backend-1 go run cmd/fake_db/main.go
+```
+Если все окей, то увидите что-то такое
+```
+{"level":"info","ts":1699521811.2572942,"caller":"repository/fake_storage.go:305","msg":"end filling favourites\n"}
+```
+Если произошли какие-то проблемы во время заполнения бд. То откатываем миграции и накатываем еще раз(шаг 3 только в конце up заменяем на down, потом опять вызов с up в конце)
+## Запуск локально из терминала / ide
 
-### Запуск контейнера 
-
-`docker run -p 8080:8080 rabotyagi/backend`
-
+1. Поднимаем бд
+```shell
+docker compose -f deployments/db-local-docker-compose.yml up -d
+```
+2. Прописываем env или соответствующая настройка в ide
+```shell
+export URL_DATA_BASE=postgres://postgres:postgres@localhost:5432/youla?sslmode=disable
+```
+3. Запускаем бек
+```shell 
+go run cmd/app/main.go
+```
+4. Накатить миграции
+```shell
+migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations up
+```
+5. Заполнить бд
+```shell
+sudo go run cmd/fake_db/main.go
+```
 
 ### Локальная установка тула для миграций
 ```shell
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 ```
 
-### Пример команды, чтобы накатить миграцию
+### Тестирование 
+
 ```shell
- migrate -database postgres://postgres:password@localhost:5432/youla?sslmode=disable -path db/migrations up
-```
-### Пример команды, чтобы отменить миграцию
-```shell
- migrate -database postgres://postgres:password@localhost:5432/youla?sslmode=disable -path db/migrations up
+mkdir -p bin && go test -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html && go tool cover --func bin/cover.out
 ```

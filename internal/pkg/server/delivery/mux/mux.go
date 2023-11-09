@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	categorydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/delivery"
+	categoryusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
 	filedelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/delivery"
 	filerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
@@ -12,40 +14,49 @@ import (
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
+
+	"go.uber.org/zap"
 )
 
-const baseDir = "./db/img/"
+const urlPrefixPathFS = "img/"
 
 type ConfigMux struct {
-	addrOrigin string
-	schema     string
-	portServer string
+	addrOrigin     string
+	schema         string
+	portServer     string
+	fileServiceDir string
 }
 
-func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMux {
+func NewConfigMux(addrOrigin string, schema string, portServer string, fileServiceDir string) *ConfigMux {
 	return &ConfigMux{
-		addrOrigin: addrOrigin,
-		schema:     schema,
-		portServer: portServer,
+		addrOrigin:     addrOrigin,
+		schema:         schema,
+		portServer:     portServer,
+		fileServiceDir: fileServiceDir,
 	}
 }
 
 func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.IUserStorage,
-	productStorage productusecases.IProductStorage,
+	productStorage productusecases.IProductStorage, categoryStorage categoryusecases.ICategoryStorage,
+	logger *zap.SugaredLogger,
 ) http.Handler {
 	router := http.NewServeMux()
 
-	userHandler := userdelivery.NewUserHandler(userStorage, configMux.addrOrigin, configMux.schema)
+	userHandler := userdelivery.NewUserHandler(userStorage, configMux.addrOrigin, configMux.schema, logger)
 
-	productHandler := productdelivery.NewProductHandler(productStorage,
-		configMux.addrOrigin, configMux.schema, configMux.portServer,
+	categoryHandler := categorydelivery.NewCategoryHandler(categoryStorage,
+		configMux.addrOrigin, configMux.schema, configMux.portServer, logger,
 	)
 
-	fileStorage := filerepo.NewFileSystemStorage(baseDir)
-	fileService := fileusecases.NewFileService(fileStorage)
-	fileHandler := filedelivery.NewFileHandler(baseDir, fileService)
+	productHandler := productdelivery.NewProductHandler(productStorage,
+		configMux.addrOrigin, configMux.schema, configMux.portServer, logger,
+	)
 
-	router.Handle("/api/v1/img/", fileHandler)
+	fileStorage := filerepo.NewFileSystemStorage(configMux.fileServiceDir)
+	fileService := fileusecases.NewFileService(fileStorage, urlPrefixPathFS)
+	fileHandler := filedelivery.NewFileHandler(configMux.fileServiceDir, fileService, logger)
+
+	router.Handle("/api/v1/img/", fileHandler.Handler)
 	router.Handle("/api/v1/img/upload", middleware.Context(ctx, fileHandler.UploadFileHandler))
 
 	router.Handle("/api/v1/signup", middleware.Context(ctx, userHandler.SignUpHandler))
@@ -69,9 +80,12 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 	router.Handle("/api/v1/order/update_count", middleware.Context(ctx, productHandler.UpdateOrderCountHandler))
 	router.Handle("/api/v1/order/update_status", middleware.Context(ctx, productHandler.UpdateOrderStatusHandler))
 	router.Handle("/api/v1/order/buy_full_basket", middleware.Context(ctx, productHandler.BuyFullBasketHandler))
+	router.Handle("/api/v1/order/delete/", middleware.Context(ctx, productHandler.DeleteOrderHandler))
+
+	router.Handle("/api/v1/category/get_full", middleware.Context(ctx, categoryHandler.GetFullCategories))
 
 	mux := http.NewServeMux()
-	mux.Handle("/", middleware.Panic(router))
+	mux.Handle("/", middleware.Panic(router, logger))
 
 	return mux
 }
