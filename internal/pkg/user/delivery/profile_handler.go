@@ -124,15 +124,6 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	updateDataMap := utils.StructToMap(userWithoutPassword)
 
-	//userID, ok := updateDataMap["ID"].(uint64)
-	//if !ok {
-	//	u.logger.Errorf("in PartiallyUpdateUserHandler: userID isn`t uint64")
-	//	delivery.SendErrResponse(w, u.logger,
-	//		delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-	//
-	//	return
-	//}
-
 	delete(updateDataMap, "ID")
 
 	updatedUser, err := u.storage.UpdateUser(ctx, userID, updateDataMap)
