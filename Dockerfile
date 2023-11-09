@@ -5,6 +5,7 @@ WORKDIR /var/backend
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 COPY cmd cmd
 COPY static static
+COPY static/img static/img
 COPY internal internal
 COPY db/migrations db/migrations
 COPY go.mod .
