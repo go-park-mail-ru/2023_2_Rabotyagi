@@ -382,6 +382,59 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 	p.logger.Infof("in CloseProductHandler: close product id=%d", productID)
 }
 
+// ActivateProductHandler godoc
+//
+//	@Summary     activate product
+//	@Description  activate product for saler using user id from cookies\jwt.
+//	@Description  This does product active.
+//	@Tags product
+//	@Accept      json
+//	@Produce    json
+//	@Param      id  query uint64 true  "product id"
+//	@Success    200  {object} delivery.Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /product/activate [patch]
+func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.Request) {
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodPatch {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+	userID := delivery.GetUserIDFromCookie(r, p.logger)
+
+	productID, err := parseIDFromRequest(r, p.logger)
+	if err != nil {
+		p.logger.Errorf("in ActivateProductHandler: %+v\n", err)
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+
+		return
+	}
+
+	err = p.storage.ActivateProduct(ctx, productID, userID)
+	if err != nil {
+		p.logger.Errorf("in ActivateProductHandler: %+v\n", err)
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delivery.SendOkResponse(w, p.logger,
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
+	p.logger.Infof("in ActivateProductHandler: activated product id=%d", productID)
+}
+
 // DeleteProductHandler godoc
 //
 //	@Summary     delete product

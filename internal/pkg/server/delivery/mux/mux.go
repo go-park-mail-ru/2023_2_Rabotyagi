@@ -73,6 +73,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 		middleware.Context(ctx, productHandler.GetListProductOfSalerHandler))
 	router.Handle("/api/v1/product/update", middleware.Context(ctx, productHandler.UpdateProductHandler))
 	router.Handle("/api/v1/product/close", middleware.Context(ctx, productHandler.CloseProductHandler))
+	router.Handle("/api/v1/product/activate", middleware.Context(ctx, productHandler.ActivateProductHandler))
 	router.Handle("/api/v1/product/delete", middleware.Context(ctx, productHandler.DeleteProductHandler))
 
 	router.Handle("/api/v1/order/add", middleware.Context(ctx, productHandler.AddOrderHandler))

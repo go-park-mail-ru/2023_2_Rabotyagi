@@ -583,6 +583,41 @@ paths:
       summary: update order status
       tags:
       - order
+  /product/activate:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        activate product for saler using user id from cookies\jwt.
+        This does product active.
+      parameters:
+      - description: product id
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: activate product
+      tags:
+      - product
   /product/add:
     post:
       consumes:

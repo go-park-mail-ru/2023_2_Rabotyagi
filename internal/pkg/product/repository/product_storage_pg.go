@@ -457,7 +457,7 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 }
 
 func (p *ProductStorage) closeProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
-	SQLCloseProduct := `UPDATE public."product" SET available_count=0, is_active=false WHERE id=$1 AND saler_id=$2`
+	SQLCloseProduct := `UPDATE public."product" SET is_active=false WHERE id=$1 AND saler_id=$2`
 
 	result, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
 	if err != nil {
@@ -485,6 +485,42 @@ func (p *ProductStorage) CloseProduct(ctx context.Context, productID uint64, use
 	})
 	if err != nil {
 		p.logger.Errorf("in CloseProduct: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) activateProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
+	SQLActivateProduct := `UPDATE public."product" SET is_active=true WHERE id=$1 AND saler_id=$2`
+
+	result, err := tx.Exec(ctx, SQLActivateProduct, productID, userID)
+	if err != nil {
+		p.logger.Errorf("in activateProduct: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedProductRows)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) ActivateProduct(ctx context.Context, productID uint64, userID uint64) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		err := p.activateProduct(ctx, tx, productID, userID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		p.logger.Errorf("in ActivateProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
