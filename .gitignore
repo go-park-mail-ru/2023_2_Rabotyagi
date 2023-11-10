@@ -17,8 +17,8 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-# Data base
-db/img
+# Images
+static/img/*
 
 # Go workspace file
 go.work

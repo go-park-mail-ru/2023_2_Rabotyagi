@@ -223,9 +223,9 @@ func (f *FakeStorage) InsertOrders(ctx context.Context,
 }
 
 func (f *FakeStorage) InsertImages(ctx context.Context,
-	tx pgx.Tx, maxNameImage uint, maxCountProducts uint, pathToRoot string,
+	tx pgx.Tx, maxNameImage uint, maxCountProducts uint, prefixURL string, pathToRoot string,
 ) error {
-	fakeGeneratorImg, err := usecases.NewFakeGeneratorImg(maxNameImage, pathToRoot)
+	fakeGeneratorImg, err := usecases.NewFakeGeneratorImg(maxNameImage, prefixURL, pathToRoot)
 	if err != nil {
 		f.Logger.Error(err)
 
@@ -263,7 +263,7 @@ func (f *FakeStorage) InsertImages(ctx context.Context,
 		return err
 	}
 
-	f.Logger.Infof("end filling orders\n")
+	f.Logger.Infof("end filling images\n")
 
 	return nil
 }

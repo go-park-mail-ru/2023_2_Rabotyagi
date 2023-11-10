@@ -13,6 +13,7 @@ import (
 func RunScriptFillDB(URLDataBase string,
 	logger *zap.SugaredLogger, baseCount uint, pathToRoot string,
 ) error {
+	prefixURL := "img/"
 	maxNameImg := uint(6)
 	userMaxCount := baseCount
 	categoryMaxCount := userMaxCount/10 + 1
@@ -92,7 +93,7 @@ func RunScriptFillDB(URLDataBase string,
 
 	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
 		err = fakeStorage.InsertImages(baseCtx,
-			tx, maxNameImg, productMaxCount, pathToRoot,
+			tx, maxNameImg, productMaxCount, prefixURL, pathToRoot,
 		)
 		if err != nil {
 			return err

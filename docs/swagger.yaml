@@ -228,6 +228,18 @@ definitions:
       status:
         type: integer
     type: object
+  internal_pkg_file_service_delivery.ResponseURL:
+    properties:
+      body:
+        $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURLBody'
+      status:
+        type: integer
+    type: object
+  internal_pkg_file_service_delivery.ResponseURLBody:
+    properties:
+      url:
+        type: string
+    type: object
   internal_pkg_product_delivery.OrderListResponse:
     properties:
       body:
@@ -315,6 +327,40 @@ paths:
       summary: get all categories
       tags:
       - category
+  /img/upload:
+    post:
+      description: |-
+        upload photo to file service and return its url
+        @Accept      multipart-form-data TODO fix
+      parameters:
+      - description: photo row TODO fix type
+        in: body
+        name: photo
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURL'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: upload photo
+      tags:
+      - fileService
   /logout:
     post:
       consumes:

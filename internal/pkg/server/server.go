@@ -41,7 +41,8 @@ func (s *Server) Run(config *config.Config) error {
 	userStorage := userrepo.NewUserStorage(pool, logger)
 	categoryStorage := categoryrepo.NewCategoryStorage(pool, logger)
 
-	handler := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin, config.Schema, config.PortServer),
+	handler := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
+		config.Schema, config.PortServer, config.FileServiceDir),
 		userStorage, productStorage, categoryStorage, logger)
 
 	s.httpServer = &http.Server{ //nolint:exhaustruct

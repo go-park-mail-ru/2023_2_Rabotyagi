@@ -2,11 +2,12 @@ package delivery
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
-	"net/http"
 
 	"go.uber.org/zap"
 )
