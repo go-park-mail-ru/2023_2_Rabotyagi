@@ -17,7 +17,7 @@ func main() {
 
 	configServer := config.New()
 
-	logger, err := usecases.NewLogger([]string{configServer.OutputLogPath}, []string{configServer.ErrorOutputLogPath})
+	logger, err := usecases.NewLogger([]string{"stdout"}, []string{"stderr"})
 	if err != nil {
 		fmt.Println(err)
 

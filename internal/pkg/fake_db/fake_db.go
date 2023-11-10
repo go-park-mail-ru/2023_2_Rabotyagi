@@ -14,7 +14,7 @@ func RunScriptFillDB(URLDataBase string,
 	logger *zap.SugaredLogger, baseCount uint, pathToRoot string,
 ) error {
 	prefixURL := "img/"
-	maxNameImg := uint(6)
+	maxNameImg := uint(12)
 	userMaxCount := baseCount
 	categoryMaxCount := userMaxCount/10 + 1
 	productMaxCount := userMaxCount * 4
