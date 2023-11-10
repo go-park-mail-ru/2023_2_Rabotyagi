@@ -43,6 +43,7 @@ type PreProduct struct {
 	AvailableCount uint32  `json:"available_count" valid:"required"`
 	Delivery       bool    `json:"delivery"        valid:"optional"`
 	SafeDeal       bool    `json:"safe_deal"       valid:"optional"`
+	IsActive       bool    `json:"is_active"       valid:"optional"`
 	Images         []Image `json:"images"`
 }
 

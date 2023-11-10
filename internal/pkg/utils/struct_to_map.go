@@ -17,7 +17,7 @@ func StructToMap(data interface{}) map[string]interface{} {
 		fieldName := typeOf.Field(i).Name
 		fieldName = CamelToSnakeCase(fieldName)
 
-		if field.IsZero() && field.Type().Kind() != reflect.Bool {
+		if field.Type().Kind() != reflect.Bool && field.IsZero() {
 			continue
 		}
 
