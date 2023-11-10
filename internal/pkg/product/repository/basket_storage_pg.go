@@ -424,7 +424,7 @@ func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context,
 	SQLDeleteOrderByID := `DELETE FROM public."order"
 		 WHERE id=$1 AND owner_id=$2`
 
-	result, err := tx.Exec(ctx, SQLDeleteOrderByID, models.OrderStatusInProcessing, orderID, ownerID)
+	result, err := tx.Exec(ctx, SQLDeleteOrderByID, orderID, ownerID)
 	if err != nil {
 		p.logger.Errorf("in deleteOrderByOrderIDAndOwnerID: %+v\n", err)
 
