@@ -19,6 +19,7 @@ FROM alpine:3.18 as production
 WORKDIR /var/backend
 COPY --from=build /var/backend/main main
 COPY --from=build /var/backend/fake_db fake_db
+COPY --from=build /go/bin/migrate migrate
 
 RUN mkdir -p static/img
 COPY static/images_for_fake_db static/images_for_fake_db

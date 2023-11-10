@@ -44,17 +44,19 @@ deployments-backend-1  | {"level":"info","ts":1699520968.4875963,"caller":"serve
 ```
 3. Далее накатываем миграции
 ```shell
-docker exec -it deployments-backend-1 migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations up
+docker exec -it deployments-backend-1 ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations up
 ```
 4. Далее заполняем бд данными.
 ```shell
-docker exec -it deployments-backend-1 go run cmd/fake_db/main.go
+docker exec -it deployments-backend-1 ./fake_db
 ```
+Если произошли какие-то проблемы во время заполнения бд. То откатываем миграции и накатываем еще раз(шаг 3 только в конце up заменяем на down, потом опять вызов с up в конце)
+
 Если все окей, то увидите что-то такое
 ```
 {"level":"info","ts":1699521811.2572942,"caller":"repository/fake_storage.go:305","msg":"end filling favourites\n"}
 ```
-Если произошли какие-то проблемы во время заполнения бд. То откатываем миграции и накатываем еще раз(шаг 3 только в конце up заменяем на down, потом опять вызов с up в конце)
+Это все бек + бд + pgadmin запущены
 ## Запуск локально из терминала / ide
 
 1. Поднимаем бд
