@@ -1,5 +1,7 @@
 DROP TRIGGER IF EXISTS verify_updated_at ON public."order";
 DROP FUNCTION IF EXISTS updated_at_now;
+DROP TRIGGER IF EXISTS check_not_zero_count_with_active_product ON public."product";
+DROP FUNCTION IF EXISTS not_zero_count_with_active_product;
 
 DROP TABLE IF EXISTS public."user" CASCADE;
 DROP TABLE IF EXISTS public."product" CASCADE;

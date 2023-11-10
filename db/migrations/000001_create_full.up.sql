@@ -96,3 +96,22 @@ CREATE TRIGGER verify_updated_at
     ON public."order"
     FOR EACH ROW
 EXECUTE PROCEDURE updated_at_now();
+
+CREATE OR REPLACE FUNCTION not_zero_count_with_active_product()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.available_count = 0 THEN
+        NEW.is_active = false;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+DROP TRIGGER IF EXISTS check_not_zero_count_with_active_product ON public."product";
+CREATE TRIGGER check_not_zero_count_with_active_product
+    BEFORE UPDATE
+    ON public."product"
+    FOR EACH ROW
+EXECUTE PROCEDURE not_zero_count_with_active_product();
