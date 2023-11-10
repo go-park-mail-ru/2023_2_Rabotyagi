@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS public."product"
         CONSTRAINT max_len_city CHECK (LENGTH(city) <= 256),
     delivery        BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
-    is_active       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
+    is_active       BOOLEAN                  DEFAULT TRUE                               NOT NULL,
     CONSTRAINT not_zero_count_with_active CHECK (not (available_count = 0 and is_active))
 );
 

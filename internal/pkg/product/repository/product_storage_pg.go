@@ -70,14 +70,14 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 ) (*models.Product, error) {
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city,
-       delivery, safe_deal FROM public."product" WHERE id=$1`
+       delivery, safe_deal, is_active FROM public."product" WHERE id=$1`
 	product := &models.Product{ID: productID} //nolint:exhaustruct
 
 	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID)
 	if err := productRow.Scan(&product.SalerID, &product.CategoryID,
 		&product.Title, &product.Description, &product.Price, &product.CreatedAt,
 		&product.Views, &product.AvailableCount, &product.City, &product.Delivery,
-		&product.SafeDeal); err != nil {
+		&product.SafeDeal, &product.IsActive); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
 		}
