@@ -263,7 +263,7 @@ func (f *FakeStorage) InsertImages(ctx context.Context,
 		return err
 	}
 
-	f.Logger.Infof("end filling orders\n")
+	f.Logger.Infof("end filling images\n")
 
 	return nil
 }
