@@ -30,7 +30,7 @@ func (s *Server) Run(config *config.Config) error {
 		return err //nolint:wrapcheck
 	}
 
-	logger, err := usecases.NewLogger([]string{"stdout"}, []string{"stderr"})
+	logger, err := usecases.NewLogger([]string{config.OutputLogPath}, []string{config.ErrorOutputLogPath})
 	if err != nil {
 		return err //nolint:wrapcheck
 	}

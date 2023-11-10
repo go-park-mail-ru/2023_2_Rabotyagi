@@ -32,7 +32,7 @@ swag init -ot yaml --parseDependency --parseInternal -g cmd/app/main.go
 ## Локальное поднятие бека, бд, pgadmin вместе
 1. Запускаем  все
 ```shell
-docker compose -f  deployments/local-docker-compose.yml up --build -d
+docker exec -it deployments-backend-1 cat /var/log/backend/logs.json
 ```
 2. Далее ждем пока поднимется бек. Команда ниже должна дать вывод как ниже 
 ```shell

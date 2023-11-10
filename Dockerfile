@@ -21,6 +21,7 @@ COPY --from=build /var/backend/main main
 COPY --from=build /var/backend/fake_db fake_db
 COPY --from=build /go/bin/migrate migrate
 
+RUN mkdir -p /var/log/backend
 RUN mkdir -p static/img
 COPY static/images_for_fake_db static/images_for_fake_db
 COPY db/migrations db/migrations
@@ -33,6 +34,9 @@ ENV POSTGRES_PASSWORD=postgres
 ENV POSTGRES_PORT=5432
 ENV POSTGRES_ADDRESS=localhost
 ENV PATH_TO_ROOT=/var/backend
+ENV FILE_SERVICE_DIR=/var/backend/static/img
+ENV OUTPUT_LOG_PATH=/var/log/backend/logs.json
+ENV ERROR_OUTPUT_LOG_PATH=/var/log/backend/err_logs.json
 
 ENV URL_DATA_BASE=postgres://postgres:postgres@localhost/youla?sslmode=disable
 ENV SCHEMA=http://
