@@ -101,6 +101,8 @@ definitions:
         type: array
       in_favourites:
         type: boolean
+      is_active:
+        type: boolean
       price:
         type: integer
       safe_deal:
@@ -127,6 +129,8 @@ definitions:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
         type: array
       in_favourites:
+        type: boolean
+      is_active:
         type: boolean
       price:
         type: integer
