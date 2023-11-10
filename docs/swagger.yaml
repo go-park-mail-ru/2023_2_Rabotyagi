@@ -66,6 +66,8 @@ definitions:
         items:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
         type: array
+      is_active:
+        type: boolean
       price:
         type: integer
       safe_deal:
