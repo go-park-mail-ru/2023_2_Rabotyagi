@@ -22,9 +22,10 @@ type Product struct {
 	Views          uint32    `json:"views"           valid:"required"`
 	AvailableCount uint32    `json:"available_count" valid:"required"`
 	City           string    `json:"city"            valid:"required, length(1|256)~City length must be from 1 to 256"` //nolint
-	Delivery       bool      `json:"delivery"        valid:"required"`
-	SafeDeal       bool      `json:"safe_deal"       valid:"required"`
-	InFavourites   bool      `json:"in_favourites"   valid:"required"`
+	Delivery       bool      `json:"delivery"        valid:"optional"`
+	SafeDeal       bool      `json:"safe_deal"       valid:"optional"`
+	InFavourites   bool      `json:"in_favourites"   valid:"optional"`
+	IsActive       bool      `json:"is_active"       valid:"optional"`
 	Images         []Image   `json:"images"`
 	Favourites     uint64    `json:"favourites"      valid:"required"`
 }
@@ -56,9 +57,10 @@ type ProductInFeed struct {
 	Title        string  `json:"title"         valid:"required, length(1|256)~Title length must be from 1 to 256"`
 	Price        uint64  `json:"price"         valid:"required"`
 	City         string  `json:"city"          valid:"required, length(1|256)~City length must be from 1 to 256"`
-	Delivery     bool    `json:"delivery"      valid:"required"`
-	SafeDeal     bool    `json:"safe_deal"     valid:"required"`
-	InFavourites bool    `json:"in_favourites" valid:"required"`
+	Delivery     bool    `json:"delivery"      valid:"optional"`
+	SafeDeal     bool    `json:"safe_deal"     valid:"optional"`
+	InFavourites bool    `json:"in_favourites" valid:"optional"`
+	IsActive     bool    `json:"is_active"     valid:"optional"`
 	Images       []Image `json:"images"`
 	Favourites   uint64  `json:"favourites"    valid:"required"`
 }

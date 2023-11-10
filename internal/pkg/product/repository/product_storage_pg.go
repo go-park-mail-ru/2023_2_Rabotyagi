@@ -241,7 +241,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	limit uint64, whereClause any, orderByClause []string,
 ) ([]*models.ProductInFeed, error) {
 	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Select("id, title," +
-		"price, city, delivery, safe_deal").From(`public."product"`).
+		"price, city, delivery, safe_deal, is_active").From(`public."product"`).
 		Where(whereClause).OrderBy(orderByClause...).Limit(limit)
 
 	SQLQuery, args, err := query.ToSql()
@@ -265,7 +265,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	_, err = pgx.ForEachRow(rowsProducts, []any{
 		&curProduct.ID, &curProduct.Title,
 		&curProduct.Price, &curProduct.City,
-		&curProduct.Delivery, &curProduct.SafeDeal,
+		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive,
 	}, func() error {
 		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
 			ID:       curProduct.ID,
@@ -274,6 +274,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 			City:     curProduct.City,
 			Delivery: curProduct.Delivery,
 			SafeDeal: curProduct.SafeDeal,
+			IsActive: curProduct.IsActive,
 		})
 
 		return nil
