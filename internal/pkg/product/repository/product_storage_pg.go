@@ -294,7 +294,7 @@ func (p *ProductStorage) GetNewProducts(ctx context.Context,
 	var slProduct []*models.ProductInFeed
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		whereClause := fmt.Sprintf("id = %d AND is_active = true AND available_count > 0", lastProductID)
+		whereClause := fmt.Sprintf("id > %d AND is_active = true AND available_count > 0", lastProductID)
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
 			tx, count, whereClause, []string{"created_at DESC"})
