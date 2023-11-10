@@ -45,8 +45,9 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ../db/img:/var/backend/db/img
+      - imgs:/var/backend/db/img
 
 volumes:
   postgres:
   pgadmin:
+  imgs:
