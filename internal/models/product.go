@@ -54,16 +54,17 @@ func (p *PreProduct) Trim() {
 }
 
 type ProductInFeed struct {
-	ID           uint64  `json:"id"            valid:"required"`
-	Title        string  `json:"title"         valid:"required, length(1|256)~Title length must be from 1 to 256"`
-	Price        uint64  `json:"price"         valid:"required"`
-	City         string  `json:"city"          valid:"required, length(1|256)~City length must be from 1 to 256"`
-	Delivery     bool    `json:"delivery"      valid:"optional"`
-	SafeDeal     bool    `json:"safe_deal"     valid:"optional"`
-	InFavourites bool    `json:"in_favourites" valid:"optional"`
-	IsActive     bool    `json:"is_active"     valid:"optional"`
-	Images       []Image `json:"images"`
-	Favourites   uint64  `json:"favourites"    valid:"required"`
+	ID             uint64  `json:"id"              valid:"required"`
+	Title          string  `json:"title"           valid:"required, length(1|256)~Title length must be from 1 to 256"`
+	Price          uint64  `json:"price"           valid:"required"`
+	City           string  `json:"city"            valid:"required, length(1|256)~City length must be from 1 to 256"`
+	AvailableCount uint32  `json:"available_count" valid:"required"`
+	Delivery       bool    `json:"delivery"        valid:"optional"`
+	SafeDeal       bool    `json:"safe_deal"       valid:"optional"`
+	InFavourites   bool    `json:"in_favourites"   valid:"optional"`
+	IsActive       bool    `json:"is_active"       valid:"optional"`
+	Images         []Image `json:"images"`
+	Favourites     uint64  `json:"favourites"      valid:"required"`
 }
 
 func (p *Product) Sanitize() {
