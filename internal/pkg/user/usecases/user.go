@@ -3,8 +3,12 @@ package usecases
 import (
 	"context"
 
+	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 )
+
+var _ IUserStorage = (*userrepo.UserStorage)(nil)
 
 type IUserStorage interface {
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error) // TODO maybe unuseful

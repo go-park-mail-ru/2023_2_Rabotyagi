@@ -2,9 +2,12 @@ package usecases
 
 import (
 	"context"
+	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 )
+
+var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 
 type IBasketStorage interface {
 	AddOrderInBasket(ctx context.Context, userID uint64, productID uint64, count uint32) (*models.OrderInBasket, error)

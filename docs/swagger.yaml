@@ -118,6 +118,8 @@ definitions:
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.ProductInFeed:
     properties:
+      available_count:
+        type: integer
       city:
         type: string
       delivery:
