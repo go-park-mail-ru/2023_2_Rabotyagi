@@ -28,8 +28,8 @@ services:
 
   backend:
     build:
-      context: ./
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: ./Dockerfile
     # image: nikdemi/rabotyagi-backend:dev-latest
     environment:
       - ALLOW_ORIGIN=localhost:3000
@@ -38,14 +38,16 @@ services:
       - POSTGRES_USER=postgres # для обратной совместимости пока оставил
       - POSTGRES_PASSWORD=postgres # для обратной совместимости пока оставил
       - URL_DATA_BASE=postgres://postgres:postgres@postgres:5432/youla?sslmode=disable
+      - PATH_TO_ROOT=/var/backend
       - SCHEMA=http://
     ports:
       - 8080:8080
     depends_on:
       - postgres
     volumes:
-      - ./db/img:/var/backend/db/img
+      - imgs:/var/backend/static/img
 
 volumes:
   postgres:
   pgadmin:
+  imgs:

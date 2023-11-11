@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	categoryrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/mux"
@@ -29,7 +30,7 @@ func (s *Server) Run(config *config.Config) error {
 		return err //nolint:wrapcheck
 	}
 
-	logger, err := usecases.NewLogger([]string{"stdout"}, []string{"stderr"})
+	logger, err := usecases.NewLogger([]string{config.OutputLogPath}, []string{config.ErrorOutputLogPath})
 	if err != nil {
 		return err //nolint:wrapcheck
 	}
@@ -38,9 +39,11 @@ func (s *Server) Run(config *config.Config) error {
 
 	productStorage := productrepo.NewProductStorage(pool, logger)
 	userStorage := userrepo.NewUserStorage(pool, logger)
+	categoryStorage := categoryrepo.NewCategoryStorage(pool, logger)
 
-	handler := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin, config.Schema, config.PortServer),
-		userStorage, productStorage, logger)
+	handler := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
+		config.Schema, config.PortServer, config.FileServiceDir),
+		userStorage, productStorage, categoryStorage, logger)
 
 	s.httpServer = &http.Server{ //nolint:exhaustruct
 		Addr:           ":" + config.PortServer,

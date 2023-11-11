@@ -1,5 +1,16 @@
 basePath: /api/v1
 definitions:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      parent_id:
+        allOf:
+        - $ref: '#/definitions/sql.NullInt64'
+        description: nolint
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image:
     properties:
       url:
@@ -37,6 +48,7 @@ definitions:
         type: string
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct:
+    description: safe_deal optional delivery optional
     properties:
       available_count:
         type: integer
@@ -54,6 +66,8 @@ definitions:
         items:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
         type: array
+      is_active:
+        type: boolean
       price:
         type: integer
       safe_deal:
@@ -89,6 +103,8 @@ definitions:
         type: array
       in_favourites:
         type: boolean
+      is_active:
+        type: boolean
       price:
         type: integer
       safe_deal:
@@ -115,6 +131,8 @@ definitions:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
         type: array
       in_favourites:
+        type: boolean
+      is_active:
         type: boolean
       price:
         type: integer
@@ -207,6 +225,27 @@ definitions:
         description: nolint
         type: string
     type: object
+  internal_pkg_category_delivery.CategoryListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category'
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_pkg_file_service_delivery.ResponseURL:
+    properties:
+      body:
+        $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURLBody'
+      status:
+        type: integer
+    type: object
+  internal_pkg_file_service_delivery.ResponseURLBody:
+    properties:
+      url:
+        type: string
+    type: object
   internal_pkg_product_delivery.OrderListResponse:
     properties:
       body:
@@ -246,6 +285,14 @@ definitions:
       status:
         type: integer
     type: object
+  sql.NullInt64:
+    properties:
+      int64:
+        type: integer
+      valid:
+        description: Valid is true if Int64 is not NULL
+        type: boolean
+    type: object
   sql.NullTime:
     properties:
       time:
@@ -261,6 +308,65 @@ info:
   title: YULA project API
   version: "1.0"
 paths:
+  /category/get_full:
+    get:
+      description: get all categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_category_delivery.CategoryListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get all categories
+      tags:
+      - category
+  /img/upload:
+    post:
+      description: |-
+        upload photo to file service and return its url
+        @Accept      multipart-form-data TODO fix
+      parameters:
+      - description: photo row TODO fix type
+        in: body
+        name: photo
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURL'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: upload photo
+      tags:
+      - fileService
   /logout:
     post:
       consumes:
@@ -358,8 +464,8 @@ paths:
         This totally removed order. Recovery will be impossible
       parameters:
       - description: order id
-        in: path
-        name: orderID
+        in: query
+        name: id
         required: true
         type: integer
       produces:
@@ -479,6 +585,41 @@ paths:
       summary: update order status
       tags:
       - order
+  /product/activate:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        activate product for saler using user id from cookies\jwt.
+        This does product active.
+      parameters:
+      - description: product id
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: activate product
+      tags:
+      - product
   /product/add:
     post:
       consumes:
@@ -517,7 +658,7 @@ paths:
       summary: add product
       tags:
       - product
-  /product/close/:
+  /product/close:
     patch:
       consumes:
       - application/json
@@ -526,8 +667,8 @@ paths:
         This does product not active.
       parameters:
       - description: product id
-        in: path
-        name: productID
+        in: query
+        name: id
         required: true
         type: integer
       produces:
@@ -552,7 +693,7 @@ paths:
       summary: close product
       tags:
       - product
-  /product/delete/:
+  /product/delete:
     delete:
       consumes:
       - application/json
@@ -561,8 +702,8 @@ paths:
         This totally removed product. Recovery will be impossible
       parameters:
       - description: product id
-        in: path
-        name: productID
+        in: query
+        name: id
         required: true
         type: integer
       produces:
@@ -587,14 +728,14 @@ paths:
       summary: delete product
       tags:
       - product
-  /product/get/{id}:
+  /product/get:
     get:
       consumes:
       - application/json
       description: get product by id
       parameters:
       - description: product id
-        in: path
+        in: query
         name: id
         required: true
         type: integer
@@ -631,7 +772,7 @@ paths:
         name: count
         required: true
         type: integer
-      - description: 'last product id '
+      - description: last product id
         in: query
         name: last_id
         required: true
@@ -702,10 +843,14 @@ paths:
       - application/json
       description: update product by id
       parameters:
-      - description: product data for updating
+      - description: product id
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: полностью опционален
         in: body
         name: preProduct
-        required: true
         schema:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
       produces:
@@ -735,10 +880,14 @@ paths:
       - application/json
       description: update product by id
       parameters:
-      - description: product data for updating
+      - description: product id
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: полностью опционален
         in: body
         name: preProduct
-        required: true
         schema:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
       produces:
@@ -763,14 +912,14 @@ paths:
       summary: update product
       tags:
       - product
-  /profile/get/{id}:
+  /profile/get:
     get:
       consumes:
       - application/json
       description: get profile by id
       parameters:
       - description: user id
-        in: path
+        in: query
         name: id
         required: true
         type: integer
@@ -802,10 +951,9 @@ paths:
       - application/json
       description: update some fields of profile
       parameters:
-      - description: user data for updating
+      - description: полностью опционален
         in: body
         name: user
-        required: true
         schema:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
       produces:
@@ -835,10 +983,9 @@ paths:
       - application/json
       description: update some fields of profile
       parameters:
-      - description: user data for updating
+      - description: полностью опционален
         in: body
         name: user
-        required: true
         schema:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
       produces:

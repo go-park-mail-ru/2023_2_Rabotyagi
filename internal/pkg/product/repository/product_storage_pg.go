@@ -70,14 +70,14 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 ) (*models.Product, error) {
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city,
-       delivery, safe_deal FROM public."product" WHERE id=$1`
+       delivery, safe_deal, is_active FROM public."product" WHERE id=$1`
 	product := &models.Product{ID: productID} //nolint:exhaustruct
 
 	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID)
 	if err := productRow.Scan(&product.SalerID, &product.CategoryID,
 		&product.Title, &product.Description, &product.Price, &product.CreatedAt,
 		&product.Views, &product.AvailableCount, &product.City, &product.Delivery,
-		&product.SafeDeal); err != nil {
+		&product.SafeDeal, &product.IsActive); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
 		}
@@ -241,7 +241,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	limit uint64, whereClause any, orderByClause []string,
 ) ([]*models.ProductInFeed, error) {
 	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Select("id, title," +
-		"price, city, delivery, safe_deal").From(`public."product"`).
+		"price, city, delivery, safe_deal, is_active, available_count").From(`public."product"`).
 		Where(whereClause).OrderBy(orderByClause...).Limit(limit)
 
 	SQLQuery, args, err := query.ToSql()
@@ -265,15 +265,17 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	_, err = pgx.ForEachRow(rowsProducts, []any{
 		&curProduct.ID, &curProduct.Title,
 		&curProduct.Price, &curProduct.City,
-		&curProduct.Delivery, &curProduct.SafeDeal,
+		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount,
 	}, func() error {
 		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
-			ID:       curProduct.ID,
-			Title:    curProduct.Title,
-			Price:    curProduct.Price,
-			City:     curProduct.City,
-			Delivery: curProduct.Delivery,
-			SafeDeal: curProduct.SafeDeal,
+			ID:             curProduct.ID,
+			Title:          curProduct.Title,
+			Price:          curProduct.Price,
+			City:           curProduct.City,
+			Delivery:       curProduct.Delivery,
+			SafeDeal:       curProduct.SafeDeal,
+			IsActive:       curProduct.IsActive,
+			AvailableCount: curProduct.AvailableCount,
 		})
 
 		return nil
@@ -293,8 +295,10 @@ func (p *ProductStorage) GetNewProducts(ctx context.Context,
 	var slProduct []*models.ProductInFeed
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		whereClause := fmt.Sprintf("id > %d AND is_active = true AND available_count > 0", lastProductID)
+
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
-			tx, count, squirrel.Gt{"id": lastProductID}, []string{"created_at DESC"})
+			tx, count, whereClause, []string{"created_at DESC"})
 		if err != nil {
 			return err
 		}
@@ -456,7 +460,7 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 }
 
 func (p *ProductStorage) closeProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
-	SQLCloseProduct := `UPDATE public."product" SET available_count=0, is_active=false WHERE id=$1 AND saler_id=$2`
+	SQLCloseProduct := `UPDATE public."product" SET is_active=false WHERE id=$1 AND saler_id=$2`
 
 	result, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
 	if err != nil {
@@ -484,6 +488,42 @@ func (p *ProductStorage) CloseProduct(ctx context.Context, productID uint64, use
 	})
 	if err != nil {
 		p.logger.Errorf("in CloseProduct: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) activateProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
+	SQLActivateProduct := `UPDATE public."product" SET is_active=true WHERE id=$1 AND saler_id=$2`
+
+	result, err := tx.Exec(ctx, SQLActivateProduct, productID, userID)
+	if err != nil {
+		p.logger.Errorf("in activateProduct: %+v\n", err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedProductRows)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) ActivateProduct(ctx context.Context, productID uint64, userID uint64) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		err := p.activateProduct(ctx, tx, productID, userID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		p.logger.Errorf("in ActivateProduct: %+v\n", err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}

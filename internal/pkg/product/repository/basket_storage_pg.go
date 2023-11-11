@@ -29,7 +29,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 
 	SQLSelectOrdersInBasketByUserID := `SELECT  "order".id, "order".owner_id, "order".product_id,
         "product".title, "product".price, "product".city, "order".count, "product".available_count,
-        "product".delivery, "product".safe_deal, "product".saler_id FROM "order"
+        "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product" ON "order".product_id = "product".id WHERE owner_id=$1 AND status=0;`
 
 	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
@@ -424,7 +424,7 @@ func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context,
 	SQLDeleteOrderByID := `DELETE FROM public."order"
 		 WHERE id=$1 AND owner_id=$2`
 
-	result, err := tx.Exec(ctx, SQLDeleteOrderByID, models.OrderStatusInProcessing, orderID, ownerID)
+	result, err := tx.Exec(ctx, SQLDeleteOrderByID, orderID, ownerID)
 	if err != nil {
 		p.logger.Errorf("in deleteOrderByOrderIDAndOwnerID: %+v\n", err)
 

@@ -3,9 +3,12 @@ package utils
 import (
 	"bytes"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+
 	"golang.org/x/crypto/argon2"
 )
 
@@ -44,4 +47,15 @@ func ComparePassAndHash(passHash []byte, plainPassword string) bool {
 	userPassHash := hashPassWithSalt(salt[:saltLen], plainPassword)
 
 	return bytes.Equal(userPassHash, passHash)
+}
+
+func Hash256(content []byte) (string, error) {
+	hasher := sha256.New()
+
+	_, err := hasher.Write(content)
+	if err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(hasher.Sum(nil)), nil
 }

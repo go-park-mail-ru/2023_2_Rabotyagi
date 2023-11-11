@@ -10,21 +10,21 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 )
 
-//	 GetUserHandler godoc
+//	GetUserHandler godoc
 //
-//		@Summary    get profile
-//		@Description  get profile by id
+// @Summary    get profile
+// @Description  get profile by id
 //
 // @Tags profile
 //
 //	@Accept      json
 //	@Produce    json
-//	@Param      id  path uint64 true  "user id"
+//	@Param      id  query uint64 true  "user id"
 //	@Success    200  {object} ProfileResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /profile/get/{id} [get]
+//	@Router      /profile/get [get]
 func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	delivery.SetupCORS(w, u.addrOrigin, u.schema)
 
@@ -40,9 +40,9 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userIDStr := delivery.GetPathParam(r.URL.Path)
+	userIDStr := r.URL.Query().Get("id")
 
-	userID, err := strconv.Atoi(userIDStr)
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
 		u.logger.Errorf("in GetUserHandler: %+v", err)
 		delivery.SendErrResponse(w, u.logger,
@@ -74,7 +74,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 //
 //	@Accept      json
 //	@Produce    json
-//	@Param      user  body models.UserWithoutPassword true  "user data for updating"
+//	@Param      user  body models.UserWithoutPassword false  "полностью опционален"
 //	@Success    200  {object} ProfileResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -98,7 +98,11 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	var err error
 
-	var userWithoutPassword *models.UserWithoutPassword
+	userID := delivery.GetUserIDFromCookie(r, u.logger)
+
+	userWithoutPassword := &models.UserWithoutPassword{
+		ID: userID,
+	}
 
 	if r.Method == http.MethodPatch {
 		userWithoutPassword, err = userusecases.ValidatePartOfUserWithoutPassword(u.logger, r.Body)
@@ -119,15 +123,6 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 	}
 
 	updateDataMap := utils.StructToMap(userWithoutPassword)
-
-	userID, ok := updateDataMap["ID"].(uint64)
-	if !ok {
-		u.logger.Errorf("in PartiallyUpdateUserHandler: userID isn`t uint64")
-		delivery.SendErrResponse(w, u.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
 
 	delete(updateDataMap, "ID")
 

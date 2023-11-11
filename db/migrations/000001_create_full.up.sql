@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS public."product"
         CONSTRAINT max_len_city CHECK (LENGTH(city) <= 256),
     delivery        BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
-    is_active       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
+    is_active       BOOLEAN                  DEFAULT TRUE                               NOT NULL,
     CONSTRAINT not_zero_count_with_active CHECK (not (available_count = 0 and is_active))
 );
 
@@ -96,3 +96,22 @@ CREATE TRIGGER verify_updated_at
     ON public."order"
     FOR EACH ROW
 EXECUTE PROCEDURE updated_at_now();
+
+CREATE OR REPLACE FUNCTION not_zero_count_with_active_product()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.available_count = 0 THEN
+        NEW.is_active = false;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+DROP TRIGGER IF EXISTS check_not_zero_count_with_active_product ON public."product";
+CREATE TRIGGER check_not_zero_count_with_active_product
+    BEFORE UPDATE
+    ON public."product"
+    FOR EACH ROW
+EXECUTE PROCEDURE not_zero_count_with_active_product();

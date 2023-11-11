@@ -143,6 +143,7 @@ linters-settings:
           - github.com/microcosm-cc/bluemonday
           - go.uber.org/zap
           - github.com/brianvoe/gofakeit/v6
+          - golang.org/x/image/webp
         deny:
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package
