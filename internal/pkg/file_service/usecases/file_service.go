@@ -7,23 +7,20 @@ import (
 	"io"
 	"log"
 
-	// Add standard formats for image
-	_ "image/gif"
-	_ "image/jpeg"
+	// Add png formats for image
 	_ "image/png"
+	// Add jpeg formats for image
+	_ "image/jpeg"
 
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 	fileservicerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
-
-	// Add format WebP for image
-	_ "golang.org/x/image/webp"
 )
 
 var _ IFileStorage = (*fileservicerepo.FileSystemStorage)(nil)
 
 var (
 	ErrCantRead    = myerrors.NewError("Не получилось считать содержимое файла")
-	ErrWrongFormat = myerrors.NewError("Формат файла должен быть png, jpeg, gif или WebP")
+	ErrWrongFormat = myerrors.NewError("Формат файла должен быть png, jpeg")
 )
 
 type IFileStorage interface {
