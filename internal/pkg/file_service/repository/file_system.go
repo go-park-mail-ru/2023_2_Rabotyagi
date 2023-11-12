@@ -17,7 +17,7 @@ func NewFileSystemStorage(baseDir string) *FileSystemStorage {
 }
 
 func (f *FileSystemStorage) SaveFile(content []byte, fileName string) error {
-	file, err := os.Create(f.baseDir + fileName)
+	file, err := os.Create(f.baseDir + "/" + fileName)
 	if err != nil {
 		log.Printf("in Save: %+v\n", err)
 

@@ -236,17 +236,19 @@ definitions:
       status:
         type: integer
     type: object
-  internal_pkg_file_service_delivery.ResponseURL:
+  internal_pkg_file_service_delivery.ResponseURLBody:
+    properties:
+      urls:
+        items:
+          type: string
+        type: array
+    type: object
+  internal_pkg_file_service_delivery.ResponseURLs:
     properties:
       body:
         $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURLBody'
       status:
         type: integer
-    type: object
-  internal_pkg_file_service_delivery.ResponseURLBody:
-    properties:
-      url:
-        type: string
     type: object
   internal_pkg_product_delivery.OrderListResponse:
     properties:
@@ -337,23 +339,16 @@ paths:
       - category
   /img/upload:
     post:
-      description: |-
-        upload photo to file service and return its url
-        @Accept      multipart-form-data TODO fix
-      parameters:
-      - description: photo row TODO fix type
-        in: body
-        name: photo
-        required: true
-        schema:
-          type: string
+      consumes:
+      - multipart/form-data
+      description: upload photo to file service and return its url
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURL'
+            $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURLs'
         "222":
           description: Error
           schema:

@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"io"
-	"log"
 	"net/http"
 
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
@@ -11,24 +10,38 @@ import (
 	"go.uber.org/zap"
 )
 
-const MaxSizePhoto = 5 * 1024 * 1024
+const (
+	MaxSizePhotoBytes = 5 * 1024 * 1024
+	MaxCountPhoto     = 4
 
-var ErrToBigFile = myerrors.NewError("Максимальный размер фото %d Мбайт", MaxSizePhoto%1024%1024)
+	nameImagesInForm = "images"
+)
+
+var (
+	ErrToBigFile        = myerrors.NewError("Максимальный размер фото %d Мбайт", MaxSizePhotoBytes%1024%1024)
+	ErrToManyCountFiles = myerrors.NewError("Максимальное количество фото = %d", MaxCountPhoto)
+)
 
 type IFileService interface {
 	SaveImage(r io.Reader) (string, error)
 }
 
 type FileHandler struct {
-	http.Handler
-	fileService IFileService
-	logger      *zap.SugaredLogger
+	fileServiceDir string
+	addrOrigin     string
+	schema         string
+	fileService    IFileService
+	logger         *zap.SugaredLogger
 }
 
-func NewFileHandler(fileServiceDir string, fileService IFileService, logger *zap.SugaredLogger) *FileHandler {
+func NewFileHandler(fileService IFileService, logger *zap.SugaredLogger,
+	fileServiceDir string, addrOrigin string, schema string,
+) *FileHandler {
 	return &FileHandler{
-		Handler:     http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(fileServiceDir))),
 		fileService: fileService, logger: logger,
+		fileServiceDir: fileServiceDir,
+		addrOrigin:     addrOrigin,
+		schema:         schema,
 	}
 }
 
@@ -37,45 +50,95 @@ func NewFileHandler(fileServiceDir string, fileService IFileService, logger *zap
 //	@Summary    upload photo
 //	@Description  upload photo to file service and return its url
 //
-// @Description	@Accept      multipart-form-data TODO fix
-//
 //	@Tags fileService
+//
+//	@Accept     multipart/form-data
 //	@Produce    json
-//	@Param      photo  body string  true  "photo row TODO fix type"
-//	@Success    200  {object} ResponseURL
+//	@Success    200  {object} ResponseURLs
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /img/upload [post]
 func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(MaxSizePhoto)
+	r.Body = http.MaxBytesReader(w, r.Body, MaxSizePhotoBytes*MaxCountPhoto)
+	delivery.SetupCORS(w, f.addrOrigin, f.schema)
 
-	file, handler, err := r.FormFile("my_file")
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	err := r.ParseMultipartForm(MaxSizePhotoBytes)
 	if err != nil {
-		log.Printf("in UploadFileHandler: fileSize=%d more than max=%d", handler.Size, MaxSizePhoto)
+		f.logger.Errorln(err)
 		delivery.SendErrResponse(w, f.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
-	defer file.Close()
-
-	if handler.Size > MaxSizePhoto {
-		f.logger.Errorf("in UploadFileHandler: fileSize=%d more than max=%d", handler.Size, MaxSizePhoto)
-		delivery.SendErrResponse(w, f.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrToBigFile.Error()))
-
-		return
-	}
-
-	URLToFile, err := f.fileService.SaveImage(r.Body)
-	if err != nil {
-		f.logger.Errorf("in UploadFileHandler: %+v\n", err)
-		delivery.HandleErr(w, f.logger, err)
+	slFiles, ok := r.MultipartForm.File[nameImagesInForm]
+	if !ok {
+		f.logger.Errorln(err)
+		delivery.SendErrResponse(w, f.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendOkResponse(w, f.logger, NewResponseURL(delivery.StatusResponseSuccessful, URLToFile))
-	log.Printf("in UploadFileHandler: uploaded file with name=%+v", URLToFile)
+	if len(slFiles) > MaxCountPhoto {
+		f.logger.Errorln(ErrToManyCountFiles)
+		delivery.SendErrResponse(w, f.logger,
+			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrToManyCountFiles.Error()))
+
+		return
+	}
+
+	slURL := make([]string, len(slFiles))
+
+	for i, file := range slFiles {
+		if file.Size > MaxSizePhotoBytes {
+			f.logger.Errorf("filename = %s error: %+v\n", file.Filename, ErrToBigFile)
+			delivery.SendErrResponse(w, f.logger,
+				delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrToBigFile.Error()))
+
+			return
+		}
+
+		fileBody, err := file.Open()
+		if err != nil {
+			f.logger.Errorln(err)
+			delivery.SendErrResponse(w, f.logger,
+				delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+			return
+		}
+
+		URLToFile, err := f.fileService.SaveImage(fileBody)
+		if err != nil {
+			f.logger.Errorln(err)
+			delivery.HandleErr(w, f.logger, err)
+
+			return
+		}
+
+		slURL[i] = URLToFile
+	}
+
+	delivery.SendOkResponse(w, f.logger, NewResponseURLs(delivery.StatusResponseSuccessful, slURL))
+
+	for _, fileName := range slURL {
+		f.logger.Infof("uploaded file %s", fileName)
+	}
+}
+
+// DocHandlerFileServer godoc
+// TODO not worked documentation
+func (f *FileHandler) DocHandlerFileServer() http.Handler {
+	return http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(f.fileServiceDir)))
 }

@@ -1,14 +1,14 @@
 package delivery
 
 type ResponseURLBody struct {
-	URL string `json:"url"`
+	SlURL []string `json:"urls"`
 }
 
-type ResponseURL struct {
+type ResponseURLs struct {
 	Status int             `json:"status"`
 	Body   ResponseURLBody `json:"body"`
 }
 
-func NewResponseURL(status int, URL string) *ResponseURL {
-	return &ResponseURL{Status: status, Body: ResponseURLBody{URL: URL}}
+func NewResponseURLs(status int, slURL []string) *ResponseURLs {
+	return &ResponseURLs{Status: status, Body: ResponseURLBody{SlURL: slURL}}
 }

@@ -48,10 +48,15 @@ func (f *FileService) SaveImage(reader io.Reader) (string, error) {
 	if err != nil {
 		log.Printf("in SaveImage: %+v\n", err)
 
-		return "", fmt.Errorf("%w", ErrWrongFormat)
+		return "", fmt.Errorf("вы используете формат %s %w", format, ErrWrongFormat)
 	}
 
-	fileName := HashContent(content) + format
+	fileName, err := HashContent(content)
+	if err != nil {
+		log.Printf("in SaveImage: %+v\n", err)
+
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
+	}
 
 	err = f.fileStorage.SaveFile(content, fileName)
 	if err != nil {
