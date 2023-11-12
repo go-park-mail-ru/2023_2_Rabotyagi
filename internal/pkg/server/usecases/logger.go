@@ -6,7 +6,7 @@ import (
 
 func NewLogger(outputPaths []string, errorOutputPaths []string, options ...zap.Option) (*zap.SugaredLogger, error) {
 	config := zap.NewProductionConfig()
-	config.DisableStacktrace = true
+	config.DisableStacktrace = false
 	config.OutputPaths = outputPaths
 	config.ErrorOutputPaths = errorOutputPaths
 

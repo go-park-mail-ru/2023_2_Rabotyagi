@@ -365,6 +365,33 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 	return slProduct, nil
 }
 
+func (p *ProductStorage) insertImages(ctx context.Context, tx pgx.Tx, productID uint64, slImg []models.Image) error {
+	SQLInsertImage := `INSERT INTO public."image" (url, product_id) VALUES(@imgURL, @productID)`
+	batch := &pgx.Batch{}
+
+	for _, image := range slImg {
+		args := pgx.NamedArgs{
+			"imgURL":    image.URL,
+			"productID": productID,
+		}
+		batch.Queue(SQLInsertImage, args)
+	}
+
+	results := tx.SendBatch(ctx, batch)
+	defer results.Close()
+
+	for _, image := range slImg {
+		_, err := results.Exec()
+		if err != nil {
+			p.logger.Errorf("with product_id=%d with URL=%s %+v", productID, image.URL, err)
+
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+	}
+
+	return results.Close() //nolint:wrapcheck
+}
+
 func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduct *models.PreProduct) error {
 	SQLInsertProduct := `INSERT INTO public."product"(saler_id,
 		category_id, title, description, price,available_count,
@@ -397,12 +424,17 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 			return err
 		}
 
+		err = p.insertImages(ctx, tx, LastProductID, preProduct.Images)
+		if err != nil {
+			return err
+		}
+
 		productID = LastProductID
 
 		return err
 	})
 	if err != nil {
-		p.logger.Errorf("in AddProduct: %+v\n", err)
+		p.logger.Errorln(err)
 
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
