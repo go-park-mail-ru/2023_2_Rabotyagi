@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"net/http"
+	"strings"
 	"time"
 
 	categoryrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/repository"
@@ -30,8 +31,8 @@ func (s *Server) Run(config *config.Config) error {
 		return err //nolint:wrapcheck
 	}
 
-	//logger, err := usecases.NewLogger([]string{config.OutputLogPath}, []string{config.ErrorOutputLogPath})
-	logger, err := my_logger.New([]string{config.OutputLogPath}, []string{config.ErrorOutputLogPath})
+	logger, err := my_logger.New(strings.Split(config.OutputLogPath, " "),
+		strings.Split(config.ErrorOutputLogPath, " "))
 	if err != nil {
 		return err //nolint:wrapcheck
 	}

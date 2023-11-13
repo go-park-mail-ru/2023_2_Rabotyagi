@@ -47,6 +47,19 @@ func ValidatePreProduct(logger *zap.SugaredLogger, r io.Reader) (*models.PreProd
 		return nil, myerrors.NewError(err.Error())
 	}
 
+	// TODO remove hardcode
+	var resultImages []models.Image
+
+	for _, image := range preProduct.Images {
+		if image.URL == "" {
+			continue
+		}
+
+		resultImages = append(resultImages, image)
+	}
+
+	preProduct.Images = resultImages
+
 	return preProduct, nil
 }
 

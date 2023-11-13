@@ -9,8 +9,8 @@ const (
 	standardURLDataBase        = "postgres://postgres:postgres@postgres:5432/youla?sslmode=disable"
 	standardPathToRoot         = "."
 	standardFileServiceDir     = "./static/img"
-	standardOutputLogPath      = "/var/log/backend/logs.json"
-	standardErrorOutputLogPath = "/var/log/backend/err_logs.json"
+	standardOutputLogPath      = "stdout /var/log/backend/logs.json"
+	standardErrorOutputLogPath = "stderr /var/log/backend/err_logs.json"
 
 	envAllowOrigin        = "ALLOW_ORIGIN"
 	envSchema             = "SCHEMA"

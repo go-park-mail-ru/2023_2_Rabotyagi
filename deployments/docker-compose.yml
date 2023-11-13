@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16.0-alpine3.18
+    restart: always
+    env_file:
+      - .env.postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:7.8
+    env_file:
+      - .env.pgadmin
+    ports:
+      - 15432:80
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+  backend:
+    build:
+      context: ../
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env.backend
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+    volumes:
+      - imgs:/var/backend/static/img
+
+volumes:
+  postgres:
+  pgadmin:
+  imgs:

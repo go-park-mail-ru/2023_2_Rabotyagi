@@ -334,15 +334,23 @@ func (p *ProductStorage) GetNewProducts(ctx context.Context,
 }
 
 func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
-	lastProductID uint64, count uint64, userID uint64,
+	lastProductID uint64, count uint64, userID uint64, isMy bool,
 ) ([]*models.ProductInFeed, error) {
 	var slProduct []*models.ProductInFeed
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		whereClause := fmt.Sprintf("id > %d AND saler_id = %d", lastProductID, userID)
+		var whereClause string
+		if isMy == true {
+			whereClause = fmt.Sprintf("id > %d AND saler_id = %d", lastProductID, userID)
+		} else {
+			whereClause =
+				fmt.Sprintf("id > %d AND saler_id = %d AND is_active = true OR (is_active = false AND available_count = 0)",
+					lastProductID, userID)
+		}
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
 			tx, count, whereClause, []string{"created_at DESC"})
+
 		if err != nil {
 			return err
 		}
