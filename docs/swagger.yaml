@@ -796,6 +796,50 @@ paths:
       summary: get products list
       tags:
       - product
+  /product/get_list_of_another_saler:
+    get:
+      consumes:
+      - application/json
+      description: get list of products for another saler using saler id, count and
+        last product id from query
+      parameters:
+      - description: saler id
+        in: query
+        name: saler_id
+        required: true
+        type: integer
+      - description: count products
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: 'last product id '
+        in: query
+        name: last_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get list of products for another saler
+      tags:
+      - product
   /product/get_list_of_saler:
     get:
       consumes:

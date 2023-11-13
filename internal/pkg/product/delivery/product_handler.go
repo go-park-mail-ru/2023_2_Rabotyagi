@@ -329,6 +329,61 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 	p.logger.Infof("in GetListProductOfSalerHandler: get product list: %+v", products)
 }
 
+// GetListProductOfAnotherSalerHandler godoc
+//
+//	@Summary     get list of products for another saler
+//	@Description  get list of products for another saler using saler id, count and last product id from query
+//	@Tags product
+//	@Accept      json
+//	@Produce    json
+//	@Param      saler_id  query uint64 true  "saler id"
+//	@Param      count  query uint64 true  "count products"
+//	@Param      last_id  query uint64 true  "last product id "
+//	@Success    200  {object} ProductListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /product/get_list_of_another_saler [get]
+func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWriter, r *http.Request) {
+	delivery.SetupCORS(w, p.addrOrigin, p.schema)
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	salerID, count, lastID, err := parseSalerIDCountLastIDFromRequest(r, p.logger)
+	if err != nil {
+		p.logger.Errorf("in GetListProductOfAnotherSalerHandler: %+v\n", err)
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, salerID)
+	if err != nil {
+		p.logger.Errorf("in GetListProductOfAnotherSalerHandler: %+v\n", err)
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	for _, product := range products {
+		product.Sanitize()
+	}
+
+	delivery.SendOkResponse(w, p.logger, NewProductListResponse(delivery.StatusResponseSuccessful, products))
+	p.logger.Infof("in GetListProductOfAnotherSalerHandler: get product list: %+v", products)
+}
+
 // CloseProductHandler godoc
 //
 //	@Summary     close product
