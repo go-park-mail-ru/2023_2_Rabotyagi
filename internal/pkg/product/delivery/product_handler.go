@@ -32,6 +32,8 @@ func NewProductHandler(storage usecases.IProductStorage,
 	}
 }
 
+var isMy bool
+
 // AddProductHandler godoc
 //
 //	@Summary    add product
@@ -312,7 +314,8 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 	ctx := r.Context()
 	userID := delivery.GetUserIDFromCookie(r, p.logger)
 
-	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, userID)
+	isMy = true
+	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, userID, isMy)
 	if err != nil {
 		p.logger.Errorf("in GetListProductOfSalerHandler: %+v\n", err)
 		delivery.SendErrResponse(w, p.logger,
@@ -367,7 +370,8 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 
 	ctx := r.Context()
 
-	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, salerID)
+	isMy = false
+	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, salerID, isMy)
 	if err != nil {
 		p.logger.Errorf("in GetListProductOfAnotherSalerHandler: %+v\n", err)
 		delivery.SendErrResponse(w, p.logger,
