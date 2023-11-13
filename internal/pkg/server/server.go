@@ -38,8 +38,13 @@ func (s *Server) Run(config *config.Config) error {
 
 	defer logger.Sync()
 
-	productStorage := productrepo.NewProductStorage(pool, logger)
+	productStorage, err := productrepo.NewProductStorage(pool)
+	if err != nil {
+		return err
+	}
+
 	userStorage := userrepo.NewUserStorage(pool, logger)
+
 	categoryStorage := categoryrepo.NewCategoryStorage(pool, logger)
 
 	handler := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
