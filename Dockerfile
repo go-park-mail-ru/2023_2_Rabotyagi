@@ -28,11 +28,6 @@ COPY db/migrations db/migrations
 
 ENV ALLOW_ORIGIN=localhost:3000
 ENV PORT_BACKEND=8080
-ENV POSTGRES_DB=youla
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=postgres
-ENV POSTGRES_PORT=5432
-ENV POSTGRES_ADDRESS=localhost
 ENV PATH_TO_ROOT=/var/backend
 ENV FILE_SERVICE_DIR=/var/backend/static/img
 ENV OUTPUT_LOG_PATH=/var/log/backend/logs.json

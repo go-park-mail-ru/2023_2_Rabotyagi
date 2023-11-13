@@ -32,11 +32,11 @@ swag init -ot yaml --parseDependency --parseInternal -g cmd/app/main.go
 ## Локальное поднятие бека, бд, pgadmin вместе
 1. Запускаем  все
 ```shell
-docker exec -it deployments-backend-1 cat /var/log/backend/logs.json
+docker compose -f deployments/docker-compose.yml up --build -d 
 ```
 2. Далее ждем пока поднимется бек. Команда ниже должна дать вывод как ниже 
 ```shell
-docker compose -f  deployments/local-docker-compose.yml logs backend
+docker compose -f  deployments/docker-compose.yml logs backend
 ```
 Вот такой вывод примерно
 ```
@@ -61,7 +61,7 @@ docker exec -it deployments-backend-1 ./fake_db
 
 1. Поднимаем бд
 ```shell
-docker compose -f deployments/db-local-docker-compose.yml up -d
+docker compose -f deployments/docker-compose.yml up -d backend
 ```
 2. Прописываем env или соответствующая настройка в ide
 ```shell

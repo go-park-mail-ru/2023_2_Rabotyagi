@@ -27,3 +27,6 @@ go.work
 .idea
 bin
 .obsidian
+
+# Env
+.env*
