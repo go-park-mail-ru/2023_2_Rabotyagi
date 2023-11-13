@@ -48,9 +48,12 @@ func (s *Server) Run(config *config.Config) error {
 
 	categoryStorage := categoryrepo.NewCategoryStorage(pool, logger)
 
-	handler := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
+	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
 		config.Schema, config.PortServer, config.FileServiceDir),
 		userStorage, productStorage, categoryStorage, logger)
+	if err != nil {
+		return err
+	}
 
 	s.httpServer = &http.Server{ //nolint:exhaustruct
 		Addr:           ":" + config.PortServer,
