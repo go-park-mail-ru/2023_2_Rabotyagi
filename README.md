@@ -63,7 +63,7 @@ make
 ```shell
 make migrate-up
 ```
-Если нужно откатить миграции
+### Если нужно откатить миграции
 ```shell
 make migrate-down
 ```
