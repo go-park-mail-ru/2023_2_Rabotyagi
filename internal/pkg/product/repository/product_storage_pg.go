@@ -337,7 +337,9 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		if isMy == true {
 			whereClause = fmt.Sprintf("id > %d AND saler_id = %d", lastProductID, userID)
 		} else {
-			whereClause = fmt.Sprintf("id > %d AND saler_id = %d AND is_active = true", lastProductID, userID)
+			whereClause =
+				fmt.Sprintf("id > %d AND saler_id = %d AND is_active = true OR (is_active = false AND available_count = 0)",
+					lastProductID, userID)
 		}
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
