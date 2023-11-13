@@ -37,7 +37,8 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 	orders, err := p.storage.GetOrdersInBasketByUserID(ctx, userID)
 	if err != nil {
-		p.logger.Errorf("in GetBasketHandler %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -84,7 +85,8 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	orderChanges, err := productusecases.ValidateOrderChangesCount(p.logger, r.Body)
 	if err != nil {
-		p.logger.Errorf("in in UpdateOrderCountHandler: %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -94,7 +96,8 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	err = p.storage.UpdateOrderCount(ctx, userID, orderChanges.ID, orderChanges.Count)
 	if err != nil {
-		p.logger.Errorf("in in UpdateOrderCountHandler: %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -136,7 +139,8 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 
 	orderChanges, err := productusecases.ValidateOrderChangesStatus(p.logger, r.Body)
 	if err != nil {
-		p.logger.Errorf("in UpdateOrderStatusHandler: %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -147,7 +151,8 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 
 	err = p.storage.UpdateOrderStatus(ctx, userID, orderChanges.ID, orderChanges.Status)
 	if err != nil {
-		p.logger.Errorf("in UpdateOrderStatusHandler: %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -193,7 +198,8 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 
 	preOrder, err := productusecases.ValidatePreOrder(p.logger, r.Body)
 	if err != nil {
-		p.logger.Errorf("in AddOrderHandler: %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -201,7 +207,8 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 
 	orderInBasket, err := p.storage.AddOrderInBasket(ctx, userID, preOrder.ProductID, preOrder.Count)
 	if err != nil {
-		p.logger.Errorf("in AddOrderHandler: %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -242,7 +249,8 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 
 	err := p.storage.BuyFullBasket(ctx, userID)
 	if err != nil {
-		p.logger.Errorf("in BuyFullBasketHandler: %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -285,7 +293,8 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 
 	orderID, err := parseIDFromRequest(r, p.logger)
 	if err != nil {
-		p.logger.Errorf("in DeleteOrderHandler: %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
 
@@ -294,7 +303,8 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 
 	err = p.storage.DeleteOrder(ctx, orderID, userID)
 	if err != nil {
-		p.logger.Errorf("in DeleteOrderHandler %+v\n", err)
+		p.logger.Errorln(err)
+
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
