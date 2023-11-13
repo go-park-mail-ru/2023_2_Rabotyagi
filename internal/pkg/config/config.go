@@ -6,7 +6,7 @@ const (
 	standardAllowOrigin        = "localhost:3000"
 	standardSchema             = "http://"
 	standardPort               = "8080"
-	standardURLDataBase        = "postgres://postgres:postgres@postgres:5432/youla?sslmode=disable"
+	standardURLDataBase        = "postgres://postgres:postgres@localhost:5432/youla?sslmode=disable"
 	standardPathToRoot         = "."
 	standardFileServiceDir     = "./static/img"
 	standardOutputLogPath      = "stdout /var/log/backend/logs.json"

@@ -23,61 +23,53 @@ http://84.23.53.28/
 ### Документация
 [Посмотреть здесь](docs/swagger.yaml)
 
-### Сгенерировать swagger документацию
-
-```shell
-swag init -ot yaml --parseDependency --parseInternal -g cmd/app/main.go
-```
-
 ## Локальное поднятие бека, бд, pgadmin вместе
 1. Запускаем  все
 ```shell
-docker compose -f deployments/docker-compose.yml up --build -d 
+make compose-full-up
 ```
-2. Далее ждем пока поднимется бек. Команда ниже должна дать вывод как ниже 
+
+### Если впервые запускаем бек
+1. Далее ждем пока поднимется бек. Команда ниже должна дать вывод как ниже 
 ```shell
-docker compose -f  deployments/docker-compose.yml logs backend
+make compose-logs
 ```
 Вот такой вывод примерно
 ```
 deployments-backend-1  | {"level":"info","ts":1699520968.4875963,"caller":"server/server.go:55","msg":"Start server:8080"}
 ```
-3. Далее накатываем миграции
+2. Далее накатываем миграции и заполняем бд
 ```shell
-docker exec -it deployments-backend-1 ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations up
+make fill-db-docker
 ```
-4. Далее заполняем бд данными.
-```shell
-docker exec -it deployments-backend-1 ./fake_db
-```
-Если произошли какие-то проблемы во время заполнения бд. То откатываем миграции и накатываем еще раз(шаг 3 только в конце up заменяем на down, потом опять вызов с up в конце)
 
-Если все окей, то увидите что-то такое
+Если все окей, то увидите что-то такое в конце
 ```
 {"level":"info","ts":1699521811.2572942,"caller":"repository/fake_storage.go:305","msg":"end filling favourites\n"}
 ```
+Если произошли какие-то проблемы во время заполнения бд. То это перезапишет данные в бд
+```shell
+make refill-db-docker
+```
+
 Это все бек + бд + pgadmin запущены
 ## Запуск локально из терминала / ide
 
-1. Поднимаем бд
+1. Запускаем сразу все
 ```shell
-docker compose -f deployments/docker-compose.yml up -d backend
+make
 ```
-2. Прописываем env или соответствующая настройка в ide
+### Если нужно накатить миграции
 ```shell
-export URL_DATA_BASE=postgres://postgres:postgres@localhost:5432/youla?sslmode=disable
+make migrate-up
 ```
-3. Запускаем бек
-```shell 
-go run cmd/app/main.go
-```
-4. Накатить миграции
+### Если нужно откатить миграции
 ```shell
-migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations up
+make migrate-down
 ```
-5. Заполнить бд
+### Если нужно перезаполнить бд
 ```shell
-sudo go run cmd/fake_db/main.go
+make refill-db
 ```
 
 ### Локальная установка тула для миграций
@@ -85,8 +77,13 @@ sudo go run cmd/fake_db/main.go
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 ```
 
-### Тестирование 
-
+### Тестирование
 ```shell
-mkdir -p bin && go test -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html && go tool cover --func bin/cover.out
+make test
 ```
+
+### Сгенерировать swagger документацию
+```shell
+make swag
+```
+
