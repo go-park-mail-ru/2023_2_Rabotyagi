@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"net/http"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/mux"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases"
 	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
 )
 
@@ -30,7 +30,8 @@ func (s *Server) Run(config *config.Config) error {
 		return err //nolint:wrapcheck
 	}
 
-	logger, err := usecases.NewLogger([]string{config.OutputLogPath}, []string{config.ErrorOutputLogPath})
+	//logger, err := usecases.NewLogger([]string{config.OutputLogPath}, []string{config.ErrorOutputLogPath})
+	logger, err := my_logger.New([]string{config.OutputLogPath}, []string{config.ErrorOutputLogPath})
 	if err != nil {
 		return err //nolint:wrapcheck
 	}

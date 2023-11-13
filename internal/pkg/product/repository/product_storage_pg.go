@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
@@ -28,7 +29,9 @@ type ProductStorage struct {
 	logger *zap.SugaredLogger
 }
 
-func NewProductStorage(pool *pgxpool.Pool, logger *zap.SugaredLogger) *ProductStorage {
+func NewProductStorage(pool *pgxpool.Pool) *ProductStorage {
+	logger, err := my_logger.Get()
+
 	return &ProductStorage{
 		pool:   pool,
 		logger: logger,
