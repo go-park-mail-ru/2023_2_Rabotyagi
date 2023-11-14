@@ -145,6 +145,8 @@ definitions:
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword:
     properties:
+      avatar:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
       birthday:
         allOf:
         - $ref: '#/definitions/sql.NullTime'
@@ -195,6 +197,11 @@ definitions:
       status:
         type: integer
     type: object
+  internal_models.Image:
+    properties:
+      url:
+        type: string
+    type: object
   internal_models.OrderChanges:
     properties:
       count:
@@ -213,6 +220,8 @@ definitions:
     type: object
   internal_models.UserWithoutID:
     properties:
+      avatar:
+        $ref: '#/definitions/internal_models.Image'
       birthday:
         allOf:
         - $ref: '#/definitions/sql.NullTime'
