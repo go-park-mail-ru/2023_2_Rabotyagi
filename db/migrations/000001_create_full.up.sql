@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS public."user"
     id       BIGINT DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
     email    TEXT UNIQUE                                     NOT NULL CHECK (email <> '')
         CONSTRAINT max_len_email CHECK (LENGTH(email) <= 256),
-    phone    TEXT UNIQUE                                     NOT NULL CHECK (phone <> '')
+    phone    TEXT UNIQUE                                     
         CONSTRAINT max_len_phone CHECK (LENGTH(phone) <= 18),
-    name     TEXT                                            NOT NULL CHECK (name <> '')
+    name     TEXT                                            
         CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256),
     password TEXT                                            NOT NULL CHECK (password <> '')
         CONSTRAINT max_len_password CHECK (LENGTH(password) <= 256),
