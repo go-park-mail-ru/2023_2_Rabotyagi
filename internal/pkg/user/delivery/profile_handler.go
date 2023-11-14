@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -44,14 +45,15 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
-		u.logger.Errorf("in GetUserHandler: %+v", err)
+		errMessageParse := fmt.Sprintf("user id = %s a должен быть строкой", userIDStr)
+		u.logger.Errorf("%w %s", err, errMessageParse)
 		delivery.SendErrResponse(w, u.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+			delivery.NewErrResponse(delivery.StatusErrBadRequest, errMessageParse))
 
 		return
 	}
 
-	user, err := u.storage.GetUserWithoutPasswordByID(ctx, uint64(userID))
+	user, err := u.storage.GetUserWithoutPasswordByID(ctx, userID)
 	if err != nil {
 		u.logger.Errorf("in GetUserHandler: %+v", err)
 		delivery.HandleErr(w, u.logger, err)

@@ -146,7 +146,7 @@ definitions:
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword:
     properties:
       avatar:
-        type: string
+        $ref: '#/definitions/sql.NullString'
       birthday:
         allOf:
         - $ref: '#/definitions/sql.NullTime'
@@ -216,7 +216,7 @@ definitions:
   internal_models.UserWithoutID:
     properties:
       avatar:
-        type: string
+        $ref: '#/definitions/sql.NullString'
       birthday:
         allOf:
         - $ref: '#/definitions/sql.NullTime'
@@ -299,6 +299,14 @@ definitions:
         type: integer
       valid:
         description: Valid is true if Int64 is not NULL
+        type: boolean
+    type: object
+  sql.NullString:
+    properties:
+      string:
+        type: string
+      valid:
+        description: Valid is true if String is not NULL
         type: boolean
     type: object
   sql.NullTime:
