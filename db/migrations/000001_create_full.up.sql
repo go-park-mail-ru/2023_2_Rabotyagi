@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS public."user"
     password TEXT                                            NOT NULL CHECK (password <> '')
         CONSTRAINT max_len_password CHECK (LENGTH(password) <= 256),
     birthday TIMESTAMP WITH TIME ZONE
+    avatar    TEXT UNIQUE
+        CONSTRAINT max_len_avatar CHECK (LENGTH(avatar) <= 256)
 );
 
 CREATE TABLE IF NOT EXISTS public."category"
