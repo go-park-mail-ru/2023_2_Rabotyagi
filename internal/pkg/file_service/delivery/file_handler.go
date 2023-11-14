@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
 	"io"
 	"net/http"
 
@@ -15,12 +16,17 @@ const (
 	MaxCountPhoto     = 4
 
 	nameImagesInForm = "images"
+
+	rootPath = "/api/v1/img/"
 )
 
 var (
-	ErrToBigFile        = myerrors.NewError("Максимальный размер фото %d Мбайт", MaxSizePhotoBytes%1024%1024)
-	ErrToManyCountFiles = myerrors.NewError("Максимальное количество фото = %d", MaxCountPhoto)
+	ErrToBigFile         = myerrors.NewError("Максимальный размер фото %d Мбайт", MaxSizePhotoBytes%1024%1024)
+	ErrToManyCountFiles  = myerrors.NewError("Максимальное количество фото = %d", MaxCountPhoto)
+	ErrForbiddenRootPath = myerrors.NewError("Нельзя вызывать корневой путь")
 )
+
+var _ IFileService = (*fileusecases.FileService)(nil)
 
 type IFileService interface {
 	SaveImage(r io.Reader) (string, error)
@@ -140,5 +146,18 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 // DocHandlerFileServer godoc
 // TODO not worked documentation
 func (f *FileHandler) DocHandlerFileServer() http.Handler {
-	return http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(f.fileServiceDir)))
+	fileServer := http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(f.fileServiceDir)))
+
+	sanitizedHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == rootPath {
+			f.logger.Errorln(ErrForbiddenRootPath)
+			delivery.HandleErr(w, f.logger, ErrForbiddenRootPath)
+
+			return
+		}
+
+		fileServer.ServeHTTP(w, r)
+	}
+
+	return http.HandlerFunc(sanitizedHandlerFunc)
 }
