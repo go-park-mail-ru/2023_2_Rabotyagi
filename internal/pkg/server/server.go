@@ -46,7 +46,10 @@ func (s *Server) Run(config *config.Config) error {
 
 	userStorage := userrepo.NewUserStorage(pool, logger)
 
-	categoryStorage := categoryrepo.NewCategoryStorage(pool, logger)
+	categoryStorage, err := categoryrepo.NewCategoryStorage(pool)
+	if err != nil {
+		return err
+	}
 
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
 		config.Schema, config.PortServer, config.FileServiceDir),

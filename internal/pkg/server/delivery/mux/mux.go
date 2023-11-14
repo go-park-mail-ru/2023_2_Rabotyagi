@@ -44,9 +44,12 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 
 	userHandler := userdelivery.NewUserHandler(userStorage, configMux.addrOrigin, configMux.schema, logger)
 
-	categoryHandler := categorydelivery.NewCategoryHandler(categoryStorage,
-		configMux.addrOrigin, configMux.schema, configMux.portServer, logger,
+	categoryHandler, err := categorydelivery.NewCategoryHandler(categoryStorage,
+		configMux.addrOrigin, configMux.schema, configMux.portServer,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	productHandler, err := productdelivery.NewProductHandler(productStorage,
 		configMux.addrOrigin, configMux.schema, configMux.portServer,

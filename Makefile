@@ -4,7 +4,7 @@ all: compose-db-up go-mod-tidy test swag run
 
 # prod
 compose-full-up:
-	docker compose -f deployments/docker-compose.yml up --build -d
+	docker-compose -f deployments/docker-compose.yml up --build -d
 
 compose-full-down:
 	docker compose -f deployments/docker-compose.yml down
@@ -25,7 +25,7 @@ refill-db-docker: migrate-docker-down fill-db-docker
 
 # dev
 compose-db-up:
-	docker compose -f deployments/docker-compose.yml up -d postgres
+	sudo docker-compose -f deployments/docker-compose.yml up -d postgres
 
 compose-db-down:
 	docker compose -f deployments/docker-compose.yml down postgres
