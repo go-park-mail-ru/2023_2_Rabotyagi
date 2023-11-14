@@ -61,7 +61,6 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 
 	categories, err := c.storage.GetFullCategories(ctx)
 	if err != nil {
-		c.logger.Errorln(err)
 		delivery.SendErrResponse(w, c.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 

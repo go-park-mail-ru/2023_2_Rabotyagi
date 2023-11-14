@@ -72,7 +72,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 
 	ctx := r.Context()
 
-	preProduct, err := usecases.ValidatePreProduct(p.logger, r.Body)
+	preProduct, err := usecases.ValidatePreProduct(r.Body)
 	if err != nil {
 		p.logger.Errorln(err)
 
@@ -123,12 +123,16 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	ctx := r.Context()
 
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
-
-	productID, err := parseIDFromRequest(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		p.logger.Errorln(err)
+		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest,
+			fmt.Sprintf("%s user id == %v But shoud be integer", delivery.ErrBadRequest, userID)))
 
+		return
+	}
+
+	productID, err := parseIDFromRequest(r)
+	if err != nil {
 		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest,
 			fmt.Sprintf("%s product id == %v But shoud be integer", delivery.ErrBadRequest, productID)))
 
@@ -177,7 +181,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	count, lastID, err := parseCountAndLastIDFromRequest(r, p.logger)
+	count, lastID, err := parseCountAndLastIDFromRequest(r)
 	if err != nil {
 		p.logger.Errorln(err)
 
@@ -188,12 +192,16 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	ctx := r.Context()
 
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
 
 	products, err := p.storage.GetNewProducts(ctx, lastID, count, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -236,7 +244,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	productID, err := parseIDFromRequest(r, p.logger)
+	productID, err := parseIDFromRequest(r)
 	if err != nil {
 		p.logger.Errorln(err)
 
@@ -247,7 +255,13 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	ctx := r.Context()
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
 
 	var preProduct *models.PreProduct
 
@@ -261,7 +275,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 			return
 		}
 	} else {
-		preProduct, err = usecases.ValidatePreProduct(p.logger, r.Body)
+		preProduct, err = usecases.ValidatePreProduct(r.Body)
 		if err != nil {
 			p.logger.Errorln(err)
 
@@ -319,23 +333,25 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 		return
 	}
 
-	count, lastID, err := parseCountAndLastIDFromRequest(r, p.logger)
+	count, lastID, err := parseCountAndLastIDFromRequest(r)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	ctx := r.Context()
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
 
 	isMy = true
 	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, userID, isMy)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -378,7 +394,7 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 		return
 	}
 
-	salerID, count, lastID, err := parseSalerIDCountLastIDFromRequest(r, p.logger)
+	salerID, count, lastID, err := parseSalerIDCountLastIDFromRequest(r)
 	if err != nil {
 		p.logger.Errorln(err)
 
@@ -392,8 +408,6 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 	isMy = false
 	products, err := p.storage.GetProductsOfSaler(ctx, lastID, count, salerID, isMy)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -436,12 +450,16 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	ctx := r.Context()
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
-
-	productID, err := parseIDFromRequest(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		p.logger.Errorln(err)
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
+		return
+	}
+
+	productID, err := parseIDFromRequest(r)
+	if err != nil {
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
 
@@ -491,9 +509,15 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 	}
 
 	ctx := r.Context()
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
-	productID, err := parseIDFromRequest(r, p.logger)
+		return
+	}
+
+	productID, err := parseIDFromRequest(r)
 	if err != nil {
 		p.logger.Errorln(err)
 
@@ -546,9 +570,15 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	ctx := r.Context()
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
-	productID, err := parseIDFromRequest(r, p.logger)
+		return
+	}
+
+	productID, err := parseIDFromRequest(r)
 	if err != nil {
 		p.logger.Errorln(err)
 
@@ -560,8 +590,6 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 
 	err = p.storage.DeleteProduct(ctx, productID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.HandleErr(w, p.logger, err)
 
 		return

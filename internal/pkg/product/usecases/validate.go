@@ -3,6 +3,7 @@ package usecases
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
@@ -19,30 +20,39 @@ var (
 	ErrNotExistingStatus  = myerrors.NewError("Статус заказа не может быть больше %d", models.OrderStatusClosed)
 )
 
-func validatePreProduct(logger *zap.SugaredLogger, r io.Reader) (*models.PreProduct, error) {
+func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
 	decoder := json.NewDecoder(r)
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
 
 	preProduct := &models.PreProduct{
 		Delivery: false,
 		SafeDeal: false,
 	}
 	if err := decoder.Decode(preProduct); err != nil {
-		logger.Errorf("in ValidatePreProduct: %+v\n", err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreProduct)
 	}
 
 	preProduct.Trim()
 
-	_, err := govalidator.ValidateStruct(preProduct)
+	_, err = govalidator.ValidateStruct(preProduct)
 
 	return preProduct, err //nolint:wrapcheck
 }
 
-func ValidatePreProduct(logger *zap.SugaredLogger, r io.Reader) (*models.PreProduct, error) {
-	preProduct, err := validatePreProduct(logger, r)
+func ValidatePreProduct(r io.Reader) (*models.PreProduct, error) {
+	logger, err := my_logger.Get()
 	if err != nil {
-		logger.Errorf("in ValidatePreProduct: %+v\n", err)
+		return nil, err
+	}
+
+	preProduct, err := validatePreProduct(r)
+	if err != nil {
+		logger.Errorln(err)
 
 		return nil, myerrors.NewError(err.Error())
 	}
@@ -64,7 +74,12 @@ func ValidatePreProduct(logger *zap.SugaredLogger, r io.Reader) (*models.PreProd
 }
 
 func ValidatePartOfPreProduct(logger *zap.SugaredLogger, r io.Reader) (*models.PreProduct, error) {
-	preProduct, err := validatePreProduct(logger, r)
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	preProduct, err := validatePreProduct(r)
 	if preProduct == nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -74,7 +89,7 @@ func ValidatePartOfPreProduct(logger *zap.SugaredLogger, r io.Reader) (*models.P
 
 		for field, err := range validationErrors {
 			if err != "non zero value required" {
-				logger.Errorf("in ValidateUserWithoutPassword: %+v\n", err)
+				logger.Errorln(err)
 
 				return nil, myerrors.NewError("%s error: %s", field, err)
 			}
@@ -84,17 +99,22 @@ func ValidatePartOfPreProduct(logger *zap.SugaredLogger, r io.Reader) (*models.P
 	return preProduct, nil
 }
 
-func ValidatePreOrder(logger *zap.SugaredLogger, r io.Reader) (*models.PreOrder, error) {
+func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
+
 	preOrder := new(models.PreOrder)
 	decoder := json.NewDecoder(r)
 
 	if err := decoder.Decode(preOrder); err != nil {
-		logger.Errorf("in ValidatePreOrder: %+v\n", err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreOrder)
 	}
 
-	_, err := govalidator.ValidateStruct(preOrder)
+	_, err = govalidator.ValidateStruct(preOrder)
 	if err != nil {
 		logger.Errorf("in ValidatePreOrder: %+v\n", err)
 
@@ -104,23 +124,28 @@ func ValidatePreOrder(logger *zap.SugaredLogger, r io.Reader) (*models.PreOrder,
 	return preOrder, nil
 }
 
-func validateOrderChanges(logger *zap.SugaredLogger, r io.Reader) (*models.OrderChanges, error) {
+func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
+
 	orderChanges := new(models.OrderChanges)
 	decoder := json.NewDecoder(r)
 
 	if err := decoder.Decode(orderChanges); err != nil {
-		logger.Errorf("in validateOrderChanges: %+v\n", err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeOrderChanges)
 	}
 
-	_, err := govalidator.ValidateStruct(orderChanges)
+	_, err = govalidator.ValidateStruct(orderChanges)
 
 	return orderChanges, err //nolint:wrapcheck
 }
 
-func ValidateOrderChangesCount(logger *zap.SugaredLogger, r io.Reader) (*models.OrderChanges, error) {
-	orderChanges, err := validateOrderChanges(logger, r)
+func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
+	orderChanges, err := validateOrderChanges(r)
 	if orderChanges == nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -137,8 +162,8 @@ func ValidateOrderChangesCount(logger *zap.SugaredLogger, r io.Reader) (*models.
 	return orderChanges, nil
 }
 
-func ValidateOrderChangesStatus(logger *zap.SugaredLogger, r io.Reader) (*models.OrderChanges, error) {
-	orderChanges, err := validateOrderChanges(logger, r)
+func ValidateOrderChangesStatus(r io.Reader) (*models.OrderChanges, error) {
+	orderChanges, err := validateOrderChanges(r)
 	if orderChanges == nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

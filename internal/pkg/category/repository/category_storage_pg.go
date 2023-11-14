@@ -76,8 +76,6 @@ func (c *CategoryStorage) GetFullCategories(ctx context.Context) ([]*models.Cate
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorln(err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 

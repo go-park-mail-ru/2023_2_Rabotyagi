@@ -2,7 +2,7 @@ package delivery
 
 import (
 	"fmt"
-	"go.uber.org/zap"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"net/http"
 	"strconv"
 
@@ -20,14 +20,19 @@ func (p *ProductHandler) createURLToProductFromID(productID uint64) string {
 	return fmt.Sprintf("%s%s:%s/api/v1/product/get/%d", p.schema, p.addrOrigin, p.portServer, productID)
 }
 
-func parseCountAndLastIDFromRequest(r *http.Request, logger *zap.SugaredLogger) (uint64, uint64, error) {
+func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return 0, 0, err
+	}
+
 	countStr := r.URL.Query().Get("count")
 
 	count, err := strconv.ParseUint(countStr, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("%w count=%s", ErrWrongCount, countStr)
 
-		logger.Errorf("in parseCountAndLastIDFromRequest: %+v\n", err)
+		logger.Errorln(err)
 
 		return 0, 0, err
 	}
@@ -37,7 +42,7 @@ func parseCountAndLastIDFromRequest(r *http.Request, logger *zap.SugaredLogger) 
 	lastID, err := strconv.ParseUint(lastIDStr, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("%w last_id=%s", ErrWrongLastID, lastIDStr)
-		logger.Errorf("in parseCountAndLastIDFromRequest: %+v\n", err)
+		logger.Errorln(err)
 
 		return 0, 0, err
 	}
@@ -45,14 +50,19 @@ func parseCountAndLastIDFromRequest(r *http.Request, logger *zap.SugaredLogger) 
 	return count, lastID, nil
 }
 
-func parseSalerIDCountLastIDFromRequest(r *http.Request, logger *zap.SugaredLogger) (uint64, uint64, uint64, error) {
+func parseSalerIDCountLastIDFromRequest(r *http.Request) (uint64, uint64, uint64, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return 0, 0, 0, err
+	}
+
 	salerIDStr := r.URL.Query().Get("saler_id")
 
 	salerID, err := strconv.ParseUint(salerIDStr, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("%w saler_id=%s", ErrWrongSalerID, salerIDStr)
 
-		logger.Errorf("in parseSalerIDCountLastIDFromRequest: %+v\n", err)
+		logger.Errorln(err)
 
 		return 0, 0, 0, err
 	}
@@ -63,7 +73,7 @@ func parseSalerIDCountLastIDFromRequest(r *http.Request, logger *zap.SugaredLogg
 	if err != nil {
 		err := fmt.Errorf("%w count=%s", ErrWrongCount, countStr)
 
-		logger.Errorf("in parseCountAndLastIDFromRequest: %+v\n", err)
+		logger.Errorln(err)
 
 		return 0, 0, 0, err
 	}
@@ -73,7 +83,7 @@ func parseSalerIDCountLastIDFromRequest(r *http.Request, logger *zap.SugaredLogg
 	lastID, err := strconv.ParseUint(lastIDStr, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("%w last_id=%s", ErrWrongLastID, lastIDStr)
-		logger.Errorf("in parseCountAndLastIDFromRequest: %+v\n", err)
+		logger.Errorln(err)
 
 		return 0, 0, 0, err
 	}
@@ -81,14 +91,19 @@ func parseSalerIDCountLastIDFromRequest(r *http.Request, logger *zap.SugaredLogg
 	return salerID, count, lastID, nil
 }
 
-func parseIDFromRequest(r *http.Request, logger *zap.SugaredLogger) (uint64, error) {
+func parseIDFromRequest(r *http.Request) (uint64, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return 0, err
+	}
+
 	IDStr := r.URL.Query().Get("id")
 
 	ID, err := strconv.ParseUint(IDStr, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("%w id=%s", ErrWrongProductID, IDStr)
 
-		logger.Errorf("in parseIDFromRequest: %+v\n", err)
+		logger.Errorln(err)
 
 		return 0, err
 	}
