@@ -2,8 +2,9 @@ package models
 
 import (
 	"database/sql"
-	"github.com/microcosm-cc/bluemonday"
 	"strings"
+
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -35,7 +36,7 @@ type User struct {
 	Name     string       `json:"name"     valid:"regexp=^[а-яА-Яa-zA-Z0-9\s]+$~Name may contain only russian, english letter, numbers and spaces"`
 	Password string       `json:"password" valid:"required,password~Password must be at least 6 symbols"`
 	Birthday sql.NullTime `json:"birthday"` //nolint
-	Avatar   Image
+	Avatar   string       `json:"avatar"`
 }
 
 type UserWithoutPassword struct {
@@ -44,7 +45,7 @@ type UserWithoutPassword struct {
 	Phone    string       `json:"phone"    valid:"regexp=^(\+){0,1}[0-9\s]*$,length(0|18)~Phone may contain only one + in begin and numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
 	Name     string       `json:"name"     valid:"regexp=^[а-яА-Яa-zA-Z0-9\s]*$~Name may contain only russian, english letter, numbers and spaces"`
 	Birthday sql.NullTime `json:"birthday"` //nolint
-	Avatar   Image
+	Avatar   string       `json:"avatar"`
 }
 
 func (u *UserWithoutPassword) Trim() {
@@ -59,7 +60,7 @@ type UserWithoutID struct {
 	Name     string       `json:"name"     valid:"regexp=^[а-яА-Яa-zA-Z0-9\s]+$~Name may contain only russian, english letter, numbers and spaces"`
 	Password string       `json:"password" valid:"required,password~Password must be at least 6 symbols"`
 	Birthday sql.NullTime `json:"birthday"` //nolint
-	Avatar   Image
+	Avatar   string       `json:"avatar"`
 }
 
 func (u *UserWithoutID) Trim() {

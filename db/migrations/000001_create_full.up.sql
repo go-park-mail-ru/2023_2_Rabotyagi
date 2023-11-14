@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public."user"
         CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256),
     password TEXT                                            NOT NULL CHECK (password <> '')
         CONSTRAINT max_len_password CHECK (LENGTH(password) <= 256),
-    birthday TIMESTAMP WITH TIME ZONE
+    birthday TIMESTAMP WITH TIME ZONE,
     avatar    TEXT UNIQUE
         CONSTRAINT max_len_avatar CHECK (LENGTH(avatar) <= 256)
 );
