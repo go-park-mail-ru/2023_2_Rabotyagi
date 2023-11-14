@@ -26,6 +26,7 @@ services:
     build:
       context: ../
       dockerfile: ./Dockerfile
+    restart: always
     env_file:
       - .env.backend
     ports:
