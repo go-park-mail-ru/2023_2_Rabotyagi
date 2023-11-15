@@ -1,30 +1,33 @@
 package delivery
 
 import (
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
-
-	"go.uber.org/zap"
 )
 
-// GetUserIDFromCookie return 0 if error happen and return userID if success
-func GetUserIDFromCookie(r *http.Request, logger *zap.SugaredLogger) uint64 {
+func GetUserIDFromCookie(r *http.Request) (uint64, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return 0, err
+	}
+
 	cookie, err := r.Cookie(CookieAuthName)
 	if err != nil {
-		logger.Errorf("in getUserIDFromCookie: %+v\n", err)
+		logger.Errorln(err)
 
-		return 0
+		return 0, err
 	}
 
 	rawJwt := cookie.Value
 
 	userPayload, err := jwt.NewUserJwtPayload(rawJwt, jwt.Secret)
 	if err != nil {
-		logger.Errorf("in getUserIDFromCookie: %+v\n", err)
+		logger.Errorln(err)
 
-		return 0
+		return 0, err
 	}
 
-	return userPayload.UserID
+	return userPayload.UserID, nil
 }

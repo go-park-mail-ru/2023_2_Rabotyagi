@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
@@ -15,11 +16,16 @@ type CategoryStorage struct {
 	logger *zap.SugaredLogger
 }
 
-func NewCategoryStorage(pool *pgxpool.Pool, logger *zap.SugaredLogger) *CategoryStorage {
+func NewCategoryStorage(pool *pgxpool.Pool) (*CategoryStorage, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
+
 	return &CategoryStorage{
 		pool:   pool,
 		logger: logger,
-	}
+	}, nil
 }
 
 func (c *CategoryStorage) selectFullCatgories(ctx context.Context, tx pgx.Tx) ([]*models.Category, error) {
@@ -29,7 +35,7 @@ func (c *CategoryStorage) selectFullCatgories(ctx context.Context, tx pgx.Tx) ([
 
 	categoriesRows, err := tx.Query(ctx, SQLSelectFullCatgories)
 	if err != nil {
-		c.logger.Errorf("in selectOrdersInBasketByUserID: %+v\n", err)
+		c.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -48,7 +54,7 @@ func (c *CategoryStorage) selectFullCatgories(ctx context.Context, tx pgx.Tx) ([
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorf("in selectOrdersInBasketByUserID: %+v\n", err)
+		c.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -70,8 +76,6 @@ func (c *CategoryStorage) GetFullCategories(ctx context.Context) ([]*models.Cate
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorf("in GetFullCatgories: %+v\n", err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 

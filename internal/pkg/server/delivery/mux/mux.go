@@ -39,14 +39,23 @@ func NewConfigMux(addrOrigin string, schema string, portServer string, fileServi
 func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.IUserStorage,
 	productStorage productusecases.IProductStorage, categoryStorage categoryusecases.ICategoryStorage,
 	logger *zap.SugaredLogger,
-) http.Handler {
+) (http.Handler, error) {
 	router := http.NewServeMux()
 
-	userHandler := userdelivery.NewUserHandler(userStorage, logger)
+	userHandler, err := userdelivery.NewUserHandler(userStorage)
+	if err != nil {
+		return nil, err
+	}
 
-	categoryHandler := categorydelivery.NewCategoryHandler(categoryStorage, logger)
+	categoryHandler, err := categorydelivery.NewCategoryHandler(categoryStorage)
+	if err != nil {
+		return nil, err
+	}
 
-	productHandler := productdelivery.NewProductHandler(productStorage, logger)
+	productHandler, err := productdelivery.NewProductHandler(productStorage)
+	if err != nil {
+		return nil, err
+	}
 
 	fileStorage := filerepo.NewFileSystemStorage(configMux.fileServiceDir)
 	fileService := fileusecases.NewFileService(fileStorage, urlPrefixPathFS)
@@ -104,5 +113,5 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(router, logger))
 
-	return mux
+	return mux, nil
 }

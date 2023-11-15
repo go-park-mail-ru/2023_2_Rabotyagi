@@ -19,6 +19,5 @@ func main() {
 	srv := new(server.Server)
 	if err := srv.Run(configServer); err != nil {
 		fmt.Printf("Error in server: %s", err.Error())
-
 	}
 }

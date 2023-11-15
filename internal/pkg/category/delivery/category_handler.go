@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"go.uber.org/zap"
 )
 
@@ -13,12 +14,16 @@ type CategoryHandler struct {
 	logger  *zap.SugaredLogger
 }
 
-func NewCategoryHandler(storage usecases.ICategoryStorage, logger *zap.SugaredLogger,
-) *CategoryHandler {
+func NewCategoryHandler(storage usecases.ICategoryStorage) (*CategoryHandler, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
+
 	return &CategoryHandler{
 		storage: storage,
 		logger:  logger,
-	}
+	}, nil
 }
 
 // GetFullCategories godoc
@@ -43,7 +48,6 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 
 	categories, err := c.storage.GetFullCategories(ctx)
 	if err != nil {
-		c.logger.Errorf("in GetFullCategories %+v\n", err)
 		delivery.SendErrResponse(w, c.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 

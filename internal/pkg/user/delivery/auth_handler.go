@@ -1,6 +1,8 @@
 package delivery
 
 import (
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -8,7 +10,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 )
 
 const (
@@ -20,11 +21,16 @@ type UserHandler struct {
 	logger  *zap.SugaredLogger
 }
 
-func NewUserHandler(storage userusecases.IUserStorage, logger *zap.SugaredLogger) *UserHandler {
+func NewUserHandler(storage userusecases.IUserStorage) (*UserHandler, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
+
 	return &UserHandler{
 		storage: storage,
 		logger:  logger,
-	}
+	}, nil
 }
 
 // SignUpHandler godoc
@@ -54,9 +60,8 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userWithoutID, err := userusecases.ValidateUserWithoutID(u.logger, r.Body)
+	userWithoutID, err := userusecases.ValidateUserWithoutID(r.Body)
 	if err != nil {
-		u.logger.Errorf("in SignUpHandler: %+v\n", err)
 		delivery.HandleErr(w, u.logger, err)
 
 		return
@@ -64,7 +69,6 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	userWithoutID.Password, err = utils.HashPass(userWithoutID.Password)
 	if err != nil {
-		u.logger.Errorf("in SignUpHandler: %+v", err)
 		delivery.SendErrResponse(w, u.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -73,7 +77,6 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.storage.AddUser(ctx, userWithoutID)
 	if err != nil {
-		u.logger.Errorf("in SignUpHandler: %+v\n", err)
 		delivery.HandleErr(w, u.logger, err)
 
 		return
@@ -84,7 +87,6 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	jwtStr, err := jwt.GenerateJwtToken(
 		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.Secret)
 	if err != nil {
-		u.logger.Errorf("in SignUpHandler: %+v\n", err)
 		delivery.SendErrResponse(w, u.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -125,7 +127,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userWithoutID, err := userusecases.ValidateUserCredentials(u.logger,
+	userWithoutID, err := userusecases.ValidateUserCredentials(
 		r.URL.Query().Get("email"), r.URL.Query().Get("password"))
 	if err != nil {
 		u.logger.Errorf("in SignInHandler: %+v\n", err)
@@ -136,7 +138,6 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.storage.GetUser(ctx, userWithoutID.Email, userWithoutID.Password)
 	if err != nil {
-		u.logger.Errorf("in SignInHandler: %+v\n", err)
 		delivery.HandleErr(w, u.logger, err)
 
 		return
@@ -152,7 +153,6 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		jwt.Secret,
 	)
 	if err != nil {
-		u.logger.Errorf("in SignInHandler: %+v\n", err)
 		delivery.SendErrResponse(w, u.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -191,7 +191,7 @@ func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie(delivery.CookieAuthName)
 	if err != nil {
-		u.logger.Errorf("in LogOutHandler: %+v\n", err)
+		u.logger.Errorln(err)
 		delivery.SendErrResponse(w, u.logger, delivery.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
 
 		return

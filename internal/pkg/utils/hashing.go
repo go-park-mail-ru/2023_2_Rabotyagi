@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 
@@ -22,10 +23,16 @@ const (
 )
 
 func HashPass(plainPassword string) (string, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
+	}
 	salt := make([]byte, saltLen)
 
-	_, err := rand.Read(salt)
+	_, err = rand.Read(salt)
 	if err != nil {
+		logger.Errorln(err)
+
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 

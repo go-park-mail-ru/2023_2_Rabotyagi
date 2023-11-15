@@ -34,7 +34,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 
 	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
 	if err != nil {
-		p.logger.Errorf("in selectOrdersInBasketByUserID: %+v\n", err)
+		p.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -65,7 +65,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in selectOrdersInBasketByUserID: %+v\n", err)
+		p.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -104,7 +104,7 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in GetOrdersInBasketByUserID: %+v\n", err)
+		p.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -121,7 +121,7 @@ func (p *ProductStorage) updateOrderCountByOrderID(ctx context.Context,
 
 	result, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newCount, orderID, userID)
 	if err != nil {
-		p.logger.Errorf("in updateOrderCountByOrderID: %+v", err)
+		p.logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -147,7 +147,7 @@ func (p *ProductStorage) getOrderByID(ctx context.Context, tx pgx.Tx, orderID ui
 		&order.UpdatedAt, &order.CreatedAt)
 
 	if err != nil {
-		p.logger.Errorf("in getOrderByID: %+v", err)
+		p.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -165,8 +165,6 @@ func (p *ProductStorage) UpdateOrderCount(ctx context.Context, userID uint64, or
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in UpdateOrderCount: %+v\n", err)
-
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -182,7 +180,7 @@ func (p *ProductStorage) updateOrderStatusByOrderID(ctx context.Context,
 
 	result, err := tx.Exec(ctx, SQLUpdateOrderCountByOrderID, newStatus, orderID)
 	if err != nil {
-		p.logger.Errorf("in updateOrderStatusByOrderID: %+v", err)
+		p.logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -209,7 +207,7 @@ func (p *ProductStorage) getStatusAndCountByOrderID(ctx context.Context,
 
 	err := orderRow.Scan(&status, &count)
 	if err != nil {
-		p.logger.Errorf("in getStatusAndCountByOrderID: %+v", err)
+		p.logger.Errorln(err)
 
 		return models.OrderStatusError, 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -230,7 +228,7 @@ func (p *ProductStorage) decreaseAvailableCountByOrderID(ctx context.Context,
 
 	result, err := tx.Exec(ctx, SQLDecreaseAvailableCountByOrderID, count, orderID)
 	if err != nil {
-		p.logger.Errorf("in decreaseAvailableCountByOrderID: %+v", err)
+		p.logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -286,8 +284,6 @@ func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in UpdateOrderStatus: %+v\n", err)
-
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -301,7 +297,7 @@ func (p *ProductStorage) insertOrder(ctx context.Context, tx pgx.Tx,
 
 	_, err := tx.Exec(ctx, SQLInsertOrder, userID, productID, count)
 	if err != nil {
-		p.logger.Errorf("in insertOrder: %+v\n", err)
+		p.logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -351,8 +347,6 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in AddOrderInBasket: %+v\n", err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -368,7 +362,7 @@ func (p *ProductStorage) updateStatusFullBasket(ctx context.Context, tx pgx.Tx, 
 			return ErrNotFoundOrdersInBasket
 		}
 
-		p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
+		p.logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -383,7 +377,7 @@ func (p *ProductStorage) updateStatusFullBasket(ctx context.Context, tx pgx.Tx, 
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
+		p.logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -391,7 +385,7 @@ func (p *ProductStorage) updateStatusFullBasket(ctx context.Context, tx pgx.Tx, 
 	for _, val := range slOrderID {
 		err = p.updateOrderStatus(ctx, tx, userID, val, models.OrderStatusInProcessing)
 		if err != nil {
-			p.logger.Errorf("in updateStatusFullBasket: %+v\n", err)
+			p.logger.Errorln(err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -410,8 +404,6 @@ func (p *ProductStorage) BuyFullBasket(ctx context.Context, userID uint64) error
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in BuyFullBasket: %+v\n", err)
-
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -426,7 +418,7 @@ func (p *ProductStorage) deleteOrderByOrderIDAndOwnerID(ctx context.Context,
 
 	result, err := tx.Exec(ctx, SQLDeleteOrderByID, orderID, ownerID)
 	if err != nil {
-		p.logger.Errorf("in deleteOrderByOrderIDAndOwnerID: %+v\n", err)
+		p.logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -449,8 +441,6 @@ func (p *ProductStorage) DeleteOrder(ctx context.Context, orderID uint64, ownerI
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorf("in DeleteOrder: %+v\n", err)
-
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 

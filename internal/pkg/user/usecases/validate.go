@@ -3,13 +3,13 @@ package usecases
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 
 	"github.com/asaskevich/govalidator"
-	"go.uber.org/zap"
 )
 
 var (
@@ -17,27 +17,37 @@ var (
 	ErrDecodeUser       = myerrors.NewError("Некорректный json пользователя")
 )
 
-func validateUserWithoutID(logger *zap.SugaredLogger, r io.Reader) (*models.UserWithoutID, error) {
+func validateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
 	decoder := json.NewDecoder(r)
 
 	userWithoutID := new(models.UserWithoutID)
 	if err := decoder.Decode(userWithoutID); err != nil {
-		logger.Errorf("in ValidateUserWithoutID: %+v\n", err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeUser)
 	}
 
 	userWithoutID.Trim()
 
-	_, err := govalidator.ValidateStruct(userWithoutID)
+	_, err = govalidator.ValidateStruct(userWithoutID)
 
 	return userWithoutID, err //nolint:wrapcheck
 }
 
-func ValidateUserWithoutID(logger *zap.SugaredLogger, r io.Reader) (*models.UserWithoutID, error) {
-	userWithoutID, err := validateUserWithoutID(logger, r)
+func ValidateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
+	logger, err := my_logger.Get()
 	if err != nil {
-		logger.Errorf("in ValidateUserWithoutID: %+v\n", err)
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	userWithoutID, err := validateUserWithoutID(r)
+	if err != nil {
+		logger.Errorln(err)
 
 		return nil, myerrors.NewError(err.Error())
 	}
@@ -45,7 +55,12 @@ func ValidateUserWithoutID(logger *zap.SugaredLogger, r io.Reader) (*models.User
 	return userWithoutID, nil
 }
 
-func ValidateUserCredentials(logger *zap.SugaredLogger, email string, password string) (*models.UserWithoutID, error) {
+func ValidateUserCredentials(email string, password string) (*models.UserWithoutID, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
 	userWithoutID := new(models.UserWithoutID)
 
 	userWithoutID.Email = email
@@ -53,10 +68,10 @@ func ValidateUserCredentials(logger *zap.SugaredLogger, email string, password s
 	userWithoutID.Trim()
 	logger.Infoln(userWithoutID)
 
-	_, err := govalidator.ValidateStruct(userWithoutID)
+	_, err = govalidator.ValidateStruct(userWithoutID)
 	if err != nil && (govalidator.ErrorByField(err, "email") != "" ||
 		govalidator.ErrorByField(err, "password") != "") {
-		logger.Errorf("in ValidateUserCredentials: %+v\n", err)
+		logger.Errorln(err)
 
 		return nil, ErrWrongCredentials
 	}
@@ -64,27 +79,37 @@ func ValidateUserCredentials(logger *zap.SugaredLogger, email string, password s
 	return userWithoutID, nil
 }
 
-func validateUserWithoutPassword(logger *zap.SugaredLogger, r io.Reader) (*models.UserWithoutPassword, error) {
+func validateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
 	decoder := json.NewDecoder(r)
 
 	userWithoutPassword := new(models.UserWithoutPassword)
 	if err := decoder.Decode(userWithoutPassword); err != nil {
-		logger.Errorf("in ValidateUserWithoutPassword: %+v\n", err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeUser)
 	}
 
 	userWithoutPassword.Trim()
 
-	_, err := govalidator.ValidateStruct(userWithoutPassword)
+	_, err = govalidator.ValidateStruct(userWithoutPassword)
 
 	return userWithoutPassword, err //nolint:wrapcheck
 }
 
-func ValidateUserWithoutPassword(logger *zap.SugaredLogger, r io.Reader) (*models.UserWithoutPassword, error) {
-	userWithoutPassword, err := validateUserWithoutPassword(logger, r)
+func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
+	logger, err := my_logger.Get()
 	if err != nil {
-		logger.Errorf("in ValidateUserWithoutPassword: %+v\n", err)
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	userWithoutPassword, err := validateUserWithoutPassword(r)
+	if err != nil {
+		logger.Errorln(err)
 
 		return nil, myerrors.NewError(err.Error())
 	}
@@ -92,8 +117,13 @@ func ValidateUserWithoutPassword(logger *zap.SugaredLogger, r io.Reader) (*model
 	return userWithoutPassword, nil
 }
 
-func ValidatePartOfUserWithoutPassword(logger *zap.SugaredLogger, r io.Reader) (*models.UserWithoutPassword, error) {
-	userWithoutPassword, err := validateUserWithoutPassword(logger, r)
+func ValidatePartOfUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	userWithoutPassword, err := validateUserWithoutPassword(r)
 	if userWithoutPassword == nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -103,7 +133,7 @@ func ValidatePartOfUserWithoutPassword(logger *zap.SugaredLogger, r io.Reader) (
 
 		for field, err := range validationErrors {
 			if err != "non zero value required" {
-				logger.Errorf("in ValidateUserWithoutPassword: %+v\n", err)
+				logger.Errorln(err)
 
 				return nil, myerrors.NewError("%s error: %s", field, err)
 			}
