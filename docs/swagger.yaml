@@ -148,9 +148,9 @@ definitions:
       avatar:
         $ref: '#/definitions/sql.NullString'
       birthday:
-        allOf:
-        - $ref: '#/definitions/sql.NullTime'
-        description: nolint
+        $ref: '#/definitions/sql.NullTime'
+      created_at:
+        type: string
       email:
         type: string
       id:
