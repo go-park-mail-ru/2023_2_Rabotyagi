@@ -75,13 +75,14 @@ func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models
 }
 
 func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx, id uint64) (*models.UserWithoutPassword, error) { //nolint:lll
-	SQLGetUserByID := `SELECT email, phone, name, birthday, avatar FROM public."user" WHERE id=$1;`
+	SQLGetUserByID := `SELECT email, phone, name, birthday, avatar, created_at FROM public."user" WHERE id=$1;`
 	userLine := tx.QueryRow(ctx, SQLGetUserByID, id)
 	user := models.UserWithoutPassword{ //nolint:exhaustruct
 		ID: id,
 	}
 
-	if err := userLine.Scan(&user.Email, &user.Phone, &user.Name, &user.Birthday, &user.Avatar); err != nil {
+	if err := userLine.Scan(&user.Email,
+		&user.Phone, &user.Name, &user.Birthday, &user.Avatar, &user.CreatedAt); err != nil {
 		u.logger.Errorf("error in getUserWithoutPasswordByID: %+v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)

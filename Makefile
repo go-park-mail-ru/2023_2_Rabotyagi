@@ -61,3 +61,6 @@ fill-db: build-fill-db migrate-up
 	sudo ./bin/fill-db
 
 refill-db: migrate-down migrate-up fill-db
+
+logs:
+	cat /var/log/backend/logs.json | jq

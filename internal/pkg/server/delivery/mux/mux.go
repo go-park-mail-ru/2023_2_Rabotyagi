@@ -50,8 +50,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 
 	fileStorage := filerepo.NewFileSystemStorage(configMux.fileServiceDir)
 	fileService := fileusecases.NewFileService(fileStorage, urlPrefixPathFS)
-	fileHandler := filedelivery.NewFileHandler(fileService, logger,
-		configMux.fileServiceDir, configMux.addrOrigin, configMux.schema)
+	fileHandler := filedelivery.NewFileHandler(fileService, logger, configMux.fileServiceDir)
 
 	router.Handle("/api/v1/img/", fileHandler.DocFileServerHandler(ctx))
 	router.Handle("/api/v1/img/upload", middleware.Context(ctx, http.HandlerFunc(fileHandler.UploadFileHandler)))

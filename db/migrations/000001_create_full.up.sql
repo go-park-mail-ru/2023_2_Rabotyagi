@@ -7,18 +7,19 @@ CREATE SEQUENCE IF NOT EXISTS favourite_id_seq;
 
 CREATE TABLE IF NOT EXISTS public."user"
 (
-    id       BIGINT DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
-    email    TEXT UNIQUE                                     NOT NULL CHECK (email <> '')
+    id         BIGINT                   DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    email      TEXT UNIQUE                                                       NOT NULL CHECK (email <> '')
         CONSTRAINT max_len_email CHECK (LENGTH(email) <= 256),
-    phone    TEXT UNIQUE                                     
+    phone      TEXT UNIQUE
         CONSTRAINT max_len_phone CHECK (LENGTH(phone) <= 18),
-    name     TEXT                                            
+    name       TEXT
         CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256),
-    password TEXT                                            NOT NULL CHECK (password <> '')
+    password   TEXT                                                              NOT NULL CHECK (password <> '')
         CONSTRAINT max_len_password CHECK (LENGTH(password) <= 256),
-    birthday TIMESTAMP WITH TIME ZONE,
-    avatar    TEXT UNIQUE
-        CONSTRAINT max_len_avatar CHECK (LENGTH(avatar) <= 256)
+    birthday   TIMESTAMP WITH TIME ZONE,
+    avatar     TEXT UNIQUE
+        CONSTRAINT max_len_avatar CHECK (LENGTH(avatar) <= 256),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()                            NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public."category"
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS public."product"
         CONSTRAINT max_len_city CHECK (LENGTH(city) <= 256),
     delivery        BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
-    is_active       BOOLEAN                  DEFAULT TRUE                               NOT NULL,
+    is_active       BOOLEAN                  DEFAULT TRUE                                NOT NULL,
     CONSTRAINT not_zero_count_with_active CHECK (not (available_count = 0 and is_active))
 );
 
@@ -80,7 +81,7 @@ CREATE TABLE IF NOT EXISTS public."favourite"
     id         BIGINT DEFAULT NEXTVAL('favourite_id_seq'::regclass) NOT NULL PRIMARY KEY,
     owner_id   BIGINT                                               NOT NULL REFERENCES public."user" (id),
     product_id BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE,
-        CONSTRAINT uniq_together_product_id_owner_id unique (owner_id, product_id)
+    CONSTRAINT uniq_together_product_id_owner_id unique (owner_id, product_id)
 );
 
 CREATE OR REPLACE FUNCTION updated_at_now()

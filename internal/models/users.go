@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"strings"
+	"time"
 
 	"github.com/microcosm-cc/bluemonday"
 
@@ -40,12 +41,13 @@ type User struct {
 }
 
 type UserWithoutPassword struct {
-	ID       uint64         `json:"id"       valid:"required"`
-	Email    string         `json:"email"    valid:"required,email~Not valid email"`
-	Phone    string         `json:"phone"    valid:"regexp=^(\+){0,1}[0-9\s]*$,length(0|18)~Phone may contain only one + in begin and numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
-	Name     string         `json:"name"     valid:"regexp=^[а-яА-Яa-zA-Z0-9\s]*$~Name may contain only russian, english letter, numbers and spaces"`
-	Birthday sql.NullTime   `json:"birthday"` //nolint
-	Avatar   sql.NullString `json:"avatar"`
+	ID        uint64         `json:"id"          valid:"required"`
+	Email     string         `json:"email"       valid:"required,email~Not valid email"`
+	Phone     string         `json:"phone"       valid:"regexp=^(\+){0,1}[0-9\s]*$,length(0|18)~Phone may contain only one + in begin and numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
+	Name      string         `json:"name"        valid:"regexp=^[а-яА-Яa-zA-Z0-9\s]*$~Name may contain only russian, english letter, numbers and spaces"`
+	Birthday  sql.NullTime   `json:"birthday"`
+	Avatar    sql.NullString `json:"avatar"`
+	CreatedAt time.Time      `json:"created_at"  valid:"required"`
 }
 
 func (u *UserWithoutPassword) Trim() {
