@@ -1,9 +1,10 @@
 package delivery
 
 import (
+	"net/http"
+
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"net/http"
 )
 
 // GetBasketHandler godoc
@@ -19,12 +20,6 @@ import (
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /order/get_basket [get]
 func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -73,12 +68,6 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /order/update_count [patch]
 func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -133,12 +122,6 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /order/update_status [patch]
 func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -194,12 +177,6 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /order/add [post]
 func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -249,12 +226,6 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /order/buy_full_basket [patch]
 func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -300,12 +271,6 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /order/delete/ [delete]
 func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodDelete {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

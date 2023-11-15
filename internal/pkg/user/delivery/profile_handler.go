@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -17,7 +18,6 @@ import (
 //
 // @Tags profile
 //
-//	@Accept      json
 //	@Produce    json
 //	@Param      id  query uint64 true  "user id"
 //	@Success    200  {object} ProfileResponse
@@ -26,12 +26,6 @@ import (
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /profile/get [get]
 func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, u.addrOrigin, u.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -44,9 +38,10 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
-		u.logger.Errorf("in GetUserHandler: %+v", err)
+		errMessageParse := fmt.Sprintf("user id = %s a должен быть строкой", userIDStr)
+		u.logger.Errorf("%w %s", err, errMessageParse)
 		delivery.SendErrResponse(w, u.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+			delivery.NewErrResponse(delivery.StatusErrBadRequest, errMessageParse))
 
 		return
 	}
@@ -82,12 +77,6 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /profile/update [patch]
 //	@Router      /profile/update [put]
 func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, u.addrOrigin, u.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPatch && r.Method != http.MethodPut {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

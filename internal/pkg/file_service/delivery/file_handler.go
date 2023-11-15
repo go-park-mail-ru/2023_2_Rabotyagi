@@ -1,10 +1,13 @@
 package delivery
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"net/http"
 
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 
 	"go.uber.org/zap"
@@ -15,12 +18,21 @@ const (
 	MaxCountPhoto     = 4
 
 	nameImagesInForm = "images"
+
+	rootPath = "/api/v1/img/"
 )
 
+type keyCtx string
+
+var keyCtxHandler keyCtx = "handler"
+
 var (
-	ErrToBigFile        = myerrors.NewError("Максимальный размер фото %d Мбайт", MaxSizePhotoBytes%1024%1024)
-	ErrToManyCountFiles = myerrors.NewError("Максимальное количество фото = %d", MaxCountPhoto)
+	ErrToBigFile         = myerrors.NewError("Максимальный размер фото %d Мбайт", MaxSizePhotoBytes%1024%1024)
+	ErrToManyCountFiles  = myerrors.NewError("Максимальное количество фото = %d", MaxCountPhoto)
+	ErrForbiddenRootPath = myerrors.NewError("Нельзя вызывать корневой путь")
 )
+
+var _ IFileService = (*fileusecases.FileService)(nil)
 
 type IFileService interface {
 	SaveImage(r io.Reader) (string, error)
@@ -61,12 +73,6 @@ func NewFileHandler(fileService IFileService, logger *zap.SugaredLogger,
 //	@Router      /img/upload [post]
 func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, MaxSizePhotoBytes*MaxCountPhoto)
-	delivery.SetupCORS(w, f.addrOrigin, f.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -137,8 +143,51 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// DocHandlerFileServer godoc
-// TODO not worked documentation
-func (f *FileHandler) DocHandlerFileServer() http.Handler {
-	return http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(f.fileServiceDir)))
+// fileServerHandler godoc
+//
+//	@Summary    download photo
+//	@Description  download photo of file by its name
+//
+//	@Tags fileService
+//
+//	@Accept     json
+//	@Produce    png
+//	@Produce    jpeg
+//	@Produce    json
+//	@Param      name path  string true "name of image"
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /img/ [get]
+func (f *FileHandler) fileServerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == rootPath {
+		f.logger.Errorln(ErrForbiddenRootPath)
+		delivery.HandleErr(w, f.logger, ErrForbiddenRootPath)
+
+		return
+	}
+
+	ctx := r.Context()
+	fileServerRaw := ctx.Value(keyCtxHandler)
+
+	fileServer, ok := fileServerRaw.(http.Handler)
+	if !ok {
+		f.logger.Errorln(fmt.Sprintf("handler = %+v а должен быть типом http.Handler", fileServerRaw))
+		delivery.SendErrResponse(w, f.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	fileServer.ServeHTTP(w, r)
+}
+
+func (f *FileHandler) DocFileServerHandler(ctx context.Context) http.Handler {
+	fileServer := http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(f.fileServiceDir)))
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r = r.WithContext(context.WithValue(ctx, keyCtxHandler, fileServer))
+
+		f.fileServerHandler(w, r)
+	})
 }

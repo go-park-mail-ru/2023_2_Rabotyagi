@@ -17,23 +17,19 @@ const (
 )
 
 type UserHandler struct {
-	storage    userusecases.IUserStorage
-	addrOrigin string
-	schema     string
-	logger     *zap.SugaredLogger
+	storage userusecases.IUserStorage
+	logger  *zap.SugaredLogger
 }
 
-func NewUserHandler(storage userusecases.IUserStorage, addrOrigin string, schema string) (*UserHandler, error) {
+func NewUserHandler(storage userusecases.IUserStorage) (*UserHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
 	}
 
 	return &UserHandler{
-		storage:    storage,
-		addrOrigin: addrOrigin,
-		schema:     schema,
-		logger:     logger,
+		storage: storage,
+		logger:  logger,
 	}, nil
 }
 
@@ -56,12 +52,6 @@ func NewUserHandler(storage userusecases.IUserStorage, addrOrigin string, schema
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signup [post]
 func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, u.addrOrigin, u.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -120,7 +110,6 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Summary    signin
 //	@Description  signin in app
 //	@Tags auth
-//	@Accept      json
 //	@Produce    json
 //	@Param      email  query string true  "user email for signin"
 //	@Param      password  query string true  "user password for signin"
@@ -130,12 +119,6 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /signin [get]
 func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, u.addrOrigin, u.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -193,7 +176,6 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Summary    logout
 //	@Description  logout in app
 //	@Tags auth
-//	@Accept      json
 //	@Produce    json
 //	@Success    200  {object} delivery.Response
 //	@Failure    405  {string} string
@@ -201,12 +183,6 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /logout [post]
 func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, u.addrOrigin, u.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

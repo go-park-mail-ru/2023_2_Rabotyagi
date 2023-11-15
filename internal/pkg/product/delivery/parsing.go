@@ -17,7 +17,7 @@ var (
 )
 
 func (p *ProductHandler) createURLToProductFromID(productID uint64) string {
-	return fmt.Sprintf("%s%s:%s/api/v1/product/get/%d", p.schema, p.addrOrigin, p.portServer, productID)
+	return fmt.Sprintf("%s%s:%s/api/v1/product/get/%d", productID)
 }
 
 func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {

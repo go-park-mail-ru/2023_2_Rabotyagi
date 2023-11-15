@@ -13,7 +13,8 @@ func Panic(next http.Handler, logger *zap.SugaredLogger) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				logger.Errorf("panic recovered: %+v\n", err)
-				delivery.SendErrResponse(w, logger, delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+				delivery.SendErrResponse(w, logger,
+					delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 			}
 		}()
 		next.ServeHTTP(w, r)

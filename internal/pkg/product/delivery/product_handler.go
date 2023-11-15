@@ -14,27 +14,19 @@ import (
 )
 
 type ProductHandler struct {
-	storage    usecases.IProductStorage
-	addrOrigin string
-	schema     string
-	portServer string
-	logger     *zap.SugaredLogger
+	storage usecases.IProductStorage
+	logger  *zap.SugaredLogger
 }
 
-func NewProductHandler(storage usecases.IProductStorage,
-	addrOrigin string, schema string, portServer string,
-) (*ProductHandler, error) {
+func NewProductHandler(storage usecases.IProductStorage) (*ProductHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
 	}
 
 	return &ProductHandler{
-		storage:    storage,
-		addrOrigin: addrOrigin,
-		schema:     schema,
-		portServer: portServer,
-		logger:     logger,
+		storage: storage,
+		logger:  logger,
 	}, nil
 }
 
@@ -58,12 +50,6 @@ var isMy bool
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/add [post]
 func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -105,12 +91,6 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/get [get]
 func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -163,12 +143,6 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/get_list [get]
 func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -226,12 +200,6 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 //	@Router      /product/update [patch]
 //	@Router      /product/update [put]
 func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPatch && r.Method != http.MethodPut {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -247,6 +215,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	ctx := r.Context()
+
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
 		delivery.SendErrResponse(w, p.logger,
@@ -287,8 +256,6 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 
 	err = p.storage.UpdateProduct(ctx, productID, updateFieldsMap)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -313,12 +280,6 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/get_list_of_saler [get]
 func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -374,12 +335,6 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/get_list_of_another_saler [get]
 func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -388,8 +343,6 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 
 	salerID, count, lastID, err := parseSalerIDCountLastIDFromRequest(r)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -429,12 +382,6 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/close [patch]
 func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -460,8 +407,6 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 
 	err = p.storage.CloseProduct(ctx, productID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -488,12 +433,6 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/activate [patch]
 func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -521,8 +460,6 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 
 	err = p.storage.ActivateProduct(ctx, productID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -531,6 +468,7 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 
 	delivery.SendOkResponse(w, p.logger,
 		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
+
 	p.logger.Infof("in ActivateProductHandler: activated product id=%d", productID)
 }
 
@@ -549,12 +487,6 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /product/delete [delete]
 func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, p.addrOrigin, p.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodDelete {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
