@@ -349,6 +349,37 @@ paths:
       summary: get all categories
       tags:
       - category
+  /img/:
+    get:
+      consumes:
+      - application/json
+      description: download photo of file by its name
+      parameters:
+      - description: name of image
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - image/png
+      - image/jpeg
+      - application/json
+      responses:
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: download photo
+      tags:
+      - fileService
   /img/upload:
     post:
       consumes:
