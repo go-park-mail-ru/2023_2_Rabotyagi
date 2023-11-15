@@ -42,15 +42,11 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 ) http.Handler {
 	router := http.NewServeMux()
 
-	userHandler := userdelivery.NewUserHandler(userStorage, configMux.addrOrigin, configMux.schema, logger)
+	userHandler := userdelivery.NewUserHandler(userStorage, logger)
 
-	categoryHandler := categorydelivery.NewCategoryHandler(categoryStorage,
-		configMux.addrOrigin, configMux.schema, configMux.portServer, logger,
-	)
+	categoryHandler := categorydelivery.NewCategoryHandler(categoryStorage, logger)
 
-	productHandler := productdelivery.NewProductHandler(productStorage,
-		configMux.addrOrigin, configMux.schema, configMux.portServer, logger,
-	)
+	productHandler := productdelivery.NewProductHandler(productStorage, logger)
 
 	fileStorage := filerepo.NewFileSystemStorage(configMux.fileServiceDir)
 	fileService := fileusecases.NewFileService(fileStorage, urlPrefixPathFS)
@@ -58,35 +54,53 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 		configMux.fileServiceDir, configMux.addrOrigin, configMux.schema)
 
 	router.Handle("/api/v1/img/", fileHandler.DocFileServerHandler(ctx))
-	router.Handle("/api/v1/img/upload", middleware.Context(ctx, fileHandler.UploadFileHandler))
+	router.Handle("/api/v1/img/upload", middleware.Context(ctx, http.HandlerFunc(fileHandler.UploadFileHandler)))
 
-	router.Handle("/api/v1/signup", middleware.Context(ctx, userHandler.SignUpHandler))
-	router.Handle("/api/v1/signin", middleware.Context(ctx, userHandler.SignInHandler))
-	router.Handle("/api/v1/logout", middleware.Context(ctx, userHandler.LogOutHandler))
+	router.Handle("/api/v1/signup", middleware.Context(ctx,
+		middleware.SetupCORS(userHandler.SignUpHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/signin", middleware.Context(ctx,
+		middleware.SetupCORS(userHandler.SignInHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/logout", middleware.Context(ctx, http.HandlerFunc(userHandler.LogOutHandler)))
 
-	router.Handle("/api/v1/profile/get", middleware.Context(ctx, userHandler.GetUserHandler))
-	router.Handle("/api/v1/profile/update", middleware.Context(ctx, userHandler.PartiallyUpdateUserHandler))
+	router.Handle("/api/v1/profile/get", middleware.Context(ctx,
+		middleware.SetupCORS(userHandler.GetUserHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/profile/update", middleware.Context(ctx,
+		middleware.SetupCORS(userHandler.PartiallyUpdateUserHandler, configMux.addrOrigin, configMux.schema)))
 
-	router.Handle("/api/v1/product/add", middleware.Context(ctx, productHandler.AddProductHandler))
-	router.Handle("/api/v1/product/get", middleware.Context(ctx, productHandler.GetProductHandler))
-	router.Handle("/api/v1/product/get_list", middleware.Context(ctx, productHandler.GetProductListHandler))
-	router.Handle("/api/v1/product/get_list_of_saler",
-		middleware.Context(ctx, productHandler.GetListProductOfSalerHandler))
-	router.Handle("/api/v1/product/get_list_of_another_saler",
-		middleware.Context(ctx, productHandler.GetListProductOfAnotherSalerHandler))
-	router.Handle("/api/v1/product/update", middleware.Context(ctx, productHandler.UpdateProductHandler))
-	router.Handle("/api/v1/product/close", middleware.Context(ctx, productHandler.CloseProductHandler))
-	router.Handle("/api/v1/product/activate", middleware.Context(ctx, productHandler.ActivateProductHandler))
-	router.Handle("/api/v1/product/delete", middleware.Context(ctx, productHandler.DeleteProductHandler))
+	router.Handle("/api/v1/product/add", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.AddProductHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/get", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.GetProductHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/get_list", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.GetProductListHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/get_list_of_saler", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.GetListProductOfSalerHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/get_list_of_another_saler", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.GetListProductOfAnotherSalerHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/update", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.UpdateProductHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/close", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.CloseProductHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/activate", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.ActivateProductHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/delete", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.DeleteProductHandler, configMux.addrOrigin, configMux.schema)))
 
-	router.Handle("/api/v1/order/add", middleware.Context(ctx, productHandler.AddOrderHandler))
-	router.Handle("/api/v1/order/get_basket", middleware.Context(ctx, productHandler.GetBasketHandler))
-	router.Handle("/api/v1/order/update_count", middleware.Context(ctx, productHandler.UpdateOrderCountHandler))
-	router.Handle("/api/v1/order/update_status", middleware.Context(ctx, productHandler.UpdateOrderStatusHandler))
-	router.Handle("/api/v1/order/buy_full_basket", middleware.Context(ctx, productHandler.BuyFullBasketHandler))
-	router.Handle("/api/v1/order/delete", middleware.Context(ctx, productHandler.DeleteOrderHandler))
+	router.Handle("/api/v1/order/add", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.AddOrderHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/order/get_basket", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/order/update_count", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.UpdateOrderCountHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/order/update_status", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.UpdateOrderStatusHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/order/buy_full_basket", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.BuyFullBasketHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/order/delete", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.DeleteOrderHandler, configMux.addrOrigin, configMux.schema)))
 
-	router.Handle("/api/v1/category/get_full", middleware.Context(ctx, categoryHandler.GetFullCategories))
+	router.Handle("/api/v1/category/get_full", middleware.Context(ctx,
+		middleware.SetupCORS(categoryHandler.GetFullCategories, configMux.addrOrigin, configMux.schema)))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(router, logger))

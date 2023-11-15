@@ -73,12 +73,6 @@ func NewFileHandler(fileService IFileService, logger *zap.SugaredLogger,
 //	@Router      /img/upload [post]
 func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, MaxSizePhotoBytes*MaxCountPhoto)
-	delivery.SetupCORS(w, f.addrOrigin, f.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

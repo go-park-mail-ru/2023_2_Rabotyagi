@@ -409,8 +409,6 @@ paths:
       - fileService
   /logout:
     post:
-      consumes:
-      - application/json
       description: logout in app
       produces:
       - application/json
@@ -998,8 +996,6 @@ paths:
       - product
   /profile/get:
     get:
-      consumes:
-      - application/json
       description: get profile by id
       parameters:
       - description: user id
@@ -1096,8 +1092,6 @@ paths:
       - profile
   /signin:
     get:
-      consumes:
-      - application/json
       description: signin in app
       parameters:
       - description: user email for signin

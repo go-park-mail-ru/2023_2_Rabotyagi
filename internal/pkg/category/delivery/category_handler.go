@@ -1,29 +1,23 @@
 package delivery
 
 import (
+	"net/http"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 type CategoryHandler struct {
-	storage    usecases.ICategoryStorage
-	addrOrigin string
-	schema     string
-	portServer string
-	logger     *zap.SugaredLogger
+	storage usecases.ICategoryStorage
+	logger  *zap.SugaredLogger
 }
 
-func NewCategoryHandler(storage usecases.ICategoryStorage,
-	addrOrigin string, schema string, portServer string, logger *zap.SugaredLogger,
+func NewCategoryHandler(storage usecases.ICategoryStorage, logger *zap.SugaredLogger,
 ) *CategoryHandler {
 	return &CategoryHandler{
-		storage:    storage,
-		addrOrigin: addrOrigin,
-		schema:     schema,
-		portServer: portServer,
-		logger:     logger,
+		storage: storage,
+		logger:  logger,
 	}
 }
 
@@ -39,12 +33,6 @@ func NewCategoryHandler(storage usecases.ICategoryStorage,
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /category/get_full [get]
 func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, c.addrOrigin, c.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

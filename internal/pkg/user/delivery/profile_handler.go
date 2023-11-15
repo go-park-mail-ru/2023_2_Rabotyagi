@@ -18,7 +18,6 @@ import (
 //
 // @Tags profile
 //
-//	@Accept      json
 //	@Produce    json
 //	@Param      id  query uint64 true  "user id"
 //	@Success    200  {object} ProfileResponse
@@ -27,12 +26,6 @@ import (
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /profile/get [get]
 func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, u.addrOrigin, u.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -84,12 +77,6 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router      /profile/update [patch]
 //	@Router      /profile/update [put]
 func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
-	delivery.SetupCORS(w, u.addrOrigin, u.schema)
-
-	if r.Method == http.MethodOptions {
-		return
-	}
-
 	if r.Method != http.MethodPatch && r.Method != http.MethodPut {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
