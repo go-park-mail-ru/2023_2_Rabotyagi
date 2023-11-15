@@ -40,20 +40,16 @@ type IFileService interface {
 
 type FileHandler struct {
 	fileServiceDir string
-	addrOrigin     string
-	schema         string
 	fileService    IFileService
 	logger         *zap.SugaredLogger
 }
 
-func NewFileHandler(fileService IFileService, logger *zap.SugaredLogger,
-	fileServiceDir string, addrOrigin string, schema string,
+func NewFileHandler(fileService IFileService,
+	logger *zap.SugaredLogger, fileServiceDir string,
 ) *FileHandler {
 	return &FileHandler{
 		fileService: fileService, logger: logger,
 		fileServiceDir: fileServiceDir,
-		addrOrigin:     addrOrigin,
-		schema:         schema,
 	}
 }
 

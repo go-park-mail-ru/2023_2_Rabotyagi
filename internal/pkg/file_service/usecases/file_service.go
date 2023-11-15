@@ -16,12 +16,12 @@ import (
 	fileservicerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
 )
 
-var _ IFileStorage = (*fileservicerepo.FileSystemStorage)(nil)
-
 var (
 	ErrCantRead    = myerrors.NewError("Не получилось считать содержимое файла")
 	ErrWrongFormat = myerrors.NewError("Формат файла должен быть png, jpeg")
 )
+
+var _ IFileStorage = (*fileservicerepo.FileSystemStorage)(nil)
 
 type IFileStorage interface {
 	SaveFile(content []byte, fileName string) error
