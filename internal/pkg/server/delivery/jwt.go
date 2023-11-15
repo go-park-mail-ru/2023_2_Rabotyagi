@@ -1,10 +1,10 @@
 package delivery
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 )
 
 func GetUserIDFromCookie(r *http.Request) (uint64, error) {

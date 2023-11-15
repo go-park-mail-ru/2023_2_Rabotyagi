@@ -2,11 +2,11 @@ package delivery
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
 	"net/http"
 	"strconv"
 
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 )
 
 var (
@@ -15,10 +15,6 @@ var (
 	ErrWrongLastID    = myerrors.NewError("Получили некорректный last_id параметр. Он должен быть целым")
 	ErrWrongProductID = myerrors.NewError("Получили некорректный product_id параметр. Он должен быть целым")
 )
-
-func (p *ProductHandler) createURLToProductFromID(productID uint64) string {
-	return fmt.Sprintf("%s%s:%s/api/v1/product/get/%d", productID)
-}
 
 func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {
 	logger, err := my_logger.Get()

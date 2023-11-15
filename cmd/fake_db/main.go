@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/fake_db"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 
 	"github.com/brianvoe/gofakeit/v6"
 )
@@ -17,7 +17,7 @@ func main() {
 
 	configServer := config.New()
 
-	logger, err := usecases.NewLogger([]string{"stdout"}, []string{"stderr"})
+	logger, err := my_logger.New([]string{"stdout"}, []string{"stderr"})
 	if err != nil {
 		fmt.Println(err)
 

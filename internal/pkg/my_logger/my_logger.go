@@ -2,15 +2,16 @@ package my_logger
 
 import (
 	"fmt"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 	"sync"
+
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
 
 	"go.uber.org/zap"
 )
 
 var (
-	logger *zap.SugaredLogger = nil
-	once   sync.Once
+	logger *zap.SugaredLogger //nolint:gochecknoglobals
+	once   sync.Once          //nolint:gochecknoglobals
 
 	ErrNoLogger = myerrors.NewError("Get для отсутствующего логгера")
 )

@@ -1,15 +1,16 @@
 package delivery
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/usecases/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
+
+	"go.uber.org/zap"
 )
 
 const (
