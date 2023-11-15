@@ -219,8 +219,6 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 

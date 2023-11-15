@@ -51,7 +51,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := u.storage.GetUserWithoutPasswordByID(ctx, uint64(userID))
+	user, err := u.storage.GetUserWithoutPasswordByID(ctx, userID)
 	if err != nil {
 		u.logger.Errorf("in GetUserHandler: %+v", err)
 		delivery.HandleErr(w, u.logger, err)
@@ -98,14 +98,20 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	var err error
 
-	userID := delivery.GetUserIDFromCookie(r, u.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, u.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
 
 	userWithoutPassword := &models.UserWithoutPassword{
 		ID: userID,
 	}
 
 	if r.Method == http.MethodPatch {
-		userWithoutPassword, err = userusecases.ValidatePartOfUserWithoutPassword(u.logger, r.Body)
+		userWithoutPassword, err = userusecases.ValidatePartOfUserWithoutPassword(r.Body)
 		if err != nil {
 			u.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
 			delivery.HandleErr(w, u.logger, err)
@@ -113,7 +119,7 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 			return
 		}
 	} else {
-		userWithoutPassword, err = userusecases.ValidateUserWithoutPassword(u.logger, r.Body)
+		userWithoutPassword, err = userusecases.ValidateUserWithoutPassword(r.Body)
 		if err != nil {
 			u.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
 			delivery.HandleErr(w, u.logger, err)

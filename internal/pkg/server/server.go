@@ -44,7 +44,10 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
-	userStorage := userrepo.NewUserStorage(pool, logger)
+	userStorage, err := userrepo.NewUserStorage(pool)
+	if err != nil {
+		return err
+	}
 
 	categoryStorage, err := categoryrepo.NewCategoryStorage(pool)
 	if err != nil {

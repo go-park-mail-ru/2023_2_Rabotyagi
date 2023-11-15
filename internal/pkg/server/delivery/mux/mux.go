@@ -42,7 +42,10 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 
-	userHandler := userdelivery.NewUserHandler(userStorage, configMux.addrOrigin, configMux.schema, logger)
+	userHandler, err := userdelivery.NewUserHandler(userStorage, configMux.addrOrigin, configMux.schema)
+	if err != nil {
+		return nil, err
+	}
 
 	categoryHandler, err := categorydelivery.NewCategoryHandler(categoryStorage,
 		configMux.addrOrigin, configMux.schema, configMux.portServer,

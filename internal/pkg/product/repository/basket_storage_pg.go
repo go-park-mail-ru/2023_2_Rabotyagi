@@ -165,8 +165,6 @@ func (p *ProductStorage) UpdateOrderCount(ctx context.Context, userID uint64, or
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -286,8 +284,6 @@ func (p *ProductStorage) UpdateOrderStatus(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -351,8 +347,6 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -410,8 +404,6 @@ func (p *ProductStorage) BuyFullBasket(ctx context.Context, userID uint64) error
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -449,8 +441,6 @@ func (p *ProductStorage) DeleteOrder(ctx context.Context, orderID uint64, ownerI
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 

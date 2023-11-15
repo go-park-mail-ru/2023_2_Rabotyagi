@@ -33,12 +33,16 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 	ctx := r.Context()
 
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
 
 	orders, err := p.storage.GetOrdersInBasketByUserID(ctx, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -83,16 +87,20 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	ctx := r.Context()
 
-	orderChanges, err := productusecases.ValidateOrderChangesCount(p.logger, r.Body)
+	orderChanges, err := productusecases.ValidateOrderChangesCount(r.Body)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
 
 	err = p.storage.UpdateOrderCount(ctx, userID, orderChanges.ID, orderChanges.Count)
 	if err != nil {
@@ -137,7 +145,7 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	orderChanges, err := productusecases.ValidateOrderChangesStatus(p.logger, r.Body)
+	orderChanges, err := productusecases.ValidateOrderChangesStatus(r.Body)
 	if err != nil {
 		p.logger.Errorln(err)
 
@@ -147,7 +155,13 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 	}
 
 	ctx := r.Context()
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
 
 	err = p.storage.UpdateOrderStatus(ctx, userID, orderChanges.ID, orderChanges.Status)
 	if err != nil {
@@ -194,12 +208,16 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 
 	ctx := r.Context()
 
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
-
-	preOrder, err := productusecases.ValidatePreOrder(p.logger, r.Body)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		p.logger.Errorln(err)
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
+		return
+	}
+
+	preOrder, err := productusecases.ValidatePreOrder(r.Body)
+	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -245,9 +263,15 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 
 	ctx := r.Context()
 
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
-	err := p.storage.BuyFullBasket(ctx, userID)
+		return
+	}
+
+	err = p.storage.BuyFullBasket(ctx, userID)
 	if err != nil {
 		p.logger.Errorln(err)
 
@@ -289,12 +313,16 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	ctx := r.Context()
-	userID := delivery.GetUserIDFromCookie(r, p.logger)
-
-	orderID, err := parseIDFromRequest(r, p.logger)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		p.logger.Errorln(err)
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
+		return
+	}
+
+	orderID, err := parseIDFromRequest(r)
+	if err != nil {
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
 
@@ -303,8 +331,6 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 
 	err = p.storage.DeleteOrder(ctx, orderID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 

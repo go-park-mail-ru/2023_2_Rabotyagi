@@ -28,7 +28,7 @@ compose-db-up:
 	sudo docker-compose -f deployments/docker-compose.yml up -d postgres
 
 compose-db-down:
-	docker compose -f deployments/docker-compose.yml down postgres
+	sudo docker-compose -f deployments/docker-compose.yml down postgres
 
 swag:
 	swag init -ot yaml --parseDependency --parseInternal -g cmd/app/main.go

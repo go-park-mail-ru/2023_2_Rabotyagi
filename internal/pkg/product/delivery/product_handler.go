@@ -74,8 +74,6 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 
 	preProduct, err := usecases.ValidatePreProduct(r.Body)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -83,8 +81,6 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 
 	productID, err := p.storage.AddProduct(ctx, preProduct)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
@@ -141,8 +137,6 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	product, err := p.storage.GetProduct(ctx, productID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrProductNotExist))
 
 		return
@@ -246,8 +240,6 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 
 	productID, err := parseIDFromRequest(r)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest,
 			fmt.Sprintf("%s product id == %v But shoud be integer", delivery.ErrBadRequest, productID)))
 
