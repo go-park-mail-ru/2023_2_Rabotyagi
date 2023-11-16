@@ -1,17 +1,21 @@
 .PHONY: all all-prod
 
 all: compose-db-up compose-frontend-up go-mod-tidy test swag run
+all-down: compose-db-down compose-frontend-down
 all-without-front: compose-db-up go-mod-tidy test swag run
 
 compose-frontend-up:
-	docker-compose -f compose -f docker-compose.yml up -d frontend
+	docker compose -f docker-compose.yml up -d frontend
+
+compose-frontend-down:
+	docker compose -f docker-compose.yml down frontend
 
 # prod
 compose-full-up:
-	docker compose -f docker-compose.yml up --build -d
+	docker compose -f docker-compose.yml up backend postgres pgadmin --build -d
 
 compose-full-down:
-	docker compose -f docker-compose.yml down
+	docker compose -f docker-compose.yml down backend postgres pgadmin
 
 compose-logs:
 	docker compose -f docker-compose.yml logs

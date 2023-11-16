@@ -156,10 +156,11 @@ definitions:
       id:
         type: integer
       name:
-        type: string
+        $ref: '#/definitions/sql.NullString'
       phone:
+        allOf:
+        - $ref: '#/definitions/sql.NullString'
         description: nolint
-        type: string
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse:
     properties:
@@ -224,12 +225,13 @@ definitions:
       email:
         type: string
       name:
-        type: string
+        $ref: '#/definitions/sql.NullString'
       password:
         type: string
       phone:
+        allOf:
+        - $ref: '#/definitions/sql.NullString'
         description: nolint
-        type: string
     type: object
   internal_pkg_category_delivery.CategoryListResponse:
     properties:

@@ -38,8 +38,6 @@ services:
 
   frontend:
     image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
-    depends_on:
-      - backend
     environment:
       - API_URL=http://localhost
       - MOCK=false

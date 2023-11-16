@@ -59,7 +59,8 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	fileHandler := filedelivery.NewFileHandler(fileService, logger, configMux.fileServiceDir)
 
 	router.Handle("/api/v1/img/", fileHandler.DocFileServerHandler(ctx))
-	router.Handle("/api/v1/img/upload", middleware.Context(ctx, http.HandlerFunc(fileHandler.UploadFileHandler)))
+	router.Handle("/api/v1/img/upload", middleware.Context(ctx,
+		middleware.SetupCORS(fileHandler.UploadFileHandler, configMux.addrOrigin, configMux.schema)))
 
 	router.Handle("/api/v1/signup", middleware.Context(ctx,
 		middleware.SetupCORS(userHandler.SignUpHandler, configMux.addrOrigin, configMux.schema)))
