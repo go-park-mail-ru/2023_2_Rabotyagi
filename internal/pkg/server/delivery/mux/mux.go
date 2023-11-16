@@ -13,7 +13,6 @@ import (
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/delivery"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
-	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 
 	"go.uber.org/zap"
 )
@@ -36,13 +35,13 @@ func NewConfigMux(addrOrigin string, schema string, portServer string, fileServi
 	}
 }
 
-func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.IUserStorage,
+func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.IUserService,
 	productStorage productusecases.IProductStorage, categoryStorage categoryusecases.ICategoryStorage,
 	logger *zap.SugaredLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 
-	userHandler, err := userdelivery.NewUserHandler(userStorage)
+	userHandler, err := userdelivery.NewUserHandler(userService)
 	if err != nil {
 		return nil, err
 	}

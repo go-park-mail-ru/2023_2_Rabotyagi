@@ -1,6 +1,9 @@
 package delivery
 
 import (
+	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"io"
 	"net/http"
 	"time"
 
@@ -8,8 +11,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
-
 	"go.uber.org/zap"
 )
 
@@ -17,19 +18,28 @@ const (
 	timeTokenLife = 24 * time.Hour
 )
 
+var _ IUserService = (*userusecases.UserService)(nil)
+
+type IUserService interface {
+	AddUser(ctx context.Context, r io.Reader) (*models.User, error)
+	GetUser(ctx context.Context, email string, password string) (*models.UserWithoutPassword, error)
+	GetUserWithoutPasswordByID(ctx context.Context, userIDStr string) (*models.UserWithoutPassword, error)
+	UpdateUser(ctx context.Context, r io.Reader, isPartialUpdate bool, userID uint64) (*models.UserWithoutPassword, error)
+}
+
 type UserHandler struct {
-	storage userusecases.IUserStorage
+	service IUserService
 	logger  *zap.SugaredLogger
 }
 
-func NewUserHandler(storage userusecases.IUserStorage) (*UserHandler, error) {
+func NewUserHandler(userService IUserService) (*UserHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
 	}
 
 	return &UserHandler{
-		storage: storage,
+		service: userService,
 		logger:  logger,
 	}, nil
 }
@@ -61,22 +71,7 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userWithoutID, err := userusecases.ValidateUserWithoutID(r.Body)
-	if err != nil {
-		delivery.HandleErr(w, u.logger, err)
-
-		return
-	}
-
-	userWithoutID.Password, err = utils.HashPass(userWithoutID.Password)
-	if err != nil {
-		delivery.SendErrResponse(w, u.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
-
-	user, err := u.storage.AddUser(ctx, userWithoutID)
+	user, err := u.service.AddUser(ctx, r.Body)
 	if err != nil {
 		delivery.HandleErr(w, u.logger, err)
 
@@ -128,16 +123,10 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userWithoutID, err := userusecases.ValidateUserCredentials(
-		r.URL.Query().Get("email"), r.URL.Query().Get("password"))
-	if err != nil {
-		u.logger.Errorf("in SignInHandler: %+v\n", err)
-		delivery.HandleErr(w, u.logger, err)
+	email := r.URL.Query().Get("email")
+	password := r.URL.Query().Get("password")
 
-		return
-	}
-
-	user, err := u.storage.GetUser(ctx, userWithoutID.Email, userWithoutID.Password)
+	user, err := u.service.GetUser(ctx, email, password)
 	if err != nil {
 		delivery.HandleErr(w, u.logger, err)
 
