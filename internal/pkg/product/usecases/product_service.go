@@ -7,21 +7,16 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
 	"go.uber.org/zap"
 )
 
-var _ IProductStorage = (*productrepo.ProductStorage)(nil)
+var ErrUserPermissionsChange = myerrors.NewError("Вы не можете изменить чужое объявление")
 
-type IBasketStorage interface {
-	AddOrderInBasket(ctx context.Context, userID uint64, productID uint64, count uint32) (*models.OrderInBasket, error)
-	GetOrdersInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
-	UpdateOrderCount(ctx context.Context, userID uint64, orderID uint64, newCount uint32) error
-	UpdateOrderStatus(ctx context.Context, userID uint64, orderID uint64, newStatus uint8) error
-	BuyFullBasket(ctx context.Context, userID uint64) error
-	DeleteOrder(ctx context.Context, orderID uint64, ownerID uint64) error
-}
+var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 
 type IProductStorage interface {
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error)
@@ -37,12 +32,18 @@ type IProductStorage interface {
 }
 
 type ProductService struct {
+	BasketService
 	storage IProductStorage
 	logger  *zap.SugaredLogger
 }
 
-func NewProductService(productStorage IProductStorage, logger *zap.SugaredLogger) *ProductService {
-	return &ProductService{storage: productStorage, logger: logger}
+func NewProductService(productStorage IProductStorage, basketService BasketService) (*ProductService, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return &ProductService{BasketService: basketService, storage: productStorage, logger: logger}, nil
 }
 
 func (p *ProductService) AddProduct(ctx context.Context, r io.Reader) (uint64, error) {
@@ -100,4 +101,66 @@ func (p *ProductService) GetProductsOfSaler(ctx context.Context,
 	}
 
 	return products, nil
+}
+
+func (p *ProductService) UpdateProduct(ctx context.Context,
+	r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64,
+) error {
+	var preProduct *models.PreProduct
+
+	var err error
+
+	if isPartialUpdate {
+		preProduct, err = ValidatePartOfPreProduct(r)
+		if err != nil {
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+	} else {
+		preProduct, err = ValidatePreProduct(r)
+		if err != nil {
+			return fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+	}
+
+	if preProduct.SalerID != userAuthID {
+		p.logger.Errorln(ErrUserPermissionsChange)
+
+		return fmt.Errorf(myerrors.ErrTemplate, ErrUserPermissionsChange)
+	}
+
+	updateFieldsMap := utils.StructToMap(preProduct)
+
+	err = p.storage.UpdateProduct(ctx, productID, updateFieldsMap)
+	if err != nil {
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductService) CloseProduct(ctx context.Context, productID uint64, userID uint64) error {
+	err := p.storage.CloseProduct(ctx, productID, userID)
+	if err != nil {
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductService) ActivateProduct(ctx context.Context, productID uint64, userID uint64) error {
+	err := p.storage.ActivateProduct(ctx, productID, userID)
+	if err != nil {
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductService) DeleteProduct(ctx context.Context, productID uint64, userID uint64) error {
+	err := p.storage.DeleteProduct(ctx, productID, userID)
+	if err != nil {
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
 }

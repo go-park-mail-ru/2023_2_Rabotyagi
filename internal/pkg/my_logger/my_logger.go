@@ -49,6 +49,8 @@ func New(outputPaths []string, errorOutputPaths []string, options ...zap.Option)
 
 func Get() (*zap.SugaredLogger, error) {
 	if logger == nil {
+		fmt.Println(ErrNoLogger)
+
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrNoLogger)
 	}
 

@@ -11,7 +11,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
 	"go.uber.org/zap"
 )
@@ -21,18 +20,23 @@ var _ IProductService = (*usecases.ProductService)(nil)
 type IProductService interface {
 	AddProduct(ctx context.Context, r io.Reader) (productID uint64, err error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
-	GetProductsList(ctx context.Context, lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
+	GetProductsList(ctx context.Context,
+		lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
 	GetProductsOfSaler(ctx context.Context, lastProductID uint64,
 		count uint64, userID uint64, isMy bool) ([]*models.ProductInFeed, error)
+	UpdateProduct(ctx context.Context, r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64) error
+	CloseProduct(ctx context.Context, productID uint64, userID uint64) error
+	ActivateProduct(ctx context.Context, productID uint64, userID uint64) error
+	DeleteProduct(ctx context.Context, productID uint64, userID uint64) error
+	IBasketService
 }
 
 type ProductHandler struct {
 	service IProductService
-	storage usecases.IProductStorage
 	logger  *zap.SugaredLogger
 }
 
-func NewProductHandler(storage usecases.IProductStorage, productService IProductService) (*ProductHandler, error) {
+func NewProductHandler(productService IProductService) (*ProductHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -40,7 +44,6 @@ func NewProductHandler(storage usecases.IProductStorage, productService IProduct
 
 	return &ProductHandler{
 		service: productService,
-		storage: storage,
 		logger:  logger,
 	}, nil
 }
@@ -291,8 +294,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 
 	productID, err := parseIDFromRequest(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest,
-			fmt.Sprintf("%s product id == %v But shoud be integer", delivery.ErrBadRequest, productID)))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -306,37 +308,12 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	var preProduct *models.PreProduct
-
 	if r.Method == http.MethodPatch {
-		preProduct, err = usecases.ValidatePartOfPreProduct(p.logger, r.Body)
-		if err != nil {
-			p.logger.Errorln(err)
-
-			delivery.HandleErr(w, p.logger, err)
-
-			return
-		}
+		err = p.service.UpdateProduct(ctx, r.Body, true, productID, userID)
 	} else {
-		preProduct, err = usecases.ValidatePreProduct(r.Body)
-		if err != nil {
-			p.logger.Errorln(err)
-
-			delivery.HandleErr(w, p.logger, err)
-
-			return
-		}
+		err = p.service.UpdateProduct(ctx, r.Body, false, productID, userID)
 	}
 
-	if preProduct.SalerID != userID {
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrUserPermissionsChange))
-
-		return
-	}
-
-	updateFieldsMap := utils.StructToMap(preProduct)
-
-	err = p.storage.UpdateProduct(ctx, productID, updateFieldsMap)
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
 
@@ -379,16 +356,14 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 
 	productID, err := parseIDFromRequest(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	err = p.storage.CloseProduct(ctx, productID, userID)
+	err = p.service.CloseProduct(ctx, productID, userID)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -430,25 +405,20 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 
 	productID, err := parseIDFromRequest(r)
 	if err != nil {
-		p.logger.Errorln(err)
-
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	err = p.storage.ActivateProduct(ctx, productID, userID)
+	err = p.service.ActivateProduct(ctx, productID, userID)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	delivery.SendOkResponse(w, p.logger,
 		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
-
 	p.logger.Infof("in ActivateProductHandler: activated product id=%d", productID)
 }
 
@@ -484,15 +454,12 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 
 	productID, err := parseIDFromRequest(r)
 	if err != nil {
-		p.logger.Errorln(err)
-
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	err = p.storage.DeleteProduct(ctx, productID, userID)
+	err = p.service.DeleteProduct(ctx, productID, userID)
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
 

@@ -10,7 +10,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 
 	"github.com/asaskevich/govalidator"
-	"go.uber.org/zap"
 )
 
 var (
@@ -21,12 +20,12 @@ var (
 )
 
 func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
-	decoder := json.NewDecoder(r)
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
 	}
 
+	decoder := json.NewDecoder(r)
 	preProduct := &models.PreProduct{
 		Delivery: false,
 		SafeDeal: false,
@@ -40,40 +39,25 @@ func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
 	preProduct.Trim()
 
 	_, err = govalidator.ValidateStruct(preProduct)
-
-	return preProduct, err //nolint:wrapcheck
-}
-
-func ValidatePreProduct(r io.Reader) (*models.PreProduct, error) {
-	logger, err := my_logger.Get()
-	if err != nil {
-		return nil, err
-	}
-
-	preProduct, err := validatePreProduct(r)
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, myerrors.NewError(err.Error())
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
-
-	// TODO remove hardcode
-	var resultImages []models.Image
-
-	for _, image := range preProduct.Images {
-		if image.URL == "" {
-			continue
-		}
-
-		resultImages = append(resultImages, image)
-	}
-
-	preProduct.Images = resultImages
 
 	return preProduct, nil
 }
 
-func ValidatePartOfPreProduct(logger *zap.SugaredLogger, r io.Reader) (*models.PreProduct, error) {
+func ValidatePreProduct(r io.Reader) (*models.PreProduct, error) {
+	preProduct, err := validatePreProduct(r)
+	if err != nil {
+		return nil, myerrors.NewError(err.Error())
+	}
+
+	return preProduct, nil
+}
+
+func ValidatePartOfPreProduct(r io.Reader) (*models.PreProduct, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
@@ -116,7 +100,7 @@ func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 
 	_, err = govalidator.ValidateStruct(preOrder)
 	if err != nil {
-		logger.Errorf("in ValidatePreOrder: %+v\n", err)
+		logger.Errorln(err)
 
 		return nil, myerrors.NewError(err.Error())
 	}
@@ -140,11 +124,21 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 	}
 
 	_, err = govalidator.ValidateStruct(orderChanges)
+	if err != nil {
+		logger.Errorln(err)
 
-	return orderChanges, err //nolint:wrapcheck
+		return nil, myerrors.NewError(err.Error())
+	}
+
+	return orderChanges, nil
 }
 
 func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
+
 	orderChanges, err := validateOrderChanges(r)
 	if orderChanges == nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -155,7 +149,10 @@ func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
 		errCount := govalidator.ErrorByField(err, "count")
 
 		if errID != "" || errCount != "" {
-			return nil, myerrors.NewError("%s\n%s", errCount, errID)
+			errInner := myerrors.NewError("%s\n%s", errCount, errID)
+			logger.Errorln(errInner)
+
+			return nil, errInner
 		}
 	}
 
@@ -163,6 +160,11 @@ func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
 }
 
 func ValidateOrderChangesStatus(r io.Reader) (*models.OrderChanges, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
+
 	orderChanges, err := validateOrderChanges(r)
 	if orderChanges == nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -173,12 +175,18 @@ func ValidateOrderChangesStatus(r io.Reader) (*models.OrderChanges, error) {
 		errID := govalidator.ErrorByField(err, "id")
 
 		if errID != "" || errStatus != "" {
-			return nil, myerrors.NewError("%s\n%s", errStatus, errID)
+			errInner := myerrors.NewError("%s\n%s", errStatus, errID)
+			logger.Errorln(errInner)
+
+			return nil, errInner
 		}
 	}
 
 	if orderChanges.Status > models.OrderStatusClosed {
-		return nil, ErrNotExistingStatus
+		errInner := fmt.Errorf(myerrors.ErrTemplate, ErrNotExistingStatus)
+		logger.Errorln(errInner)
+
+		return nil, errInner
 	}
 
 	return orderChanges, nil

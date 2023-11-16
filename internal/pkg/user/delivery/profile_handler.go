@@ -78,9 +78,9 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	var updatedUser *models.UserWithoutPassword
 	if r.Method == http.MethodPatch {
-		updatedUser, err = u.service.UpdateUser(ctx, r.Body, true)
+		updatedUser, err = u.service.UpdateUser(ctx, r.Body, true, userID)
 	} else {
-		updatedUser, err = u.service.UpdateUser(ctx, r.Body, false)
+		updatedUser, err = u.service.UpdateUser(ctx, r.Body, false, userID)
 	}
 
 	if err != nil {
