@@ -18,15 +18,6 @@ var ErrUserPermissionsChange = myerrors.NewError("Вы не можете изм�
 
 var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 
-type IBasketStorage interface {
-	AddOrderInBasket(ctx context.Context, userID uint64, productID uint64, count uint32) (*models.OrderInBasket, error)
-	GetOrdersInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
-	UpdateOrderCount(ctx context.Context, userID uint64, orderID uint64, newCount uint32) error
-	UpdateOrderStatus(ctx context.Context, userID uint64, orderID uint64, newStatus uint8) error
-	BuyFullBasket(ctx context.Context, userID uint64) error
-	DeleteOrder(ctx context.Context, orderID uint64, ownerID uint64) error
-}
-
 type IProductStorage interface {
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
@@ -41,17 +32,18 @@ type IProductStorage interface {
 }
 
 type ProductService struct {
+	BasketService
 	storage IProductStorage
 	logger  *zap.SugaredLogger
 }
 
-func NewProductService(productStorage IProductStorage) (*ProductService, error) {
+func NewProductService(productStorage IProductStorage, basketService BasketService) (*ProductService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return &ProductService{storage: productStorage, logger: logger}, nil
+	return &ProductService{BasketService: basketService, storage: productStorage, logger: logger}, nil
 }
 
 func (p *ProductService) AddProduct(ctx context.Context, r io.Reader) (uint64, error) {

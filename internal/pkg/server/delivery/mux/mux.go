@@ -11,7 +11,6 @@ import (
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/middleware"
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/delivery"
-	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 
@@ -37,7 +36,7 @@ func NewConfigMux(addrOrigin string, schema string, portServer string, fileServi
 }
 
 func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.IUserStorage,
-	productStorage productusecases.IProductStorage, categoryStorage categoryusecases.ICategoryStorage,
+	productService productdelivery.IProductService, categoryStorage categoryusecases.ICategoryStorage,
 	logger *zap.SugaredLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
@@ -52,7 +51,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userStorage userusecases.
 		return nil, err
 	}
 
-	productHandler, err := productdelivery.NewProductHandler(productStorage)
+	productHandler, err := productdelivery.NewProductHandler(productService)
 	if err != nil {
 		return nil, err
 	}

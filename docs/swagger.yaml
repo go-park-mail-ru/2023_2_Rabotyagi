@@ -803,7 +803,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: get products by count and last_id return new products
+      description: get products by count and last_id return old products
       parameters:
       - description: count products
         in: query

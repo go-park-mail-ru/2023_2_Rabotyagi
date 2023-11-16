@@ -1,162 +1,24 @@
 package delivery
 
 import (
+	"context"
+	"io"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 )
 
-// GetBasketHandler godoc
-//
-//	@Summary    get basket of orders
-//	@Description  get basket of orders by user id from cookie\jwt token
-//	@Tags order
-//	@Accept     json
-//	@Produce    json
-//	@Success    200  {object} OrderListResponse
-//	@Failure    405  {string} string
-//	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /order/get_basket [get]
-func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+var _ IBasketService = (*productusecases.BasketService)(nil)
 
-		return
-	}
-
-	ctx := r.Context()
-
-	userID, err := delivery.GetUserIDFromCookie(r)
-	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
-	orders, err := p.storage.GetOrdersInBasketByUserID(ctx, userID)
-	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
-
-		return
-	}
-
-	for _, order := range orders {
-		order.Sanitize()
-	}
-
-	delivery.SendOkResponse(w, p.logger, NewOrderListResponse(delivery.StatusResponseSuccessful, orders))
-	p.logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", orders)
-}
-
-// UpdateOrderCountHandler godoc
-//
-//	@Summary    update order count
-//	@Description  update order count using user id from cookie\jwt token
-//	@Tags order
-//	@Accept      json
-//	@Produce    json
-//
-// @Param orderChanges  body internal_models.OrderChanges true  "order data for updating use only id and count"
-//
-//	@Success    200  {object} delivery.Response
-//	@Failure    405  {string} string
-//	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /order/update_count [patch]
-func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPatch {
-		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
-
-		return
-	}
-
-	ctx := r.Context()
-
-	orderChanges, err := productusecases.ValidateOrderChangesCount(r.Body)
-	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
-	userID, err := delivery.GetUserIDFromCookie(r)
-	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
-	err = p.storage.UpdateOrderCount(ctx, userID, orderChanges.ID, orderChanges.Count)
-	if err != nil {
-		p.logger.Errorln(err)
-
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
-	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateCountOrder))
-	p.logger.Infof("in UpdateOrderCountHandler: updated order count=%d for order id=%d for user id=%d\n",
-		orderChanges.Count, orderChanges.ID, userID)
-}
-
-// UpdateOrderStatusHandler godoc
-//
-//	@Summary    update order status
-//	@Description  update order status using user id from cookie\jwt token
-//	@Tags order
-//	@Accept      json
-//	@Produce    json
-//
-// @Param orderChanges  body internal_models.OrderChanges true  "order data for updating use only id and status"
-//
-//	@Success    200  {object} delivery.Response
-//	@Failure    405  {string} string
-//	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /order/update_status [patch]
-func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPatch {
-		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
-
-		return
-	}
-
-	orderChanges, err := productusecases.ValidateOrderChangesStatus(r.Body)
-	if err != nil {
-		p.logger.Errorln(err)
-
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
-	ctx := r.Context()
-
-	userID, err := delivery.GetUserIDFromCookie(r)
-	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
-	err = p.storage.UpdateOrderStatus(ctx, userID, orderChanges.ID, orderChanges.Status)
-	if err != nil {
-		p.logger.Errorln(err)
-
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
-	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateStatusOrder))
-	p.logger.Infof("in UpdateOrderStatusHandler: updated order id=%d with status=%d for user id=%d\n",
-		orderChanges.ID, orderChanges.Status, userID)
+type IBasketService interface {
+	AddOrder(ctx context.Context, r io.Reader, userID uint64) (*models.OrderInBasket, error)
+	GetOrdersByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
+	UpdateOrderCount(ctx context.Context, r io.Reader, userID uint64) error
+	UpdateOrderStatus(ctx context.Context, r io.Reader, userID uint64) error
+	BuyFullBasket(ctx context.Context, userID uint64) error
+	DeleteOrder(ctx context.Context, orderID uint64, ownerID uint64) error
 }
 
 // AddOrderHandler godoc
@@ -190,24 +52,140 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	preOrder, err := productusecases.ValidatePreOrder(r.Body)
+	orderInBasket, err := p.service.AddOrder(ctx, r.Body, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
-	orderInBasket, err := p.storage.AddOrderInBasket(ctx, userID, preOrder.ProductID, preOrder.Count)
-	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	delivery.SendOkResponse(w, p.logger, NewOrderResponse(delivery.StatusResponseSuccessful, orderInBasket))
-	p.logger.Infof("in AddOrderHandler: add order on productID=%d for userID=%d\n", preOrder.ProductID, userID)
+	p.logger.Infof("in AddOrderHandler: add order orderID=%d for userID=%d\n", orderInBasket.ID, userID)
+}
+
+// GetBasketHandler godoc
+//
+//	@Summary    get basket of orders
+//	@Description  get basket of orders by user id from cookie\jwt token
+//	@Tags order
+//	@Accept     json
+//	@Produce    json
+//	@Success    200  {object} OrderListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /order/get_basket [get]
+func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
+	orders, err := p.service.GetOrdersByUserID(ctx, userID)
+	if err != nil {
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
+	delivery.SendOkResponse(w, p.logger, NewOrderListResponse(delivery.StatusResponseSuccessful, orders))
+	p.logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", orders)
+}
+
+// UpdateOrderCountHandler godoc
+//
+//	@Summary    update order count
+//	@Description  update order count using user id from cookie\jwt token
+//	@Tags order
+//	@Accept      json
+//	@Produce    json
+//
+// @Param orderChanges  body internal_models.OrderChanges true  "order data for updating use only id and count"
+//
+//	@Success    200  {object} delivery.Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /order/update_count [patch]
+func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPatch {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
+	err = p.service.UpdateOrderCount(ctx, r.Body, userID)
+	if err != nil {
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
+	delivery.SendOkResponse(w, p.logger,
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateCountOrder))
+	p.logger.Infof("in UpdateOrderCountHandler: updated order count for user id=%d\n", userID)
+}
+
+// UpdateOrderStatusHandler godoc
+//
+//	@Summary    update order status
+//	@Description  update order status using user id from cookie\jwt token
+//	@Tags order
+//	@Accept      json
+//	@Produce    json
+//
+// @Param orderChanges  body internal_models.OrderChanges true  "order data for updating use only id and status"
+//
+//	@Success    200  {object} delivery.Response
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /order/update_status [patch]
+func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPatch {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
+	err = p.service.UpdateOrderStatus(ctx, r.Body, userID)
+	if err != nil {
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
+	delivery.SendOkResponse(w, p.logger,
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateStatusOrder))
+	p.logger.Infof("in UpdateOrderStatusHandler: updated order status for user id=%d\n", userID)
 }
 
 // BuyFullBasketHandler godoc
@@ -238,10 +216,8 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = p.storage.BuyFullBasket(ctx, userID)
+	err = p.service.BuyFullBasket(ctx, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		delivery.HandleErr(w, p.logger, err)
 
 		return
@@ -284,16 +260,14 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 
 	orderID, err := parseIDFromRequest(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrBadRequest, ErrWrongProductID.Error()))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	err = p.storage.DeleteOrder(ctx, orderID, userID)
+	err = p.service.DeleteOrder(ctx, orderID, userID)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}

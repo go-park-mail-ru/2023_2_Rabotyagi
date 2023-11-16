@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"net/http"
 	"strings"
 	"time"
@@ -44,6 +45,16 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
+	basketService, err := usecases.NewBasketService(productStorage)
+	if err != nil {
+		return err
+	}
+
+	productService, err := usecases.NewProductService(productStorage, *basketService)
+	if err != nil {
+		return err
+	}
+
 	userStorage, err := userrepo.NewUserStorage(pool)
 	if err != nil {
 		return err
@@ -56,7 +67,7 @@ func (s *Server) Run(config *config.Config) error {
 
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
 		config.Schema, config.PortServer, config.FileServiceDir),
-		userStorage, productStorage, categoryStorage, logger)
+		userStorage, productService, categoryStorage, logger)
 	if err != nil {
 		return err
 	}

@@ -17,8 +17,6 @@ import (
 
 var _ IProductService = (*usecases.ProductService)(nil)
 
-type IBasketService interface{}
-
 type IProductService interface {
 	AddProduct(ctx context.Context, r io.Reader) (productID uint64, err error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
@@ -35,11 +33,10 @@ type IProductService interface {
 
 type ProductHandler struct {
 	service IProductService
-	storage usecases.IProductStorage
 	logger  *zap.SugaredLogger
 }
 
-func NewProductHandler(storage usecases.IProductStorage, productService IProductService) (*ProductHandler, error) {
+func NewProductHandler(productService IProductService) (*ProductHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -47,7 +44,6 @@ func NewProductHandler(storage usecases.IProductStorage, productService IProduct
 
 	return &ProductHandler{
 		service: productService,
-		storage: storage,
 		logger:  logger,
 	}, nil
 }
