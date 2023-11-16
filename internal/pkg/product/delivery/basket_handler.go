@@ -30,8 +30,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -85,8 +84,7 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -138,10 +136,10 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 	}
 
 	ctx := r.Context()
+
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -187,8 +185,7 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -236,8 +233,7 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -278,10 +274,10 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	ctx := r.Context()
+
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}

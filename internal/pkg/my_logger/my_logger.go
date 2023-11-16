@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 
 	"go.uber.org/zap"
 )
@@ -13,11 +13,15 @@ var (
 	logger *zap.SugaredLogger //nolint:gochecknoglobals
 	once   sync.Once          //nolint:gochecknoglobals
 
-	ErrNoLogger = myerrors.NewError("Get для отсутствующего логгера")
+	ErrNoLogger = fmt.Errorf("my_logger.Get для отсутствующего логгера")
 )
 
 func NewNop() *zap.SugaredLogger {
-	return zap.NewNop().Sugar()
+	once.Do(func() {
+		logger = zap.NewNop().Sugar()
+	})
+
+	return logger
 }
 
 func New(outputPaths []string, errorOutputPaths []string, options ...zap.Option) (*zap.SugaredLogger, error) {

@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"encoding/json"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -20,6 +21,8 @@ const (
 	ErrInternalServer = "Ошибка на сервере"
 	ErrBadRequest     = "Некорректный запрос"
 )
+
+var ErrCookieNotPresented = myerrors.NewError("Должна быть выставлена cookie, а её нет")
 
 const (
 	CookieAuthName = "access_token"

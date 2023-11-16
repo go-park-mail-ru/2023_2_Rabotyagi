@@ -89,8 +89,7 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, u.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}

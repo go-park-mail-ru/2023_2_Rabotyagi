@@ -2,6 +2,7 @@ package jwt_test
 
 import (
 	"errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"reflect"
 	"testing"
 
@@ -11,6 +12,8 @@ import (
 //nolint:funlen
 func TestGenerateJwtToken(t *testing.T) {
 	t.Parallel()
+
+	my_logger.NewNop()
 
 	type TestCase struct {
 		name                string
@@ -55,7 +58,7 @@ func TestGenerateJwtToken(t *testing.T) {
 			name:                "test nil UserJwtPayload",
 			inputUserJwtPayload: nil,
 			expectedJwt:         "",
-			expectedError:       jwt.ErrNilToken,
+			expectedError:       jwt.ErrInvalidToken,
 		},
 	}
 
@@ -80,6 +83,8 @@ func TestGenerateJwtToken(t *testing.T) {
 //nolint:funlen
 func TestNewUserJwtPayload(t *testing.T) {
 	t.Parallel()
+
+	my_logger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -122,7 +127,7 @@ func TestNewUserJwtPayload(t *testing.T) {
 			name:                   "test parsing invalid token",
 			inputRawJwt:            "",
 			expectedUserJwtPayload: nil,
-			expectedError:          jwt.ErrParseToken,
+			expectedError:          jwt.ErrInvalidToken,
 		},
 	}
 

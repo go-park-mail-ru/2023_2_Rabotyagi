@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 )
 
@@ -19,7 +19,7 @@ var (
 func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	countStr := r.URL.Query().Get("count")
@@ -49,7 +49,7 @@ func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {
 func parseSalerIDCountLastIDFromRequest(r *http.Request) (uint64, uint64, uint64, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return 0, 0, 0, err
+		return 0, 0, 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	salerIDStr := r.URL.Query().Get("saler_id")
@@ -90,6 +90,8 @@ func parseSalerIDCountLastIDFromRequest(r *http.Request) (uint64, uint64, uint64
 func parseIDFromRequest(r *http.Request) (uint64, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
+		fmt.Println("in parseIDFromRequest: ", err)
+
 		return 0, err
 	}
 

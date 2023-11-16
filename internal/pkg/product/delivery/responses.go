@@ -5,8 +5,6 @@ import (
 )
 
 const (
-	ResponseSuccessfulAddProduct        = "Объявление успешно добавлено"
-	ResponseSuccessfulAddOrder          = "Заказ успешно добавлен"
 	ResponseSuccessfulUpdateCountOrder  = "Успешно изменено количество заказа"
 	ResponseSuccessfulUpdateStatusOrder = "Успешно изменен статус заказа"
 	ResponseSuccessfulBuyFullBasket     = "Успешная покупка всего из корзины"
@@ -15,7 +13,6 @@ const (
 
 	ErrProductNotExist       = "Такое объявление не существует"
 	ErrUserPermissionsChange = "Вы не можете изменить чужое объявление"
-	ErrNoSuchCountOfProduct  = "not enough products in storage"
 )
 
 type ProductResponse struct {

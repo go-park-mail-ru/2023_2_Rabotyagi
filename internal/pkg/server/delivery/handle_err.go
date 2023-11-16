@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 )
 
 // HandleErr this function handle err. If err is myerror.

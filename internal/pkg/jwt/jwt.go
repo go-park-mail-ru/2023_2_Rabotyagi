@@ -3,7 +3,8 @@ package jwt
 import (
 	"fmt"
 
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/errors"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -14,7 +15,6 @@ var (
 	ErrNilToken           = myerrors.NewError("Получили токен = nil")
 	ErrWrongSigningMethod = myerrors.NewError("Неожиданный signing метод ")
 	ErrInvalidToken       = myerrors.NewError("Некорректный токен")
-	ErrParseToken         = myerrors.NewError("Ошибка парсинга токена")
 )
 
 type UserJwtPayload struct {
@@ -23,16 +23,25 @@ type UserJwtPayload struct {
 	Email  string
 }
 
-func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { //nolint:cyclop
+func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
 	tokenDuplicity, err := jwt.Parse(rawJwt, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("method == %+v %w", token.Header["alg"], ErrWrongSigningMethod)
+			logger.Errorf("method == %+v %w", token.Header["alg"], ErrWrongSigningMethod)
+
+			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
 		}
 
 		return secret, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("%s %w", err.Error(), ErrParseToken)
+		logger.Errorf("%s", err.Error())
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
 	}
 
 	if claims, ok := tokenDuplicity.Claims.(jwt.MapClaims); ok && tokenDuplicity.Valid {
@@ -41,7 +50,9 @@ func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { 
 		interfaceEmail, ok3 := claims["email"]
 
 		if !(ok1 && ok2 && ok3) {
-			return nil, fmt.Errorf("error with claims: %+v %w", claims, ErrInvalidToken)
+			logger.Errorf("error with claims: %+v", claims)
+
+			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
 		}
 
 		userID, ok1 := interfaceUserID.(float64)
@@ -49,7 +60,9 @@ func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) { 
 		email, ok3 := interfaceEmail.(string)
 
 		if !(ok1 && ok2 && ok3) {
-			return nil, fmt.Errorf("error with casting claims: %+v %w", claims, ErrInvalidToken)
+			logger.Errorf("error with casting claims: %+v", claims)
+
+			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
 		}
 
 		return &UserJwtPayload{UserID: uint64(userID), Expire: int64(expire), Email: email}, nil
@@ -69,15 +82,24 @@ func (u *UserJwtPayload) getMapClaims() jwt.MapClaims {
 }
 
 func GenerateJwtToken(userToken *UserJwtPayload, secret []byte) (string, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return "", err //nolint:wrapcheck
+	}
+
 	if userToken == nil {
-		return "", fmt.Errorf(myerrors.ErrTemplate, ErrNilToken)
+		logger.Errorln(ErrNilToken)
+
+		return "", fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, userToken.getMapClaims())
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		return "", fmt.Errorf(myerrors.ErrTemplate, err)
+		logger.Errorln(err)
+
+		return "", fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
 	}
 
 	return tokenString, nil

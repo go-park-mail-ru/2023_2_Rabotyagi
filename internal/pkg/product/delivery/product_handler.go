@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"fmt"
+	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
@@ -21,7 +22,7 @@ type ProductHandler struct {
 func NewProductHandler(storage usecases.IProductStorage) (*ProductHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return &ProductHandler{
@@ -101,8 +102,7 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger, delivery.NewErrResponse(delivery.StatusErrBadRequest,
-			fmt.Sprintf("%s user id == %v But shoud be integer", delivery.ErrBadRequest, userID)))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -162,8 +162,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -218,8 +217,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -294,10 +292,10 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 	}
 
 	ctx := r.Context()
+
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -389,10 +387,10 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	ctx := r.Context()
+
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -440,10 +438,10 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 	}
 
 	ctx := r.Context()
+
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -494,10 +492,10 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	ctx := r.Context()
+
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.SendErrResponse(w, p.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
