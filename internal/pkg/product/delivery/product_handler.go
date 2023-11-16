@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -109,9 +110,13 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		if errors.Is(err, delivery.ErrCookieNotPresented) {
+			userID = 0
+		} else {
+			delivery.HandleErr(w, p.logger, err)
 
-		return
+			return
+		}
 	}
 
 	productID, err := parseIDFromRequest(r)
@@ -164,9 +169,13 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		if errors.Is(err, delivery.ErrCookieNotPresented) {
+			userID = 0
+		} else {
+			delivery.HandleErr(w, p.logger, err)
 
-		return
+			return
+		}
 	}
 
 	products, err := p.service.GetProductsList(ctx, lastID, count, userID)
