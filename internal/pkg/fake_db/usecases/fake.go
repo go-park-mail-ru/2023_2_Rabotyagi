@@ -18,9 +18,9 @@ func FakeUserWihtoutID(index int) (*models.UserWithoutID, error) {
 
 	var err error
 
-	user.Name = gofakeit.Name()
+	user.Name = sql.NullString{Valid: true, String: gofakeit.Name()}
 	user.Email = gofakeit.Email() + strconv.Itoa(index)
-	user.Phone = strconv.Itoa(gofakeit.Number(1, 8999000000) + index) //nolint:gomnd
+	user.Phone = sql.NullString{Valid: true, String: strconv.Itoa(gofakeit.Number(1, 8999000000) + index)}
 	user.Birthday = sql.NullTime{Valid: true, Time: gofakeit.Date()}
 	user.Password = gofakeit.Password(true, true, true, true, true, 16) //nolint:gomnd
 
