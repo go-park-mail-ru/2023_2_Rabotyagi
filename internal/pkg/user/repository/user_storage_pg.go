@@ -183,15 +183,9 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 
 	var err error
 
-	//if !preUser.Birthday.Valid || preUser.Birthday.Time.IsZero() {
 	SQLCreateUser = `INSERT INTO public."user" (email, password) VALUES ($1, $2);`
 	_, err = tx.Exec(ctx, SQLCreateUser,
 		preUser.Email, preUser.Password)
-	//} else {
-	//	SQLCreateUser = `INSERT INTO public."user" (email, phone, name, password, birthday) VALUES ($1, $2, $3, $4, $5);`
-	//	_, err = tx.Exec(ctx, SQLCreateUser,
-	//		preUser.Email, preUser.Phone, preUser.Name, preUser.Password, preUser.Birthday)
-	//}
 
 	if err != nil {
 		u.logger.Errorf("in createUser: preUser=%+v err=%+v", preUser, err)
@@ -273,15 +267,6 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 			return ErrEmailBusy
 		}
 
-		//phoneBusy, err := u.isPhoneBusy(ctx, tx, preUser.Phone)
-		//if err != nil {
-		//	return fmt.Errorf(myerrors.ErrTemplate, err)
-		//}
-
-		//if phoneBusy {
-		//	return ErrPhoneBusy
-		//}
-
 		err = u.createUser(ctx, tx, preUser)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
@@ -301,10 +286,7 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 	}
 
 	user.Email = preUser.Email
-	//user.Phone = preUser.Phone
-	//user.Name = preUser.Name
 	user.Password = preUser.Password
-	//user.Birthday = preUser.Birthday
 
 	return &user, nil
 }
