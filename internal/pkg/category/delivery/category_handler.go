@@ -1,6 +1,8 @@
 package delivery
 
 import (
+	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
@@ -10,19 +12,25 @@ import (
 	"go.uber.org/zap"
 )
 
+var _ ICategoryService = (*usecases.CategoryService)(nil)
+
+type ICategoryService interface {
+	GetFullCategories(ctx context.Context) ([]*models.Category, error)
+}
+
 type CategoryHandler struct {
-	storage usecases.ICategoryStorage
+	service ICategoryService
 	logger  *zap.SugaredLogger
 }
 
-func NewCategoryHandler(storage usecases.ICategoryStorage) (*CategoryHandler, error) {
+func NewCategoryHandler(service ICategoryService) (*CategoryHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
 	}
 
 	return &CategoryHandler{
-		storage: storage,
+		service: service,
 		logger:  logger,
 	}, nil
 }
@@ -47,16 +55,12 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 
 	ctx := r.Context()
 
-	categories, err := c.storage.GetFullCategories(ctx)
+	categories, err := c.service.GetFullCategories(ctx)
 	if err != nil {
 		delivery.SendErrResponse(w, c.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
 
 		return
-	}
-
-	for _, order := range categories {
-		order.Sanitize()
 	}
 
 	delivery.SendOkResponse(w, c.logger, NewCategoryListResponse(delivery.StatusResponseSuccessful, categories))

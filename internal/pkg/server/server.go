@@ -2,7 +2,9 @@ package server
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
+	categoryusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
+	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
+	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 	"net/http"
 	"strings"
 	"time"
@@ -45,12 +47,12 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
-	basketService, err := usecases.NewBasketService(productStorage)
+	basketService, err := productusecases.NewBasketService(productStorage)
 	if err != nil {
 		return err
 	}
 
-	productService, err := usecases.NewProductService(productStorage, *basketService)
+	productService, err := productusecases.NewProductService(productStorage, *basketService)
 	if err != nil {
 		return err
 	}
@@ -60,14 +62,24 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
+	userService, err := userusecases.NewUserService(userStorage)
+	if err != nil {
+		return err
+	}
+
 	categoryStorage, err := categoryrepo.NewCategoryStorage(pool)
+	if err != nil {
+		return err
+	}
+
+	categoryService, err := categoryusecases.NewCategoryService(categoryStorage)
 	if err != nil {
 		return err
 	}
 
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
 		config.Schema, config.PortServer, config.FileServiceDir),
-		userStorage, productService, categoryStorage, logger)
+		userService, productService, categoryService, logger)
 	if err != nil {
 		return err
 	}

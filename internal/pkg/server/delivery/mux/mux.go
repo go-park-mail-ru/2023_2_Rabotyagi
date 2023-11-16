@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	categorydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/delivery"
-	categoryusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
 	filedelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/delivery"
 	filerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
@@ -35,7 +34,7 @@ func NewConfigMux(addrOrigin string, schema string, portServer string, fileServi
 }
 
 func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.IUserService,
-	productService productdelivery.IProductService, categoryStorage categoryusecases.ICategoryStorage,
+	productService productdelivery.IProductService, categoryService categorydelivery.ICategoryService,
 	logger *zap.SugaredLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
@@ -45,7 +44,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		return nil, err
 	}
 
-	categoryHandler, err := categorydelivery.NewCategoryHandler(categoryStorage)
+	categoryHandler, err := categorydelivery.NewCategoryHandler(categoryService)
 	if err != nil {
 		return nil, err
 	}
