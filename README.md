@@ -57,8 +57,13 @@ make refill-db-docker
 
 1. Запускаем сразу все
 ```shell
-make
+make all
 ```
+### Все без фронта 
+```shell
+make all-without-front
+```
+
 ### Если нужно накатить миграции
 ```shell
 make migrate-up

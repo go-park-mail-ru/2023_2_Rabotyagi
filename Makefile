@@ -1,6 +1,10 @@
 .PHONY: all all-prod
 
-all: compose-db-up go-mod-tidy test swag run
+all: compose-db-up compose-frontend-up go-mod-tidy test swag run
+all-without-front: compose-db-up go-mod-tidy test swag run
+
+compose-frontend-up:
+	docker-compose -f compose -f docker-compose.yml up -d frontend
 
 # prod
 compose-full-up:

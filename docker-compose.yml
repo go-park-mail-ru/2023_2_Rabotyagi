@@ -36,6 +36,18 @@ services:
     volumes:
       - imgs:/var/backend/static/img
 
+  frontend:
+    image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
+    depends_on:
+      - backend
+    environment:
+      - API_URL=http://localhost
+      - MOCK=false
+      - NODE_ENV=development
+    ports:
+      - 3000:3000
+    entrypoint: npm run dev-linux
+
 volumes:
   postgres:
   pgadmin:
