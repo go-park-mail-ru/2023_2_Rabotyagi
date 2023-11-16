@@ -38,6 +38,7 @@ func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {
 	lastID, err := strconv.ParseUint(lastIDStr, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("%w last_id=%s", ErrWrongLastID, lastIDStr)
+
 		logger.Errorln(err)
 
 		return 0, 0, err
@@ -79,6 +80,7 @@ func parseSalerIDCountLastIDFromRequest(r *http.Request) (uint64, uint64, uint64
 	lastID, err := strconv.ParseUint(lastIDStr, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("%w last_id=%s", ErrWrongLastID, lastIDStr)
+
 		logger.Errorln(err)
 
 		return 0, 0, 0, err
@@ -90,9 +92,7 @@ func parseSalerIDCountLastIDFromRequest(r *http.Request) (uint64, uint64, uint64
 func parseIDFromRequest(r *http.Request) (uint64, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		fmt.Println("in parseIDFromRequest: ", err)
-
-		return 0, err
+		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	IDStr := r.URL.Query().Get("id")

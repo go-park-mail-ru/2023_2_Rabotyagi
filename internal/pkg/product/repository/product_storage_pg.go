@@ -50,6 +50,10 @@ func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 
 	imagesRows, err := tx.Query(ctx, SQLSelectImages, productID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return images, nil
+		}
+
 		p.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -109,7 +113,7 @@ func (p *ProductStorage) selectCountFavouritesByProductID(ctx context.Context,
 	CountFavouritesRow := tx.QueryRow(ctx, SQLCountFavourites, productID)
 	if err := CountFavouritesRow.Scan(&favouritesCount); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return 0, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
+			return 0, nil
 		}
 
 		p.logger.Errorln(err)
@@ -155,22 +159,16 @@ func (p *ProductStorage) getProductAddition(ctx context.Context,
 
 	images, err := p.selectImagesByProductID(ctx, tx, productID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	favouritesCount, err := p.selectCountFavouritesByProductID(ctx, tx, productID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	inFavouriteProduct, err := p.selectIsUserFavouriteProduct(ctx, tx, productID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -186,15 +184,11 @@ func (p *ProductStorage) getProduct(ctx context.Context,
 ) (*models.Product, error) {
 	product, err := p.selectProductByID(ctx, tx, productID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	productAdditionInner, err := p.getProductAddition(ctx, tx, productID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
-
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
@@ -293,7 +287,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	return slProduct, nil
 }
 
-func (p *ProductStorage) GetNewProducts(ctx context.Context,
+func (p *ProductStorage) GetOldProducts(ctx context.Context,
 	lastProductID uint64, count uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
 	var slProduct []*models.ProductInFeed
@@ -302,7 +296,7 @@ func (p *ProductStorage) GetNewProducts(ctx context.Context,
 		whereClause := fmt.Sprintf("id > %d AND is_active = true AND available_count > 0", lastProductID)
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
-			tx, count, whereClause, []string{"created_at DESC"})
+			tx, count, whereClause, []string{"created_at"})
 		if err != nil {
 			return err
 		}
@@ -338,12 +332,12 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		var whereClause string
-		if isMy == true {
+		if isMy {
 			whereClause = fmt.Sprintf("id > %d AND saler_id = %d", lastProductID, userID)
 		} else {
-			whereClause =
-				fmt.Sprintf("id > %d AND saler_id = %d AND is_active = true OR (is_active = false AND available_count = 0)",
-					lastProductID, userID)
+			whereClause = fmt.Sprintf("id > %d AND saler_id = %d AND is_active =  true OR"+
+				"(is_active = false AND available_count = 0)",
+				lastProductID, userID)
 		}
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
