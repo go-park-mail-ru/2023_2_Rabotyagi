@@ -12,7 +12,7 @@ Backend репозиторий команды Работяги
 Таня Емельянова: 'https://github.com/TanyaEmka' и тг https://t.me/jupi_abri
 
 ### Репа фронт
-https://github.com/frontend-park-mail-ru/2023_2_Rabotyagi/tree/minimal-front
+https://github.com/frontend-park-mail-ru/2023_2_Rabotyagi
 
 ### Фигма
 https://www.figma.com/file/YLSZ9uY9gVn6bMDJchrEzD?node-id=23:2127&mode=design#567544444

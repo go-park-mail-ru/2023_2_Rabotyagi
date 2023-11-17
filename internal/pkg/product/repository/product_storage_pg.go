@@ -21,6 +21,8 @@ var (
 	ErrNoUpdateFields        = myerrors.NewError("Вы пытаетесь обновить пустое количество полей объявления")
 	ErrNoAffectedProductRows = myerrors.NewError("Не получилось обновить данные товара")
 
+	MessageErrGetUncorrectedFormatImages = "Получили некорректный формат images внутри объявления"
+
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
 
@@ -371,6 +373,19 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 	return slProduct, nil
 }
 
+func (p *ProductStorage) deleteAllImagesOfProduct(ctx context.Context, tx pgx.Tx, productID uint64) error {
+	SQLDeleteImage := `DELETE FROM public."image" WHERE product_id=$1;`
+
+	_, err := tx.Exec(ctx, SQLDeleteImage, productID)
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
 func (p *ProductStorage) insertImages(ctx context.Context, tx pgx.Tx, productID uint64, slImg []models.Image) error {
 	SQLInsertImage := `INSERT INTO public."image" (url, product_id) VALUES(@imgURL, @productID)`
 	batch := &pgx.Batch{}
@@ -484,7 +499,32 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 	updateFields map[string]interface{},
 ) error {
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		updateImages, imagesExist := updateFields["images"]
+		if imagesExist {
+			delete(updateFields, "images")
+		}
+
 		err := p.updateProduct(ctx, tx, productID, updateFields)
+		if err != nil {
+			return err
+		}
+
+		err = p.deleteAllImagesOfProduct(ctx, tx, productID)
+		if err != nil {
+			return err
+		}
+
+		if imagesExist {
+			slImages, ok := updateImages.([]models.Image)
+			if !ok {
+				errMessage := fmt.Sprintf("%s product_id=%d", MessageErrGetUncorrectedFormatImages, productID)
+				p.logger.Errorln(errMessage)
+
+				return fmt.Errorf(errMessage)
+			}
+
+			err = p.insertImages(ctx, tx, productID, slImages)
+		}
 
 		return err
 	})

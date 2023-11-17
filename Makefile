@@ -72,3 +72,7 @@ refill-db: migrate-down migrate-up fill-db
 
 logs:
 	cat /var/log/backend/logs.json | jq
+
+compose-pull:
+	docker compose down
+	docker compose pull
