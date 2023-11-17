@@ -16,7 +16,7 @@ func (p *ProductStorage) selectUserFavourites(ctx context.Context, tx pgx.Tx,
 	userID uint64) ([]*models.ProductInFeed, error) {
 
 	SQLSelectUserFavourites :=
-		`SELECT p.id, p.title
+		`SELECT p.id, p.title, p.price, p.city, p.delivery, p.safe_deal, p.is_active, p.available_count
 		FROM public."product" p
 		JOIN public."favourite" f ON p.id = f.product_id
 		WHERE f.owner_id = $1`
