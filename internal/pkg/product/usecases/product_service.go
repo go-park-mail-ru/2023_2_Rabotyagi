@@ -29,21 +29,25 @@ type IProductStorage interface {
 	ActivateProduct(ctx context.Context, productID uint64, userID uint64) error
 	DeleteProduct(ctx context.Context, productID uint64, userID uint64) error
 	IBasketStorage
+	IFavouriteStorage
 }
 
 type ProductService struct {
+	FavouriteService
 	BasketService
 	storage IProductStorage
 	logger  *zap.SugaredLogger
 }
 
-func NewProductService(productStorage IProductStorage, basketService BasketService) (*ProductService, error) {
+func NewProductService(productStorage IProductStorage, basketService BasketService,
+	favouriteService FavouriteService) (*ProductService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return &ProductService{BasketService: basketService, storage: productStorage, logger: logger}, nil
+	return &ProductService{FavouriteService: favouriteService,
+		BasketService: basketService, storage: productStorage, logger: logger}, nil
 }
 
 func (p *ProductService) AddProduct(ctx context.Context, r io.Reader) (uint64, error) {

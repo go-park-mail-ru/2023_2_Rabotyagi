@@ -30,6 +30,7 @@ type IProductService interface {
 	ActivateProduct(ctx context.Context, productID uint64, userID uint64) error
 	DeleteProduct(ctx context.Context, productID uint64, userID uint64) error
 	IBasketService
+	IFavouriteService
 }
 
 type ProductHandler struct {
