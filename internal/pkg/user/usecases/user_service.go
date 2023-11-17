@@ -101,7 +101,7 @@ func (u *UserService) UpdateUser(ctx context.Context, r io.Reader,
 
 	var err error
 
-	if isPartialUpdate == true {
+	if isPartialUpdate {
 		userWithoutPassword, err = ValidatePartOfUserWithoutPassword(r)
 		if err != nil {
 			return nil, fmt.Errorf(myerrors.ErrTemplate, err)

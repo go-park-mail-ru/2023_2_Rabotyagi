@@ -14,6 +14,7 @@ var (
 	ErrWrongCount     = myerrors.NewError("Получили некорректный count параметр. Он должен быть целым")
 	ErrWrongLastID    = myerrors.NewError("Получили некорректный last_id параметр. Он должен быть целым")
 	ErrWrongProductID = myerrors.NewError("Получили некорректный product_id параметр. Он должен быть целым")
+	ErrWrongUserID    = myerrors.NewError("Получили некорректный user_id параметр. Он должен быть целым")
 )
 
 func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {
@@ -45,6 +46,37 @@ func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {
 	}
 
 	return count, lastID, nil
+}
+
+func parseUserIDAndProductIDFromRequest(r *http.Request) (uint64, uint64, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return 0, 0, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	userIDStr := r.URL.Query().Get("user_id")
+
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
+	if err != nil {
+		err := fmt.Errorf("%w count=%s", ErrWrongUserID, userIDStr)
+
+		logger.Errorln(err)
+
+		return 0, 0, err
+	}
+
+	productIDStr := r.URL.Query().Get("product_id")
+
+	productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	if err != nil {
+		err := fmt.Errorf("%w last_id=%s", ErrWrongProductID, productIDStr)
+
+		logger.Errorln(err)
+
+		return 0, 0, err
+	}
+
+	return userID, productID, nil
 }
 
 func parseSalerIDCountLastIDFromRequest(r *http.Request) (uint64, uint64, uint64, error) {

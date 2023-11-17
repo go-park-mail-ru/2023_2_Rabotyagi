@@ -52,7 +52,12 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
-	productService, err := productusecases.NewProductService(productStorage, *basketService)
+	favouriteService, err := productusecases.NewFavouriteService(productStorage)
+	if err != nil {
+		return err
+	}
+
+	productService, err := productusecases.NewProductService(productStorage, *basketService, *favouriteService)
 	if err != nil {
 		return err
 	}
