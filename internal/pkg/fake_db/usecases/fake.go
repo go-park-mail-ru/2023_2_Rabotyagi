@@ -32,7 +32,7 @@ func FakeUserWihtoutID(index int) (*models.UserWithoutID, error) {
 	return user, nil
 }
 
-func FakeProduct(userMaxCount uint, categoryMaxCount uint) *models.Product {
+func FakeProduct(userMaxCount uint, categoryMaxCount uint, cityMaxCount uint) *models.Product {
 	wordsInDescription := 10
 	maxPrice := 1000
 	maxAvailableCount := 10
@@ -41,11 +41,12 @@ func FakeProduct(userMaxCount uint, categoryMaxCount uint) *models.Product {
 
 	preProduct.SalerID = uint64(gofakeit.Number(1, int(userMaxCount)))
 	preProduct.CategoryID = uint64(gofakeit.Number(1, int(categoryMaxCount)))
+	preProduct.CityID = uint64(gofakeit.Number(1, int(cityMaxCount)))
 	preProduct.Title = gofakeit.BookTitle()
 	preProduct.Description = gofakeit.Sentence(wordsInDescription)
 	preProduct.Price = uint64(gofakeit.Number(1, maxPrice))
 	preProduct.AvailableCount = uint32(gofakeit.Number(1, maxAvailableCount))
-	preProduct.City = gofakeit.City()
+	//preProduct.City = gofakeit.City()
 	preProduct.Delivery = gofakeit.Bool()
 	preProduct.SafeDeal = gofakeit.Bool()
 	preProduct.Views = uint32(gofakeit.Number(0, maxViews))
@@ -68,6 +69,10 @@ func FakeFavourite(userMaxCount uint, productMaxCount uint) (uint64, uint64) {
 	productID := uint64(gofakeit.Number(1, int(productMaxCount)))
 
 	return ownerID, productID
+}
+
+func FakeCity() string {
+	return gofakeit.City()
 }
 
 type FakeGeneratorImg struct {

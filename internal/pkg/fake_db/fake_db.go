@@ -17,6 +17,7 @@ func RunScriptFillDB(URLDataBase string,
 	maxNameImg := uint(12)
 	userMaxCount := baseCount
 	categoryMaxCount := userMaxCount/10 + 1
+	cityMaxCount := userMaxCount/10 + 1
 	productMaxCount := userMaxCount * 4
 	orderMaxCount := userMaxCount * 2
 	favouritesMaxCount := userMaxCount
@@ -61,7 +62,7 @@ func RunScriptFillDB(URLDataBase string,
 
 	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
 		err = fakeStorage.InsertProducts(baseCtx,
-			tx, productMaxCount, userMaxCount, categoryMaxCount,
+			tx, productMaxCount, userMaxCount, categoryMaxCount, cityMaxCount,
 		)
 		if err != nil {
 			return err

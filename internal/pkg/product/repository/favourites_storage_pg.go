@@ -33,14 +33,14 @@ func (p *ProductStorage) selectUserFavourites(ctx context.Context, tx pgx.Tx,
 
 	_, err = pgx.ForEachRow(productsInFavouritesRows, []any{
 		&curProduct.ID, &curProduct.Title,
-		&curProduct.Price, &curProduct.City,
+		&curProduct.Price, &curProduct.CityID,
 		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount,
 	}, func() error {
 		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
 			ID:             curProduct.ID,
 			Title:          curProduct.Title,
 			Price:          curProduct.Price,
-			City:           curProduct.City,
+			CityID:         curProduct.CityID,
 			Delivery:       curProduct.Delivery,
 			SafeDeal:       curProduct.SafeDeal,
 			IsActive:       curProduct.IsActive,

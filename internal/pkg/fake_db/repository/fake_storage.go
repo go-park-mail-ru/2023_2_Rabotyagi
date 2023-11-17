@@ -57,6 +57,40 @@ func (f *FakeStorage) InsertUsersWithoutID(ctx context.Context, tx pgx.Tx, userC
 	return nil
 }
 
+func (f *FakeStorage) InsertCity(ctx context.Context, tx pgx.Tx, cityCount uint) error {
+	slCity := [][]any{}
+	columns := []string{"name"}
+
+	f.Logger.Infof("start filling users")
+
+	for i := 0; i < int(cityCount); i++ {
+		if i%(int(cityCount)/100+1) == 0 {
+			f.Logger.Infof("filled i=%d of %d city", i, cityCount)
+		}
+
+		city := usecases.FakeCity()
+
+		slCity = append(slCity, []any{city})
+	}
+
+	_, err := tx.CopyFrom(
+		ctx,
+		pgx.Identifier{"public", "city"},
+		columns,
+		pgx.CopyFromRows(slCity),
+	)
+
+	if err != nil {
+		f.Logger.Error(err)
+
+		return err
+	}
+
+	f.Logger.Infof("end filling city\n")
+
+	return nil
+}
+
 // InsertCategories open new connection because categories have constraint referenses on parent_id.
 // At this reason I insert parent categories in second connection
 func (f *FakeStorage) InsertCategories(ctx context.Context, tx pgx.Tx, categoriesCount uint) error {
@@ -140,12 +174,12 @@ func (f *FakeStorage) InsertCategories(ctx context.Context, tx pgx.Tx, categorie
 }
 
 func (f *FakeStorage) InsertProducts(ctx context.Context,
-	tx pgx.Tx, productCount uint, userMaxCount uint, categoryMaxCount uint,
+	tx pgx.Tx, productCount uint, userMaxCount uint, categoryMaxCount uint, cityMaxCount uint,
 ) error {
 	slProduct := [][]any{}
 	columns := []string{
-		"saler_id", "category_id", "title", "description", "price",
-		"available_count", "city", "delivery", "safe_deal", "views",
+		"saler_id", "category_id", "city_id", "title", "description", "price",
+		"available_count", "delivery", "safe_deal", "views",
 	}
 
 	f.Logger.Infof("start filling users")
@@ -155,12 +189,12 @@ func (f *FakeStorage) InsertProducts(ctx context.Context,
 			f.Logger.Infof("filled i=%d of %d products", i, productCount)
 		}
 
-		preProduct := usecases.FakeProduct(userMaxCount, categoryMaxCount)
+		preProduct := usecases.FakeProduct(userMaxCount, categoryMaxCount, cityMaxCount)
 
 		slProduct = append(slProduct,
 			[]any{
-				preProduct.SalerID, preProduct.CategoryID, preProduct.Title,
-				preProduct.Description, preProduct.Price, preProduct.AvailableCount, preProduct.City,
+				preProduct.SalerID, preProduct.CategoryID, preProduct.CityID, preProduct.Title,
+				preProduct.Description, preProduct.Price, preProduct.AvailableCount,
 				preProduct.Delivery, preProduct.SafeDeal, preProduct.Views,
 			},
 		)
