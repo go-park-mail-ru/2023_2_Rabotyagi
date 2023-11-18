@@ -40,6 +40,7 @@ func UnsafeTimeToNull(time *time.Time) sql.NullTime {
 func NullInt64ToUnsafeUint(nullInt64 sql.NullInt64) *uint64 {
 	if nullInt64.Valid {
 		innerUint64 := uint64(nullInt64.Int64)
+
 		return &(innerUint64)
 	}
 

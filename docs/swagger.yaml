@@ -7,9 +7,8 @@ definitions:
       name:
         type: string
       parent_id:
-        allOf:
-        - $ref: '#/definitions/sql.NullInt64'
         description: nolint
+        type: integer
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image:
     properties:
@@ -294,14 +293,6 @@ definitions:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
       status:
         type: integer
-    type: object
-  sql.NullInt64:
-    properties:
-      int64:
-        type: integer
-      valid:
-        description: Valid is true if Int64 is not NULL
-        type: boolean
     type: object
   sql.NullString:
     properties:
