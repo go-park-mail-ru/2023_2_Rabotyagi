@@ -146,9 +146,10 @@ definitions:
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword:
     properties:
       avatar:
-        $ref: '#/definitions/sql.NullString'
+        type: string
       birthday:
-        $ref: '#/definitions/sql.NullTime'
+        example: "2014-12-12T14:00:12+07:00"
+        type: string
       created_at:
         type: string
       email:
@@ -156,11 +157,10 @@ definitions:
       id:
         type: integer
       name:
-        $ref: '#/definitions/sql.NullString'
+        type: string
       phone:
-        allOf:
-        - $ref: '#/definitions/sql.NullString'
         description: nolint
+        type: string
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse:
     properties:
