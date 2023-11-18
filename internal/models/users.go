@@ -2,11 +2,8 @@ package models
 
 import (
 	"database/sql"
-	"encoding/json"
 	"strings"
 	"time"
-
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/microcosm-cc/bluemonday"
@@ -50,38 +47,6 @@ type UserWithoutPassword struct {
 	Birthday  sql.NullTime   `json:"birthday"   swaggertype:"string"   example:"2014-12-12T14:00:12+07:00"`
 	Avatar    sql.NullString `json:"avatar"     swaggertype:"string"`
 	CreatedAt time.Time      `json:"created_at" valid:"required"`
-}
-
-func (u *UserWithoutPassword) MarshalJSON() ([]byte, error) {
-	var userJs = userJson{
-		ID:        u.ID,
-		Email:     u.Email,
-		Phone:     utils.NullStringToUnsafe(u.Phone),
-		Name:      utils.NullStringToUnsafe(u.Name),
-		Birthday:  utils.NullTimeToUnsafe(u.Birthday),
-		Avatar:    utils.NullStringToUnsafe(u.Avatar),
-		CreatedAt: u.CreatedAt,
-	}
-
-	return json.Marshal(userJs)
-}
-
-func (u *UserWithoutPassword) UnmarshalJSON(bytes []byte) error {
-	var userJs userJson
-
-	if err := json.Unmarshal(bytes, &userJs); err != nil {
-		return err
-	}
-
-	u.ID = userJs.ID
-	u.Email = userJs.Email
-	u.Phone = utils.UnsafeStringToNull(userJs.Phone)
-	u.Name = utils.UnsafeStringToNull(userJs.Name)
-	u.Birthday = utils.UnsafeTimeToNull(userJs.Birthday)
-	u.Avatar = utils.UnsafeStringToNull(userJs.Avatar)
-	u.CreatedAt = userJs.CreatedAt
-
-	return nil
 }
 
 func (u *UserWithoutPassword) Trim() {

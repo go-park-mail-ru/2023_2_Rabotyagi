@@ -13,6 +13,14 @@ func NullStringToUnsafe(nullStr sql.NullString) *string {
 	return nil
 }
 
+func UnsafeStringToNull(str *string) sql.NullString {
+	if str == nil {
+		return sql.NullString{Valid: false} //nolint:exhaustruct
+	}
+
+	return sql.NullString{String: *str, Valid: true}
+}
+
 func NullTimeToUnsafe(nullTime sql.NullTime) *time.Time {
 	if nullTime.Valid {
 		return &nullTime.Time
@@ -29,10 +37,19 @@ func UnsafeTimeToNull(time *time.Time) sql.NullTime {
 	return sql.NullTime{Time: *time, Valid: true}
 }
 
-func UnsafeStringToNull(str *string) sql.NullString {
-	if str == nil {
-		return sql.NullString{Valid: false} //nolint:exhaustruct
+func NullInt64ToUnsafeUint(nullInt64 sql.NullInt64) *uint64 {
+	if nullInt64.Valid {
+		innerUint64 := uint64(nullInt64.Int64)
+		return &(innerUint64)
 	}
 
-	return sql.NullString{String: *str, Valid: true}
+	return nil
+}
+
+func UnsafeUint64ToNullInt(unsafeInt64 *uint64) sql.NullInt64 {
+	if unsafeInt64 == nil {
+		return sql.NullInt64{Valid: false} //nolint:exhaustruct
+	}
+
+	return sql.NullInt64{Int64: int64(*unsafeInt64), Valid: true}
 }
