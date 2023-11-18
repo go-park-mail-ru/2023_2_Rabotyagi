@@ -43,13 +43,13 @@ type User struct {
 }
 
 type UserWithoutPassword struct {
-	ID        uint64         `valid:"required"`
-	Email     string         `valid:"required,email~Not valid email"`
-	Phone     sql.NullString `swaggertype:"string"   valid:"regexp=^(\+){0,1}[0-9\s]*$,length(0|18)~Phone may contain only one + in begin and numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
-	Name      sql.NullString `swaggertype:"string"   valid:"regexp=^[а-яА-Яa-zA-Z0-9\s]*$~Name may contain only russian, english letter, numbers and spaces"`
-	Birthday  sql.NullTime   `swaggertype:"string" example:"2014-12-12T14:00:12+07:00"`
-	Avatar    sql.NullString `swaggertype:"string"`
-	CreatedAt time.Time      `valid:"required"`
+	ID        uint64         `json:"id"         valid:"required"`
+	Email     string         `json:"email"      valid:"required,email~Not valid email"`
+	Phone     sql.NullString `json:"phone"      swaggertype:"string"   valid:"regexp=^(\+){0,1}[0-9\s]*$,length(0|18)~Phone may contain only one + in begin and numbers,length(1|18)~Phone length must be from 1 to 18"` //nolint
+	Name      sql.NullString `json:"name"       swaggertype:"string"   valid:"regexp=^[а-яА-Яa-zA-Z0-9\s]*$~Name may contain only russian, english letter, numbers and spaces"`
+	Birthday  sql.NullTime   `json:"birthday"   swaggertype:"string"   example:"2014-12-12T14:00:12+07:00"`
+	Avatar    sql.NullString `json:"avatar"     swaggertype:"string"`
+	CreatedAt time.Time      `json:"created_at" valid:"required"`
 }
 
 func (u *UserWithoutPassword) MarshalJSON() ([]byte, error) {
