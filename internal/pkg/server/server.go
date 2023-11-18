@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	categoryusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
+	cityusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/city/usecases"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	categoryrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/repository"
+	cityrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/city/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
@@ -82,9 +84,19 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
+	cityStorage, err := cityrepo.NewCityStorage(pool)
+	if err != nil {
+		return err
+	}
+
+	cityService, err := cityusecases.NewCityService(cityStorage)
+	if err != nil {
+		return err
+	}
+
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
 		config.Schema, config.PortServer, config.FileServiceDir),
-		userService, productService, categoryService, logger)
+		userService, productService, categoryService, cityService, logger)
 	if err != nil {
 		return err
 	}

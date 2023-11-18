@@ -61,6 +61,20 @@ func RunScriptFillDB(URLDataBase string,
 	}
 
 	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
+		err = fakeStorage.InsertCity(baseCtx, tx, cityMaxCount)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		logger.Error(err)
+
+		return err
+	}
+
+	err = pgx.BeginFunc(baseCtx, pool, func(tx pgx.Tx) error {
 		err = fakeStorage.InsertProducts(baseCtx,
 			tx, productMaxCount, userMaxCount, categoryMaxCount, cityMaxCount,
 		)

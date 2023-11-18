@@ -31,6 +31,13 @@ CREATE TABLE IF NOT EXISTS public."category"
     parent_id BIGINT DEFAULT NULL REFERENCES public."category" (id)
 );
 
+CREATE TABLE IF NOT EXISTS public."city"
+(
+    id              BIGINT            DEFAULT NEXTVAL('city_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    name            TEXT                                                       NOT NULL CHECK (name <> '')
+    CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256)
+);
+
 CREATE TABLE IF NOT EXISTS public."product"
 (
     id              BIGINT                   DEFAULT NEXTVAL('product_id_seq'::regclass) NOT NULL PRIMARY KEY,
@@ -52,13 +59,6 @@ CREATE TABLE IF NOT EXISTS public."product"
     safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     is_active       BOOLEAN                  DEFAULT TRUE                                NOT NULL,
     CONSTRAINT not_zero_count_with_active CHECK (not (available_count = 0 and is_active))
-);
-
-CREATE TABLE IF NOT EXISTS public."city"
-(
-    id              BIGINT            DEFAULT NEXTVAL('city_id_seq'::regclass) NOT NULL PRIMARY KEY,
-    name            TEXT                                                       NOT NULL CHECK (name <> '')
-        CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256),
 );
 
 CREATE TABLE IF NOT EXISTS public."order"

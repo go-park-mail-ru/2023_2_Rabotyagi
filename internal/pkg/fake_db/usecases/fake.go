@@ -107,7 +107,7 @@ func NewFakeGeneratorImg(maxNameImage uint, prefixURL string, pathToRoot string)
 			return nil, err
 		}
 
-		URLFile, err := os.OpenFile(fmt.Sprintf("%s/static/img/%s", pathToRoot, URLToFile),
+		URLFile, err := os.OpenFile(fmt.Sprintf("%s/static/images_for_fake_db/%s", pathToRoot, URLToFile),
 			os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
 			return nil, err

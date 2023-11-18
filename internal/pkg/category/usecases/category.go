@@ -33,8 +33,8 @@ func (c *CategoryService) GetFullCategories(ctx context.Context) ([]*models.Cate
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	for _, order := range categories {
-		order.Sanitize()
+	for _, category := range categories {
+		category.Sanitize()
 	}
 
 	return categories, nil
