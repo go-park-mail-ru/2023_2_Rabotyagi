@@ -33,9 +33,9 @@ type OrderInBasket struct {
 	OwnerID        uint64  `json:"owner_id"        valid:"required"`
 	SalerID        uint64  `json:"saler_id"        valid:"required"`
 	ProductID      uint64  `json:"product_id"      valid:"required"`
+	CityID         uint64  `json:"city_id"      valid:"required"`
 	Title          string  `json:"title"           valid:"required, length(1|256)~Title length must be from 1 to 256"`
 	Price          uint64  `json:"price"           valid:"required"`
-	City           string  `json:"city"            valid:"required, length(1|256)~City length must be from 1 to 256"`
 	Count          uint32  `json:"count"           valid:"required"`
 	AvailableCount uint32  `json:"available_count" valid:"required"`
 	Delivery       bool    `json:"delivery"        valid:"required"`
@@ -55,6 +55,5 @@ const (
 func (o *OrderInBasket) Sanitize() {
 	sanitizer := bluemonday.UGCPolicy()
 
-	o.City = sanitizer.Sanitize(o.City)
 	o.Title = sanitizer.Sanitize(o.Title)
 }

@@ -64,5 +64,5 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 	}
 
 	delivery.SendOkResponse(w, c.logger, NewCategoryListResponse(delivery.StatusResponseSuccessful, categories))
-	c.logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", categories)
+	c.logger.Infof("in GetFullCategories: get all categories: %+v\n", categories)
 }

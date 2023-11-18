@@ -81,14 +81,14 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 	tx pgx.Tx, productID uint64,
 ) (*models.Product, error) {
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
-       description, price, created_at, views, available_count, city,
+       description, price, created_at, views, available_count, city_id,
        delivery, safe_deal, is_active FROM public."product" WHERE id=$1`
 	product := &models.Product{ID: productID} //nolint:exhaustruct
 
 	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID)
 	if err := productRow.Scan(&product.SalerID, &product.CategoryID,
 		&product.Title, &product.Description, &product.Price, &product.CreatedAt,
-		&product.Views, &product.AvailableCount, &product.City, &product.Delivery,
+		&product.Views, &product.AvailableCount, &product.CityID, &product.Delivery,
 		&product.SafeDeal, &product.IsActive); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
@@ -241,7 +241,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	limit uint64, whereClause any, orderByClause []string,
 ) ([]*models.ProductInFeed, error) {
 	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Select("id, title," +
-		"price, city, delivery, safe_deal, is_active, available_count").From(`public."product"`).
+		"price, city_id, delivery, safe_deal, is_active, available_count").From(`public."product"`).
 		Where(whereClause).OrderBy(orderByClause...).Limit(limit)
 
 	SQLQuery, args, err := query.ToSql()
@@ -264,14 +264,14 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 
 	_, err = pgx.ForEachRow(rowsProducts, []any{
 		&curProduct.ID, &curProduct.Title,
-		&curProduct.Price, &curProduct.City,
+		&curProduct.Price, &curProduct.CityID,
 		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount,
 	}, func() error {
 		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
 			ID:             curProduct.ID,
 			Title:          curProduct.Title,
 			Price:          curProduct.Price,
-			City:           curProduct.City,
+			CityID:         curProduct.CityID,
 			Delivery:       curProduct.Delivery,
 			SafeDeal:       curProduct.SafeDeal,
 			IsActive:       curProduct.IsActive,
@@ -416,11 +416,11 @@ func (p *ProductStorage) insertImages(ctx context.Context, tx pgx.Tx, productID 
 func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduct *models.PreProduct) error {
 	SQLInsertProduct := `INSERT INTO public."product"(saler_id,
 		category_id, title, description, price,available_count,
-		city, delivery, safe_deal) VALUES(
+		city_id, delivery, safe_deal) VALUES(
 		$1, $2, $3, $4, $5, $6, $7, $8, $9)`
 	_, err := tx.Exec(ctx, SQLInsertProduct, preProduct.SalerID, preProduct.CategoryID,
 		preProduct.Title, preProduct.Description, preProduct.Price, preProduct.AvailableCount,
-		preProduct.City, preProduct.Delivery, preProduct.SafeDeal)
+		preProduct.CityID, preProduct.Delivery, preProduct.SafeDeal)
 
 	if err != nil {
 		p.logger.Errorln(err)

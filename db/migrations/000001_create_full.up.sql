@@ -1,5 +1,6 @@
 CREATE SEQUENCE IF NOT EXISTS user_id_seq;
 CREATE SEQUENCE IF NOT EXISTS product_id_seq;
+CREATE SEQUENCE IF NOT EXISTS city_id_seq;
 CREATE SEQUENCE IF NOT EXISTS category_id_seq;
 CREATE SEQUENCE IF NOT EXISTS order_id_seq;
 CREATE SEQUENCE IF NOT EXISTS image_id_seq;
@@ -30,11 +31,19 @@ CREATE TABLE IF NOT EXISTS public."category"
     parent_id BIGINT DEFAULT NULL REFERENCES public."category" (id)
 );
 
+CREATE TABLE IF NOT EXISTS public."city"
+(
+    id              BIGINT            DEFAULT NEXTVAL('city_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    name            TEXT                                                       NOT NULL CHECK (name <> '')
+    CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256)
+);
+
 CREATE TABLE IF NOT EXISTS public."product"
 (
     id              BIGINT                   DEFAULT NEXTVAL('product_id_seq'::regclass) NOT NULL PRIMARY KEY,
     saler_id        BIGINT                                                               NOT NULL REFERENCES public."user" (id),
     category_id     BIGINT                                                               NOT NULL REFERENCES public."category" (id),
+    city_id         BIGINT                                                               NOT NULL REFERENCES public."city" (id),
     title           TEXT                                                                 NOT NULL CHECK (title <> '')
         CONSTRAINT max_len_title CHECK (LENGTH(title) <= 256),
     description     TEXT                                                                 NOT NULL CHECK (description <> '')
@@ -46,8 +55,6 @@ CREATE TABLE IF NOT EXISTS public."product"
         CONSTRAINT not_negative_views CHECK (views >= 0),
     available_count INT                      DEFAULT 0                                   NOT NULL
         CONSTRAINT max_len_available_count CHECK (available_count >= 0),
-    city            TEXT                                                                 NOT NULL CHECK (city <> '')
-        CONSTRAINT max_len_city CHECK (LENGTH(city) <= 256),
     delivery        BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     is_active       BOOLEAN                  DEFAULT TRUE                                NOT NULL,

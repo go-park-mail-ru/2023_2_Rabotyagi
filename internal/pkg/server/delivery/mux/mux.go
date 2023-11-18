@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	categorydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/delivery"
+	citydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/city/delivery"
 	filedelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/delivery"
 	filerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
@@ -35,7 +36,7 @@ func NewConfigMux(addrOrigin string, schema string, portServer string, fileServi
 
 func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.IUserService,
 	productService productdelivery.IProductService, categoryService categorydelivery.ICategoryService,
-	logger *zap.SugaredLogger,
+	cityService citydelivery.ICityService, logger *zap.SugaredLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 
@@ -45,6 +46,11 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	}
 
 	categoryHandler, err := categorydelivery.NewCategoryHandler(categoryService)
+	if err != nil {
+		return nil, err
+	}
+
+	cityHandler, err := citydelivery.NewCityHandler(cityService)
 	if err != nil {
 		return nil, err
 	}
@@ -114,6 +120,9 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 
 	router.Handle("/api/v1/category/get_full", middleware.Context(ctx,
 		middleware.SetupCORS(categoryHandler.GetFullCategories, configMux.addrOrigin, configMux.schema)))
+
+	router.Handle("/api/v1/city/get_full", middleware.Context(ctx,
+		middleware.SetupCORS(cityHandler.GetFullCities, configMux.addrOrigin, configMux.schema)))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(router, logger))

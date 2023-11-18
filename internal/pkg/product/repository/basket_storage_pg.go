@@ -28,7 +28,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	var orders []*models.OrderInBasket
 
 	SQLSelectOrdersInBasketByUserID := `SELECT  "order".id, "order".owner_id, "order".product_id,
-        "product".title, "product".price, "product".city, "order".count, "product".available_count,
+        "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product" ON "order".product_id = "product".id WHERE owner_id=$1 AND status=0;`
 
@@ -43,7 +43,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 
 	_, err = pgx.ForEachRow(ordersInBasketRows, []any{
 		&curOrder.ID, &curOrder.OwnerID, &curOrder.ProductID,
-		&curOrder.Title, &curOrder.Price, &curOrder.City,
+		&curOrder.Title, &curOrder.Price, &curOrder.CityID,
 		&curOrder.Count, &curOrder.AvailableCount, &curOrder.Delivery,
 		&curOrder.SafeDeal, &curOrder.SalerID,
 	}, func() error {
@@ -53,7 +53,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 			ProductID:      curOrder.ProductID,
 			Title:          curOrder.Title,
 			Price:          curOrder.Price,
-			City:           curOrder.City,
+			CityID:         curOrder.CityID,
 			Count:          curOrder.Count,
 			AvailableCount: curOrder.AvailableCount,
 			Delivery:       curOrder.Delivery,
@@ -337,7 +337,7 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
 		orderInBasket.SalerID = productInner.SalerID
 		orderInBasket.Title = productInner.Title
 		orderInBasket.Price = productInner.Price
-		orderInBasket.City = productInner.City
+		orderInBasket.CityID = productInner.CityID
 		orderInBasket.AvailableCount = productInner.AvailableCount
 		orderInBasket.Delivery = productInner.Delivery
 		orderInBasket.SafeDeal = productInner.SafeDeal
