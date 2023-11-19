@@ -1,6 +1,6 @@
 .PHONY: all all-prod
 
-all: compose-db-up compose-frontend-up go-mod-tidy test swag run
+all: update-env compose-db-up compose-frontend-up go-mod-tidy test swag run
 all-down: compose-db-down compose-frontend-down
 all-without-front: compose-db-up go-mod-tidy test swag run
 
@@ -11,7 +11,7 @@ compose-frontend-down:
 	docker compose -f docker-compose.yml down frontend
 
 # prod
-compose-full-up:
+compose-full-up: update-env
 	docker compose -f docker-compose.yml up backend postgres pgadmin --build -d
 
 compose-full-down:
@@ -76,3 +76,9 @@ logs:
 compose-pull:
 	docker compose down
 	docker compose pull
+
+update-env:
+	mkdir -p ".env"
+	cp .env.example/.env.backend .env/.env.backend
+	cp .env.example/.env.pgadmin .env/.env.pgadmin
+	cp .env.example/.env.postgres .env/.env.postgres
