@@ -29,8 +29,33 @@ jobs:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             - name: Build and push
               uses: docker/build-push-action@v5
+              id: prod
               with:
                   context: .
                   push: true
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
+
+            - name: Send Good Notification
+              uses: appleboy/telegram-action@master
+              if: success()
+              with:
+                  to: ${{ secrets.TELEGRAM_CHAT }}
+                  token: ${{ secrets.TELEGRAM_TOKEN }}
+                  message: |
+                      Билд образа
+                        - ${{ github.repository }}:${{github.ref_name}}
+                      Закончился с ✅
+                      https://github.com/go-park-mail-ru/2023_2_Rabotyagi/commit/${{github.sha}}
+        
+            - name: Send Bad Notification
+              uses: appleboy/telegram-action@master
+              if: failure() && steps.prod.outcome == 'failure'
+              with:
+                  to: ${{ secrets.TELEGRAM_CHAT }}
+                  token: ${{ secrets.TELEGRAM_TOKEN }}
+                  message: |
+                      Билд образа
+                        - ${{ github.repository }}:${{github.ref_name}}
+                      Закончился с ❌
+                      https://github.com/go-park-mail-ru/2023_2_Rabotyagi/actions/runs/${{github.run_id}}
