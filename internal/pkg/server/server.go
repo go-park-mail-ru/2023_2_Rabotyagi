@@ -113,7 +113,8 @@ func (s *Server) Run(config *config.Config) error {
 	logger.Infof("Start server:%s", config.PortServer)
 
 	if config.ProductionMode {
-		return s.httpServer.ListenAndServeTLS("", "") //nolint:wrapcheck
+		return s.httpServer.ListenAndServeTLS("/etc/ssl/goods-galaxy.ru.crt", //nolint:wrapcheck
+			"/etc/ssl/goods-galaxy.ru.key")
 	}
 
 	return s.httpServer.ListenAndServe() //nolint:wrapcheck
