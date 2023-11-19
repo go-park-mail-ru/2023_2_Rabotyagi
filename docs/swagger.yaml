@@ -7,9 +7,8 @@ definitions:
       name:
         type: string
       parent_id:
-        allOf:
-        - $ref: '#/definitions/sql.NullInt64'
         description: nolint
+        type: integer
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.City:
     properties:
@@ -152,9 +151,10 @@ definitions:
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword:
     properties:
       avatar:
-        $ref: '#/definitions/sql.NullString'
+        type: string
       birthday:
-        $ref: '#/definitions/sql.NullTime'
+        example: "2014-12-12T14:00:12+07:00"
+        type: string
       created_at:
         type: string
       email:
@@ -162,11 +162,10 @@ definitions:
       id:
         type: integer
       name:
-        $ref: '#/definitions/sql.NullString'
+        type: string
       phone:
-        allOf:
-        - $ref: '#/definitions/sql.NullString'
         description: nolint
+        type: string
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse:
     properties:
@@ -309,14 +308,6 @@ definitions:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
       status:
         type: integer
-    type: object
-  sql.NullInt64:
-    properties:
-      int64:
-        type: integer
-      valid:
-        description: Valid is true if Int64 is not NULL
-        type: boolean
     type: object
   sql.NullString:
     properties:

@@ -14,7 +14,7 @@ type Order struct {
 	Status    uint8        `json:"status"      valid:"required"`
 	CreatedAt time.Time    `json:"created_at"  valid:"required"`
 	UpdatedAt time.Time    `json:"updated_at"  valid:"required"`
-	ClosedAt  sql.NullTime `json:"closed_at"   valid:"required"`
+	ClosedAt  sql.NullTime `json:"closed_at"   swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"`
 }
 
 type OrderChanges struct {

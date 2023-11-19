@@ -15,6 +15,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 )
 
+var ErrWrongUserID = myerrors.NewError("Попытка изменить данные другого пользователя")
+
 var _ IUserStorage = (*userrepo.UserStorage)(nil)
 
 type IUserStorage interface {
@@ -77,7 +79,8 @@ func (u *UserService) GetUser(ctx context.Context, email string, password string
 }
 
 func (u *UserService) GetUserWithoutPasswordByID(ctx context.Context,
-	userIDStr string) (*models.UserWithoutPassword, error) {
+	userIDStr string,
+) (*models.UserWithoutPassword, error) {
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -94,10 +97,9 @@ func (u *UserService) GetUserWithoutPasswordByID(ctx context.Context,
 }
 
 func (u *UserService) UpdateUser(ctx context.Context, r io.Reader,
-	isPartialUpdate bool, userID uint64) (*models.UserWithoutPassword, error) {
-	userWithoutPassword := &models.UserWithoutPassword{
-		ID: userID,
-	}
+	isPartialUpdate bool, userID uint64,
+) (*models.UserWithoutPassword, error) {
+	var userWithoutPassword *models.UserWithoutPassword
 
 	var err error
 
@@ -113,6 +115,12 @@ func (u *UserService) UpdateUser(ctx context.Context, r io.Reader,
 		}
 	}
 
+	if userWithoutPassword.ID != userID && userWithoutPassword.ID != 0 {
+		u.logger.Errorln(ErrWrongUserID)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrWrongUserID)
+	}
+
 	updateDataMap := utils.StructToMap(userWithoutPassword)
 
 	delete(updateDataMap, "ID")
@@ -124,5 +132,5 @@ func (u *UserService) UpdateUser(ctx context.Context, r io.Reader,
 
 	updatedUser.Sanitize()
 
-	return userWithoutPassword, nil
+	return updatedUser, nil
 }
