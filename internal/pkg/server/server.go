@@ -28,6 +28,7 @@ type Server struct {
 	httpServer *http.Server
 }
 
+//nolint:funlen
 func (s *Server) Run(config *config.Config) error {
 	baseCtx := context.Background()
 
@@ -110,6 +111,10 @@ func (s *Server) Run(config *config.Config) error {
 	}
 
 	logger.Infof("Start server:%s", config.PortServer)
+
+	if config.ProductionMode {
+		return s.httpServer.ListenAndServeTLS("", "") //nolint:wrapcheck
+	}
 
 	return s.httpServer.ListenAndServe() //nolint:wrapcheck
 }

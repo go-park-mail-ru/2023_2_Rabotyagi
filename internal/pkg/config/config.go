@@ -3,6 +3,8 @@ package config
 import "os"
 
 const (
+	standardDevelopmentMode    = "development"
+	standardProductionMode     = "production"
 	standardAllowOrigin        = "localhost:3000"
 	standardSchema             = "http://"
 	standardPort               = "8080"
@@ -12,6 +14,7 @@ const (
 	standardOutputLogPath      = "stdout /var/log/backend/logs.json"
 	standardErrorOutputLogPath = "stderr /var/log/backend/err_logs.json"
 
+	envEnvironmentMode    = "ENVIRONMENT"
 	envAllowOrigin        = "ALLOW_ORIGIN"
 	envSchema             = "SCHEMA"
 	envPortBackend        = "PORT_BACKEND"
@@ -23,6 +26,7 @@ const (
 )
 
 type Config struct {
+	ProductionMode     bool
 	AllowOrigin        string
 	Schema             string
 	PortServer         string
@@ -34,6 +38,11 @@ type Config struct {
 }
 
 func New() *Config {
+	productionMode := false
+	if getEnvStr(envEnvironmentMode, standardDevelopmentMode) == standardProductionMode {
+		productionMode = true
+	}
+
 	return &Config{
 		AllowOrigin:        getEnvStr(envAllowOrigin, standardAllowOrigin),
 		Schema:             getEnvStr(envSchema, standardSchema),
@@ -43,6 +52,7 @@ func New() *Config {
 		FileServiceDir:     getEnvStr(envFileServiceDir, standardFileServiceDir),
 		OutputLogPath:      getEnvStr(envOutputLogPath, standardOutputLogPath),
 		ErrorOutputLogPath: getEnvStr(envErrorOutputLogPath, standardErrorOutputLogPath),
+		ProductionMode:     productionMode,
 	}
 }
 
