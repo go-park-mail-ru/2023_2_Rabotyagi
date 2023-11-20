@@ -122,7 +122,9 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(categoryHandler.GetFullCategories, configMux.addrOrigin, configMux.schema)))
 
 	router.Handle("/api/v1/city/get_full", middleware.Context(ctx,
-		middleware.SetupCORS(cityHandler.GetFullCities, configMux.addrOrigin, configMux.schema)))
+		middleware.SetupCORS(cityHandler.GetFullCitiesHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/city/search", middleware.Context(ctx,
+		middleware.SetupCORS(cityHandler.SearchCityHandler, configMux.addrOrigin, configMux.schema)))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(router, logger))
