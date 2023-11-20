@@ -1,5 +1,6 @@
 CREATE SEQUENCE IF NOT EXISTS user_id_seq;
 CREATE SEQUENCE IF NOT EXISTS product_id_seq;
+CREATE SEQUENCE IF NOT EXISTS view_id_seq;
 CREATE SEQUENCE IF NOT EXISTS city_id_seq;
 CREATE SEQUENCE IF NOT EXISTS category_id_seq;
 CREATE SEQUENCE IF NOT EXISTS order_id_seq;
@@ -59,6 +60,14 @@ CREATE TABLE IF NOT EXISTS public."product"
     safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     is_active       BOOLEAN                  DEFAULT TRUE                                NOT NULL,
     CONSTRAINT not_zero_count_with_active CHECK (not (available_count = 0 and is_active))
+);
+
+CREATE TABLE IF NOT EXISTS public."view"
+(
+    id              BIGINT      DEFAULT NEXTVAL('view_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    user_id         BIGINT                                               NOT NULL REFERENCES public."user" (id),
+    product_id      BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE,
+    CONSTRAINT uniq_together_product_id_user_id unique (user_id, product_id)
 );
 
 CREATE TABLE IF NOT EXISTS public."order"

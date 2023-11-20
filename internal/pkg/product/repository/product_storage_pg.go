@@ -210,9 +210,18 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 			return err
 		}
 
+		err = p.addView(ctx, tx, userID, productID)
+		if err == nil {
+			err = p.incViews(ctx, tx, productID)
+
+			if err != nil {
+				return err
+			}
+		}
+
 		product = productInner
 
-		return nil
+		return err
 	})
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -636,6 +645,37 @@ func (p *ProductStorage) DeleteProduct(ctx context.Context, productID uint64, us
 
 		return nil
 	})
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) addView(ctx context.Context, tx pgx.Tx, userID uint64, productID uint64) error {
+	SQLAddView := `INSERT INTO public."view" (user_id, product_id)
+				   VALUES ($1, $2)`
+
+	_, err := tx.Exec(ctx, SQLAddView, userID, productID)
+
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) incViews(ctx context.Context, tx pgx.Tx, productID uint64) error {
+	SQLAddView := `UPDATE public."product" 
+				   SET views = views + 1 
+				   WHERE id=$1`
+
+	_, err := tx.Exec(ctx, SQLAddView, productID)
+
 	if err != nil {
 		p.logger.Errorln(err)
 
