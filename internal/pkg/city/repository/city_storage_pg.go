@@ -3,10 +3,10 @@ package repository
 import (
 	"context"
 	"fmt"
-
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -84,15 +84,14 @@ func (c *CityStorage) GetFullCities(ctx context.Context) ([]*models.City, error)
 }
 
 func (c *CityStorage) searchCity(ctx context.Context, tx pgx.Tx, searchInput string) ([]*models.City, error) {
-	SQLSearhCity := `SELECT id, name
+	SQLSearchCity := `SELECT city.id, city.name
 						FROM public."city"
-						WHERE to_tsvector(city.name) @@ plainto_tsquery($1)
-						ORDER BY ts_rank(to_tsvector(city.name), plainto_tsquery($1)) DESC
+						WHERE LOWER(name) LIKE $1 
 						LIMIT 5;`
 
 	var cities []*models.City
 
-	citiesRows, err := tx.Query(ctx, SQLSearhCity, searchInput)
+	citiesRows, err := tx.Query(ctx, SQLSearchCity, "%"+strings.ToLower(searchInput)+"%")
 	if err != nil {
 		c.logger.Errorln(err)
 

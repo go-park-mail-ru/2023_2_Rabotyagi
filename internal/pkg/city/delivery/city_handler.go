@@ -89,7 +89,7 @@ func (c *CityHandler) SearchCityHandler(w http.ResponseWriter, r *http.Request) 
 
 	ctx := r.Context()
 
-	searchInput := r.URL.Query().Get("searches")
+	searchInput := r.URL.Query().Get("searched")
 
 	cities, err := c.service.SearchCity(ctx, searchInput)
 	if err != nil {
@@ -100,5 +100,5 @@ func (c *CityHandler) SearchCityHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	delivery.SendOkResponse(w, c.logger, NewCityListResponse(delivery.StatusResponseSuccessful, cities))
-	c.logger.Infof("in GetFullCities: get all cities: %+v\n", cities)
+	c.logger.Infof("in SearchCityHandler: search city: %+v\n", cities)
 }
