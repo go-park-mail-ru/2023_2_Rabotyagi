@@ -210,10 +210,18 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 			return err
 		}
 
-		err = p.addView(ctx, tx, userID, productID)
-		if err == nil {
-			err = p.incViews(ctx, tx, productID)
+		viewExist, err := p.viewExist(ctx, tx, userID, productID)
+		if err != nil {
+			return err
+		}
 
+		if !viewExist {
+			err = p.addView(ctx, tx, userID, productID)
+			if err != nil {
+				return err
+			}
+
+			err = p.incViews(ctx, tx, productID)
 			if err != nil {
 				return err
 			}
@@ -221,7 +229,7 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 
 		product = productInner
 
-		return err
+		return nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -652,6 +660,21 @@ func (p *ProductStorage) DeleteProduct(ctx context.Context, productID uint64, us
 	}
 
 	return nil
+}
+
+func (p *ProductStorage) viewExist(ctx context.Context, tx pgx.Tx, userID uint64, productID uint64) (bool, error) {
+	SQLViewExist := `SELECT EXISTS(SELECT * FROM public."view" WHERE user_id = $1 AND product_id = $2);`
+
+	exist := false
+
+	existRow := tx.QueryRow(ctx, SQLViewExist, userID, productID)
+	if err := existRow.Scan(&exist); err != nil {
+		p.logger.Errorln(err)
+
+		return false, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return exist, nil
 }
 
 func (p *ProductStorage) addView(ctx context.Context, tx pgx.Tx, userID uint64, productID uint64) error {
