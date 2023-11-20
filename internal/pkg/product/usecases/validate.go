@@ -117,7 +117,7 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 	orderChanges := new(models.OrderChanges)
 	decoder := json.NewDecoder(r)
 
-	if err := decoder.Decode(orderChanges); err != nil {
+	if err = decoder.Decode(orderChanges); err != nil {
 		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeOrderChanges)
@@ -127,7 +127,7 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, myerrors.NewError(err.Error())
+		return orderChanges, err
 	}
 
 	return orderChanges, nil
