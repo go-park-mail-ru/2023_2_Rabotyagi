@@ -357,6 +357,37 @@ paths:
       summary: get all categories
       tags:
       - category
+  /category/search:
+    get:
+      description: search top 5 common named categories
+      parameters:
+      - description: searched string
+        in: query
+        name: searched
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_category_delivery.CategoryListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: search category
+      tags:
+      - category
   /city/get_full:
     get:
       description: get all cities
@@ -381,7 +412,7 @@ paths:
             type: string
       summary: get all cities
       tags:
-      - City
+      - city
   /city/search:
     get:
       description: search top 5 common named cities
@@ -412,7 +443,7 @@ paths:
             type: string
       summary: search city
       tags:
-      - City
+      - city
   /img/:
     get:
       consumes:

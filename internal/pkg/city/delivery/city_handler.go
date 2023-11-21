@@ -40,7 +40,7 @@ func NewCityHandler(service ICityService) (*CityHandler, error) {
 //
 //	@Summary    get all cities
 //	@Description  get all cities
-//	@Tags City
+//	@Tags city
 //	@Produce    json
 //	@Success    200  {object} CityListResponse
 //	@Failure    405  {string} string
@@ -72,7 +72,7 @@ func (c *CityHandler) GetFullCitiesHandler(w http.ResponseWriter, r *http.Reques
 //
 //	@Summary    search city
 //	@Description  search top 5 common named cities
-//	@Tags City
+//	@Tags city
 //	@Produce    json
 //	@Param      searched  query string true  "searched string"
 //	@Success    200  {object} CityListResponse

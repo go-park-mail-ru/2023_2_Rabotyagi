@@ -72,7 +72,7 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 //
 //	@Summary    search category
 //	@Description  search top 5 common named categories
-//	@Tags Category
+//	@Tags category
 //	@Produce    json
 //	@Param      searched  query string true  "searched string"
 //	@Success    200  {object} CategoryListResponse
