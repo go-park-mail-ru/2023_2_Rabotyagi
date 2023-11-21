@@ -29,6 +29,7 @@ type IProductService interface {
 	CloseProduct(ctx context.Context, productID uint64, userID uint64) error
 	ActivateProduct(ctx context.Context, productID uint64, userID uint64) error
 	DeleteProduct(ctx context.Context, productID uint64, userID uint64) error
+	SearchProduct(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error)
 	IBasketService
 	IFavouriteService
 }

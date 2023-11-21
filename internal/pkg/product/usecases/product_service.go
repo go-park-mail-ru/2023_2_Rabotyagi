@@ -28,6 +28,7 @@ type IProductStorage interface {
 	CloseProduct(ctx context.Context, productID uint64, userID uint64) error
 	ActivateProduct(ctx context.Context, productID uint64, userID uint64) error
 	DeleteProduct(ctx context.Context, productID uint64, userID uint64) error
+	SearchProduct(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error)
 	IBasketStorage
 	IFavouriteStorage
 }
@@ -167,4 +168,17 @@ func (p *ProductService) DeleteProduct(ctx context.Context, productID uint64, us
 	}
 
 	return nil
+}
+
+func (p *ProductService) SearchCategory(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error) {
+	products, err := p.storage.SearchProduct(ctx, searchInput)
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	for _, product := range products {
+		product.Sanitize()
+	}
+
+	return products, nil
 }

@@ -66,6 +66,11 @@ type ProductInFeed struct {
 	Favourites     uint64  `json:"favourites"      valid:"required"`
 }
 
+type ProductInSearch struct {
+	ID    uint64 `json:"id"              valid:"required"`
+	Title string `json:"title"           valid:"required, length(1|256)~Title length must be from 1 to 256"`
+}
+
 func (p *Product) Sanitize() {
 	sanitizer := bluemonday.UGCPolicy()
 
@@ -74,6 +79,12 @@ func (p *Product) Sanitize() {
 }
 
 func (p *ProductInFeed) Sanitize() {
+	sanitizer := bluemonday.UGCPolicy()
+
+	p.Title = sanitizer.Sanitize(p.Title)
+}
+
+func (p *ProductInSearch) Sanitize() {
 	sanitizer := bluemonday.UGCPolicy()
 
 	p.Title = sanitizer.Sanitize(p.Title)

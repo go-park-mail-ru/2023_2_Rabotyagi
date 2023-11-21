@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
@@ -743,4 +744,62 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (c *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]*models.ProductInSearch, error) {
+	SQLSearchCategory := `SELECT category.id, category.name, category.parent_id
+						FROM public."category"
+						WHERE LOWER(name) LIKE $1 
+						LIMIT 5;`
+
+	var products []*models.ProductInSearch
+
+	productsRows, err := tx.Query(ctx, SQLSearchCategory, "%"+strings.ToLower(searchInput)+"%")
+	if err != nil {
+		c.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	curProduct := new(models.ProductInSearch)
+
+	_, err = pgx.ForEachRow(productsRows, []any{
+		&curProduct.ID, &curProduct.Title,
+	}, func() error {
+		products = append(products, &models.ProductInSearch{ //nolint:exhaustruct
+			ID:    curProduct.ID,
+			Title: curProduct.Title,
+		})
+
+		return nil
+	})
+	if err != nil {
+		c.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return products, nil
+}
+
+func (c *ProductStorage) SearchProduct(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error) {
+	var products []*models.ProductInSearch
+
+	err := pgx.BeginFunc(ctx, c.pool, func(tx pgx.Tx) error {
+		productsInner, err := c.searchProduct(ctx, tx, searchInput)
+		if err != nil {
+			return err
+		}
+
+		products = productsInner
+
+		return nil
+	})
+	if err != nil {
+		c.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return products, nil
 }
