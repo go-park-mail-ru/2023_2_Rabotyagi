@@ -481,3 +481,38 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
 	p.logger.Infof("in DeleteProductHandler: delete product id=%d", productID)
 }
+
+// SearchProductHandler godoc
+//
+//	@Summary    search products
+//	@Description  search top 5 common named/descripted products
+//	@Tags product
+//	@Produce    json
+//	@Param      searched  query string true  "searched string"
+//	@Success    200  {object} ProductInSearchListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /product/search [get]
+func (p *ProductHandler) SearchProductHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	searchInput := r.URL.Query().Get("searched")
+
+	products, err := p.service.SearchProduct(ctx, searchInput)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delivery.SendOkResponse(w, p.logger, NewProductInSearchListResponse(delivery.StatusResponseSuccessful, products))
+	p.logger.Infof("in SearchProductHandler: search products: %+v\n", products)
+}

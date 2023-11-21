@@ -12,6 +12,9 @@ DROP TABLE IF EXISTS public."order" CASCADE;
 DROP TABLE IF EXISTS public."image" CASCADE;
 DROP TABLE IF EXISTS public."favourite" CASCADE;
 
+DROP INDEX IF EXISTS product_description_search_idx;
+DROP INDEX IF EXISTS product_title_search_idx;
+
 DROP SEQUENCE IF EXISTS user_id_seq;
 DROP SEQUENCE IF EXISTS product_id_seq;
 DROP SEQUENCE IF EXISTS view_id_seq;

@@ -170,7 +170,7 @@ func (p *ProductService) DeleteProduct(ctx context.Context, productID uint64, us
 	return nil
 }
 
-func (p *ProductService) SearchCategory(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error) {
+func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error) {
 	products, err := p.storage.SearchProduct(ctx, searchInput)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)

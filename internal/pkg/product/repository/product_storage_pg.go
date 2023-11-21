@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
@@ -747,14 +745,17 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 }
 
 func (c *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]*models.ProductInSearch, error) {
-	SQLSearchCategory := `SELECT category.id, category.name, category.parent_id
-						FROM public."category"
-						WHERE LOWER(name) LIKE $1 
-						LIMIT 5;`
+	SQLSearchProduct := `SELECT id, title
+							FROM product
+							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+							   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+							ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC,
+									 ts_rank(to_tsvector(description), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
+							LIMIT 5;`
 
 	var products []*models.ProductInSearch
 
-	productsRows, err := tx.Query(ctx, SQLSearchCategory, "%"+strings.ToLower(searchInput)+"%")
+	productsRows, err := tx.Query(ctx, SQLSearchProduct, searchInput)
 	if err != nil {
 		c.logger.Errorln(err)
 
