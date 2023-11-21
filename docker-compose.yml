@@ -39,9 +39,9 @@ services:
   frontend:
     image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
     environment:
-      - API_URL=http://localhost
+      - API_URL=localhost
       - MOCK=false
-      - NODE_ENV=development
+      - SCHEMA=http://
     ports:
       - 3000:3000
     entrypoint: npm run dev-linux

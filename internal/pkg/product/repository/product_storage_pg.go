@@ -215,7 +215,7 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 			return err
 		}
 
-		if !viewExist {
+		if !viewExist && userID != 0 {
 			err = p.addView(ctx, tx, userID, productID)
 			if err != nil {
 				return err
