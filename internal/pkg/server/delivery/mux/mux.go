@@ -97,6 +97,10 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(productHandler.ActivateProductHandler, configMux.addrOrigin, configMux.schema)))
 	router.Handle("/api/v1/product/delete", middleware.Context(ctx,
 		middleware.SetupCORS(productHandler.DeleteProductHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/search", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.SearchProductHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/get_search_feed", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.GetSearchProductFeedHandler, configMux.addrOrigin, configMux.schema)))
 
 	router.Handle("/api/v1/profile/favourites", middleware.Context(ctx,
 		middleware.SetupCORS(productHandler.GetFavouritesHandler, configMux.addrOrigin, configMux.schema)))
@@ -120,9 +124,13 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 
 	router.Handle("/api/v1/category/get_full", middleware.Context(ctx,
 		middleware.SetupCORS(categoryHandler.GetFullCategories, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/category/search", middleware.Context(ctx,
+		middleware.SetupCORS(categoryHandler.SearchCategoryHandler, configMux.addrOrigin, configMux.schema)))
 
 	router.Handle("/api/v1/city/get_full", middleware.Context(ctx,
-		middleware.SetupCORS(cityHandler.GetFullCities, configMux.addrOrigin, configMux.schema)))
+		middleware.SetupCORS(cityHandler.GetFullCitiesHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/city/search", middleware.Context(ctx,
+		middleware.SetupCORS(cityHandler.SearchCityHandler, configMux.addrOrigin, configMux.schema)))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(router, logger))

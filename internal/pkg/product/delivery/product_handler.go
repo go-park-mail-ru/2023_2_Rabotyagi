@@ -29,6 +29,10 @@ type IProductService interface {
 	CloseProduct(ctx context.Context, productID uint64, userID uint64) error
 	ActivateProduct(ctx context.Context, productID uint64, userID uint64) error
 	DeleteProduct(ctx context.Context, productID uint64, userID uint64) error
+	SearchProduct(ctx context.Context, searchInput string) ([]string, error)
+	GetSearchProductFeed(ctx context.Context,
+		searchInput string, lastNumber uint64, limit uint64, userID uint64,
+	) ([]*models.ProductInFeed, error)
 	IBasketService
 	IFavouriteService
 }
@@ -479,4 +483,94 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 	delivery.SendOkResponse(w, p.logger,
 		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
 	p.logger.Infof("in DeleteProductHandler: delete product id=%d", productID)
+}
+
+// SearchProductHandler godoc
+//
+//	@Summary    search products
+//	@Description  search top 5 common named/descripted products
+//	@Tags product
+//	@Produce    json
+//	@Param      searched  query string true  "searched string"
+//	@Success    200  {object} ProductInSearchListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /product/search [get]
+func (p *ProductHandler) SearchProductHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	searchInput := r.URL.Query().Get("searched")
+
+	products, err := p.service.SearchProduct(ctx, searchInput)
+	if err != nil {
+		delivery.SendErrResponse(w, p.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delivery.SendOkResponse(w, p.logger, NewProductInSearchListResponse(delivery.StatusResponseSuccessful, products))
+	p.logger.Infof("in SearchProductHandler: search products: %+v\n", products)
+}
+
+// GetSearchProductFeedHandler godoc
+//
+//	@Summary    get products search feed
+//	@Description  get products feed after search
+//	@Tags product
+//	@Accept      json
+//	@Produce    json
+//	@Param      count  query uint64 true  "count products"
+//	@Param      last_id  query uint64 true  "last product id"
+//	@Param      searched  query string true  "searched string"
+//	@Success    200  {object} ProductListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /product/get_search_feed [get]
+func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	count, lastID, err := parseCountAndLastIDFromRequest(r)
+	if err != nil {
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
+	searchInput := r.URL.Query().Get("searched")
+
+	ctx := r.Context()
+
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		if errors.Is(err, delivery.ErrCookieNotPresented) {
+			userID = 0
+		} else {
+			delivery.HandleErr(w, p.logger, err)
+
+			return
+		}
+	}
+
+	products, err := p.service.GetSearchProductFeed(ctx, searchInput, lastID, count, userID)
+	if err != nil {
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
+	delivery.SendOkResponse(w, p.logger, NewProductListResponse(delivery.StatusResponseSuccessful, products))
+	p.logger.Infof("in GetProductListHandler: get product list: %+v", products)
 }

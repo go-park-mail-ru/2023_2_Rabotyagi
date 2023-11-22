@@ -16,6 +16,7 @@ var _ ICityService = (*usecases.CityService)(nil)
 
 type ICityService interface {
 	GetFullCities(ctx context.Context) ([]*models.City, error)
+	SearchCity(ctx context.Context, searchInput string) ([]*models.City, error)
 }
 
 type CityHandler struct {
@@ -35,18 +36,18 @@ func NewCityHandler(service ICityService) (*CityHandler, error) {
 	}, nil
 }
 
-// GetFullCities godoc
+// GetFullCitiesHandler godoc
 //
 //	@Summary    get all cities
 //	@Description  get all cities
-//	@Tags City
+//	@Tags city
 //	@Produce    json
 //	@Success    200  {object} CityListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
 //	@Router      /city/get_full [get]
-func (c *CityHandler) GetFullCities(w http.ResponseWriter, r *http.Request) {
+func (c *CityHandler) GetFullCitiesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -65,4 +66,39 @@ func (c *CityHandler) GetFullCities(w http.ResponseWriter, r *http.Request) {
 
 	delivery.SendOkResponse(w, c.logger, NewCityListResponse(delivery.StatusResponseSuccessful, cities))
 	c.logger.Infof("in GetFullCities: get all cities: %+v\n", cities)
+}
+
+// SearchCityHandler godoc
+//
+//	@Summary    search city
+//	@Description  search top 5 common named cities
+//	@Tags city
+//	@Produce    json
+//	@Param      searched  query string true  "searched string"
+//	@Success    200  {object} CityListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /city/search [get]
+func (c *CityHandler) SearchCityHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	searchInput := r.URL.Query().Get("searched")
+
+	cities, err := c.service.SearchCity(ctx, searchInput)
+	if err != nil {
+		delivery.SendErrResponse(w, c.logger,
+			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+
+		return
+	}
+
+	delivery.SendOkResponse(w, c.logger, NewCityListResponse(delivery.StatusResponseSuccessful, cities))
+	c.logger.Infof("in SearchCityHandler: search city: %+v\n", cities)
 }

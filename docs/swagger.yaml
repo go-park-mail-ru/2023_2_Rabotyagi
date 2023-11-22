@@ -286,6 +286,15 @@ definitions:
       status:
         type: integer
     type: object
+  internal_pkg_product_delivery.ProductInSearchListResponse:
+    properties:
+      body:
+        items:
+          type: string
+        type: array
+      status:
+        type: integer
+    type: object
   internal_pkg_product_delivery.ProductListResponse:
     properties:
       body:
@@ -357,6 +366,37 @@ paths:
       summary: get all categories
       tags:
       - category
+  /category/search:
+    get:
+      description: search top 5 common named categories
+      parameters:
+      - description: searched string
+        in: query
+        name: searched
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_category_delivery.CategoryListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: search category
+      tags:
+      - category
   /city/get_full:
     get:
       description: get all cities
@@ -381,7 +421,38 @@ paths:
             type: string
       summary: get all cities
       tags:
-      - City
+      - city
+  /city/search:
+    get:
+      description: search top 5 common named cities
+      parameters:
+      - description: searched string
+        in: query
+        name: searched
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_city_delivery.CityListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: search city
+      tags:
+      - city
   /img/:
     get:
       consumes:
@@ -986,6 +1057,49 @@ paths:
       summary: get list of products for saler
       tags:
       - product
+  /product/get_search_feed:
+    get:
+      consumes:
+      - application/json
+      description: get products feed after search
+      parameters:
+      - description: count products
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: last product id
+        in: query
+        name: last_id
+        required: true
+        type: integer
+      - description: searched string
+        in: query
+        name: searched
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get products search feed
+      tags:
+      - product
   /product/remove-from-fav:
     delete:
       consumes:
@@ -1020,6 +1134,37 @@ paths:
       summary: delete product from favs
       tags:
       - favourite
+  /product/search:
+    get:
+      description: search top 5 common named/descripted products
+      parameters:
+      - description: searched string
+        in: query
+        name: searched
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_product_delivery.ProductInSearchListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: search products
+      tags:
+      - product
   /product/update:
     patch:
       consumes:
