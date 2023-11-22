@@ -744,7 +744,8 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 	return nil
 }
 
-func (c *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]*models.ProductInSearch, error) {
+func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx,
+	searchInput string) ([]*models.ProductInSearch, error) {
 	SQLSearchProduct := `SELECT id, title
 							FROM product
 							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
@@ -757,7 +758,7 @@ func (c *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInp
 
 	productsRows, err := tx.Query(ctx, SQLSearchProduct, searchInput)
 	if err != nil {
-		c.logger.Errorln(err)
+		p.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -775,7 +776,7 @@ func (c *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInp
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorln(err)
+		p.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -783,11 +784,11 @@ func (c *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInp
 	return products, nil
 }
 
-func (c *ProductStorage) SearchProduct(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error) {
+func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error) {
 	var products []*models.ProductInSearch
 
-	err := pgx.BeginFunc(ctx, c.pool, func(tx pgx.Tx) error {
-		productsInner, err := c.searchProduct(ctx, tx, searchInput)
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		productsInner, err := p.searchProduct(ctx, tx, searchInput)
 		if err != nil {
 			return err
 		}
@@ -797,10 +798,97 @@ func (c *ProductStorage) SearchProduct(ctx context.Context, searchInput string) 
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorln(err)
+		p.logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return products, nil
+}
+
+func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
+	searchInput string, lastNumber uint32, limit uint32) ([]*models.ProductInFeed, error) {
+	SQLSearchProduct :=
+		`SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
+	FROM product
+	WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+	   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+	ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC,
+			 ts_rank(to_tsvector(description), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
+	OFFSET $2
+	LIMIT $3;`
+
+	rowsProducts, err := tx.Query(ctx, SQLSearchProduct, searchInput, lastNumber, limit)
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	curProduct := new(models.ProductInFeed)
+
+	var slProduct []*models.ProductInFeed
+
+	_, err = pgx.ForEachRow(rowsProducts, []any{
+		&curProduct.ID, &curProduct.Title,
+		&curProduct.Price, &curProduct.CityID,
+		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount,
+	}, func() error {
+		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
+			ID:             curProduct.ID,
+			Title:          curProduct.Title,
+			Price:          curProduct.Price,
+			CityID:         curProduct.CityID,
+			Delivery:       curProduct.Delivery,
+			SafeDeal:       curProduct.SafeDeal,
+			IsActive:       curProduct.IsActive,
+			AvailableCount: curProduct.AvailableCount,
+		})
+
+		return nil
+	})
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return slProduct, nil
+}
+
+func (p *ProductStorage) GetSearchProductFeed(ctx context.Context,
+	searchInput string, lastNumber uint32, limit uint32, userID uint64,
+) ([]*models.ProductInFeed, error) {
+	var slProduct []*models.ProductInFeed
+
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		slProductInner, err := p.searchProductFeed(ctx,
+			tx, searchInput, lastNumber, limit)
+
+		if err != nil {
+			return err
+		}
+
+		for _, product := range slProductInner {
+			productAdditionInner, err := p.getProductAddition(ctx, tx, product.ID, userID)
+			if err != nil {
+				return err
+			}
+
+			product.Images = productAdditionInner.images
+			product.Favourites = productAdditionInner.favourites
+			product.InFavourites = productAdditionInner.inFavourite
+
+			slProduct = append(slProduct, product)
+		}
+
+		return nil
+	})
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return slProduct, nil
 }
