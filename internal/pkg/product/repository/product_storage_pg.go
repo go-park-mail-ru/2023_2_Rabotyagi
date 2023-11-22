@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
-
-	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
+	"regexp"
+	"strings"
 )
 
 var (
@@ -745,8 +746,16 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 }
 
 func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx,
-	searchInput string) ([]*models.ProductInSearch, error) {
-	SQLSearchProduct := `SELECT id, title
+	searchInput string) ([]string, error) {
+	//searchInput = strings.TrimFunc(searchInput, func(r rune) bool {
+	//	return !unicode.IsLetter(r) && !unicode.IsNumber(r) && !unicode.IsSpace(r)
+	//})
+	regex := regexp.MustCompile("[^a-zA-Zа-яА-Я0-9\\s]+")
+	searchInput = regex.ReplaceAllString(searchInput, "")
+	regex = regexp.MustCompile(`\s+`)
+	searchInput = regex.ReplaceAllString(searchInput, " ")
+
+	SQLSearchProduct := `SELECT title
 							FROM product
 							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
 							   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
@@ -754,7 +763,7 @@ func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx,
 									 ts_rank(to_tsvector(description), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
 							LIMIT 5;`
 
-	var products []*models.ProductInSearch
+	var products []string
 
 	productsRows, err := tx.Query(ctx, SQLSearchProduct, searchInput)
 	if err != nil {
@@ -763,15 +772,12 @@ func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	curProduct := new(models.ProductInSearch)
+	var curProduct string
 
 	_, err = pgx.ForEachRow(productsRows, []any{
-		&curProduct.ID, &curProduct.Title,
+		&curProduct,
 	}, func() error {
-		products = append(products, &models.ProductInSearch{ //nolint:exhaustruct
-			ID:    curProduct.ID,
-			Title: curProduct.Title,
-		})
+		products = append(products, curProduct)
 
 		return nil
 	})
@@ -784,8 +790,8 @@ func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx,
 	return products, nil
 }
 
-func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error) {
-	var products []*models.ProductInSearch
+func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) ([]string, error) {
+	var products []string
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		productsInner, err := p.searchProduct(ctx, tx, searchInput)
@@ -807,7 +813,14 @@ func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) 
 }
 
 func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
-	searchInput string, lastNumber uint32, limit uint32) ([]*models.ProductInFeed, error) {
+	searchInput string, lastNumber uint64, limit uint64) ([]*models.ProductInFeed, error) {
+	regex := regexp.MustCompile("[^a-zA-Zа-яА-Я0-9\\s]+")
+	searchInput = regex.ReplaceAllString(searchInput, "")
+	regex = regexp.MustCompile(`\s+`)
+	searchInput = regex.ReplaceAllString(searchInput, " ")
+
+	searchInput = strings.TrimSpace(searchInput)
+
 	SQLSearchProduct :=
 		`SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
 	FROM product
@@ -857,7 +870,7 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 }
 
 func (p *ProductStorage) GetSearchProductFeed(ctx context.Context,
-	searchInput string, lastNumber uint32, limit uint32, userID uint64,
+	searchInput string, lastNumber uint64, limit uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
 	var slProduct []*models.ProductInFeed
 

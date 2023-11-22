@@ -37,11 +37,11 @@ func NewProductListResponse(status int, body []*models.ProductInFeed) *ProductLi
 }
 
 type ProductInSearchListResponse struct {
-	Status int                       `json:"status"`
-	Body   []*models.ProductInSearch `json:"body"`
+	Status int      `json:"status"`
+	Body   []string `json:"body"`
 }
 
-func NewProductInSearchListResponse(status int, body []*models.ProductInSearch) *ProductInSearchListResponse {
+func NewProductInSearchListResponse(status int, body []string) *ProductInSearchListResponse {
 	return &ProductInSearchListResponse{
 		Status: status,
 		Body:   body,

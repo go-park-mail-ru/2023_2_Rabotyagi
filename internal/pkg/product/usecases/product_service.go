@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"github.com/microcosm-cc/bluemonday"
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
@@ -28,7 +29,10 @@ type IProductStorage interface {
 	CloseProduct(ctx context.Context, productID uint64, userID uint64) error
 	ActivateProduct(ctx context.Context, productID uint64, userID uint64) error
 	DeleteProduct(ctx context.Context, productID uint64, userID uint64) error
-	SearchProduct(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error)
+	SearchProduct(ctx context.Context, searchInput string) ([]string, error)
+	GetSearchProductFeed(ctx context.Context,
+		searchInput string, lastNumber uint64, limit uint64, userID uint64,
+	) ([]*models.ProductInFeed, error)
 	IBasketStorage
 	IFavouriteStorage
 }
@@ -170,8 +174,25 @@ func (p *ProductService) DeleteProduct(ctx context.Context, productID uint64, us
 	return nil
 }
 
-func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) ([]*models.ProductInSearch, error) {
+func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) ([]string, error) {
 	products, err := p.storage.SearchProduct(ctx, searchInput)
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	sanitizer := bluemonday.UGCPolicy()
+
+	for _, product := range products {
+		product = sanitizer.Sanitize(product)
+	}
+
+	return products, nil
+}
+
+func (p *ProductService) GetSearchProductFeed(ctx context.Context,
+	searchInput string, lastNumber uint64, limit uint64, userID uint64,
+) ([]*models.ProductInFeed, error) {
+	products, err := p.storage.GetSearchProductFeed(ctx, searchInput, lastNumber, limit, userID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

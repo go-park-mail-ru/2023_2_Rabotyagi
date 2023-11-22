@@ -7,9 +7,6 @@ CREATE SEQUENCE IF NOT EXISTS order_id_seq;
 CREATE SEQUENCE IF NOT EXISTS image_id_seq;
 CREATE SEQUENCE IF NOT EXISTS favourite_id_seq;
 
-CREATE INDEX product_title_search_idx ON public."product" USING GIN (to_tsvector(title));
-CREATE INDEX product_description_search_idx ON public."product" USING GIN (to_tsvector(description));
-
 CREATE TABLE IF NOT EXISTS public."user"
 (
     id         BIGINT                   DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,

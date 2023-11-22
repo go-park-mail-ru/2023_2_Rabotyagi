@@ -99,6 +99,8 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(productHandler.DeleteProductHandler, configMux.addrOrigin, configMux.schema)))
 	router.Handle("/api/v1/product/search", middleware.Context(ctx,
 		middleware.SetupCORS(productHandler.SearchProductHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/product/get_search_feed", middleware.Context(ctx,
+		middleware.SetupCORS(productHandler.GetSearchProductFeedHandler, configMux.addrOrigin, configMux.schema)))
 
 	router.Handle("/api/v1/profile/favourites", middleware.Context(ctx,
 		middleware.SetupCORS(productHandler.GetFavouritesHandler, configMux.addrOrigin, configMux.schema)))
