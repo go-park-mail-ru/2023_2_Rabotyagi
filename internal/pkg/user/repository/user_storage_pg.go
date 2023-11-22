@@ -19,10 +19,10 @@ import (
 )
 
 var (
-	ErrEmailBusy          = myerrors.NewErrorBadFormatRequest("Такой email уже занят")
-	ErrEmailNotExist      = myerrors.NewErrorBadFormatRequest("Такой email не существует")
-	ErrPhoneBusy          = myerrors.NewErrorBadFormatRequest("Такой телефон уже занят")
-	ErrWrongPassword      = myerrors.NewErrorBadFormatRequest("Некорректный пароль")
+	ErrEmailBusy          = myerrors.NewErrorBadContentRequest("Такой email уже занят")
+	ErrEmailNotExist      = myerrors.NewErrorBadContentRequest("Такой email не существует")
+	ErrPhoneBusy          = myerrors.NewErrorBadContentRequest("Такой телефон уже занят")
+	ErrWrongCredentials   = myerrors.NewErrorBadContentRequest("Некорректный логин или пароль")
 	ErrNoUpdateFields     = myerrors.NewErrorBadFormatRequest("Вы пытаетесь обновить пустое количество полей")
 	ErrNoAffectedUserRows = myerrors.NewErrorBadFormatRequest("Не получилось обновить данные пользователя")
 
@@ -316,7 +316,7 @@ func (u *UserStorage) GetUser(ctx context.Context, email string, password string
 		}
 
 		if !utils.ComparePassAndHash(hashPass, password) {
-			return ErrWrongPassword
+			return ErrWrongCredentials
 		}
 
 		return nil

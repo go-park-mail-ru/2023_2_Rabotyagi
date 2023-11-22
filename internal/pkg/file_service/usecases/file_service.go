@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	ErrCantRead    = myerrors.NewErrorBadFormatRequest("Не получилось считать содержимое файла")
+	ErrCantRead    = myerrors.NewErrorInternal("Не получилось считать содержимое файла из тела запроса")
 	ErrWrongFormat = myerrors.NewErrorBadFormatRequest("Формат файла должен быть png, jpeg")
 )
 

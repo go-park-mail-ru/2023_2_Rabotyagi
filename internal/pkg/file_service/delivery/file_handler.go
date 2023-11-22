@@ -28,10 +28,10 @@ type keyCtx string
 const keyCtxHandler keyCtx = "handler"
 
 var (
-	ErrToBigFile = myerrors.NewErrorBadFormatRequest("Максимальный размер фото %d Мбайт",
+	ErrToBigFile = myerrors.NewErrorBadContentRequest("Максимальный размер фото %d Мбайт",
 		MaxSizePhotoBytes%1024%1024)
-	ErrToManyCountFiles  = myerrors.NewErrorBadFormatRequest("Максимальное количество фото = %d", MaxCountPhoto)
-	ErrForbiddenRootPath = myerrors.NewErrorBadFormatRequest("Нельзя вызывать корневой путь")
+	ErrToManyCountFiles  = myerrors.NewErrorBadContentRequest("Максимальное количество фото = %d", MaxCountPhoto)
+	ErrForbiddenRootPath = myerrors.NewErrorBadContentRequest("Нельзя вызывать корневой путь")
 )
 
 var _ IFileService = (*fileusecases.FileService)(nil)

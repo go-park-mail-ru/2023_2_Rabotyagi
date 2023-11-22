@@ -15,11 +15,12 @@ import (
 var (
 	NameSeqOrder = pgx.Identifier{"public", "order_id_seq"} //nolint:gochecknoglobals
 
-	ErrLessStatus              = myerrors.NewErrorBadFormatRequest("Статус заказа должен только увеличиваться")
-	ErrNotFoundOrder           = myerrors.NewErrorBadFormatRequest("Не получилось найти такой заказ для изменения")
-	ErrNotFoundOrdersInBasket  = myerrors.NewErrorBadFormatRequest("Не получилось найти заказы для покупки")
-	ErrNoAffectedOrderRows     = myerrors.NewErrorBadFormatRequest("Не получилось обновить данные заказа")
-	ErrAvailableCountNotEnough = myerrors.NewErrorBadFormatRequest("Товара доступно меньше, чем вы пытаетесь довавить в корзину")
+	ErrLessStatus              = myerrors.NewErrorBadContentRequest("Статус заказа должен только увеличиваться")
+	ErrNotFoundOrder           = myerrors.NewErrorBadContentRequest("Не получилось найти такой заказ для изменения")
+	ErrNotFoundOrdersInBasket  = myerrors.NewErrorBadContentRequest("Не получилось найти заказы для покупки")
+	ErrNoAffectedOrderRows     = myerrors.NewErrorBadContentRequest("Не получилось обновить данные заказа")
+	ErrAvailableCountNotEnough = myerrors.NewErrorBadContentRequest(
+		"Товара доступно меньше, чем вы пытаетесь довавить в корзину")
 )
 
 func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,

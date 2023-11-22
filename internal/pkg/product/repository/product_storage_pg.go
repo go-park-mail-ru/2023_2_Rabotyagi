@@ -17,11 +17,12 @@ import (
 )
 
 var (
-	ErrProductNotFound       = myerrors.NewErrorBadFormatRequest("Это объявление не найдено")
-	ErrNoUpdateFields        = myerrors.NewErrorBadFormatRequest("Вы пытаетесь обновить пустое количество полей объявления")
-	ErrNoAffectedProductRows = myerrors.NewErrorBadFormatRequest("Не получилось обновить данные товара")
-
-	MessageErrGetUncorrectedFormatImages = "Получили некорректный формат images внутри объявления"
+	ErrProductNotFound = myerrors.NewErrorBadFormatRequest("Это объявление не найдено")
+	ErrNoUpdateFields  = myerrors.NewErrorBadFormatRequest(
+		"Вы пытаетесь обновить пустое количество полей объявления")
+	ErrNoAffectedProductRows      = myerrors.NewErrorBadFormatRequest("Не получилось обновить данные товара")
+	ErrGetUncorrectedFormatImages = myerrors.NewErrorBadFormatRequest(
+		"Получили некорректный формат images внутри объявления")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
@@ -534,10 +535,10 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 		if imagesExist {
 			slImages, ok := updateImages.([]models.Image)
 			if !ok {
-				errMessage := fmt.Sprintf("%s product_id=%d", MessageErrGetUncorrectedFormatImages, productID)
+				errMessage := fmt.Errorf("%w product_id=%d", ErrGetUncorrectedFormatImages, productID)
 				p.logger.Errorln(errMessage)
 
-				return fmt.Errorf(errMessage)
+				return errMessage
 			}
 
 			err = p.insertImages(ctx, tx, productID, slImages)

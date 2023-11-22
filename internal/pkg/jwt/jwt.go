@@ -12,8 +12,8 @@ import (
 var Secret = []byte("super-secret")
 
 var (
-	ErrNilToken           = myerrors.NewErrorBadFormatRequest("Получили токен = nil")
-	ErrWrongSigningMethod = myerrors.NewErrorBadFormatRequest("Неожиданный signing метод ")
+	ErrNilToken           = myerrors.NewErrorInternal("Получили токен = nil")
+	ErrWrongSigningMethod = myerrors.NewErrorBadFormatRequest("Неожиданный signing метод jwt токена")
 	ErrInvalidToken       = myerrors.NewErrorBadFormatRequest("Некорректный токен")
 )
 

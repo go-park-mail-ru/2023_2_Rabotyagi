@@ -16,7 +16,8 @@ var (
 	ErrDecodePreProduct   = myerrors.NewErrorBadFormatRequest("Некорректный json объявления")
 	ErrDecodePreOrder     = myerrors.NewErrorBadFormatRequest("Некорректный json заказа")
 	ErrDecodeOrderChanges = myerrors.NewErrorBadFormatRequest("Некорректный json изменения заказа")
-	ErrNotExistingStatus  = myerrors.NewErrorBadFormatRequest("Статус заказа не может быть больше %d", models.OrderStatusClosed)
+	ErrNotExistingStatus  = myerrors.NewErrorBadFormatRequest(
+		"Статус заказа не может быть больше %d", models.OrderStatusClosed)
 )
 
 func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
@@ -26,10 +27,11 @@ func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
 	}
 
 	decoder := json.NewDecoder(r)
-	preProduct := &models.PreProduct{
+	preProduct := &models.PreProduct{ //nolint:exhaustruct
 		Delivery: false,
 		SafeDeal: false,
 	}
+
 	if err := decoder.Decode(preProduct); err != nil {
 		logger.Errorln(err)
 
@@ -51,7 +53,7 @@ func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
 func ValidatePreProduct(r io.Reader) (*models.PreProduct, error) {
 	preProduct, err := validatePreProduct(r)
 	if err != nil {
-		return nil, myerrors.NewErrorBadFormatRequest(err.Error())
+		return nil, myerrors.NewErrorBadContentRequest(err.Error())
 	}
 
 	return preProduct, nil
@@ -75,7 +77,7 @@ func ValidatePartOfPreProduct(r io.Reader) (*models.PreProduct, error) {
 			if err != "non zero value required" {
 				logger.Errorln(err)
 
-				return nil, myerrors.NewErrorBadFormatRequest("%s error: %s", field, err)
+				return nil, myerrors.NewErrorBadContentRequest("в поле %s ошибка: %s", field, err)
 			}
 		}
 	}
@@ -102,7 +104,7 @@ func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, myerrors.NewErrorBadFormatRequest(err.Error())
+		return nil, myerrors.NewErrorBadContentRequest(err.Error())
 	}
 
 	return preOrder, nil
@@ -127,7 +129,7 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return orderChanges, err
+		return orderChanges, myerrors.NewErrorBadFormatRequest(err.Error())
 	}
 
 	return orderChanges, nil

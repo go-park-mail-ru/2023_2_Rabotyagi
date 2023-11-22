@@ -13,8 +13,9 @@ var (
 	ErrWrongSalerID   = myerrors.NewErrorBadFormatRequest("Получили некорректный saler_id параметр. Он должен быть целым")
 	ErrWrongCount     = myerrors.NewErrorBadFormatRequest("Получили некорректный count параметр. Он должен быть целым")
 	ErrWrongLastID    = myerrors.NewErrorBadFormatRequest("Получили некорректный last_id параметр. Он должен быть целым")
-	ErrWrongProductID = myerrors.NewErrorBadFormatRequest("Получили некорректный product_id параметр. Он должен быть целым")
-	ErrWrongUserID    = myerrors.NewErrorBadFormatRequest("Получили некорректный user_id параметр. Он должен быть целым")
+	ErrWrongProductID = myerrors.NewErrorBadFormatRequest(
+		"Получили некорректный product_id параметр. Он должен быть целым")
+	ErrWrongUserID = myerrors.NewErrorBadFormatRequest("Получили некорректный user_id параметр. Он должен быть целым")
 )
 
 func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {

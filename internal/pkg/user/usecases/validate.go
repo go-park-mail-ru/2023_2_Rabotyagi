@@ -13,8 +13,7 @@ import (
 )
 
 var (
-	ErrWrongCredentials = myerrors.NewErrorBadFormatRequest("Некорректный логин или пароль")
-	ErrDecodeUser       = myerrors.NewErrorBadFormatRequest("Некорректный json пользователя")
+	ErrDecodeUser = myerrors.NewErrorBadFormatRequest("Некорректный json пользователя")
 )
 
 func validateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
@@ -69,11 +68,17 @@ func ValidateUserCredentials(email string, password string) (*models.UserWithout
 	logger.Infoln(userWithoutID)
 
 	_, err = govalidator.ValidateStruct(userWithoutID)
-	if err != nil && (govalidator.ErrorByField(err, "email") != "" ||
-		govalidator.ErrorByField(err, "password") != "") {
+
+	if errMessage := govalidator.ErrorByField(err, "email"); errMessage != "" {
 		logger.Errorln(err)
 
-		return nil, ErrWrongCredentials
+		return nil, myerrors.NewErrorBadContentRequest(errMessage)
+	}
+
+	if errMessage := govalidator.ErrorByField(err, "password"); errMessage != "" {
+		logger.Errorln(err)
+
+		return nil, myerrors.NewErrorBadContentRequest(errMessage)
 	}
 
 	return userWithoutID, nil

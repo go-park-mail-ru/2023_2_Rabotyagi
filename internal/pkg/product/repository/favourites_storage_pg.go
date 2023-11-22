@@ -8,15 +8,13 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var (
-	ErrNoAffectedFavouriteRows = myerrors.NewErrorBadFormatRequest("Не получилось удалить из избранного")
-)
+var ErrNoAffectedFavouriteRows = myerrors.NewErrorBadFormatRequest("Не получилось удалить из избранного")
 
 func (p *ProductStorage) selectUserFavourites(ctx context.Context, tx pgx.Tx,
-	userID uint64) ([]*models.ProductInFeed, error) {
-
-	SQLSelectUserFavourites :=
-		`SELECT p.id, p.title, p.price, p.city_id, p.delivery, p.safe_deal, p.is_active, p.available_count
+	userID uint64,
+) ([]*models.ProductInFeed, error) {
+	SQLSelectUserFavourites := `SELECT p.id, p.title, p.price, p.city_id,
+		p.delivery, p.safe_deal, p.is_active, p.available_count
 		FROM public."product" p
 		JOIN public."favourite" f ON p.id = f.product_id
 		WHERE f.owner_id = $1`
@@ -29,6 +27,7 @@ func (p *ProductStorage) selectUserFavourites(ctx context.Context, tx pgx.Tx,
 	}
 
 	curProduct := new(models.ProductInFeed)
+
 	var slProduct []*models.ProductInFeed
 
 	_, err = pgx.ForEachRow(productsInFavouritesRows, []any{
