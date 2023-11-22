@@ -3,6 +3,7 @@ package delivery
 import (
 	"context"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/city/usecases"
@@ -89,7 +90,7 @@ func (c *CityHandler) SearchCityHandler(w http.ResponseWriter, r *http.Request) 
 
 	ctx := r.Context()
 
-	searchInput := r.URL.Query().Get("searched")
+	searchInput := utils.ParseStringFromRequest(r, "searched")
 
 	cities, err := c.service.SearchCity(ctx, searchInput)
 	if err != nil {

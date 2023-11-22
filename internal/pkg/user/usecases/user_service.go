@@ -5,12 +5,10 @@ import (
 	"fmt"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"go.uber.org/zap"
 	"io"
-	"strconv"
-
-	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 )
@@ -79,13 +77,8 @@ func (u *UserService) GetUser(ctx context.Context, email string, password string
 }
 
 func (u *UserService) GetUserWithoutPasswordByID(ctx context.Context,
-	userIDStr string,
+	userID uint64,
 ) (*models.UserWithoutPassword, error) {
-	userID, err := strconv.ParseUint(userIDStr, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
 	user, err := u.storage.GetUserWithoutPasswordByID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)

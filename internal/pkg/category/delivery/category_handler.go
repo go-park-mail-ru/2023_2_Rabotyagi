@@ -3,6 +3,7 @@ package delivery
 import (
 	"context"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
@@ -89,7 +90,7 @@ func (c *CategoryHandler) SearchCategoryHandler(w http.ResponseWriter, r *http.R
 
 	ctx := r.Context()
 
-	searchInput := r.URL.Query().Get("searched")
+	searchInput := utils.ParseStringFromRequest(r, "searched")
 
 	categories, err := c.service.SearchCategory(ctx, searchInput)
 	if err != nil {
