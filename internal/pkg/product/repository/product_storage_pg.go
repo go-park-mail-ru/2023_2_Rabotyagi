@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 
 	"github.com/Masterminds/squirrel"
@@ -17,9 +17,9 @@ import (
 )
 
 var (
-	ErrProductNotFound       = myerrors.NewError("Это объявление не найдено")
-	ErrNoUpdateFields        = myerrors.NewError("Вы пытаетесь обновить пустое количество полей объявления")
-	ErrNoAffectedProductRows = myerrors.NewError("Не получилось обновить данные товара")
+	ErrProductNotFound       = myerrors.NewErrorBadFormatRequest("Это объявление не найдено")
+	ErrNoUpdateFields        = myerrors.NewErrorBadFormatRequest("Вы пытаетесь обновить пустое количество полей объявления")
+	ErrNoAffectedProductRows = myerrors.NewErrorBadFormatRequest("Не получилось обновить данные товара")
 
 	MessageErrGetUncorrectedFormatImages = "Получили некорректный формат images внутри объявления"
 

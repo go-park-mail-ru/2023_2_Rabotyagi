@@ -6,17 +6,17 @@ import (
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 
 	"github.com/asaskevich/govalidator"
 )
 
 var (
-	ErrDecodePreProduct   = myerrors.NewError("Некорректный json объявления")
-	ErrDecodePreOrder     = myerrors.NewError("Некорректный json заказа")
-	ErrDecodeOrderChanges = myerrors.NewError("Некорректный json изменения заказа")
-	ErrNotExistingStatus  = myerrors.NewError("Статус заказа не может быть больше %d", models.OrderStatusClosed)
+	ErrDecodePreProduct   = myerrors.NewErrorBadFormatRequest("Некорректный json объявления")
+	ErrDecodePreOrder     = myerrors.NewErrorBadFormatRequest("Некорректный json заказа")
+	ErrDecodeOrderChanges = myerrors.NewErrorBadFormatRequest("Некорректный json изменения заказа")
+	ErrNotExistingStatus  = myerrors.NewErrorBadFormatRequest("Статус заказа не может быть больше %d", models.OrderStatusClosed)
 )
 
 func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
@@ -51,7 +51,7 @@ func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
 func ValidatePreProduct(r io.Reader) (*models.PreProduct, error) {
 	preProduct, err := validatePreProduct(r)
 	if err != nil {
-		return nil, myerrors.NewError(err.Error())
+		return nil, myerrors.NewErrorBadFormatRequest(err.Error())
 	}
 
 	return preProduct, nil
@@ -75,7 +75,7 @@ func ValidatePartOfPreProduct(r io.Reader) (*models.PreProduct, error) {
 			if err != "non zero value required" {
 				logger.Errorln(err)
 
-				return nil, myerrors.NewError("%s error: %s", field, err)
+				return nil, myerrors.NewErrorBadFormatRequest("%s error: %s", field, err)
 			}
 		}
 	}
@@ -102,7 +102,7 @@ func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, myerrors.NewError(err.Error())
+		return nil, myerrors.NewErrorBadFormatRequest(err.Error())
 	}
 
 	return preOrder, nil
@@ -149,7 +149,7 @@ func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
 		errCount := govalidator.ErrorByField(err, "count")
 
 		if errID != "" || errCount != "" {
-			errInner := myerrors.NewError("%s\n%s", errCount, errID)
+			errInner := myerrors.NewErrorBadFormatRequest("%s\n%s", errCount, errID)
 			logger.Errorln(errInner)
 
 			return nil, errInner
@@ -175,7 +175,7 @@ func ValidateOrderChangesStatus(r io.Reader) (*models.OrderChanges, error) {
 		errID := govalidator.ErrorByField(err, "id")
 
 		if errID != "" || errStatus != "" {
-			errInner := myerrors.NewError("%s\n%s", errStatus, errID)
+			errInner := myerrors.NewErrorBadFormatRequest("%s\n%s", errStatus, errID)
 			logger.Errorln(errInner)
 
 			return nil, errInner

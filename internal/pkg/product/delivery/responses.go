@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
 )
 
 const (
@@ -17,9 +18,9 @@ type ProductResponse struct {
 	Body   *models.Product `json:"body"`
 }
 
-func NewProductResponse(status int, body *models.Product) *ProductResponse {
+func NewProductResponse(body *models.Product) *ProductResponse {
 	return &ProductResponse{
-		Status: status,
+		Status: statuses.StatusResponseSuccessful,
 		Body:   body,
 	}
 }
@@ -29,9 +30,9 @@ type ProductListResponse struct {
 	Body   []*models.ProductInFeed `json:"body"`
 }
 
-func NewProductListResponse(status int, body []*models.ProductInFeed) *ProductListResponse {
+func NewProductListResponse(body []*models.ProductInFeed) *ProductListResponse {
 	return &ProductListResponse{
-		Status: status,
+		Status: statuses.StatusResponseSuccessful,
 		Body:   body,
 	}
 }
@@ -41,9 +42,9 @@ type OrderResponse struct {
 	Body   *models.OrderInBasket `json:"body"`
 }
 
-func NewOrderResponse(status int, body *models.OrderInBasket) *OrderResponse {
+func NewOrderResponse(body *models.OrderInBasket) *OrderResponse {
 	return &OrderResponse{
-		Status: status,
+		Status: statuses.StatusResponseSuccessful,
 		Body:   body,
 	}
 }
@@ -53,9 +54,9 @@ type OrderListResponse struct {
 	Body   []*models.OrderInBasket `json:"body"`
 }
 
-func NewOrderListResponse(status int, body []*models.OrderInBasket) *OrderListResponse {
+func NewOrderListResponse(body []*models.OrderInBasket) *OrderListResponse {
 	return &OrderListResponse{
-		Status: status,
+		Status: statuses.StatusResponseSuccessful,
 		Body:   body,
 	}
 }

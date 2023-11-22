@@ -2,12 +2,13 @@ package delivery
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
 
 	"go.uber.org/zap"
 )
@@ -57,12 +58,12 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 
 	categories, err := c.service.GetFullCategories(ctx)
 	if err != nil {
-		delivery.SendErrResponse(w, c.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendResponse(w, c.logger,
+			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendOkResponse(w, c.logger, NewCategoryListResponse(delivery.StatusResponseSuccessful, categories))
+	delivery.SendResponse(w, c.logger, NewCategoryListResponse(categories))
 	c.logger.Infof("in GetFullCategories: get all categories: %+v\n", categories)
 }

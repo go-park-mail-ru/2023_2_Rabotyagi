@@ -174,13 +174,6 @@ definitions:
       status:
         type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response:
-    properties:
-      body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody'
-      status:
-        type: integer
-    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody:
     properties:
       message:
@@ -200,6 +193,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID'
+      status:
+        type: integer
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody'
       status:
         type: integer
     type: object
@@ -449,7 +449,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
@@ -510,7 +510,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
@@ -545,7 +545,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
@@ -606,7 +606,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
@@ -640,7 +640,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
@@ -675,7 +675,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
@@ -782,7 +782,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
@@ -817,7 +817,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
@@ -1238,7 +1238,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
@@ -1276,7 +1276,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:

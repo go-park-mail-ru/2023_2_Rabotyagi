@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 
 	"github.com/jackc/pgx/v5"
@@ -15,11 +15,11 @@ import (
 var (
 	NameSeqOrder = pgx.Identifier{"public", "order_id_seq"} //nolint:gochecknoglobals
 
-	ErrLessStatus              = myerrors.NewError("Статус заказа должен только увеличиваться")
-	ErrNotFoundOrder           = myerrors.NewError("Не получилось найти такой заказ для изменения")
-	ErrNotFoundOrdersInBasket  = myerrors.NewError("Не получилось найти заказы для покупки")
-	ErrNoAffectedOrderRows     = myerrors.NewError("Не получилось обновить данные заказа")
-	ErrAvailableCountNotEnough = myerrors.NewError("Товара доступно меньше, чем вы пытаетесь довавить в корзину")
+	ErrLessStatus              = myerrors.NewErrorBadFormatRequest("Статус заказа должен только увеличиваться")
+	ErrNotFoundOrder           = myerrors.NewErrorBadFormatRequest("Не получилось найти такой заказ для изменения")
+	ErrNotFoundOrdersInBasket  = myerrors.NewErrorBadFormatRequest("Не получилось найти заказы для покупки")
+	ErrNoAffectedOrderRows     = myerrors.NewErrorBadFormatRequest("Не получилось обновить данные заказа")
+	ErrAvailableCountNotEnough = myerrors.NewErrorBadFormatRequest("Товара доступно меньше, чем вы пытаетесь довавить в корзину")
 )
 
 func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,

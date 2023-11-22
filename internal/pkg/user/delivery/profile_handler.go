@@ -38,7 +38,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	delivery.SendOkResponse(w, u.logger, NewProfileResponse(delivery.StatusResponseSuccessful, user))
+	delivery.SendResponse(w, u.logger, NewProfileResponse(user))
 	u.logger.Infof("in GetUserHandler: get product: %+v", user)
 }
 
@@ -90,6 +90,6 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	delivery.SendOkResponse(w, u.logger, NewProfileResponse(delivery.StatusResponseSuccessful, updatedUser))
+	delivery.SendResponse(w, u.logger, NewProfileResponse(updatedUser))
 	u.logger.Infof("Successfully updated: %+v", userID)
 }

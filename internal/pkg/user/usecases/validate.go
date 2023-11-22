@@ -6,15 +6,15 @@ import (
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 
 	"github.com/asaskevich/govalidator"
 )
 
 var (
-	ErrWrongCredentials = myerrors.NewError("Некорректный логин или пароль")
-	ErrDecodeUser       = myerrors.NewError("Некорректный json пользователя")
+	ErrWrongCredentials = myerrors.NewErrorBadFormatRequest("Некорректный логин или пароль")
+	ErrDecodeUser       = myerrors.NewErrorBadFormatRequest("Некорректный json пользователя")
 )
 
 func validateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
@@ -49,7 +49,7 @@ func ValidateUserWithoutID(r io.Reader) (*models.UserWithoutID, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, myerrors.NewError(err.Error())
+		return nil, myerrors.NewErrorBadFormatRequest(err.Error())
 	}
 
 	return userWithoutID, nil
@@ -111,7 +111,7 @@ func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, myerrors.NewError(err.Error())
+		return nil, myerrors.NewErrorBadFormatRequest(err.Error())
 	}
 
 	return userWithoutPassword, nil
@@ -135,7 +135,7 @@ func ValidatePartOfUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword
 			if err != "non zero value required" {
 				logger.Errorln(err)
 
-				return nil, myerrors.NewError("%s error: %s", field, err)
+				return nil, myerrors.NewErrorBadFormatRequest("%s error: %s", field, err)
 			}
 		}
 	}

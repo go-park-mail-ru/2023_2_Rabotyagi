@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/jackc/pgx/v5"
 )
 
 var (
-	ErrNoAffectedFavouriteRows = myerrors.NewError("Не получилось удалить из избранного")
+	ErrNoAffectedFavouriteRows = myerrors.NewErrorBadFormatRequest("Не получилось удалить из избранного")
 )
 
 func (p *ProductStorage) selectUserFavourites(ctx context.Context, tx pgx.Tx,

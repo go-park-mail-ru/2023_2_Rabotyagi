@@ -52,7 +52,7 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, NewProductListResponse(delivery.StatusResponseSuccessful, products))
+	delivery.SendResponse(w, p.logger, NewProductListResponse(products))
 	p.logger.Infof("in GetFavouritesHandler: get user favourites: %+v\n", products)
 }
 
@@ -101,7 +101,7 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(productID))
+	delivery.SendResponse(w, p.logger, delivery.NewResponseIDRedirect(productID))
 	p.logger.Infof("in AddToFavouritesHandler: add to fav with product id = %+v", productID)
 }
 
@@ -150,6 +150,6 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(productID))
+	delivery.SendResponse(w, p.logger, delivery.NewResponseIDRedirect(productID))
 	p.logger.Infof("in DeleteFromFavouritesHandler: del form fav with product id = %+v", productID)
 }

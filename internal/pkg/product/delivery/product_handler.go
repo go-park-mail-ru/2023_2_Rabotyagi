@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 
@@ -83,7 +83,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(productID))
+	delivery.SendResponse(w, p.logger, delivery.NewResponseIDRedirect(productID))
 	p.logger.Infof("in AddProductHandler: added product id= %+v", productID)
 }
 
@@ -134,7 +134,7 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, NewProductResponse(delivery.StatusResponseSuccessful, product))
+	delivery.SendResponse(w, p.logger, NewProductResponse(product))
 	p.logger.Infof("in GetProductHandler: get product: %+v", product)
 }
 
@@ -186,7 +186,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, NewProductListResponse(delivery.StatusResponseSuccessful, products))
+	delivery.SendResponse(w, p.logger, NewProductListResponse(products))
 	p.logger.Infof("in GetProductListHandler: get product list: %+v", products)
 }
 
@@ -234,7 +234,7 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, NewProductListResponse(delivery.StatusResponseSuccessful, products))
+	delivery.SendResponse(w, p.logger, NewProductListResponse(products))
 	p.logger.Infof("in GetListProductOfSalerHandler: get product list: %+v", products)
 }
 
@@ -276,7 +276,7 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, NewProductListResponse(delivery.StatusResponseSuccessful, products))
+	delivery.SendResponse(w, p.logger, NewProductListResponse(products))
 	p.logger.Infof("in GetListProductOfAnotherSalerHandler: get product list: %+v", products)
 }
 
@@ -330,7 +330,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(productID))
+	delivery.SendResponse(w, p.logger, delivery.NewResponseIDRedirect(productID))
 	p.logger.Infof("in UpdateProductHandler: updated product with id = %+v", productID)
 }
 
@@ -343,7 +343,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 //	@Accept      json
 //	@Produce    json
 //	@Param      id  query uint64 true  "product id"
-//	@Success    200  {object} delivery.Response
+//	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -378,8 +378,8 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulCloseProduct))
 	p.logger.Infof("in CloseProductHandler: close product id=%d", productID)
 }
 
@@ -392,7 +392,7 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 //	@Accept      json
 //	@Produce    json
 //	@Param      id  query uint64 true  "product id"
-//	@Success    200  {object} delivery.Response
+//	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -427,8 +427,8 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulCloseProduct))
 	p.logger.Infof("in ActivateProductHandler: activated product id=%d", productID)
 }
 
@@ -441,7 +441,7 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 //	@Accept      json
 //	@Produce    json
 //	@Param      id  query uint64 true  "product id"
-//	@Success    200  {object} delivery.Response
+//	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -476,7 +476,7 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
 	p.logger.Infof("in DeleteProductHandler: delete product id=%d", productID)
 }

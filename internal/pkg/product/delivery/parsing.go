@@ -5,16 +5,16 @@ import (
 	"net/http"
 	"strconv"
 
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 )
 
 var (
-	ErrWrongSalerID   = myerrors.NewError("Получили некорректный saler_id параметр. Он должен быть целым")
-	ErrWrongCount     = myerrors.NewError("Получили некорректный count параметр. Он должен быть целым")
-	ErrWrongLastID    = myerrors.NewError("Получили некорректный last_id параметр. Он должен быть целым")
-	ErrWrongProductID = myerrors.NewError("Получили некорректный product_id параметр. Он должен быть целым")
-	ErrWrongUserID    = myerrors.NewError("Получили некорректный user_id параметр. Он должен быть целым")
+	ErrWrongSalerID   = myerrors.NewErrorBadFormatRequest("Получили некорректный saler_id параметр. Он должен быть целым")
+	ErrWrongCount     = myerrors.NewErrorBadFormatRequest("Получили некорректный count параметр. Он должен быть целым")
+	ErrWrongLastID    = myerrors.NewErrorBadFormatRequest("Получили некорректный last_id параметр. Он должен быть целым")
+	ErrWrongProductID = myerrors.NewErrorBadFormatRequest("Получили некорректный product_id параметр. Он должен быть целым")
+	ErrWrongUserID    = myerrors.NewErrorBadFormatRequest("Получили некорректный user_id параметр. Он должен быть целым")
 )
 
 func parseCountAndLastIDFromRequest(r *http.Request) (uint64, uint64, error) {

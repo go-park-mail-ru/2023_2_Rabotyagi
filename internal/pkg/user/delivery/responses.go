@@ -1,6 +1,9 @@
 package delivery
 
-import "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+import (
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
+)
 
 const (
 	StatusUnauthorized = 401
@@ -17,9 +20,9 @@ type ProfileResponse struct {
 	Body   *models.UserWithoutPassword `json:"body"`
 }
 
-func NewProfileResponse(status int, body *models.UserWithoutPassword) *ProfileResponse {
+func NewProfileResponse(body *models.UserWithoutPassword) *ProfileResponse {
 	return &ProfileResponse{
-		Status: status,
+		Status: statuses.StatusResponseSuccessful,
 		Body:   body,
 	}
 }

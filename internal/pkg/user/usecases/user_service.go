@@ -3,8 +3,8 @@ package usecases
 import (
 	"context"
 	"fmt"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"go.uber.org/zap"
 	"io"
@@ -15,7 +15,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 )
 
-var ErrWrongUserID = myerrors.NewError("Попытка изменить данные другого пользователя")
+var ErrWrongUserID = myerrors.NewErrorBadFormatRequest("Попытка изменить данные другого пользователя")
 
 var _ IUserStorage = (*userrepo.UserStorage)(nil)
 

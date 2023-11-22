@@ -13,12 +13,12 @@ import (
 	_ "image/jpeg"
 
 	fileservicerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 )
 
 var (
-	ErrCantRead    = myerrors.NewError("Не получилось считать содержимое файла")
-	ErrWrongFormat = myerrors.NewError("Формат файла должен быть png, jpeg")
+	ErrCantRead    = myerrors.NewErrorBadFormatRequest("Не получилось считать содержимое файла")
+	ErrWrongFormat = myerrors.NewErrorBadFormatRequest("Формат файла должен быть png, jpeg")
 )
 
 var _ IFileStorage = (*fileservicerepo.FileSystemStorage)(nil)

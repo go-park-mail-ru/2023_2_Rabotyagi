@@ -2,12 +2,13 @@ package delivery
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/city/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
 
 	"go.uber.org/zap"
 )
@@ -57,12 +58,12 @@ func (c *CityHandler) GetFullCities(w http.ResponseWriter, r *http.Request) {
 
 	cities, err := c.service.GetFullCities(ctx)
 	if err != nil {
-		delivery.SendErrResponse(w, c.logger,
-			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
+		delivery.SendResponse(w, c.logger,
+			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendOkResponse(w, c.logger, NewCityListResponse(delivery.StatusResponseSuccessful, cities))
+	delivery.SendResponse(w, c.logger, NewCityListResponse(cities))
 	c.logger.Infof("in GetFullCities: get all cities: %+v\n", cities)
 }

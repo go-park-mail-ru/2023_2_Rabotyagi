@@ -2,27 +2,19 @@ package delivery
 
 import (
 	"encoding/json"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
-	"go.uber.org/zap"
 	"net/http"
-)
 
-const (
-	HTTPStatusOk    = 200
-	HTTPStatusError = 222
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
 
-	StatusResponseSuccessful      = 200
-	StatusRedirectAfterSuccessful = 303
-	StatusErrBadRequest           = 400
-	StatusErrInternalServer       = 500
+	"go.uber.org/zap"
 )
 
 const (
 	ErrInternalServer = "Ошибка на сервере"
-	ErrBadRequest     = "Некорректный запрос"
 )
 
-var ErrCookieNotPresented = myerrors.NewError("Должна быть выставлена cookie, а её нет")
+var ErrCookieNotPresented = myerrors.NewErrorBadFormatRequest("Должна быть выставлена cookie, а её нет")
 
 const (
 	CookieAuthName = "access_token"
@@ -32,14 +24,14 @@ type ResponseBody struct {
 	Message string `json:"message"`
 }
 
-type Response struct {
+type ResponseSuccessful struct {
 	Status int          `json:"status"`
 	Body   ResponseBody `json:"body"`
 }
 
-func NewResponse(status int, message string) *Response {
-	return &Response{
-		Status: status,
+func NewResponseSuccessful(message string) *ResponseSuccessful {
+	return &ResponseSuccessful{
+		Status: statuses.StatusResponseSuccessful,
 		Body:   ResponseBody{message},
 	}
 }
@@ -53,8 +45,8 @@ type ResponseID struct {
 	Body   ResponseBodyID `json:"body"`
 }
 
-func NewResponseID(ID uint64) *ResponseID {
-	return &ResponseID{Status: StatusRedirectAfterSuccessful, Body: ResponseBodyID{ID: ID}}
+func NewResponseIDRedirect(ID uint64) *ResponseID {
+	return &ResponseID{Status: statuses.StatusRedirectAfterSuccessful, Body: ResponseBodyID{ID: ID}}
 }
 
 type ResponseBodyError struct {
@@ -89,14 +81,8 @@ func sendResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any
 	}
 }
 
-func SendErrResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
+func SendResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(HTTPStatusError)
-	sendResponse(w, logger, response)
-}
-
-func SendOkResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(HTTPStatusOk)
+	w.WriteHeader(http.StatusOK)
 	sendResponse(w, logger, response)
 }

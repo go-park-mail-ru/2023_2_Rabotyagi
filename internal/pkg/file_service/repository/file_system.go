@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 )
 
 type FileSystemStorage struct {

@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
@@ -19,12 +19,12 @@ import (
 )
 
 var (
-	ErrEmailBusy          = myerrors.NewError("Такой email уже занят")
-	ErrEmailNotExist      = myerrors.NewError("Такой email не существует")
-	ErrPhoneBusy          = myerrors.NewError("Такой телефон уже занят")
-	ErrWrongPassword      = myerrors.NewError("Некорректный пароль")
-	ErrNoUpdateFields     = myerrors.NewError("Вы пытаетесь обновить пустое количество полей")
-	ErrNoAffectedUserRows = myerrors.NewError("Не получилось обновить данные пользователя")
+	ErrEmailBusy          = myerrors.NewErrorBadFormatRequest("Такой email уже занят")
+	ErrEmailNotExist      = myerrors.NewErrorBadFormatRequest("Такой email не существует")
+	ErrPhoneBusy          = myerrors.NewErrorBadFormatRequest("Такой телефон уже занят")
+	ErrWrongPassword      = myerrors.NewErrorBadFormatRequest("Некорректный пароль")
+	ErrNoUpdateFields     = myerrors.NewErrorBadFormatRequest("Вы пытаетесь обновить пустое количество полей")
+	ErrNoAffectedUserRows = myerrors.NewErrorBadFormatRequest("Не получилось обновить данные пользователя")
 
 	NameSeqUser = pgx.Identifier{"public", "user_id_seq"} //nolint:gochecknoglobals
 )

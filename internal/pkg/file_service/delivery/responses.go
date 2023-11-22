@@ -1,7 +1,9 @@
 package delivery
 
+import "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
+
 type ResponseURLBody struct {
-	SlURL []string `json:"urls"`
+	SlURL []string `json:"urls"` //nolint:tagliatelle
 }
 
 type ResponseURLs struct {
@@ -9,6 +11,6 @@ type ResponseURLs struct {
 	Body   ResponseURLBody `json:"body"`
 }
 
-func NewResponseURLs(status int, slURL []string) *ResponseURLs {
-	return &ResponseURLs{Status: status, Body: ResponseURLBody{SlURL: slURL}}
+func NewResponseURLs(slURL []string) *ResponseURLs {
+	return &ResponseURLs{Status: statuses.StatusResponseSuccessful, Body: ResponseURLBody{SlURL: slURL}}
 }

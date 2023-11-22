@@ -6,15 +6,15 @@ import (
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
 	"go.uber.org/zap"
 )
 
-var ErrUserPermissionsChange = myerrors.NewError("Вы не можете изменить чужое объявление")
+var ErrUserPermissionsChange = myerrors.NewErrorBadFormatRequest("Вы не можете изменить чужое объявление")
 
 var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 

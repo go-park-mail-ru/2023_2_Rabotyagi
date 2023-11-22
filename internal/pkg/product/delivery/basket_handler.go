@@ -59,7 +59,7 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, NewOrderResponse(delivery.StatusResponseSuccessful, orderInBasket))
+	delivery.SendResponse(w, p.logger, NewOrderResponse(orderInBasket))
 	p.logger.Infof("in AddOrderHandler: add order orderID=%d for userID=%d\n", orderInBasket.ID, userID)
 }
 
@@ -98,7 +98,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, NewOrderListResponse(delivery.StatusResponseSuccessful, orders))
+	delivery.SendResponse(w, p.logger, NewOrderListResponse(orders))
 	p.logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", orders)
 }
 
@@ -112,7 +112,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 //
 // @Param orderChanges  body internal_models.OrderChanges true  "order data for updating use only id and count"
 //
-//	@Success    200  {object} delivery.Response
+//	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -140,8 +140,8 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateCountOrder))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulUpdateCountOrder))
 	p.logger.Infof("in UpdateOrderCountHandler: updated order count for user id=%d\n", userID)
 }
 
@@ -155,7 +155,7 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 //
 // @Param orderChanges  body internal_models.OrderChanges true  "order data for updating use only id and status"
 //
-//	@Success    200  {object} delivery.Response
+//	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -183,8 +183,8 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulUpdateStatusOrder))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulUpdateStatusOrder))
 	p.logger.Infof("in UpdateOrderStatusHandler: updated order status for user id=%d\n", userID)
 }
 
@@ -195,7 +195,7 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 //	@Tags order
 //	@Accept      json
 //	@Produce    json
-//	@Success    200  {object} delivery.Response
+//	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -223,8 +223,8 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulBuyFullBasket))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulBuyFullBasket))
 	p.logger.Infof("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
 }
 
@@ -237,7 +237,7 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 //	@Accept      json
 //	@Produce    json
 //	@Param      id  query uint64 true  "order id"
-//	@Success    200  {object} delivery.Response
+//	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
@@ -272,7 +272,7 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulDeleteProduct))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
 	p.logger.Infof("in DeleteOrderHandler: delete order id=%d", orderID)
 }

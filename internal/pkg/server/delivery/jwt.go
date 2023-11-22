@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
-	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 )
 
 func GetUserIDFromCookie(r *http.Request) (uint64, error) {
