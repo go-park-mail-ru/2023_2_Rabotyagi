@@ -1070,7 +1070,7 @@ paths:
         type: integer
       - description: last product id
         in: query
-        name: last_id
+        name: offset
         required: true
         type: integer
       - description: searched string

@@ -557,7 +557,7 @@ func (p *ProductHandler) SearchProductHandler(w http.ResponseWriter, r *http.Req
 //	@Accept      json
 //	@Produce    json
 //	@Param      count  query uint64 true  "count products"
-//	@Param      last_id  query uint64 true  "last product id"
+//	@Param      offset  query uint64 true  "last product id"
 //	@Param      searched  query string true  "searched string"
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
@@ -578,7 +578,7 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
+	offset, err := utils.ParseUint64FromRequest(r, "offset")
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
 
@@ -600,7 +600,7 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 		}
 	}
 
-	products, err := p.service.GetSearchProductFeed(ctx, searchInput, lastID, count, userID)
+	products, err := p.service.GetSearchProductFeed(ctx, searchInput, offset, count, userID)
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
 
