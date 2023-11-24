@@ -745,11 +745,7 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 	return nil
 }
 
-func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx,
-	searchInput string) ([]string, error) {
-	//searchInput = strings.TrimFunc(searchInput, func(r rune) bool {
-	//	return !unicode.IsLetter(r) && !unicode.IsNumber(r) && !unicode.IsSpace(r)
-	//})
+func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]string, error) {
 	regex := regexp.MustCompile("[^a-zA-Zа-яА-Я0-9\\s]+")
 	searchInput = regex.ReplaceAllString(searchInput, "")
 	regex = regexp.MustCompile(`\s+`)
@@ -821,8 +817,7 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 
 	searchInput = strings.TrimSpace(searchInput)
 
-	SQLSearchProduct :=
-		`SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
+	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
 	FROM product
 	WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
 	   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
