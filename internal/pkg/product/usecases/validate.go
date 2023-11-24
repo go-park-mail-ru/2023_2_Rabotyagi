@@ -19,7 +19,7 @@ var (
 	ErrNotExistingStatus  = myerrors.NewError("Статус заказа не может быть больше %d", models.OrderStatusClosed)
 )
 
-func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
+func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
@@ -38,6 +38,8 @@ func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
 
 	preProduct.Trim()
 
+	preProduct.SalerID = userID
+
 	_, err = govalidator.ValidateStruct(preProduct)
 	if err != nil {
 		logger.Errorln(err)
@@ -48,8 +50,8 @@ func validatePreProduct(r io.Reader) (*models.PreProduct, error) {
 	return preProduct, nil
 }
 
-func ValidatePreProduct(r io.Reader) (*models.PreProduct, error) {
-	preProduct, err := validatePreProduct(r)
+func ValidatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
+	preProduct, err := validatePreProduct(r, userID)
 	if err != nil {
 		return nil, myerrors.NewError(err.Error())
 	}
@@ -57,13 +59,13 @@ func ValidatePreProduct(r io.Reader) (*models.PreProduct, error) {
 	return preProduct, nil
 }
 
-func ValidatePartOfPreProduct(r io.Reader) (*models.PreProduct, error) {
+func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
 	}
 
-	preProduct, err := validatePreProduct(r)
+	preProduct, err := validatePreProduct(r, userID)
 	if preProduct == nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

@@ -20,7 +20,7 @@ import (
 var _ IProductService = (*usecases.ProductService)(nil)
 
 type IProductService interface {
-	AddProduct(ctx context.Context, r io.Reader) (productID uint64, err error)
+	AddProduct(ctx context.Context, r io.Reader, userID uint64) (productID uint64, err error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
 	GetProductsList(ctx context.Context,
 		lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
@@ -79,9 +79,16 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	userID, err := delivery.GetUserIDFromCookie(r)
+	if err != nil {
+		delivery.HandleErr(w, p.logger, err)
+
+		return
+	}
+
 	ctx := r.Context()
 
-	productID, err := p.service.AddProduct(ctx, r.Body)
+	productID, err := p.service.AddProduct(ctx, r.Body, userID)
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
 

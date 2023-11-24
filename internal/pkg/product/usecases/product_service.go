@@ -57,8 +57,8 @@ func NewProductService(productStorage IProductStorage, basketService BasketServi
 		BasketService:    basketService, storage: productStorage, logger: logger}, nil
 }
 
-func (p *ProductService) AddProduct(ctx context.Context, r io.Reader) (uint64, error) {
-	preProduct, err := ValidatePreProduct(r)
+func (p *ProductService) AddProduct(ctx context.Context, r io.Reader, userID uint64) (uint64, error) {
+	preProduct, err := ValidatePreProduct(r, userID)
 	if err != nil {
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -122,21 +122,15 @@ func (p *ProductService) UpdateProduct(ctx context.Context,
 	var err error
 
 	if isPartialUpdate {
-		preProduct, err = ValidatePartOfPreProduct(r)
+		preProduct, err = ValidatePartOfPreProduct(r, userAuthID)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 	} else {
-		preProduct, err = ValidatePreProduct(r)
+		preProduct, err = ValidatePreProduct(r, userAuthID)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
-	}
-
-	if preProduct.SalerID != userAuthID {
-		p.logger.Errorln(ErrUserPermissionsChange)
-
-		return fmt.Errorf(myerrors.ErrTemplate, ErrUserPermissionsChange)
 	}
 
 	updateFieldsMap := utils.StructToMap(preProduct)
