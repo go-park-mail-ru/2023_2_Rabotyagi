@@ -3,6 +3,7 @@ package delivery
 import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"net/http"
 )
 
@@ -29,9 +30,14 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	userIDStr := r.URL.Query().Get("id")
+	userID, err := utils.ParseUint64FromRequest(r, "id")
+	if err != nil {
+		delivery.HandleErr(w, u.logger, err)
 
-	user, err := u.service.GetUserWithoutPasswordByID(ctx, userIDStr)
+		return
+	}
+
+	user, err := u.service.GetUserWithoutPasswordByID(ctx, userID)
 	if err != nil {
 		delivery.HandleErr(w, u.logger, err)
 

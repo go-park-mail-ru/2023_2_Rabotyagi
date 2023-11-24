@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 	"io"
 	"net/http"
 
@@ -258,7 +259,7 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	orderID, err := parseIDFromRequest(r)
+	orderID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
 

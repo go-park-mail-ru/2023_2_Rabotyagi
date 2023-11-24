@@ -11,6 +11,7 @@ const (
 	ResponseSuccessfulBuyFullBasket     = "Успешная покупка всего из корзины"
 	ResponseSuccessfulCloseProduct      = "Объявление успешно закрыто"
 	ResponseSuccessfulDeleteProduct     = "Объявление успешно удалено"
+	ResponseSuccessfulActivateProduct   = "Объявление успешно активировано"
 )
 
 type ProductResponse struct {
@@ -32,6 +33,18 @@ type ProductListResponse struct {
 
 func NewProductListResponse(body []*models.ProductInFeed) *ProductListResponse {
 	return &ProductListResponse{
+		Status: statuses.StatusResponseSuccessful,
+		Body:   body,
+	}
+}
+
+type ProductInSearchListResponse struct {
+	Status int      `json:"status"`
+	Body   []string `json:"body"`
+}
+
+func NewProductInSearchListResponse(body []string) *ProductInSearchListResponse {
+	return &ProductInSearchListResponse{
 		Status: statuses.StatusResponseSuccessful,
 		Body:   body,
 	}

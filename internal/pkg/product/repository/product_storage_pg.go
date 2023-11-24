@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
+	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/repository"
-
-	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
+	"regexp"
+	"strings"
 )
 
 var (
@@ -744,4 +744,160 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]string, error) {
+	regex := regexp.MustCompile("[^a-zA-Zа-яА-Я0-9\\s]+")
+	searchInput = regex.ReplaceAllString(searchInput, "")
+	regex = regexp.MustCompile(`\s+`)
+	searchInput = regex.ReplaceAllString(searchInput, " ")
+
+	SQLSearchProduct := `SELECT title
+							FROM product
+							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+							   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+							ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC,
+									 ts_rank(to_tsvector(description), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
+							LIMIT 5;`
+
+	var products []string
+
+	productsRows, err := tx.Query(ctx, SQLSearchProduct, searchInput)
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	var curProduct string
+
+	_, err = pgx.ForEachRow(productsRows, []any{
+		&curProduct,
+	}, func() error {
+		products = append(products, curProduct)
+
+		return nil
+	})
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return products, nil
+}
+
+func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) ([]string, error) {
+	var products []string
+
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		productsInner, err := p.searchProduct(ctx, tx, searchInput)
+		if err != nil {
+			return err
+		}
+
+		products = productsInner
+
+		return nil
+	})
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return products, nil
+}
+
+func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
+	searchInput string, lastNumber uint64, limit uint64) ([]*models.ProductInFeed, error) {
+	regex := regexp.MustCompile("[^a-zA-Zа-яА-Я0-9\\s]+")
+	searchInput = regex.ReplaceAllString(searchInput, "")
+	regex = regexp.MustCompile(`\s+`)
+	searchInput = regex.ReplaceAllString(searchInput, " ")
+
+	searchInput = strings.TrimSpace(searchInput)
+
+	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
+	FROM product
+	WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+	   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+	ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC,
+			 ts_rank(to_tsvector(description), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
+	OFFSET $2
+	LIMIT $3;`
+
+	rowsProducts, err := tx.Query(ctx, SQLSearchProduct, searchInput, lastNumber, limit)
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	curProduct := new(models.ProductInFeed)
+
+	var slProduct []*models.ProductInFeed
+
+	_, err = pgx.ForEachRow(rowsProducts, []any{
+		&curProduct.ID, &curProduct.Title,
+		&curProduct.Price, &curProduct.CityID,
+		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount,
+	}, func() error {
+		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
+			ID:             curProduct.ID,
+			Title:          curProduct.Title,
+			Price:          curProduct.Price,
+			CityID:         curProduct.CityID,
+			Delivery:       curProduct.Delivery,
+			SafeDeal:       curProduct.SafeDeal,
+			IsActive:       curProduct.IsActive,
+			AvailableCount: curProduct.AvailableCount,
+		})
+
+		return nil
+	})
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return slProduct, nil
+}
+
+func (p *ProductStorage) GetSearchProductFeed(ctx context.Context,
+	searchInput string, lastNumber uint64, limit uint64, userID uint64,
+) ([]*models.ProductInFeed, error) {
+	var slProduct []*models.ProductInFeed
+
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		slProductInner, err := p.searchProductFeed(ctx,
+			tx, searchInput, lastNumber, limit)
+
+		if err != nil {
+			return err
+		}
+
+		for _, product := range slProductInner {
+			productAdditionInner, err := p.getProductAddition(ctx, tx, product.ID, userID)
+			if err != nil {
+				return err
+			}
+
+			product.Images = productAdditionInner.images
+			product.Favourites = productAdditionInner.favourites
+			product.InFavourites = productAdditionInner.inFavourite
+
+			slProduct = append(slProduct, product)
+		}
+
+		return nil
+	})
+	if err != nil {
+		p.logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return slProduct, nil
 }
