@@ -461,7 +461,7 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 	}
 
 	delivery.SendOkResponse(w, p.logger,
-		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulCloseProduct))
+		delivery.NewResponse(delivery.StatusResponseSuccessful, ResponseSuccessfulActivateProduct))
 	p.logger.Infof("in ActivateProductHandler: activated product id=%d", productID)
 }
 

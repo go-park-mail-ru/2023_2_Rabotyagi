@@ -10,6 +10,7 @@ const (
 	ResponseSuccessfulBuyFullBasket     = "Успешная покупка всего из корзины"
 	ResponseSuccessfulCloseProduct      = "Объявление успешно закрыто"
 	ResponseSuccessfulDeleteProduct     = "Объявление успешно удалено"
+	ResponseSuccessfulActivateProduct   = "Объявление успешно активировано"
 )
 
 type ProductResponse struct {

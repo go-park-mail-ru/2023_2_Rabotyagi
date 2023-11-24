@@ -45,14 +45,16 @@ type ProductService struct {
 }
 
 func NewProductService(productStorage IProductStorage, basketService BasketService,
-	favouriteService FavouriteService) (*ProductService, error) {
+	favouriteService FavouriteService,
+) (*ProductService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return &ProductService{FavouriteService: favouriteService,
-		BasketService: basketService, storage: productStorage, logger: logger}, nil
+	return &ProductService{
+		FavouriteService: favouriteService,
+		BasketService:    basketService, storage: productStorage, logger: logger}, nil
 }
 
 func (p *ProductService) AddProduct(ctx context.Context, r io.Reader) (uint64, error) {
