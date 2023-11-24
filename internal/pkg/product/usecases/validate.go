@@ -30,6 +30,7 @@ func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 		Delivery: false,
 		SafeDeal: false,
 	}
+
 	if err := decoder.Decode(preProduct); err != nil {
 		logger.Errorln(err)
 
@@ -44,7 +45,7 @@ func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		return preProduct, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return preProduct, nil

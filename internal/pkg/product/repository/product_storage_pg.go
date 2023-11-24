@@ -809,7 +809,8 @@ func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) 
 }
 
 func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
-	searchInput string, lastNumber uint64, limit uint64) ([]*models.ProductInFeed, error) {
+	searchInput string, lastNumber uint64, limit uint64,
+) ([]*models.ProductInFeed, error) {
 	regex := regexp.MustCompile("[^a-zA-Zа-яА-Я0-9\\s]+")
 	searchInput = regex.ReplaceAllString(searchInput, "")
 	regex = regexp.MustCompile(`\s+`)
