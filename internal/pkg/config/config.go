@@ -27,7 +27,7 @@ const (
 	envFileServiceDir     = "FILE_SERVICE_DIR"
 	envOutputLogPath      = "OUTPUT_LOG_PATH"
 	envErrorOutputLogPath = "ERROR_OUTPUT_LOG_PATH"
-	envStandardSecret     = "STANDARD_SECRET"
+	envStandardSecret     = "JWT_SECRET"
 )
 
 type Config struct {
