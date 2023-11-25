@@ -12,7 +12,7 @@ import (
 const lenSecret = 64
 
 var (
-	globalSecret []byte    = nil
+	globalSecret []byte    //nolint:gochecknoglobals
 	once         sync.Once //nolint:gochecknoglobals
 )
 
@@ -22,6 +22,8 @@ func SetSecret(secret []byte) {
 	})
 }
 
+// GetSecret return secret for jwt if it exists
+// and additionally generate secret if not exist
 func GetSecret() []byte {
 	var result []byte
 

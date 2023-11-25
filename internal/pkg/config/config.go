@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
+	"os"
+)
 
 const (
 	standardDevelopmentMode    = "development"
@@ -13,6 +16,7 @@ const (
 	standardFileServiceDir     = "./static/img"
 	standardOutputLogPath      = "stdout /var/log/backend/logs.json"
 	standardErrorOutputLogPath = "stderr /var/log/backend/err_logs.json"
+	standardSecret             = ""
 
 	envEnvironmentMode    = "ENVIRONMENT"
 	envAllowOrigin        = "ALLOW_ORIGIN"
@@ -23,6 +27,7 @@ const (
 	envFileServiceDir     = "FILE_SERVICE_DIR"
 	envOutputLogPath      = "OUTPUT_LOG_PATH"
 	envErrorOutputLogPath = "ERROR_OUTPUT_LOG_PATH"
+	envStandardSecret     = "STANDARD_SECRET"
 )
 
 type Config struct {
@@ -38,6 +43,13 @@ type Config struct {
 }
 
 func New() *Config {
+	secret := getEnvStr(envStandardSecret, standardSecret)
+	if secret != standardSecret {
+		jwt.SetSecret([]byte(secret))
+	} else {
+		_ = jwt.GetSecret()
+	}
+
 	productionMode := false
 	if getEnvStr(envEnvironmentMode, standardDevelopmentMode) == standardProductionMode {
 		productionMode = true
