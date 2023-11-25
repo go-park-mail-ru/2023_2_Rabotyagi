@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 	"os"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 )
 
 const (
