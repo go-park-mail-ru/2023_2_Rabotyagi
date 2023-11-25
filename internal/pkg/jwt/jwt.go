@@ -3,23 +3,47 @@ package jwt
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/golang-jwt/jwt"
 )
 
-const lenSecret = 64
-
-var (
-	globalSecret []byte    //nolint:gochecknoglobals
-	once         sync.Once //nolint:gochecknoglobals
+const (
+	lenSecret                = 64
+	TimeRefreshSecretInHours = 48
 )
 
+var (
+	globalSecret []byte       //nolint:gochecknoglobals
+	rwMu         sync.RWMutex //nolint:gochecknoglobals
+)
+
+func StartRefreshingSecret(period time.Duration, chClose <-chan struct{}) {
+	go func() {
+		for {
+			select {
+			case <-chClose:
+				return
+			default:
+				time.Sleep(period)
+				refreshSecret()
+			}
+		}
+	}()
+}
+
 func SetSecret(secret []byte) {
-	once.Do(func() {
-		globalSecret = secret
-	})
+	rwMu.Lock()
+	globalSecret = secret
+	rwMu.Unlock()
+}
+
+func refreshSecret() {
+	rwMu.Lock()
+	globalSecret = make([]byte, lenSecret)
+	rwMu.Unlock()
 }
 
 // GetSecret return secret for jwt if it exists
@@ -27,13 +51,13 @@ func SetSecret(secret []byte) {
 func GetSecret() []byte {
 	var result []byte
 
-	once.Do(func() {
-		if globalSecret == nil {
-			globalSecret = make([]byte, lenSecret)
-		}
+	if globalSecret == nil {
+		refreshSecret()
+	}
 
-		result = globalSecret
-	})
+	rwMu.RLock()
+	result = globalSecret
+	rwMu.RUnlock()
 
 	return result
 }
