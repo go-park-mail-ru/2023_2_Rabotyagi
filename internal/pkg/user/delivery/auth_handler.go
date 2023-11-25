@@ -81,7 +81,7 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().Add(timeTokenLife)
 
 	jwtStr, err := jwt.GenerateJwtToken(
-		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.Secret)
+		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.GetSecret())
 	if err != nil {
 		delivery.SendErrResponse(w, u.logger,
 			delivery.NewErrResponse(delivery.StatusErrInternalServer, delivery.ErrInternalServer))
@@ -140,7 +140,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		Email:  user.Email,
 		Expire: expire.Unix(),
 	},
-		jwt.Secret,
+		jwt.GetSecret(),
 	)
 	if err != nil {
 		delivery.SendErrResponse(w, u.logger,

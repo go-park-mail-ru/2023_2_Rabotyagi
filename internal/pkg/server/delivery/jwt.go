@@ -24,7 +24,7 @@ func GetUserIDFromCookie(r *http.Request) (uint64, error) {
 
 	rawJwt := cookie.Value
 
-	userPayload, err := jwt.NewUserJwtPayload(rawJwt, jwt.Secret)
+	userPayload, err := jwt.NewUserJwtPayload(rawJwt, jwt.GetSecret())
 	if err != nil {
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

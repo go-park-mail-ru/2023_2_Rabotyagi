@@ -2,14 +2,39 @@ package jwt
 
 import (
 	"fmt"
+	"sync"
 
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/golang-jwt/jwt"
 )
 
-// Secret TODO from config and reset her every some time.
-var Secret = []byte("super-secret")
+const lenSecret = 64
+
+var (
+	globalSecret []byte    = nil
+	once         sync.Once //nolint:gochecknoglobals
+)
+
+func SetSecret(secret []byte) {
+	once.Do(func() {
+		globalSecret = secret
+	})
+}
+
+func GetSecret() []byte {
+	var result []byte
+
+	once.Do(func() {
+		if globalSecret == nil {
+			globalSecret = make([]byte, lenSecret)
+		}
+
+		result = globalSecret
+	})
+
+	return result
+}
 
 var (
 	ErrNilToken           = myerrors.NewError("Получили токен = nil")
