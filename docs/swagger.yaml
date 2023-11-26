@@ -1110,15 +1110,14 @@ paths:
     delete:
       consumes:
       - application/json
-      description: delete product from favs using product id from body and user id
+      description: delete product from favs using product id from query and user id
         form cookie
       parameters:
       - description: product id
-        in: body
+        in: query
         name: product_id
         required: true
-        schema:
-          $ref: '#/definitions/internal_models.ProductID'
+        type: integer
       produces:
       - application/json
       responses:
