@@ -46,7 +46,7 @@ func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		return preProduct, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return preProduct, nil

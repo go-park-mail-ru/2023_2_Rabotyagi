@@ -2,14 +2,65 @@ package jwt
 
 import (
 	"fmt"
+	"sync"
+	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/golang-jwt/jwt"
 )
 
-// Secret TODO from config and reset her every some time.
-var Secret = []byte("super-secret")
+const (
+	lenSecret                = 64
+	TimeRefreshSecretInHours = 48
+)
+
+var (
+	globalSecret []byte       //nolint:gochecknoglobals
+	rwMu         sync.RWMutex //nolint:gochecknoglobals
+)
+
+func StartRefreshingSecret(period time.Duration, chClose <-chan struct{}) {
+	go func() {
+		for {
+			select {
+			case <-chClose:
+				return
+			default:
+				time.Sleep(period)
+				refreshSecret()
+			}
+		}
+	}()
+}
+
+func SetSecret(secret []byte) {
+	rwMu.Lock()
+	globalSecret = secret
+	rwMu.Unlock()
+}
+
+func refreshSecret() {
+	rwMu.Lock()
+	globalSecret = make([]byte, lenSecret)
+	rwMu.Unlock()
+}
+
+// GetSecret return secret for jwt if it exists
+// and additionally generate secret if not exist
+func GetSecret() []byte {
+	var result []byte
+
+	if globalSecret == nil {
+		refreshSecret()
+	}
+
+	rwMu.RLock()
+	result = globalSecret
+	rwMu.RUnlock()
+
+	return result
+}
 
 var (
 	ErrNilToken           = myerrors.NewErrorInternal("Получили токен = nil")

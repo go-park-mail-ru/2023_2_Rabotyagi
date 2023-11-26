@@ -133,7 +133,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(cityHandler.SearchCityHandler, configMux.addrOrigin, configMux.schema)))
 
 	mux := http.NewServeMux()
-	mux.Handle("/", middleware.Panic(router, logger))
+	mux.Handle("/", middleware.Panic(middleware.AccessLogMiddleware(router, logger), logger))
 
 	return mux, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	categoryusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/usecases"
 	cityusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/city/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
 	"net/http"
@@ -116,6 +117,11 @@ func (s *Server) Run(config *config.Config) error {
 		return s.httpServer.ListenAndServeTLS("/etc/ssl/goods-galaxy.ru.crt", //nolint:wrapcheck
 			"/etc/ssl/goods-galaxy.ru.key")
 	}
+
+	chCloseRefreshing := make(chan struct{})
+
+	// don`t want use chCloseRefreshing secret now
+	jwt.StartRefreshingSecret(time.Hour*jwt.TimeRefreshSecretInHours, chCloseRefreshing)
 
 	return s.httpServer.ListenAndServe() //nolint:wrapcheck
 }
