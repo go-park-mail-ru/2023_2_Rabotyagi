@@ -9,14 +9,24 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/jwt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/usecases"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"io"
 	"time"
 )
+
+var _ IAuthService = (*usecases.AuthService)(nil)
+
+type IAuthService interface {
+	AddUser(ctx context.Context, r io.Reader) (*models.User, error)
+	GetUser(ctx context.Context, email string, password string) (*models.User, error)
+}
 
 type SessionManager struct {
 	auth.UnimplementedSessionMangerServer
