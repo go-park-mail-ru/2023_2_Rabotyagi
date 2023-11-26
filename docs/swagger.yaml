@@ -219,6 +219,11 @@ definitions:
       product_id:
         type: integer
     type: object
+  internal_models.ProductID:
+    properties:
+      product_id:
+        type: integer
+    type: object
   internal_models.UserWithoutID:
     properties:
       avatar:
@@ -804,14 +809,15 @@ paths:
     post:
       consumes:
       - application/json
-      description: add product to favs using product id from query and user id form
+      description: add product to favs using product id from body and user id form
         cookie
       parameters:
       - description: product id
-        in: query
+        in: body
         name: product_id
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/internal_models.ProductID'
       produces:
       - application/json
       responses:
@@ -1104,14 +1110,15 @@ paths:
     delete:
       consumes:
       - application/json
-      description: delete product from favs using product id from query and user id
+      description: delete product from favs using product id from body and user id
         form cookie
       parameters:
       - description: product id
-        in: query
+        in: body
         name: product_id
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/internal_models.ProductID'
       produces:
       - application/json
       responses:

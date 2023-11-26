@@ -5,16 +5,16 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
+	"io"
 	"net/http"
-	"strconv"
 )
 
 var _ IFavouriteService = (*productusecases.FavouriteService)(nil)
 
 type IFavouriteService interface {
 	GetUserFavourites(ctx context.Context, userID uint64) ([]*models.ProductInFeed, error)
-	AddToFavourites(ctx context.Context, userID uint64, productID uint64) error
-	DeleteFromFavourites(ctx context.Context, userID uint64, productID uint64) error
+	AddToFavourites(ctx context.Context, userID uint64, r io.Reader) error
+	DeleteFromFavourites(ctx context.Context, userID uint64, r io.Reader) error
 }
 
 // GetFavouritesHandler godoc
@@ -58,17 +58,17 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 
 // AddToFavouritesHandler godoc
 //
-//	@Summary     add product to favs
-//	@Description  add product to favs using product id from query and user id form cookie
-//	@Tags favourite
-//	@Accept      json
-//	@Produce    json
-//	@Param      product_id  query uint64 true  "product id"
-//	@Success    200  {object} ProductListResponse
-//	@Failure    405  {string} string
-//	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /product/add-to-fav [post]
+//		@Summary     add product to favs
+//		@Description  add product to favs using product id from body and user id form cookie
+//		@Tags favourite
+//		@Accept      json
+//		@Produce    json
+//	 @Param      product_id  body internal_models.ProductID true  "product id"
+//		@Success    200  {object} ProductListResponse
+//		@Failure    405  {string} string
+//		@Failure    500  {string} string
+//		@Failure    222  {object} delivery.ErrorResponse "Error"
+//		@Router      /product/add-to-fav [post]
 func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -76,15 +76,6 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	productIDStr := r.URL.Query().Get("product_id")
-
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
-	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
@@ -94,30 +85,30 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 
 	ctx := r.Context()
 
-	err = p.service.AddToFavourites(ctx, userID, productID)
+	err = p.service.AddToFavourites(ctx, userID, r.Body)
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(productID))
-	p.logger.Infof("in AddToFavouritesHandler: add to fav with product id = %+v", productID)
+	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(userID))
+	p.logger.Infof("in AddToFavouritesHandler: add to fav with product id = %+v", userID)
 }
 
 // DeleteFromFavouritesHandler godoc
 //
-//	@Summary     delete product from favs
-//	@Description  delete product from favs using product id from query and user id form cookie
-//	@Tags favourite
-//	@Accept      json
-//	@Produce    json
-//	@Param      product_id  query uint64 true  "product id"
-//	@Success    200  {object} ProductListResponse
-//	@Failure    405  {string} string
-//	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /product/remove-from-fav [delete]
+//		@Summary     delete product from favs
+//		@Description  delete product from favs using product id from body and user id form cookie
+//		@Tags favourite
+//		@Accept      json
+//		@Produce    json
+//	 @Param      product_id  body internal_models.ProductID true  "product id"
+//		@Success    200  {object} ProductListResponse
+//		@Failure    405  {string} string
+//		@Failure    500  {string} string
+//		@Failure    222  {object} delivery.ErrorResponse "Error"
+//		@Router      /product/remove-from-fav [delete]
 func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -125,15 +116,6 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	productIDStr := r.URL.Query().Get("product_id")
-
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
-	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
-
-		return
-	}
-
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
@@ -143,13 +125,13 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 
 	ctx := r.Context()
 
-	err = p.service.DeleteFromFavourites(ctx, userID, productID)
+	err = p.service.DeleteFromFavourites(ctx, userID, r.Body)
 	if err != nil {
 		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(productID))
-	p.logger.Infof("in DeleteFromFavouritesHandler: del form fav with product id = %+v", productID)
+	delivery.SendOkResponse(w, p.logger, delivery.NewResponseID(userID))
+	p.logger.Infof("in DeleteFromFavouritesHandler: del form fav to user = %+v", userID)
 }
