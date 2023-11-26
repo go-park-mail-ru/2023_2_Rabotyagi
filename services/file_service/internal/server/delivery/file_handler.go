@@ -3,13 +3,12 @@ package delivery
 import (
 	"context"
 	"fmt"
+	delivery2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
 	"io"
 	"net/http"
-
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
 
 	"go.uber.org/zap"
 )
@@ -80,8 +79,8 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 	err := r.ParseMultipartForm(MaxSizePhotoBytes)
 	if err != nil {
 		f.logger.Errorln(err)
-		delivery.SendResponse(w, f.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		delivery2.SendResponse(w, f.logger,
+			delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
 
 		return
 	}
@@ -89,16 +88,16 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 	slFiles, ok := r.MultipartForm.File[nameImagesInForm]
 	if !ok {
 		f.logger.Errorln(err)
-		delivery.SendResponse(w, f.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		delivery2.SendResponse(w, f.logger,
+			delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
 
 		return
 	}
 
 	if len(slFiles) > MaxCountPhoto {
 		f.logger.Errorln(ErrToManyCountFiles)
-		delivery.SendResponse(w, f.logger,
-			delivery.NewErrResponse(statuses.StatusBadContentRequest, ErrToManyCountFiles.Error()))
+		delivery2.SendResponse(w, f.logger,
+			delivery2.NewErrResponse(statuses.StatusBadContentRequest, ErrToManyCountFiles.Error()))
 
 		return
 	}
@@ -108,8 +107,8 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 	for i, file := range slFiles {
 		if file.Size > MaxSizePhotoBytes {
 			f.logger.Errorf("filename = %s error: %+v\n", file.Filename, ErrToBigFile)
-			delivery.SendResponse(w, f.logger,
-				delivery.NewErrResponse(statuses.StatusBadContentRequest, ErrToBigFile.Error()))
+			delivery2.SendResponse(w, f.logger,
+				delivery2.NewErrResponse(statuses.StatusBadContentRequest, ErrToBigFile.Error()))
 
 			return
 		}
@@ -117,8 +116,8 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 		fileBody, err := file.Open()
 		if err != nil {
 			f.logger.Errorln(err)
-			delivery.SendResponse(w, f.logger,
-				delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+			delivery2.SendResponse(w, f.logger,
+				delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
 
 			return
 		}
@@ -126,7 +125,7 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 		URLToFile, err := f.fileService.SaveImage(fileBody)
 		if err != nil {
 			f.logger.Errorln(err)
-			delivery.HandleErr(w, f.logger, err)
+			delivery2.HandleErr(w, f.logger, err)
 
 			return
 		}
@@ -134,7 +133,7 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 		slURL[i] = URLToFile
 	}
 
-	delivery.SendResponse(w, f.logger, NewResponseURLs(slURL))
+	delivery2.SendResponse(w, f.logger, NewResponseURLs(slURL))
 
 	for _, fileName := range slURL {
 		f.logger.Infof("uploaded file %s", fileName)
@@ -160,7 +159,7 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 func (f *FileHandler) fileServerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == rootPath {
 		f.logger.Errorln(ErrForbiddenRootPath)
-		delivery.HandleErr(w, f.logger, ErrForbiddenRootPath)
+		delivery2.HandleErr(w, f.logger, ErrForbiddenRootPath)
 
 		return
 	}
@@ -171,8 +170,8 @@ func (f *FileHandler) fileServerHandler(w http.ResponseWriter, r *http.Request) 
 	fileServer, ok := fileServerRaw.(http.Handler)
 	if !ok {
 		f.logger.Errorln(fmt.Sprintf("handler = %+v а должен быть типом http.Handler", fileServerRaw))
-		delivery.SendResponse(w, f.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		delivery2.SendResponse(w, f.logger,
+			delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
 
 		return
 	}

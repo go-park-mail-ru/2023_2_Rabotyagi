@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/config"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/fake_db"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/fake_db"
 )
 
 func main() {

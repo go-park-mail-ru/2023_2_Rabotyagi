@@ -35,6 +35,12 @@ const (
 	EnvFileServiceDir         = "FILE_SERVICE_DIR"
 	EnvAddressFileServiceGrpc = "ADDRESS_FS_GRPC"
 	EnvFileServicePortHTTP    = "PORT_FS"
+
+	// Auth service env
+
+	StandardAddressAuthGrpc = "127.0.0.1:8082"
+
+	EnvAddressAuthServiceGrpc = "ADDRESS_AUTH_GRPC"
 )
 
 func GetEnvStr(name string, defaultValue string) string {

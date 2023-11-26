@@ -1,6 +1,8 @@
 package delivery
 
-import "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
+import (
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery/statuses"
+)
 
 type ResponseURLBody struct {
 	SlURL []string `json:"urls"` //nolint:tagliatelle

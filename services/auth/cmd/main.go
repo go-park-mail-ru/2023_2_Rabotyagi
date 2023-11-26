@@ -64,6 +64,7 @@ func main() {
 	auth.RegisterSessionMangerServer(server, sessionManager)
 
 	fmt.Println("starting server at :8082")
+
 	if err := server.Serve(lis); err != nil {
 		fmt.Println(err)
 
