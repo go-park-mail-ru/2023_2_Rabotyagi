@@ -2,11 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"net/http"
 	"strconv"
-
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 )
 
 var MessageErrWrongNumberParam = "Получили некорректный числовой параметр. Он должен быть целым"

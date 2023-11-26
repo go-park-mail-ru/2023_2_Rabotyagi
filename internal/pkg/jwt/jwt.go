@@ -2,11 +2,11 @@ package jwt
 
 import (
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"sync"
 	"time"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/golang-jwt/jwt"
 )
 

@@ -2,9 +2,9 @@ package delivery
 
 import (
 	"encoding/json"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
 
 	"go.uber.org/zap"

@@ -2,7 +2,7 @@ package jwt_test
 
 import (
 	"errors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"reflect"
 	"testing"
 

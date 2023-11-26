@@ -3,6 +3,7 @@ package usecases
 import (
 	"bytes"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"image"
 	"io"
 	"log"
@@ -13,7 +14,6 @@ import (
 	_ "image/jpeg"
 
 	fileservicerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 )
 
 var (

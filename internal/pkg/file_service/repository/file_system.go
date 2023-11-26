@@ -2,10 +2,9 @@ package repository
 
 import (
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"log"
 	"os"
-
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 )
 
 type FileSystemStorage struct {

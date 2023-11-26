@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"go.uber.org/zap"
 )
 

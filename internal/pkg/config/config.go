@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
-	"os"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 )
 
 const (
@@ -43,7 +43,7 @@ type Config struct {
 }
 
 func New() *Config {
-	secret := getEnvStr(envStandardSecret, standardSecret)
+	secret := config.GetEnvStr(envStandardSecret, standardSecret)
 	if secret != standardSecret {
 		jwt.SetSecret([]byte(secret))
 	} else {
@@ -51,28 +51,19 @@ func New() *Config {
 	}
 
 	productionMode := false
-	if getEnvStr(envEnvironmentMode, standardDevelopmentMode) == standardProductionMode {
+	if config.GetEnvStr(envEnvironmentMode, standardDevelopmentMode) == standardProductionMode {
 		productionMode = true
 	}
 
 	return &Config{
-		AllowOrigin:        getEnvStr(envAllowOrigin, standardAllowOrigin),
-		Schema:             getEnvStr(envSchema, standardSchema),
-		PortServer:         getEnvStr(envPortBackend, standardPort),
-		URLDataBase:        getEnvStr(envURLDataBase, standardURLDataBase),
-		PathToRoot:         getEnvStr(envPathToRoot, standardPathToRoot),
-		FileServiceDir:     getEnvStr(envFileServiceDir, standardFileServiceDir),
-		OutputLogPath:      getEnvStr(envOutputLogPath, standardOutputLogPath),
-		ErrorOutputLogPath: getEnvStr(envErrorOutputLogPath, standardErrorOutputLogPath),
+		AllowOrigin:        config.GetEnvStr(envAllowOrigin, standardAllowOrigin),
+		Schema:             config.GetEnvStr(envSchema, standardSchema),
+		PortServer:         config.GetEnvStr(envPortBackend, standardPort),
+		URLDataBase:        config.GetEnvStr(envURLDataBase, standardURLDataBase),
+		PathToRoot:         config.GetEnvStr(envPathToRoot, standardPathToRoot),
+		FileServiceDir:     config.GetEnvStr(envFileServiceDir, standardFileServiceDir),
+		OutputLogPath:      config.GetEnvStr(envOutputLogPath, standardOutputLogPath),
+		ErrorOutputLogPath: config.GetEnvStr(envErrorOutputLogPath, standardErrorOutputLogPath),
 		ProductionMode:     productionMode,
 	}
-}
-
-func getEnvStr(name string, defaultValue string) string {
-	result, ok := os.LookupEnv(name)
-	if !ok {
-		return defaultValue
-	}
-
-	return result
 }

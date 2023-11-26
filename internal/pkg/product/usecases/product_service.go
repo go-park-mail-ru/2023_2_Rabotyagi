@@ -3,12 +3,12 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/microcosm-cc/bluemonday"
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/myerrors"
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
 
