@@ -33,6 +33,11 @@ const (
 	EnvPathToRoot         = "PATH_TO_ROOT"
 	EnvFileServiceDir     = "FILE_SERVICE_DIR"
 	EnvAddressFileService = "ADDRESS_FILE_SERVICE"
+
+	// Auth service env
+
+	StandardAddressAuthService = "127.0.0.1:8082"
+	EnvAddressAuthServiceGrpc  = "ADDRESS_AUTH_GRPC"
 )
 
 func GetEnvStr(name string, defaultValue string) string {
