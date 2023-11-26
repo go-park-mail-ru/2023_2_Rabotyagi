@@ -33,8 +33,22 @@ services:
       - 8080:8080
     depends_on:
       - postgres
+      - backend-fs
+
+  backend-fs:
+    build:
+      context: ./services/file_service
+      dockerfile: ./services/file_service/Dockerfile
+    restart: always
+    env_file:
+      - ./services/file_service/env/.env.backend
+    ports:
+      - 8081:8081
+      - 8018:8018
+    depends_on:
+      - postgres
     volumes:
-      - imgs:/var/backend/static/img
+      - imgs:/var/file_service/static/img
 
   frontend:
     image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev

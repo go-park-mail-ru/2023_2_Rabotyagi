@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	utils2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
-
 	"go.uber.org/zap"
 	"io"
 )
@@ -48,7 +47,7 @@ func (u *UserService) AddUser(ctx context.Context, r io.Reader) (*models.User, e
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	userWithoutID.Password, err = utils.HashPass(userWithoutID.Password)
+	userWithoutID.Password, err = utils2.HashPass(userWithoutID.Password)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -115,7 +114,7 @@ func (u *UserService) UpdateUser(ctx context.Context, r io.Reader,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrWrongUserID)
 	}
 
-	updateDataMap := utils.StructToMap(userWithoutPassword)
+	updateDataMap := utils2.StructToMap(userWithoutPassword)
 
 	delete(updateDataMap, "ID")
 

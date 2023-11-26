@@ -3,14 +3,13 @@ package usecases
 import (
 	"database/sql"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"io"
 	"os"
 	"strconv"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
-
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 )
 
 func FakeUserWihtoutID(index int) (*models.UserWithoutID, error) {

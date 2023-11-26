@@ -11,8 +11,6 @@ type Config struct {
 	Schema             string
 	PortServer         string
 	URLDataBase        string
-	PathToRoot         string
-	FileServiceDir     string
 	OutputLogPath      string
 	ErrorOutputLogPath string
 }
@@ -35,8 +33,6 @@ func New() *Config {
 		Schema:             config.GetEnvStr(config.EnvSchema, config.StandardSchema),
 		PortServer:         config.GetEnvStr(config.EnvPortBackend, config.StandardPort),
 		URLDataBase:        config.GetEnvStr(config.EnvURLDataBase, config.StandardURLDataBase),
-		PathToRoot:         config.GetEnvStr(config.EnvPathToRoot, config.StandardPathToRoot),
-		FileServiceDir:     config.GetEnvStr(config.EnvFileServiceDir, config.StandardFileServiceDir),
 		OutputLogPath:      config.GetEnvStr(config.EnvOutputLogPath, config.StandardOutputLogPath),
 		ErrorOutputLogPath: config.GetEnvStr(config.EnvErrorOutputLogPath, config.StandardErrorOutputLogPath),
 		ProductionMode:     productionMode,

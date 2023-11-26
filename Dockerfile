@@ -22,14 +22,10 @@ COPY --from=build /var/backend/fake_db fake_db
 COPY --from=build /go/bin/migrate migrate
 
 RUN mkdir -p /var/log/backend
-RUN mkdir -p static/img
-COPY static/images_for_fake_db static/images_for_fake_db
 COPY db/migrations db/migrations
 
 ENV ALLOW_ORIGIN=localhost:3000
 ENV PORT_BACKEND=8080
-ENV PATH_TO_ROOT=/var/backend
-ENV FILE_SERVICE_DIR=/var/backend/static/img
 ENV OUTPUT_LOG_PATH=/var/log/backend/logs.json
 ENV ERROR_OUTPUT_LOG_PATH=/var/log/backend/err_logs.json
 

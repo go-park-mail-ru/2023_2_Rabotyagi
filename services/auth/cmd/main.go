@@ -7,6 +7,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	reposhare "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/usecases"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -38,7 +40,21 @@ func main() {
 		return
 	}
 
-	sessionManager, err := delivery.NewSessionManager(pool)
+	storage, err := repository.NewAuthStorage(pool)
+	if err != nil {
+		fmt.Println(err)
+
+		return
+	}
+
+	service, err := usecases.NewAuthService(storage)
+	if err != nil {
+		fmt.Println(err)
+
+		return
+	}
+
+	sessionManager, err := delivery.NewSessionManager(pool, service)
 	if err != nil {
 		fmt.Println(err)
 

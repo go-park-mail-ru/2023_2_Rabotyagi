@@ -6,31 +6,24 @@ import (
 
 	categorydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/category/delivery"
 	citydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/city/delivery"
-	filedelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/delivery"
-	filerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/repository"
-	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/middleware"
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/delivery"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
 
 	"go.uber.org/zap"
 )
 
-const urlPrefixPathFS = "img/"
-
 type ConfigMux struct {
-	addrOrigin     string
-	schema         string
-	portServer     string
-	fileServiceDir string
+	addrOrigin string
+	schema     string
+	portServer string
 }
 
-func NewConfigMux(addrOrigin string, schema string, portServer string, fileServiceDir string) *ConfigMux {
+func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMux {
 	return &ConfigMux{
-		addrOrigin:     addrOrigin,
-		schema:         schema,
-		portServer:     portServer,
-		fileServiceDir: fileServiceDir,
+		addrOrigin: addrOrigin,
+		schema:     schema,
+		portServer: portServer,
 	}
 }
 
@@ -59,14 +52,6 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	if err != nil {
 		return nil, err
 	}
-
-	fileStorage := filerepo.NewFileSystemStorage(configMux.fileServiceDir)
-	fileService := fileusecases.NewFileService(fileStorage, urlPrefixPathFS)
-	fileHandler := filedelivery.NewFileHandler(fileService, logger, configMux.fileServiceDir)
-
-	router.Handle("/api/v1/img/", fileHandler.DocFileServerHandler(ctx))
-	router.Handle("/api/v1/img/upload", middleware.Context(ctx,
-		middleware.SetupCORS(fileHandler.UploadFileHandler, configMux.addrOrigin, configMux.schema)))
 
 	router.Handle("/api/v1/signup", middleware.Context(ctx,
 		middleware.SetupCORS(userHandler.SignUpHandler, configMux.addrOrigin, configMux.schema)))
