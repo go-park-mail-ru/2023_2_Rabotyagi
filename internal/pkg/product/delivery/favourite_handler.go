@@ -28,7 +28,7 @@ type IFavouriteService interface {
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /profile/profile/favourites [get]
+//	@Router      /profile/favourites [get]
 func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
