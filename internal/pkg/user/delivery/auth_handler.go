@@ -92,10 +92,11 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    delivery.CookieAuthName,
-		Value:   jwtStr,
-		Expires: expire,
-		Path:    "/",
+		Name:     delivery.CookieAuthName,
+		Value:    jwtStr,
+		Expires:  expire,
+		Path:     "/",
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(w, cookie)
@@ -152,10 +153,11 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    delivery.CookieAuthName,
-		Value:   jwtStr,
-		Expires: expire,
-		Path:    "/",
+		Name:     delivery.CookieAuthName,
+		Value:    jwtStr,
+		Expires:  expire,
+		Path:     "/",
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(w, cookie)
