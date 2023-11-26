@@ -5,31 +5,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 )
 
-const (
-	standardDevelopmentMode    = "development"
-	standardProductionMode     = "production"
-	standardAllowOrigin        = "localhost:3000"
-	standardSchema             = "http://"
-	standardPort               = "8080"
-	standardURLDataBase        = "postgres://postgres:postgres@localhost:5432/youla?sslmode=disable"
-	standardPathToRoot         = "."
-	standardFileServiceDir     = "./static/img"
-	standardOutputLogPath      = "stdout /var/log/backend/logs.json"
-	standardErrorOutputLogPath = "stderr /var/log/backend/err_logs.json"
-	standardSecret             = ""
-
-	envEnvironmentMode    = "ENVIRONMENT"
-	envAllowOrigin        = "ALLOW_ORIGIN"
-	envSchema             = "SCHEMA"
-	envPortBackend        = "PORT_BACKEND"
-	envURLDataBase        = "URL_DATA_BASE"
-	envPathToRoot         = "PATH_TO_ROOT"
-	envFileServiceDir     = "FILE_SERVICE_DIR"
-	envOutputLogPath      = "OUTPUT_LOG_PATH"
-	envErrorOutputLogPath = "ERROR_OUTPUT_LOG_PATH"
-	envStandardSecret     = "JWT_SECRET"
-)
-
 type Config struct {
 	ProductionMode     bool
 	AllowOrigin        string
@@ -43,27 +18,27 @@ type Config struct {
 }
 
 func New() *Config {
-	secret := config.GetEnvStr(envStandardSecret, standardSecret)
-	if secret != standardSecret {
+	secret := config.GetEnvStr(config.EnvStandardSecret, config.StandardSecret)
+	if secret != config.StandardSecret {
 		jwt.SetSecret([]byte(secret))
 	} else {
 		_ = jwt.GetSecret()
 	}
 
 	productionMode := false
-	if config.GetEnvStr(envEnvironmentMode, standardDevelopmentMode) == standardProductionMode {
+	if config.GetEnvStr(config.EnvEnvironmentMode, config.StandardDevelopmentMode) == config.StandardProductionMode {
 		productionMode = true
 	}
 
 	return &Config{
-		AllowOrigin:        config.GetEnvStr(envAllowOrigin, standardAllowOrigin),
-		Schema:             config.GetEnvStr(envSchema, standardSchema),
-		PortServer:         config.GetEnvStr(envPortBackend, standardPort),
-		URLDataBase:        config.GetEnvStr(envURLDataBase, standardURLDataBase),
-		PathToRoot:         config.GetEnvStr(envPathToRoot, standardPathToRoot),
-		FileServiceDir:     config.GetEnvStr(envFileServiceDir, standardFileServiceDir),
-		OutputLogPath:      config.GetEnvStr(envOutputLogPath, standardOutputLogPath),
-		ErrorOutputLogPath: config.GetEnvStr(envErrorOutputLogPath, standardErrorOutputLogPath),
+		AllowOrigin:        config.GetEnvStr(config.EnvAllowOrigin, config.StandardAllowOrigin),
+		Schema:             config.GetEnvStr(config.EnvSchema, config.StandardSchema),
+		PortServer:         config.GetEnvStr(config.EnvPortBackend, config.StandardPort),
+		URLDataBase:        config.GetEnvStr(config.EnvURLDataBase, config.StandardURLDataBase),
+		PathToRoot:         config.GetEnvStr(config.EnvPathToRoot, config.StandardPathToRoot),
+		FileServiceDir:     config.GetEnvStr(config.EnvFileServiceDir, config.StandardFileServiceDir),
+		OutputLogPath:      config.GetEnvStr(config.EnvOutputLogPath, config.StandardOutputLogPath),
+		ErrorOutputLogPath: config.GetEnvStr(config.EnvErrorOutputLogPath, config.StandardErrorOutputLogPath),
 		ProductionMode:     productionMode,
 	}
 }
