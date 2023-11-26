@@ -1,5 +1,19 @@
 basePath: /api/v1
 definitions:
+  delivery.ResponseURLBody:
+    properties:
+      urls:
+        items:
+          type: string
+        type: array
+    type: object
+  delivery.ResponseURLs:
+    properties:
+      body:
+        $ref: '#/definitions/delivery.ResponseURLBody'
+      status:
+        type: integer
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category:
     properties:
       id:
@@ -256,20 +270,6 @@ definitions:
       status:
         type: integer
     type: object
-  internal_pkg_file_service_delivery.ResponseURLBody:
-    properties:
-      urls:
-        items:
-          type: string
-        type: array
-    type: object
-  internal_pkg_file_service_delivery.ResponseURLs:
-    properties:
-      body:
-        $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURLBody'
-      status:
-        type: integer
-    type: object
   internal_pkg_product_delivery.OrderListResponse:
     properties:
       body:
@@ -495,7 +495,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURLs'
+            $ref: '#/definitions/delivery.ResponseURLs'
         "222":
           description: Error
           schema:

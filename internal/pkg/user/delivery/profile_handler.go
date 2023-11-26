@@ -3,7 +3,7 @@ package delivery
 import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"net/http"
 )
 

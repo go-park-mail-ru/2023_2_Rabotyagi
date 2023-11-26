@@ -3,14 +3,13 @@ package delivery
 import (
 	"context"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/city/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
-
 	"go.uber.org/zap"
 )
 

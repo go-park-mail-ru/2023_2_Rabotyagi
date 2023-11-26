@@ -26,13 +26,15 @@ const (
 
 	// File service env
 
-	StandardPathToRoot         = "."
-	StandardFileServiceDir     = "./static/img"
-	StandardAddressFileService = "127.0.0.1:8081"
+	StandardPathToRoot             = "."
+	StandardFileServiceDir         = "./static/img"
+	StandardAddressFileServiceGrpc = "127.0.0.1:8081"
+	StandardFileServicePortHTTP    = "8018"
 
-	EnvPathToRoot         = "PATH_TO_ROOT"
-	EnvFileServiceDir     = "FILE_SERVICE_DIR"
-	EnvAddressFileService = "ADDRESS_FILE_SERVICE"
+	EnvPathToRoot             = "PATH_TO_ROOT"
+	EnvFileServiceDir         = "FILE_SERVICE_DIR"
+	EnvAddressFileServiceGrpc = "ADDRESS_FS_GRPC"
+	EnvFileServicePortHTTP    = "PORT_FS"
 )
 
 func GetEnvStr(name string, defaultValue string) string {

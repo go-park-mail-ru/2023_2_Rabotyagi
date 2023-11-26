@@ -2,7 +2,7 @@ package models
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/utils"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"time"
 )
 

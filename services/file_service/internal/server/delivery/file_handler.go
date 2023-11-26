@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
 	"io"
 	"net/http"
 
-	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/file_service/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
 

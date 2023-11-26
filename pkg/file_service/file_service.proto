@@ -6,3 +6,12 @@ option go_package = "./;test";
 package fileservice;
 
 message Nothing{}
+
+message ImgURLs {
+  repeated string url =1;
+}
+
+service FileService {
+  rpc GetFullNames(Nothing) returns (ImgURLs) {}
+  rpc SubscribeURLs(Nothing) returns (stream ImgURLs) {}
+}

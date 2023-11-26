@@ -22,6 +22,9 @@ import (
 )
 
 const (
+	pathCertFile = "/etc/ssl/goods-galaxy.ru.crt"
+	pathKeyFile  = "/etc/ssl/goods-galaxy.ru.key"
+
 	basicTimeout = 10 * time.Second
 )
 
@@ -97,7 +100,7 @@ func (s *Server) Run(config *config.Config) error {
 	}
 
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
-		config.Schema, config.PortServer, config.FileServiceDir),
+		config.Schema, config.PortServer),
 		userService, productService, categoryService, cityService, logger)
 	if err != nil {
 		return err
@@ -114,8 +117,7 @@ func (s *Server) Run(config *config.Config) error {
 	logger.Infof("Start server:%s", config.PortServer)
 
 	if config.ProductionMode {
-		return s.httpServer.ListenAndServeTLS("/etc/ssl/goods-galaxy.ru.crt", //nolint:wrapcheck
-			"/etc/ssl/goods-galaxy.ru.key")
+		return s.httpServer.ListenAndServeTLS(pathCertFile, pathKeyFile)
 	}
 
 	chCloseRefreshing := make(chan struct{})
