@@ -12,7 +12,6 @@ import (
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"go.uber.org/zap"
 )
 
 var _ IProductStorage = (*productrepo.ProductStorage)(nil)
@@ -40,7 +39,7 @@ type ProductService struct {
 	BasketService
 	fileServiceClient fileservice.FileServiceClient
 	storage           IProductStorage
-	logger            *zap.SugaredLogger
+	logger            *my_logger.MyLogger
 }
 
 func NewProductService(productStorage IProductStorage, basketService BasketService,

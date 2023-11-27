@@ -6,7 +6,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"go.uber.org/zap"
 )
 
 type ICityStorage interface {
@@ -16,7 +15,7 @@ type ICityStorage interface {
 
 type CityService struct {
 	storage ICityStorage
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewCityService(cityStorage ICityStorage) (*CityService, error) {

@@ -1,4 +1,4 @@
-package utils
+package my_logger
 
 import (
 	"context"

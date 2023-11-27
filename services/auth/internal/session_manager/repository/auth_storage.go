@@ -9,7 +9,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/models"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
 )
 
 var (
@@ -21,7 +20,7 @@ var (
 
 type AuthStorage struct {
 	pool   *pgxpool.Pool
-	logger *zap.SugaredLogger
+	logger *my_logger.MyLogger
 }
 
 func NewAuthStorage(pool *pgxpool.Pool) (*AuthStorage, error) {
@@ -36,7 +35,7 @@ func NewAuthStorage(pool *pgxpool.Pool) (*AuthStorage, error) {
 	}, nil
 }
 
-func GetLastValSeq(ctx context.Context, tx pgx.Tx, logger *zap.SugaredLogger, nameTable pgx.Identifier) (uint64, error) {
+func GetLastValSeq(ctx context.Context, tx pgx.Tx, logger *my_logger.MyLogger, nameTable pgx.Identifier) (uint64, error) {
 	sanitizedNameTable := nameTable.Sanitize()
 	SQLGetLastValSeq := fmt.Sprintf(`SELECT last_value FROM %s;`, sanitizedNameTable)
 	seqRow := tx.QueryRow(ctx, SQLGetLastValSeq)

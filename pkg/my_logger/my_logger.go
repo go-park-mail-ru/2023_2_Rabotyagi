@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"sync"
 
 	"go.uber.org/zap"
@@ -64,6 +63,6 @@ func Get() (*MyLogger, error) {
 
 func (m *MyLogger) LogReqID(ctx context.Context) *zap.SugaredLogger {
 	return m.With(
-		zap.String("req_id", utils.GetRequestIDFromCtx(ctx)),
+		zap.String("req_id", GetRequestIDFromCtx(ctx)),
 	)
 }

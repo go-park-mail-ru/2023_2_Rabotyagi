@@ -59,7 +59,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := utils.AddRequestIDToCtx(r.Context())
+	ctx := my_logger.AddRequestIDToCtx(r.Context())
 
 	userID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {

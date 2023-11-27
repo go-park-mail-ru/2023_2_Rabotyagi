@@ -11,7 +11,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
 	"regexp"
 	"strings"
 )
@@ -29,7 +28,7 @@ var (
 
 type ProductStorage struct {
 	pool   *pgxpool.Pool
-	logger *zap.SugaredLogger
+	logger *my_logger.MyLogger
 }
 
 func NewProductStorage(pool *pgxpool.Pool) (*ProductStorage, error) {

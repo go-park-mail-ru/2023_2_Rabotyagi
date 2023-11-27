@@ -10,7 +10,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/repository"
-	"go.uber.org/zap"
 	"time"
 )
 
@@ -27,7 +26,7 @@ type IAuthStorage interface {
 
 type AuthService struct {
 	storage IAuthStorage
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewAuthService(authStorage IAuthStorage) (*AuthService, error) {

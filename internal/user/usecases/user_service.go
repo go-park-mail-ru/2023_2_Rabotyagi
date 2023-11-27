@@ -9,7 +9,6 @@ import (
 	utils2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"go.uber.org/zap"
 	"io"
 )
 
@@ -29,7 +28,7 @@ type IUserStorage interface {
 
 type UserService struct {
 	storage IUserStorage
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewUserService(userStorage IUserStorage) (*UserService, error) {

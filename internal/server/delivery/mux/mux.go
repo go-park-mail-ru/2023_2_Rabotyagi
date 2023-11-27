@@ -2,6 +2,7 @@ package mux
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"net/http"
 
 	categorydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/delivery"
@@ -11,8 +12,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
-
-	"go.uber.org/zap"
 )
 
 type ConfigMux struct {
@@ -31,7 +30,7 @@ func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMu
 
 func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.IUserService,
 	productService productdelivery.IProductService, categoryService categorydelivery.ICategoryService,
-	cityService citydelivery.ICityService, authGrpcService auth.SessionMangerClient, logger *zap.SugaredLogger,
+	cityService citydelivery.ICityService, authGrpcService auth.SessionMangerClient, logger *my_logger.MyLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 

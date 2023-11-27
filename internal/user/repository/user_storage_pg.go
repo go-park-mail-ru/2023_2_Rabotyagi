@@ -14,7 +14,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
 )
 
 var (
@@ -30,7 +29,7 @@ var (
 
 type UserStorage struct {
 	pool   *pgxpool.Pool
-	logger *zap.SugaredLogger
+	logger *my_logger.MyLogger
 }
 
 func NewUserStorage(pool *pgxpool.Pool) (*UserStorage, error) {

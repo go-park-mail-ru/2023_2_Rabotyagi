@@ -2,13 +2,12 @@ package middleware
 
 import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
 	"net/http"
-
-	"go.uber.org/zap"
 )
 
-func Panic(next http.Handler, logger *zap.SugaredLogger) http.Handler {
+func Panic(next http.Handler, logger *my_logger.MyLogger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {

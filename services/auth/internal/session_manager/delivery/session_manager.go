@@ -8,7 +8,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/usecases"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -27,7 +26,7 @@ type SessionManager struct {
 
 	service IAuthService
 	pool    *pgxpool.Pool
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewSessionManager(pool *pgxpool.Pool, authService IAuthService) (*SessionManager, error) {

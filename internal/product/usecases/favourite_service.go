@@ -7,7 +7,6 @@ import (
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"go.uber.org/zap"
 )
 
 var _ IFavouriteStorage = (*productrepo.ProductStorage)(nil)
@@ -20,7 +19,7 @@ type IFavouriteStorage interface {
 
 type FavouriteService struct {
 	storage IFavouriteStorage
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewFavouriteService(favouriteStorage IFavouriteStorage) (*FavouriteService, error) {
