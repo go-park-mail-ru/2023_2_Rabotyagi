@@ -2,9 +2,11 @@ package delivery
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/usecases"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -43,7 +45,7 @@ func NewSessionManager(pool *pgxpool.Pool, authService IAuthService) (*SessionMa
 
 func (s *SessionManager) Check(ctx context.Context, sessionUser *auth.Session) (*auth.SessionStatus, error) {
 	if sessionUser == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "sessionUser == nil")
+		return nil, myerrors.NewErrorInternal("sessionUser == nil")
 	}
 
 	correct := s.service.Check(ctx, sessionUser.GetAccessToken())
@@ -53,12 +55,12 @@ func (s *SessionManager) Check(ctx context.Context, sessionUser *auth.Session) (
 
 func (s *SessionManager) Create(ctx context.Context, user *auth.User) (*auth.Session, error) {
 	if user == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "user == nil")
+		return nil, myerrors.NewErrorInternal("user == nil")
 	}
 
 	rawJWT, err := s.service.AddUser(ctx, user.GetEmail(), user.GetPassword())
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "in Create")
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return &auth.Session{AccessToken: rawJWT}, nil
@@ -66,12 +68,12 @@ func (s *SessionManager) Create(ctx context.Context, user *auth.User) (*auth.Ses
 
 func (s *SessionManager) Login(ctx context.Context, user *auth.User) (*auth.Session, error) {
 	if user == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "user == nil")
+		return nil, myerrors.NewErrorInternal("user == nil")
 	}
 
 	rawJWT, err := s.service.GetUserRawJWT(ctx, user.GetEmail(), user.GetPassword())
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "in Login")
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return &auth.Session{AccessToken: rawJWT}, nil
@@ -79,12 +81,12 @@ func (s *SessionManager) Login(ctx context.Context, user *auth.User) (*auth.Sess
 
 func (s *SessionManager) Delete(ctx context.Context, sessionUser *auth.Session) (*auth.Session, error) {
 	if sessionUser == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "sessionUser == nil")
+		return nil, myerrors.NewErrorInternal("sessionUser == nil")
 	}
 
 	rawJwt, err := s.service.Delete(ctx, sessionUser.GetAccessToken())
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "in Delete")
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return &auth.Session{AccessToken: rawJwt}, nil

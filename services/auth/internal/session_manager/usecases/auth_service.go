@@ -7,12 +7,10 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/jwt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/repository"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"time"
 )
 
@@ -46,7 +44,7 @@ func (a *AuthService) GetUserRawJWT(ctx context.Context, email string, password 
 	if err != nil {
 		a.logger.Errorln(err)
 
-		return "", status.Errorf(codes.Internal, "can`t get user")
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	hashPass, err := hex.DecodeString(user.Password)
@@ -70,7 +68,7 @@ func (a *AuthService) GetUserRawJWT(ctx context.Context, email string, password 
 	if err != nil {
 		a.logger.Errorln(err)
 
-		return "", status.Errorf(codes.Internal, "can`t get user")
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return rawJwt, nil
@@ -88,7 +86,7 @@ func (a *AuthService) AddUser(ctx context.Context, email string, password string
 	if err != nil {
 		a.logger.Errorln(err)
 
-		return "", status.Errorf(codes.Internal, "can`t add user")
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	jwtPayload := jwt.UserJwtPayload{}
@@ -101,7 +99,7 @@ func (a *AuthService) AddUser(ctx context.Context, email string, password string
 	if err != nil {
 		a.logger.Errorln(err)
 
-		return "", status.Errorf(codes.Internal, "can`t add user")
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return rawJwt, nil
@@ -112,7 +110,7 @@ func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error)
 	if err != nil {
 		a.logger.Errorln(err)
 
-		return "", status.Errorf(codes.InvalidArgument, "get incorrect access_token in sessionUser")
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	jwtPayload.Expire = time.Now().Unix()
@@ -121,7 +119,7 @@ func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error)
 	if err != nil {
 		a.logger.Errorln(err)
 
-		return "", status.Errorf(codes.Internal, "can`t delete user")
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return newRawJwt, nil

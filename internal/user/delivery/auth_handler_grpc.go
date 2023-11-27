@@ -148,7 +148,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error".
 //	@Router      /logout [post]
 func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {

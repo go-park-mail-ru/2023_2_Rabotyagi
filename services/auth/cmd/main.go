@@ -7,9 +7,9 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	reposhare "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/usecases"
 	"google.golang.org/grpc"
 	"net"
 )
