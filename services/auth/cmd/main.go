@@ -12,7 +12,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/usecases"
 	"google.golang.org/grpc"
 	"net"
-	"os"
 )
 
 var (
@@ -21,7 +20,7 @@ var (
 )
 
 func main() {
-	lis, err := net.Listen("tcp", ":"+config.StandardAddressAuthGrpc)
+	lis, err := net.Listen("tcp", ":"+config.StandardPortAuthGrpc)
 	if err != nil {
 		fmt.Printf("can`t listen port %s", err)
 
@@ -39,7 +38,7 @@ func main() {
 		return
 	}
 
-	pool, err := reposhare.NewPgxPool(baseCtx, os.Getenv("URL_DATABASE_AUTH"))
+	pool, err := reposhare.NewPgxPool(baseCtx, config.StandardURLDataBase)
 	if err != nil {
 		fmt.Println(err)
 

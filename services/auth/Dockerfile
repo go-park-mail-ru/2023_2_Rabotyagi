@@ -25,10 +25,9 @@ ENV SCHEMA=http://
 ENV ALLOW_ORIGIN=localhost:3000
 ENV PORT_BACKEND=8080
 ENV PATH_TO_ROOT=/var/auth
-ENV OUTPUT_LOG_PATH=stdout /var/log/backend/logs_fs.json
-ENV ERROR_OUTPUT_LOG_PATH=stderr /var/log/backend/err_logs_fs.json
-
-EXPOSE 8081
+ENV OUTPUT_LOG_PATH=stdout /var/log/backend/logs_auth.json
+ENV ERROR_OUTPUT_LOG_PATH=stderr /var/log/backend/err_logs_auth.json
+EXPOSE 8082
 EXPOSE 8019
 
 ENTRYPOINT ./main

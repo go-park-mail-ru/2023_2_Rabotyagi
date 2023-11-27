@@ -38,7 +38,7 @@ type Server struct {
 func (s *Server) Run(config *config.Config) error {
 	baseCtx := context.Background()
 
-	grcpConnTest, err := grpc.Dial(
+	grcpConnAuth, err := grpc.Dial(
 		":8082",
 		grpc.WithInsecure(),
 	)
@@ -47,9 +47,9 @@ func (s *Server) Run(config *config.Config) error {
 
 		return err
 	}
-	defer grcpConnTest.Close()
+	defer grcpConnAuth.Close()
 
-	authGrpcService := auth.NewSessionMangerClient(grcpConnTest)
+	authGrpcService := auth.NewSessionMangerClient(grcpConnAuth)
 
 	pool, err := repository.NewPgxPool(baseCtx, config.URLDataBase)
 	if err != nil {
