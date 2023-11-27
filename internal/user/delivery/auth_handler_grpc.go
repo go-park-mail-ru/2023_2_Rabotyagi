@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+const (
+	timeTokenLife = 24 * time.Hour
+)
+
 type AuthHandler struct {
 	sessionManagerClient auth.SessionMangerClient
 	logger               *zap.SugaredLogger
@@ -21,6 +25,24 @@ func NewAuthHandler(sessionManagerClient auth.SessionMangerClient, logger *zap.S
 	return &AuthHandler{sessionManagerClient: sessionManagerClient, logger: logger}
 }
 
+// SignUpHandler godoc
+//
+//	@Summary    signup
+//	@Description  signup in app
+//
+//	@Description Error.status can be:
+//	@Description StatusErrBadRequest      = 400
+//	@Description  StatusErrInternalServer  = 500
+//	@Tags auth
+//
+//	@Accept      json
+//	@Produce    json
+//	@Param      preUser  body internal_models.UserWithoutID true  "user data for signup"
+//	@Success    200  {object} delivery.ResponseSuccessful
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /signup [post]
 func (a *AuthHandler) SingUpHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -69,6 +91,19 @@ func (a *AuthHandler) SingUpHandler(w http.ResponseWriter, r *http.Request) {
 	a.logger.Infof("in SignUpHandler: added user")
 }
 
+// SignInHandler godoc
+//
+//	@Summary    signin
+//	@Description  signin in app
+//	@Tags auth
+//	@Produce    json
+//	@Param      email  query string true  "user email for signin"
+//	@Param      password  query string true  "user password for signin"
+//	@Success    200  {object} delivery.ResponseSuccessful
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /signin [get]
 func (a *AuthHandler) SingInHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -104,6 +139,17 @@ func (a *AuthHandler) SingInHandler(w http.ResponseWriter, r *http.Request) {
 	a.logger.Infof("in SignUpHandler: added user")
 }
 
+// LogOutHandler godoc
+//
+//	@Summary    logout
+//	@Description  logout in app
+//	@Tags auth
+//	@Produce    json
+//	@Success    200  {object} delivery.ResponseSuccessful
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Router      /logout [post]
 func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)

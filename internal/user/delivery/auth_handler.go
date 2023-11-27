@@ -1,49 +1,12 @@
 package delivery
 
 import (
-	"context"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
 	delivery2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
-	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
-	"io"
 	"net/http"
 	"time"
-
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"go.uber.org/zap"
 )
-
-const (
-	timeTokenLife = 24 * time.Hour
-)
-
-var _ IUserService = (*userusecases.UserService)(nil)
-
-type IUserService interface {
-	AddUser(ctx context.Context, r io.Reader) (*models.User, error)
-	GetUser(ctx context.Context, email string, password string) (*models.UserWithoutPassword, error)
-	GetUserWithoutPasswordByID(ctx context.Context, userID uint64) (*models.UserWithoutPassword, error)
-	UpdateUser(ctx context.Context, r io.Reader, isPartialUpdate bool, userID uint64) (*models.UserWithoutPassword, error)
-}
-
-type UserHandler struct {
-	service IUserService
-	logger  *zap.SugaredLogger
-}
-
-func NewUserHandler(userService IUserService) (*UserHandler, error) {
-	logger, err := my_logger.Get()
-	if err != nil {
-		return nil, err
-	}
-
-	return &UserHandler{
-		service: userService,
-		logger:  logger,
-	}, nil
-}
 
 // SignUpHandler godoc
 //

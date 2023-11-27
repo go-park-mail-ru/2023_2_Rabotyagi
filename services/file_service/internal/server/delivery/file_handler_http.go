@@ -155,7 +155,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 //	@Param      name path  string true "name of image"
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent"
+//	@Failure    222  {object} delivery.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400)"
 //	@Router      /img/ [get]
 func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == rootPath {

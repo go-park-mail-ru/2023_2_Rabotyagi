@@ -82,12 +82,10 @@ func (s *Server) Run(config *config.Config) error {
 	}
 
 	basketService, err := usecases.NewBasketService(productStorage)
-	basketService, err := usecases.NewBasketService(productStorage)
 	if err != nil {
 		return err
 	}
 
-	favouriteService, err := usecases.NewFavouriteService(productStorage)
 	favouriteService, err := usecases.NewFavouriteService(productStorage)
 	if err != nil {
 		return err
