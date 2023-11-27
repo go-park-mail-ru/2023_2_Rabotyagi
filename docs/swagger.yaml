@@ -470,7 +470,7 @@ paths:
       - application/json
       responses:
         "222":
-          description: Error
+          description: Тут статус http статус 200. Внутри body статус может быть badContent
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
         "405":
@@ -497,7 +497,8 @@ paths:
           schema:
             $ref: '#/definitions/delivery.ResponseURLs'
         "222":
-          description: Error
+          description: Тут статус http статус 200. Внутри body статус может быть badContent,
+            badFormat
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
         "405":

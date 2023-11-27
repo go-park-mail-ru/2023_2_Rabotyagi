@@ -4,7 +4,7 @@
 // - protoc             v4.25.1
 // source: pkg/file_service/file_service.proto
 
-package test
+package fileservice
 
 import (
 	context "context"
@@ -19,16 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	FileService_GetFullNames_FullMethodName  = "/fileservice.FileService/GetFullNames"
-	FileService_SubscribeURLs_FullMethodName = "/fileservice.FileService/SubscribeURLs"
+	FileService_Check_FullMethodName = "/fileservice.FileService/Check"
 )
 
 // FileServiceClient is the client API for FileService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FileServiceClient interface {
-	GetFullNames(ctx context.Context, in *Nothing, opts ...grpc.CallOption) (*ImgURLs, error)
-	SubscribeURLs(ctx context.Context, in *Nothing, opts ...grpc.CallOption) (FileService_SubscribeURLsClient, error)
+	Check(ctx context.Context, in *ImgURLs, opts ...grpc.CallOption) (*CheckedURLs, error)
 }
 
 type fileServiceClient struct {
@@ -39,53 +37,20 @@ func NewFileServiceClient(cc grpc.ClientConnInterface) FileServiceClient {
 	return &fileServiceClient{cc}
 }
 
-func (c *fileServiceClient) GetFullNames(ctx context.Context, in *Nothing, opts ...grpc.CallOption) (*ImgURLs, error) {
-	out := new(ImgURLs)
-	err := c.cc.Invoke(ctx, FileService_GetFullNames_FullMethodName, in, out, opts...)
+func (c *fileServiceClient) Check(ctx context.Context, in *ImgURLs, opts ...grpc.CallOption) (*CheckedURLs, error) {
+	out := new(CheckedURLs)
+	err := c.cc.Invoke(ctx, FileService_Check_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *fileServiceClient) SubscribeURLs(ctx context.Context, in *Nothing, opts ...grpc.CallOption) (FileService_SubscribeURLsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &FileService_ServiceDesc.Streams[0], FileService_SubscribeURLs_FullMethodName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &fileServiceSubscribeURLsClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type FileService_SubscribeURLsClient interface {
-	Recv() (*ImgURLs, error)
-	grpc.ClientStream
-}
-
-type fileServiceSubscribeURLsClient struct {
-	grpc.ClientStream
-}
-
-func (x *fileServiceSubscribeURLsClient) Recv() (*ImgURLs, error) {
-	m := new(ImgURLs)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 // FileServiceServer is the server API for FileService service.
 // All implementations must embed UnimplementedFileServiceServer
 // for forward compatibility
 type FileServiceServer interface {
-	GetFullNames(context.Context, *Nothing) (*ImgURLs, error)
-	SubscribeURLs(*Nothing, FileService_SubscribeURLsServer) error
+	Check(context.Context, *ImgURLs) (*CheckedURLs, error)
 	mustEmbedUnimplementedFileServiceServer()
 }
 
@@ -93,11 +58,8 @@ type FileServiceServer interface {
 type UnimplementedFileServiceServer struct {
 }
 
-func (UnimplementedFileServiceServer) GetFullNames(context.Context, *Nothing) (*ImgURLs, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFullNames not implemented")
-}
-func (UnimplementedFileServiceServer) SubscribeURLs(*Nothing, FileService_SubscribeURLsServer) error {
-	return status.Errorf(codes.Unimplemented, "method SubscribeURLs not implemented")
+func (UnimplementedFileServiceServer) Check(context.Context, *ImgURLs) (*CheckedURLs, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
 func (UnimplementedFileServiceServer) mustEmbedUnimplementedFileServiceServer() {}
 
@@ -112,43 +74,22 @@ func RegisterFileServiceServer(s grpc.ServiceRegistrar, srv FileServiceServer) {
 	s.RegisterService(&FileService_ServiceDesc, srv)
 }
 
-func _FileService_GetFullNames_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Nothing)
+func _FileService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ImgURLs)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FileServiceServer).GetFullNames(ctx, in)
+		return srv.(FileServiceServer).Check(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: FileService_GetFullNames_FullMethodName,
+		FullMethod: FileService_Check_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FileServiceServer).GetFullNames(ctx, req.(*Nothing))
+		return srv.(FileServiceServer).Check(ctx, req.(*ImgURLs))
 	}
 	return interceptor(ctx, in, info, handler)
-}
-
-func _FileService_SubscribeURLs_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Nothing)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(FileServiceServer).SubscribeURLs(m, &fileServiceSubscribeURLsServer{stream})
-}
-
-type FileService_SubscribeURLsServer interface {
-	Send(*ImgURLs) error
-	grpc.ServerStream
-}
-
-type fileServiceSubscribeURLsServer struct {
-	grpc.ServerStream
-}
-
-func (x *fileServiceSubscribeURLsServer) Send(m *ImgURLs) error {
-	return x.ServerStream.SendMsg(m)
 }
 
 // FileService_ServiceDesc is the grpc.ServiceDesc for FileService service.
@@ -159,16 +100,10 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*FileServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetFullNames",
-			Handler:    _FileService_GetFullNames_Handler,
+			MethodName: "Check",
+			Handler:    _FileService_Check_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "SubscribeURLs",
-			Handler:       _FileService_SubscribeURLs_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "pkg/file_service/file_service.proto",
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
-
 	"go.uber.org/zap"
 )
 
@@ -26,11 +25,13 @@ func NewConfigMux(allowOrigin string, schema string, portServer string, fileServ
 	}
 }
 
-func NewMux(ctx context.Context, configMux *ConfigMux, fileService delivery.IFileService, logger *zap.SugaredLogger,
+func NewMux(ctx context.Context, configMux *ConfigMux,
+	fileServiceHTTP delivery.IFileServiceHTTP,
+	logger *zap.SugaredLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 
-	fileHandler := delivery.NewFileHandler(fileService, logger, configMux.fileServiceDir)
+	fileHandler := delivery.NewFileHandlerHTTP(fileServiceHTTP, logger, configMux.fileServiceDir)
 
 	router.Handle("/api/v1/img/", fileHandler.DocFileServerHandler(ctx))
 	router.Handle("/api/v1/img/upload", middleware.Context(ctx,

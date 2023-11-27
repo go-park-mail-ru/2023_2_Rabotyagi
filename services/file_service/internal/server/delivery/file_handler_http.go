@@ -34,22 +34,22 @@ var (
 	ErrForbiddenRootPath = myerrors.NewErrorBadContentRequest("Нельзя вызывать корневой путь")
 )
 
-var _ IFileService = (*fileusecases.FileService)(nil)
+var _ IFileServiceHTTP = (*fileusecases.FileServiceHTTP)(nil)
 
-type IFileService interface {
+type IFileServiceHTTP interface {
 	SaveImage(r io.Reader) (string, error)
 }
 
-type FileHandler struct {
+type FileHandlerHTTP struct {
 	fileServiceDir string
-	fileService    IFileService
+	fileService    IFileServiceHTTP
 	logger         *zap.SugaredLogger
 }
 
-func NewFileHandler(fileService IFileService,
+func NewFileHandlerHTTP(fileService IFileServiceHTTP,
 	logger *zap.SugaredLogger, fileServiceDir string,
-) *FileHandler {
-	return &FileHandler{
+) *FileHandlerHTTP {
+	return &FileHandlerHTTP{
 		fileService: fileService, logger: logger,
 		fileServiceDir: fileServiceDir,
 	}
@@ -67,9 +67,9 @@ func NewFileHandler(fileService IFileService,
 //	@Success    200  {object} ResponseURLs
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent, badFormat"
 //	@Router      /img/upload [post]
-func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
+func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, MaxSizePhotoBytes*MaxCountPhoto)
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -97,8 +97,7 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 
 	if len(slFiles) > MaxCountPhoto {
 		f.logger.Errorln(ErrToManyCountFiles)
-		delivery.SendResponse(w, f.logger,
-			delivery.NewErrResponse(statuses.StatusBadContentRequest, ErrToManyCountFiles.Error()))
+		delivery.HandleErr(w, f.logger, ErrToManyCountFiles)
 
 		return
 	}
@@ -107,9 +106,11 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 
 	for i, file := range slFiles {
 		if file.Size > MaxSizePhotoBytes {
-			f.logger.Errorf("filename = %s error: %+v\n", file.Filename, ErrToBigFile)
-			delivery.SendResponse(w, f.logger,
-				delivery.NewErrResponse(statuses.StatusBadContentRequest, ErrToBigFile.Error()))
+			err := myerrors.NewErrorBadContentRequest(
+				"файл: %s весит %d Мбайт. %+v\n", file.Filename, file.Size/1024/1024, ErrToBigFile.Error())
+
+			f.logger.Errorln(err)
+			delivery.HandleErr(w, f.logger, err)
 
 			return
 		}
@@ -155,9 +156,9 @@ func (f *FileHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) 
 //	@Param      name path  string true "name of image"
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent"
 //	@Router      /img/ [get]
-func (f *FileHandler) fileServerHandler(w http.ResponseWriter, r *http.Request) {
+func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == rootPath {
 		f.logger.Errorln(ErrForbiddenRootPath)
 		delivery.HandleErr(w, f.logger, ErrForbiddenRootPath)
@@ -180,7 +181,7 @@ func (f *FileHandler) fileServerHandler(w http.ResponseWriter, r *http.Request) 
 	fileServer.ServeHTTP(w, r)
 }
 
-func (f *FileHandler) DocFileServerHandler(ctx context.Context) http.Handler {
+func (f *FileHandlerHTTP) DocFileServerHandler(ctx context.Context) http.Handler {
 	fileServer := http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(f.fileServiceDir)))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
