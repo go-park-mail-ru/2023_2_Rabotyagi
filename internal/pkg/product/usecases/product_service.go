@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/microcosm-cc/bluemonday"
 	"io"
+	"regexp"
+	"strings"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	myerrors "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/my_errors"
@@ -171,6 +173,13 @@ func (p *ProductService) DeleteProduct(ctx context.Context, productID uint64, us
 }
 
 func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) ([]string, error) {
+	regex := regexp.MustCompile(`[^a-zA-Zа-яА-Я0-9\s]+`)
+	searchInput = regex.ReplaceAllString(searchInput, "")
+	regex = regexp.MustCompile(`\s+`)
+	searchInput = regex.ReplaceAllString(searchInput, " ")
+
+	searchInput = strings.TrimSpace(searchInput)
+
 	products, err := p.storage.SearchProduct(ctx, searchInput)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -188,6 +197,13 @@ func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) 
 func (p *ProductService) GetSearchProductFeed(ctx context.Context,
 	searchInput string, lastNumber uint64, limit uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
+	regex := regexp.MustCompile(`[^a-zA-Zа-яА-Я0-9\s]+`)
+	searchInput = regex.ReplaceAllString(searchInput, "")
+	regex = regexp.MustCompile(`\s+`)
+	searchInput = regex.ReplaceAllString(searchInput, " ")
+
+	searchInput = strings.TrimSpace(searchInput)
+
 	products, err := p.storage.GetSearchProductFeed(ctx, searchInput, lastNumber, limit, userID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)

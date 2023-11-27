@@ -12,8 +12,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
-	"regexp"
-	"strings"
 )
 
 var (
@@ -746,11 +744,6 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 }
 
 func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]string, error) {
-	regex := regexp.MustCompile(`[^a-zA-Zа-яА-Я0-9\s]+`)
-	searchInput = regex.ReplaceAllString(searchInput, "")
-	regex = regexp.MustCompile(`\s+`)
-	searchInput = regex.ReplaceAllString(searchInput, " ")
-
 	SQLSearchProduct := `SELECT title
 							FROM product
 							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
@@ -811,13 +804,6 @@ func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) 
 func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 	searchInput string, lastNumber uint64, limit uint64,
 ) ([]*models.ProductInFeed, error) {
-	regex := regexp.MustCompile(`[^a-zA-Zа-яА-Я0-9\s]+`)
-	searchInput = regex.ReplaceAllString(searchInput, "")
-	regex = regexp.MustCompile(`\s+`)
-	searchInput = regex.ReplaceAllString(searchInput, " ")
-
-	searchInput = strings.TrimSpace(searchInput)
-
 	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
 	FROM product
 	WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
