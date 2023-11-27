@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	categoryrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/repository"
 	categoryusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
 	cityrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/repository"
@@ -14,7 +15,9 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/repository"
 	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/repository"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"google.golang.org/grpc"
 	"net/http"
 	"strings"
 	"time"
@@ -34,6 +37,19 @@ type Server struct {
 //nolint:funlen
 func (s *Server) Run(config *config.Config) error {
 	baseCtx := context.Background()
+
+	grcpConnTest, err := grpc.Dial(
+		":8082",
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		fmt.Println(err)
+
+		return err
+	}
+	defer grcpConnTest.Close()
+
+	authGrpcService := auth.NewSessionMangerClient(grcpConnTest)
 
 	pool, err := repository.NewPgxPool(baseCtx, config.URLDataBase)
 	if err != nil {
@@ -100,7 +116,7 @@ func (s *Server) Run(config *config.Config) error {
 
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
 		config.Schema, config.PortServer),
-		userService, productService, categoryService, cityService, logger)
+		userService, productService, categoryService, cityService, authGrpcService, logger)
 	if err != nil {
 		return err
 	}

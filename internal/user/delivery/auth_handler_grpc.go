@@ -59,7 +59,7 @@ func (a *AuthHandler) SingUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
 		Name:    delivery2.CookieAuthName,
-		Value:   sessionWithToken.AccessToken,
+		Value:   sessionWithToken.GetAccessToken(),
 		Expires: expire,
 		Path:    "/",
 	}
@@ -94,7 +94,7 @@ func (a *AuthHandler) SingInHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
 		Name:    delivery2.CookieAuthName,
-		Value:   sessionWithToken.AccessToken,
+		Value:   sessionWithToken.GetAccessToken(),
 		Expires: expire,
 		Path:    "/",
 	}
@@ -122,14 +122,15 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := context.Background()
-	_, err = a.sessionManagerClient.Delete(ctx, sessionUser)
+
+	expiredSession, err := a.sessionManagerClient.Delete(ctx, sessionUser)
 	if err != nil {
 		delivery2.HandleErr(w, a.logger, err)
 
 		return
 	}
 
-	cookie.Expires = time.Now()
+	cookie.Value = expiredSession.GetAccessToken()
 
 	http.SetCookie(w, cookie)
 	delivery2.SendResponse(w, a.logger, delivery2.NewResponseSuccessful(ResponseSuccessfulLogOut))

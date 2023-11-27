@@ -127,9 +127,6 @@ func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error)
 
 func (a *AuthService) Check(ctx context.Context, rawJwt string) bool {
 	_, err := jwt.NewUserJwtPayload(rawJwt, jwt.GetSecret())
-	if err != nil {
-		return false
-	}
 
-	return true
+	return err == nil
 }

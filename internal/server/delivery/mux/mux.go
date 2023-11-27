@@ -6,6 +6,7 @@ import (
 	citydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/delivery"
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
@@ -29,9 +30,11 @@ func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMu
 
 func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.IUserService,
 	productService productdelivery.IProductService, categoryService categorydelivery.ICategoryService,
-	cityService citydelivery.ICityService, logger *zap.SugaredLogger,
+	cityService citydelivery.ICityService, authGrpcService auth.SessionMangerClient, logger *zap.SugaredLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
+
+	authHandler := userdelivery.NewAuthHandler(authGrpcService, logger)
 
 	userHandler, err := userdelivery.NewUserHandler(userService)
 	if err != nil {
@@ -54,10 +57,10 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	}
 
 	router.Handle("/api/v1/signup", middleware.Context(ctx,
-		middleware.SetupCORS(userHandler.SignUpHandler, configMux.addrOrigin, configMux.schema)))
+		middleware.SetupCORS(authHandler.SingUpHandler, configMux.addrOrigin, configMux.schema)))
 	router.Handle("/api/v1/signin", middleware.Context(ctx,
-		middleware.SetupCORS(userHandler.SignInHandler, configMux.addrOrigin, configMux.schema)))
-	router.Handle("/api/v1/logout", middleware.Context(ctx, http.HandlerFunc(userHandler.LogOutHandler)))
+		middleware.SetupCORS(authHandler.SingInHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/logout", middleware.Context(ctx, http.HandlerFunc(authHandler.LogOutHandler)))
 
 	router.Handle("/api/v1/profile/get", middleware.Context(ctx,
 		middleware.SetupCORS(userHandler.GetUserHandler, configMux.addrOrigin, configMux.schema)))
