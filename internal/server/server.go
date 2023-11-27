@@ -16,6 +16,7 @@ import (
 	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/repository"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
+	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"google.golang.org/grpc"
 	"net/http"
@@ -39,7 +40,7 @@ func (s *Server) Run(config *config.Config) error {
 	baseCtx := context.Background()
 
 	grcpConnAuth, err := grpc.Dial(
-		":8082",
+		"127.0.0.1:8081",
 		grpc.WithInsecure(),
 	)
 	if err != nil {
@@ -49,7 +50,17 @@ func (s *Server) Run(config *config.Config) error {
 	}
 	defer grcpConnAuth.Close()
 
+	grpcConnFileService, err := grpc.Dial(
+		config.AddressFileServiceGrpc,
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		return err
+	}
+	defer grpcConnFileService.Close()
+
 	authGrpcService := auth.NewSessionMangerClient(grcpConnAuth)
+	fileServiceClient := fileservice.NewFileServiceClient(grpcConnFileService)
 
 	pool, err := repository.NewPgxPool(baseCtx, config.URLDataBase)
 	if err != nil {
@@ -79,7 +90,7 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
-	productService, err := usecases.NewProductService(productStorage, *basketService, *favouriteService)
+	productService, err := usecases.NewProductService(productStorage, *basketService, *favouriteService, fileServiceClient)
 	if err != nil {
 		return err
 	}
