@@ -40,7 +40,7 @@ func (s *Server) Run(config *config.Config) error {
 	baseCtx := context.Background()
 
 	grcpConnAuth, err := grpc.Dial(
-		"127.0.0.1:8081",
+		config.AddressAuthServiceGrpc,
 		grpc.WithInsecure(),
 	)
 	if err != nil {
