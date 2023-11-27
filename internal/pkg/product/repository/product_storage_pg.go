@@ -746,7 +746,7 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]string, error) {
 	SQLSearchProduct := `SELECT title
 							FROM product
-							WHERE (to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
 							   AND ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) > 0
 							   AND is_active = true
 							ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
