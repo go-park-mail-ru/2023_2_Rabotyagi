@@ -89,8 +89,7 @@ func (a *AuthStorage) getUserByEmail(ctx context.Context, tx pgx.Tx, email strin
 }
 
 func (u *AuthStorage) GetUser(ctx context.Context, email string) (*models.User, error) {
-	user := &models.User{}            //nolint:exhaustruct
-	userWithoutPass := &models.User{} //nolint:exhaustruct
+	var user *models.User
 
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
 		emailBusy, err := u.isEmailBusy(ctx, tx, email)
@@ -114,10 +113,7 @@ func (u *AuthStorage) GetUser(ctx context.Context, email string) (*models.User, 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	userWithoutPass.ID = user.ID
-	userWithoutPass.Email = user.Email
-
-	return userWithoutPass, nil
+	return user, nil
 }
 
 func (u *AuthStorage) createUser(ctx context.Context, tx pgx.Tx, email string, password string) error {
