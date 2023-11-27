@@ -3,7 +3,7 @@ package usecases
 import (
 	"context"
 	"fmt"
-	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
+	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -11,6 +11,7 @@ import (
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"go.uber.org/zap"
 )
 
@@ -37,12 +38,13 @@ type IProductStorage interface {
 type ProductService struct {
 	FavouriteService
 	BasketService
-	storage IProductStorage
-	logger  *zap.SugaredLogger
+	fileServiceClient fileservice.FileServiceClient
+	storage           IProductStorage
+	logger            *zap.SugaredLogger
 }
 
 func NewProductService(productStorage IProductStorage, basketService BasketService,
-	favouriteService FavouriteService,
+	favouriteService FavouriteService, fileServiceClient fileservice.FileServiceClient,
 ) (*ProductService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
@@ -50,14 +52,46 @@ func NewProductService(productStorage IProductStorage, basketService BasketServi
 	}
 
 	return &ProductService{
-		FavouriteService: favouriteService,
-		BasketService:    basketService, storage: productStorage, logger: logger}, nil
+		FavouriteService:  favouriteService,
+		BasketService:     basketService,
+		fileServiceClient: fileServiceClient,
+		storage:           productStorage,
+		logger:            logger,
+	}, nil
 }
 
 func (p *ProductService) AddProduct(ctx context.Context, r io.Reader, userID uint64) (uint64, error) {
 	preProduct, err := ValidatePreProduct(r, userID)
 	if err != nil {
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	checkedURLs, err := p.fileServiceClient.Check(
+		ctx, &fileservice.ImgURLs{Url: convertImagesToSl(preProduct.Images)})
+	if err != nil {
+		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	if checkedURLs == nil {
+		return 0, myerrors.NewErrorInternal("checkedURLs == nil")
+	}
+
+	if len(checkedURLs.Correct) != len(preProduct.Images) {
+		return 0, myerrors.NewErrorInternal(
+			"Different lens of checkedURLs.Correct and preProduct.Images. %d != %d",
+			len(checkedURLs.Correct), len(preProduct.Images))
+	}
+
+	messageUnCorrect := ""
+
+	for i, urlCorrect := range checkedURLs.Correct {
+		if !urlCorrect {
+			messageUnCorrect += fmt.Sprintf("файл с урлом: %s не найден в хранилище\n", preProduct.Images[i].URL)
+		}
+	}
+
+	if messageUnCorrect != "" {
+		return 0, myerrors.NewErrorBadContentRequest(messageUnCorrect)
 	}
 
 	productID, err := p.storage.AddProduct(ctx, preProduct)
@@ -195,4 +229,14 @@ func (p *ProductService) GetSearchProductFeed(ctx context.Context,
 	}
 
 	return products, nil
+}
+
+func convertImagesToSl(images []models.Image) []string {
+	result := make([]string, len(images))
+
+	for i, image := range images {
+		result[i] = image.URL
+	}
+
+	return result
 }

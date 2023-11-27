@@ -30,14 +30,20 @@ func (e *Error) IsErrorClient() bool {
 	return e.status >= statuses.MinValueClientError && e.status <= statuses.MaxValueClientError
 }
 
+// NewErrorBadFormatRequest error with status =
+// StatusBadFormatRequest uses when get bad request from frontend and errors with this status need frontend developer
 func NewErrorBadFormatRequest(format string, args ...any) *Error {
 	return &Error{err: fmt.Sprintf(format, args...), status: statuses.StatusBadFormatRequest}
 }
 
+// NewErrorBadContentRequest error with status =
+// StatusBadContentRequest uses when user has entered incorrect data and needs to show him this error
 func NewErrorBadContentRequest(format string, args ...any) *Error {
 	return &Error{err: fmt.Sprintf(format, args...), status: statuses.StatusBadContentRequest}
 }
 
+// NewErrorInternal error with status =
+// StatusInternalServer uses for indicates internal error status in server
 func NewErrorInternal(format string, args ...any) *Error {
 	return &Error{err: fmt.Sprintf(format, args...), status: statuses.StatusInternalServer}
 }
