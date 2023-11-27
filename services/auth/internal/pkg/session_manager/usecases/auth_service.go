@@ -51,6 +51,8 @@ func (a *AuthService) GetUserRawJWT(ctx context.Context, email string, password 
 
 	hashPass, err := hex.DecodeString(user.Password)
 	if err != nil {
+		a.logger.Errorln(err)
+
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
