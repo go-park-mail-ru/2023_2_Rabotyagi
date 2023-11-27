@@ -20,7 +20,7 @@ var (
 )
 
 func main() {
-	lis, err := net.Listen("tcp", ":"+config.StandardPortAuthGrpc)
+	lis, err := net.Listen("tcp", config.StandardAddressAuthGrpc)
 	if err != nil {
 		fmt.Printf("can`t listen port %s", err)
 
