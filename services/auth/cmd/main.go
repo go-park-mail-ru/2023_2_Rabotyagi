@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	reposhare "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/pkg/session_manager/delivery"
@@ -14,10 +15,15 @@ import (
 	"os"
 )
 
+var (
+	standardOutputLogPath = "stdout"
+	standardErrLogPath    = "stderr"
+)
+
 func main() {
-	lis, err := net.Listen("tcp", ":8082")
+	lis, err := net.Listen("tcp", ":"+config.StandardAddressAuthGrpc)
 	if err != nil {
-		fmt.Printf("can`t listen port", err)
+		fmt.Printf("can`t listen port %s", err)
 
 		return
 	}
@@ -26,7 +32,7 @@ func main() {
 
 	baseCtx := context.Background()
 
-	_, err = my_logger.New([]string{"stdout"}, []string{"stderr"})
+	_, err = my_logger.New([]string{standardOutputLogPath}, []string{standardErrLogPath})
 	if err != nil {
 		fmt.Println(err)
 

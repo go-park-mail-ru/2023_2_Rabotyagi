@@ -46,7 +46,7 @@ func (s *SessionManager) Check(ctx context.Context, sessionUser *auth.Session) (
 		return nil, status.Errorf(codes.InvalidArgument, "sessionUser == nil")
 	}
 
-	correct := s.service.Check(ctx, sessionUser.AccessToken)
+	correct := s.service.Check(ctx, sessionUser.GetAccessToken())
 
 	return &auth.SessionStatus{Correct: correct}, nil
 }
@@ -56,7 +56,7 @@ func (s *SessionManager) Create(ctx context.Context, user *auth.User) (*auth.Ses
 		return nil, status.Errorf(codes.InvalidArgument, "user == nil")
 	}
 
-	rawJWT, err := s.service.AddUser(ctx, user.Email, user.Password)
+	rawJWT, err := s.service.AddUser(ctx, user.GetEmail(), user.GetPassword())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "in Create")
 	}
@@ -69,7 +69,7 @@ func (s *SessionManager) Login(ctx context.Context, user *auth.User) (*auth.Sess
 		return nil, status.Errorf(codes.InvalidArgument, "user == nil")
 	}
 
-	rawJWT, err := s.service.GetUserRawJWT(ctx, user.Email, user.Password)
+	rawJWT, err := s.service.GetUserRawJWT(ctx, user.GetEmail(), user.GetPassword())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "in Login")
 	}
@@ -82,7 +82,7 @@ func (s *SessionManager) Delete(ctx context.Context, sessionUser *auth.Session) 
 		return nil, status.Errorf(codes.InvalidArgument, "sessionUser == nil")
 	}
 
-	rawJwt, err := s.service.Delete(ctx, sessionUser.AccessToken)
+	rawJwt, err := s.service.Delete(ctx, sessionUser.GetAccessToken())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "in Delete")
 	}
