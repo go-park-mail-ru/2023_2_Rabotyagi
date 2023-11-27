@@ -3,6 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	categoryrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/repository"
 	categoryusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
 	cityrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/repository"
@@ -19,9 +23,6 @@ import (
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"google.golang.org/grpc"
-	"net/http"
-	"strings"
-	"time"
 )
 
 const (
@@ -81,10 +82,12 @@ func (s *Server) Run(config *config.Config) error {
 	}
 
 	basketService, err := usecases.NewBasketService(productStorage)
+	basketService, err := usecases.NewBasketService(productStorage)
 	if err != nil {
 		return err
 	}
 
+	favouriteService, err := usecases.NewFavouriteService(productStorage)
 	favouriteService, err := usecases.NewFavouriteService(productStorage)
 	if err != nil {
 		return err

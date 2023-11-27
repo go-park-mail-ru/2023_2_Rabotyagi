@@ -2,12 +2,13 @@ package mux
 
 import (
 	"context"
+	"net/http"
+
 	categorydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/delivery"
 	citydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/delivery"
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
-	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
 

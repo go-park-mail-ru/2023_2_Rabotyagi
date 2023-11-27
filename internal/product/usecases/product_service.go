@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 	"fmt"
+	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
@@ -11,7 +12,6 @@ import (
 	"io"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"go.uber.org/zap"
 )
 
@@ -60,38 +60,53 @@ func NewProductService(productStorage IProductStorage, basketService BasketServi
 	}, nil
 }
 
-func (p *ProductService) AddProduct(ctx context.Context, r io.Reader, userID uint64) (uint64, error) {
-	preProduct, err := ValidatePreProduct(r, userID)
-	if err != nil {
-		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
+func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []models.Image) error {
 	checkedURLs, err := p.fileServiceClient.Check(
-		ctx, &fileservice.ImgURLs{Url: convertImagesToSl(preProduct.Images)})
+		ctx, &fileservice.ImgURLs{Url: convertImagesToSl(slImg)})
 	if err != nil {
-		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
+		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	if checkedURLs == nil {
-		return 0, myerrors.NewErrorInternal("checkedURLs == nil")
+		err := myerrors.NewErrorInternal("checkedURLs == nil")
+		p.logger.Errorln(err)
+
+		return err
 	}
 
-	if len(checkedURLs.Correct) != len(preProduct.Images) {
-		return 0, myerrors.NewErrorInternal(
-			"Different lens of checkedURLs.Correct and preProduct.Images. %d != %d",
-			len(checkedURLs.Correct), len(preProduct.Images))
+	if len(checkedURLs.Correct) != len(slImg) {
+		err := myerrors.NewErrorInternal(
+			"Different lens of checkedURLs.Correct and slImg %d != %d",
+			len(checkedURLs.Correct), len(slImg))
+		p.logger.Errorln(err)
+
+		return err
 	}
 
 	messageUnCorrect := ""
 
 	for i, urlCorrect := range checkedURLs.Correct {
 		if !urlCorrect {
-			messageUnCorrect += fmt.Sprintf("файл с урлом: %s не найден в хранилище\n", preProduct.Images[i].URL)
+			messageUnCorrect += fmt.Sprintf("файл с урлом: %s не найден в хранилище\n", slImg[i].URL)
 		}
 	}
 
 	if messageUnCorrect != "" {
-		return 0, myerrors.NewErrorBadContentRequest(messageUnCorrect)
+		return myerrors.NewErrorBadContentRequest(messageUnCorrect)
+	}
+
+	return nil
+}
+
+func (p *ProductService) AddProduct(ctx context.Context, r io.Reader, userID uint64) (uint64, error) {
+	preProduct, err := ValidatePreProduct(r, userID)
+	if err != nil {
+		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	err = p.checkCorrectnessUrlsImg(ctx, preProduct.Images)
+	if err != nil {
+		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	productID, err := p.storage.AddProduct(ctx, preProduct)
@@ -162,6 +177,11 @@ func (p *ProductService) UpdateProduct(ctx context.Context,
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
+	}
+
+	err = p.checkCorrectnessUrlsImg(ctx, preProduct.Images)
+	if err != nil {
+		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	updateFieldsMap := utils.StructToMap(preProduct)

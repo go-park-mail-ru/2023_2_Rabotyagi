@@ -41,7 +41,7 @@ services:
       dockerfile: ./services/file_service/Dockerfile
     restart: always
     env_file:
-      - services/file_service/env/.env
+      - ./services/file_service/.env/.env
     ports:
       - 8081:8081
       - 8018:8018

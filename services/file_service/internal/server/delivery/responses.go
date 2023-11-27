@@ -1,7 +1,7 @@
 package delivery
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
 )
 
 type ResponseURLBody struct {

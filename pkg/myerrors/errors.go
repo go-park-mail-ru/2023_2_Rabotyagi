@@ -2,7 +2,7 @@ package myerrors
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
 )
 
 const (
