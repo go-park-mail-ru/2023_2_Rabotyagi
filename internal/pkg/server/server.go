@@ -7,7 +7,9 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/jwt"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/usecases"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/usecases"
+	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"google.golang.org/grpc"
 	"net/http"
 	"strings"
 	"time"
@@ -35,6 +37,15 @@ type Server struct {
 //nolint:funlen
 func (s *Server) Run(config *config.Config) error {
 	baseCtx := context.Background()
+
+	grpcConnFileService, err := grpc.Dial(
+		config.AddressFileServiceGrpc,
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		return err
+	}
+	defer grpcConnFileService.Close()
 
 	pool, err := repository.NewPgxPool(baseCtx, config.URLDataBase)
 	if err != nil {
@@ -64,7 +75,10 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
-	productService, err := productusecases.NewProductService(productStorage, *basketService, *favouriteService)
+	fileServiceClient := fileservice.NewFileServiceClient(grpcConnFileService)
+
+	productService, err := productusecases.NewProductService(productStorage,
+		*basketService, *favouriteService, fileServiceClient)
 	if err != nil {
 		return err
 	}

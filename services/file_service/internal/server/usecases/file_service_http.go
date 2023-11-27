@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	ErrCantRead    = myerrors.NewErrorBadContentRequest("Не получилось считать содержимое файла из тела запроса")
-	ErrWrongFormat = myerrors.NewErrorBadFormatRequest("Формат файла должен быть png, jpeg")
+	ErrCantRead    = myerrors.NewErrorBadFormatRequest("Не получилось считать содержимое файла из тела запроса")
+	ErrWrongFormat = myerrors.NewErrorBadContentRequest("Формат файла должен быть png, jpeg")
 )
 
 var _ IFileStorageHTTP = (*fileservicerepo.FileSystemStorage)(nil)

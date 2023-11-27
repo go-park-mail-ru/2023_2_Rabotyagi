@@ -6,13 +6,14 @@ import (
 )
 
 type Config struct {
-	ProductionMode     bool
-	AllowOrigin        string
-	Schema             string
-	PortServer         string
-	URLDataBase        string
-	OutputLogPath      string
-	ErrorOutputLogPath string
+	ProductionMode         bool
+	AllowOrigin            string
+	Schema                 string
+	PortServer             string
+	URLDataBase            string
+	AddressFileServiceGrpc string
+	OutputLogPath          string
+	ErrorOutputLogPath     string
 }
 
 func New() *Config {
@@ -29,12 +30,13 @@ func New() *Config {
 	}
 
 	return &Config{
-		AllowOrigin:        config.GetEnvStr(config.EnvAllowOrigin, config.StandardAllowOrigin),
-		Schema:             config.GetEnvStr(config.EnvSchema, config.StandardSchema),
-		PortServer:         config.GetEnvStr(config.EnvPortBackend, config.StandardPort),
-		URLDataBase:        config.GetEnvStr(config.EnvURLDataBase, config.StandardURLDataBase),
-		OutputLogPath:      config.GetEnvStr(config.EnvOutputLogPath, config.StandardOutputLogPath),
-		ErrorOutputLogPath: config.GetEnvStr(config.EnvErrorOutputLogPath, config.StandardErrorOutputLogPath),
-		ProductionMode:     productionMode,
+		AllowOrigin:            config.GetEnvStr(config.EnvAllowOrigin, config.StandardAllowOrigin),
+		Schema:                 config.GetEnvStr(config.EnvSchema, config.StandardSchema),
+		PortServer:             config.GetEnvStr(config.EnvPortBackend, config.StandardPort),
+		URLDataBase:            config.GetEnvStr(config.EnvURLDataBase, config.StandardURLDataBase),
+		AddressFileServiceGrpc: config.GetEnvStr(config.EnvAddressFileServiceGrpc, config.StandardAddressFileServiceGrpc),
+		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, config.StandardOutputLogPath),
+		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, config.StandardErrorOutputLogPath),
+		ProductionMode:         productionMode,
 	}
 }

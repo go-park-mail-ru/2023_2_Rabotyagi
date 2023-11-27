@@ -89,7 +89,7 @@ func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error {
 	}
 
 	server := grpc.NewServer()
-	fileServiceGrpc := usecases.NewFileServiceGrpc(fileStorage)
+	fileServiceGrpc := usecases.NewFileServiceGrpc(urlPrefixPathFS, fileStorage)
 	fileHandlerGrpc := delivery.NewFileHandlerGrpc(fileServiceGrpc)
 
 	fileservice.RegisterFileServiceServer(server, fileHandlerGrpc)
