@@ -1,10 +1,9 @@
 package middleware
 
 import (
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
 	"net/http"
-
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
 
 	"go.uber.org/zap"
 )

@@ -3,13 +3,12 @@ package delivery
 import (
 	"context"
 	"fmt"
+	delivery2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
 	"io"
 	"net/http"
-
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery/statuses"
 
 	"go.uber.org/zap"
 )
@@ -67,7 +66,7 @@ func NewFileHandlerHTTP(fileService IFileServiceHTTP,
 //	@Success    200  {object} ResponseURLs
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent, badFormat"
+//	@Failure    222  {object} delivery.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400), badFormat(4000)"
 //	@Router      /img/upload [post]
 func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, MaxSizePhotoBytes*MaxCountPhoto)
@@ -80,8 +79,8 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 	err := r.ParseMultipartForm(MaxSizePhotoBytes)
 	if err != nil {
 		f.logger.Errorln(err)
-		delivery.SendResponse(w, f.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		delivery2.SendResponse(w, f.logger,
+			delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
 
 		return
 	}
@@ -89,15 +88,15 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 	slFiles, ok := r.MultipartForm.File[nameImagesInForm]
 	if !ok {
 		f.logger.Errorln(err)
-		delivery.SendResponse(w, f.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		delivery2.SendResponse(w, f.logger,
+			delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
 
 		return
 	}
 
 	if len(slFiles) > MaxCountPhoto {
 		f.logger.Errorln(ErrToManyCountFiles)
-		delivery.HandleErr(w, f.logger, ErrToManyCountFiles)
+		delivery2.HandleErr(w, f.logger, ErrToManyCountFiles)
 
 		return
 	}
@@ -110,7 +109,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 				"файл: %s весит %d Мбайт. %+v\n", file.Filename, file.Size/1024/1024, ErrToBigFile.Error())
 
 			f.logger.Errorln(err)
-			delivery.HandleErr(w, f.logger, err)
+			delivery2.HandleErr(w, f.logger, err)
 
 			return
 		}
@@ -118,8 +117,8 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 		fileBody, err := file.Open()
 		if err != nil {
 			f.logger.Errorln(err)
-			delivery.SendResponse(w, f.logger,
-				delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+			delivery2.SendResponse(w, f.logger,
+				delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
 
 			return
 		}
@@ -127,7 +126,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 		URLToFile, err := f.fileService.SaveImage(fileBody)
 		if err != nil {
 			f.logger.Errorln(err)
-			delivery.HandleErr(w, f.logger, err)
+			delivery2.HandleErr(w, f.logger, err)
 
 			return
 		}
@@ -135,7 +134,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 		slURL[i] = URLToFile
 	}
 
-	delivery.SendResponse(w, f.logger, NewResponseURLs(slURL))
+	delivery2.SendResponse(w, f.logger, NewResponseURLs(slURL))
 
 	for _, fileName := range slURL {
 		f.logger.Infof("uploaded file %s", fileName)
@@ -161,7 +160,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == rootPath {
 		f.logger.Errorln(ErrForbiddenRootPath)
-		delivery.HandleErr(w, f.logger, ErrForbiddenRootPath)
+		delivery2.HandleErr(w, f.logger, ErrForbiddenRootPath)
 
 		return
 	}
@@ -172,8 +171,8 @@ func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Reque
 	fileServer, ok := fileServerRaw.(http.Handler)
 	if !ok {
 		f.logger.Errorln(fmt.Sprintf("handler = %+v а должен быть типом http.Handler", fileServerRaw))
-		delivery.SendResponse(w, f.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		delivery2.SendResponse(w, f.logger,
+			delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
 
 		return
 	}

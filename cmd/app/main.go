@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/config"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/config"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server"
 )
 
 //	@title      YULA project API
