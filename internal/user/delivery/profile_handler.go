@@ -4,7 +4,6 @@ import (
 	"context"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 
@@ -24,7 +23,7 @@ type IUserService interface {
 
 type UserHandler struct {
 	service IUserService
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewUserHandler(userService IUserService) (*UserHandler, error) {
@@ -60,7 +59,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
+	ctx := utils.AddRequestIDToCtx(r.Context())
 
 	userID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
@@ -77,7 +76,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	delivery.SendResponse(w, u.logger, NewProfileResponse(user))
-	u.logger.Infof("in GetUserHandler: get product: %+v", user)
+	u.logger.LogReqID(ctx).Infof("in GetUserHandler: get product: %+v", user)
 }
 
 // PartiallyUpdateUserHandler godoc

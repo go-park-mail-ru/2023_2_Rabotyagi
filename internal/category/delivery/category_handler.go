@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"go.uber.org/zap"
 )
 
 var _ ICategoryService = (*usecases.CategoryService)(nil)
@@ -22,7 +21,7 @@ type ICategoryService interface {
 
 type CategoryHandler struct {
 	service ICategoryService
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewCategoryHandler(service ICategoryService) (*CategoryHandler, error) {

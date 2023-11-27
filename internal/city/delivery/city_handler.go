@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"go.uber.org/zap"
 )
 
 var _ ICityService = (*usecases.CityService)(nil)
@@ -22,7 +21,7 @@ type ICityService interface {
 
 type CityHandler struct {
 	service ICityService
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewCityHandler(service ICityService) (*CityHandler, error) {

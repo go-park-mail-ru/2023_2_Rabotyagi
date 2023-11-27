@@ -14,8 +14,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
-
-	"go.uber.org/zap"
 )
 
 var _ IProductService = (*usecases.ProductService)(nil)
@@ -41,7 +39,7 @@ type IProductService interface {
 
 type ProductHandler struct {
 	service IProductService
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewProductHandler(productService IProductService) (*ProductHandler, error) {

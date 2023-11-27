@@ -7,7 +7,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
-	"go.uber.org/zap"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"net/http"
 	"time"
 )
@@ -18,11 +18,16 @@ const (
 
 type AuthHandler struct {
 	sessionManagerClient auth.SessionMangerClient
-	logger               *zap.SugaredLogger
+	logger               *my_logger.MyLogger
 }
 
-func NewAuthHandler(sessionManagerClient auth.SessionMangerClient, logger *zap.SugaredLogger) *AuthHandler {
-	return &AuthHandler{sessionManagerClient: sessionManagerClient, logger: logger}
+func NewAuthHandler(sessionManagerClient auth.SessionMangerClient) (*AuthHandler, error) {
+	logger, err := my_logger.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	return &AuthHandler{sessionManagerClient: sessionManagerClient, logger: logger}, nil
 }
 
 // SignUpHandler godoc
@@ -43,7 +48,7 @@ func NewAuthHandler(sessionManagerClient auth.SessionMangerClient, logger *zap.S
 //	@Failure    500  {string} string
 //	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /signup [post]
-func (a *AuthHandler) SingUpHandler(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
