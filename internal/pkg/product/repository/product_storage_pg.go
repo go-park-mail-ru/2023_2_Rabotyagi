@@ -746,8 +746,9 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]string, error) {
 	SQLSearchProduct := `SELECT title
 							FROM product
-							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
-							   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+							WHERE (to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+							   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | ')))
+							   AND is_active = true
 							ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC,
 									 ts_rank(to_tsvector(description), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
 							LIMIT 5;`
@@ -806,8 +807,9 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 ) ([]*models.ProductInFeed, error) {
 	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
 	FROM product
-	WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
-	   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+	WHERE (to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+	   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | ')))
+	   AND is_active = true
 	ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC,
 			 ts_rank(to_tsvector(description), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
 	OFFSET $2
