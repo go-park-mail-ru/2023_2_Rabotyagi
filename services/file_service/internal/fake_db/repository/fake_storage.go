@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/fake_db/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/fake_db/usecases"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"

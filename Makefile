@@ -38,7 +38,7 @@ migrate-docker-down:
 
 .PHONY: fill-db-docker
 fill-db-docker: migrate-docker-up
-	docker exec -it 2023_2_rabotyagi-backend-1  ./fake_db
+	docker exec -it 2023_2_rabotyagi-backend-1  ./fake_db postgres://postgres:postgres@postgres:5432/youla?sslmode=disable .
 
 .PHONY: refill-db-docker
 refill-db-docker: migrate-docker-down fill-db-docker
@@ -86,11 +86,11 @@ migrate-down:
 
 .PHONY: build-fill-db
 build-fill-db: mkdir-bin
-	go build -o bin/fill-db cmd/fake_db/main.go
+	go build -o bin/fill-db services/file_service/cmd/fake_db/main.go
 
 .PHONY: fill-db
 fill-db: build-fill-db migrate-up
-	sudo ./bin/fill-db
+	sudo ./bin/fill-db postgres://postgres:postgres@localhost:5432/youla?sslmode=disable ./services/file_service
 
 .PHONY: refill-db
 refill-db: migrate-down migrate-up fill-db

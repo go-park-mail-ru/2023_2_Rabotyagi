@@ -2,8 +2,8 @@ package fake_db
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/fake_db/repository"
 	serverrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/fake_db/repository"
 
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"

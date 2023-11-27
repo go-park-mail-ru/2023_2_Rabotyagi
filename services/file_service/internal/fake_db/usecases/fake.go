@@ -45,7 +45,7 @@ func FakeProduct(userMaxCount uint, categoryMaxCount uint, cityMaxCount uint) *m
 	preProduct.Description = gofakeit.Sentence(wordsInDescription)
 	preProduct.Price = uint64(gofakeit.Number(1, maxPrice))
 	preProduct.AvailableCount = uint32(gofakeit.Number(1, maxAvailableCount))
-	//preProduct.City = gofakeit.City()
+	preProduct.CityID = 1
 	preProduct.Delivery = gofakeit.Bool()
 	preProduct.SafeDeal = gofakeit.Bool()
 	preProduct.Views = uint32(gofakeit.Number(0, maxViews))
