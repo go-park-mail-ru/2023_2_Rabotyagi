@@ -50,6 +50,19 @@ services:
     volumes:
       - imgs:/var/file_service/static/img
 
+  backend-auth:
+    build:
+      context: ./services/auth
+      dockerfile: ./services/auth/Dockerfile
+    restart: always
+    env_file:
+      - ./services/auth/env/.env.backend
+    ports:
+      - 8082:8082
+      - 8019:8019
+    depends_on:
+      - postgres
+
   frontend:
     image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
     environment:
