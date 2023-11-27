@@ -28,6 +28,5 @@ ENV PATH_TO_ROOT=/var/auth
 ENV OUTPUT_LOG_PATH=stdout /var/log/backend/logs_auth.json
 ENV ERROR_OUTPUT_LOG_PATH=stderr /var/log/backend/err_logs_auth.json
 EXPOSE 8082
-EXPOSE 8019
 
 ENTRYPOINT ./main

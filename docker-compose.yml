@@ -34,6 +34,7 @@ services:
     depends_on:
       - postgres
       - backend-fs
+      - backend-auth
 
   backend-fs:
     build:
@@ -59,7 +60,6 @@ services:
       - services/auth/env/.env
     ports:
       - 8082:8082
-      - 8019:8019
     depends_on:
       - postgres
 

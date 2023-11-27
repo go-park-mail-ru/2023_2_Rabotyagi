@@ -30,7 +30,7 @@ func (f *FileHandlerGrpc) Check(ctx context.Context, imgURLs *fileservice.ImgURL
 		return nil, myerrors.NewErrorInternal("imgURLs == nil")
 	}
 
-	result, err := f.fileService.Check(ctx, imgURLs.Url)
+	result, err := f.fileService.Check(ctx, imgURLs.GetUrl())
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
