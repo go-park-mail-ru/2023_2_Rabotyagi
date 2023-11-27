@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/asaskevich/govalidator"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	delivery2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"go.uber.org/zap"
 	"net/http"
@@ -41,7 +41,7 @@ func NewAuthHandler(sessionManagerClient auth.SessionMangerClient, logger *zap.S
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /signup [post]
 func (a *AuthHandler) SingUpHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -56,14 +56,14 @@ func (a *AuthHandler) SingUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	userWithoutID := new(models.User)
 	if err := decoder.Decode(userWithoutID); err != nil {
-		delivery2.HandleErr(w, a.logger, err)
+		delivery.HandleErr(w, a.logger, err)
 
 		return
 	}
 
 	_, err := govalidator.ValidateStruct(userWithoutID)
 	if err != nil {
-		delivery2.HandleErr(w, a.logger, err)
+		delivery.HandleErr(w, a.logger, err)
 
 		return
 	}
@@ -72,7 +72,7 @@ func (a *AuthHandler) SingUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	sessionWithToken, err := a.sessionManagerClient.Create(ctx, &userForCreate)
 	if err != nil {
-		delivery2.HandleErr(w, a.logger, err)
+		delivery.HandleErr(w, a.logger, err)
 
 		return
 	}
@@ -80,14 +80,14 @@ func (a *AuthHandler) SingUpHandler(w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().Add(timeTokenLife)
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    delivery2.CookieAuthName,
+		Name:    delivery.CookieAuthName,
 		Value:   sessionWithToken.GetAccessToken(),
 		Expires: expire,
 		Path:    "/",
 	}
 
 	http.SetCookie(w, cookie)
-	delivery2.SendResponse(w, a.logger, delivery2.NewResponseSuccessful(ResponseSuccessfulSignUp))
+	delivery.SendResponse(w, a.logger, delivery.NewResponseSuccessful(ResponseSuccessfulSignUp))
 	a.logger.Infof("in SignUpHandler: added user")
 }
 
@@ -102,9 +102,9 @@ func (a *AuthHandler) SingUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /signin [get]
-func (a *AuthHandler) SingInHandler(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -120,7 +120,7 @@ func (a *AuthHandler) SingInHandler(w http.ResponseWriter, r *http.Request) {
 
 	sessionWithToken, err := a.sessionManagerClient.Login(ctx, &userForLogin)
 	if err != nil {
-		delivery2.HandleErr(w, a.logger, err)
+		delivery.HandleErr(w, a.logger, err)
 
 		return
 	}
@@ -128,14 +128,14 @@ func (a *AuthHandler) SingInHandler(w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().Add(timeTokenLife)
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    delivery2.CookieAuthName,
+		Name:    delivery.CookieAuthName,
 		Value:   sessionWithToken.GetAccessToken(),
 		Expires: expire,
 		Path:    "/",
 	}
 
 	http.SetCookie(w, cookie)
-	delivery2.SendResponse(w, a.logger, delivery2.NewResponseSuccessful(ResponseSuccessfulSignUp))
+	delivery.SendResponse(w, a.logger, delivery.NewResponseSuccessful(ResponseSuccessfulSignUp))
 	a.logger.Infof("in SignUpHandler: added user")
 }
 
@@ -156,9 +156,9 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie(delivery2.CookieAuthName)
+	cookie, err := r.Cookie(delivery.CookieAuthName)
 	if err != nil {
-		delivery2.HandleErr(w, a.logger, err)
+		delivery.HandleErr(w, a.logger, err)
 
 		return
 	}
@@ -171,7 +171,7 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	expiredSession, err := a.sessionManagerClient.Delete(ctx, sessionUser)
 	if err != nil {
-		delivery2.HandleErr(w, a.logger, err)
+		delivery.HandleErr(w, a.logger, err)
 
 		return
 	}
@@ -179,6 +179,6 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie.Value = expiredSession.GetAccessToken()
 
 	http.SetCookie(w, cookie)
-	delivery2.SendResponse(w, a.logger, delivery2.NewResponseSuccessful(ResponseSuccessfulLogOut))
+	delivery.SendResponse(w, a.logger, delivery.NewResponseSuccessful(ResponseSuccessfulLogOut))
 	a.logger.Infof("in LogOutHandler: logout user with cookie: %+v", cookie)
 }

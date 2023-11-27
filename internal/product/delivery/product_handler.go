@@ -71,7 +71,7 @@ func NewProductHandler(productService IProductService) (*ProductHandler, error) 
 //	@Success    200  {object} delivery.ResponseID
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /product/add [post]
 func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -333,7 +333,7 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 //	@Success    200  {object} delivery.ResponseID
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /product/update [patch]
 //	@Router      /product/update [put]
 func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
@@ -387,7 +387,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 //	@Router      /product/close [patch]
 func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
@@ -436,7 +436,7 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 //	@Router      /product/activate [patch]
 func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
@@ -485,7 +485,7 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 //	@Router      /product/delete [delete]
 func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {

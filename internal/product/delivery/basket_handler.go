@@ -35,7 +35,7 @@ type IBasketService interface {
 //	@Success    200  {object} OrderResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /order/add [post]
 func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -116,7 +116,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /order/update_count [patch]
 func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
@@ -159,7 +159,7 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 //	@Router      /order/update_status [patch]
 func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
@@ -199,7 +199,7 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 //	@Router      /order/buy_full_basket [patch]
 func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
@@ -241,7 +241,7 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 //	@Success    200  {object} delivery.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} delivery.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 //	@Router      /order/delete/ [delete]
 func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
