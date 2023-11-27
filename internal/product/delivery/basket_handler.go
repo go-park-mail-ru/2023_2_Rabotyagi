@@ -2,13 +2,13 @@ package delivery
 
 import (
 	"context"
-	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
-	delivery2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"io"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
 var _ IBasketService = (*productusecases.BasketService)(nil)
@@ -46,21 +46,21 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 
 	ctx := r.Context()
 
-	userID, err := delivery2.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	orderInBasket, err := p.service.AddOrder(ctx, r.Body, userID)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery2.SendResponse(w, p.logger, NewOrderResponse(orderInBasket))
+	delivery.SendResponse(w, p.logger, NewOrderResponse(orderInBasket))
 	p.logger.Infof("in AddOrderHandler: add order orderID=%d for userID=%d\n", orderInBasket.ID, userID)
 }
 
@@ -85,21 +85,21 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 	ctx := r.Context()
 
-	userID, err := delivery2.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	orders, err := p.service.GetOrdersByUserID(ctx, userID)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery2.SendResponse(w, p.logger, NewOrderListResponse(orders))
+	delivery.SendResponse(w, p.logger, NewOrderListResponse(orders))
 	p.logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", orders)
 }
 
@@ -127,22 +127,22 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	ctx := r.Context()
 
-	userID, err := delivery2.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.UpdateOrderCount(ctx, r.Body, userID)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery2.SendResponse(w, p.logger,
-		delivery2.NewResponseSuccessful(ResponseSuccessfulUpdateCountOrder))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulUpdateCountOrder))
 	p.logger.Infof("in UpdateOrderCountHandler: updated order count for user id=%d\n", userID)
 }
 
@@ -170,22 +170,22 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 
 	ctx := r.Context()
 
-	userID, err := delivery2.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.UpdateOrderStatus(ctx, r.Body, userID)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery2.SendResponse(w, p.logger,
-		delivery2.NewResponseSuccessful(ResponseSuccessfulUpdateStatusOrder))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulUpdateStatusOrder))
 	p.logger.Infof("in UpdateOrderStatusHandler: updated order status for user id=%d\n", userID)
 }
 
@@ -210,22 +210,22 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 
 	ctx := r.Context()
 
-	userID, err := delivery2.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.BuyFullBasket(ctx, userID)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery2.SendResponse(w, p.logger,
-		delivery2.NewResponseSuccessful(ResponseSuccessfulBuyFullBasket))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulBuyFullBasket))
 	p.logger.Infof("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
 }
 
@@ -252,28 +252,28 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 
 	ctx := r.Context()
 
-	userID, err := delivery2.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	orderID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.DeleteOrder(ctx, orderID, userID)
 	if err != nil {
-		delivery2.HandleErr(w, p.logger, err)
+		delivery.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery2.SendResponse(w, p.logger,
-		delivery2.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
+	delivery.SendResponse(w, p.logger,
+		delivery.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
 	p.logger.Infof("in DeleteOrderHandler: delete order id=%d", orderID)
 }

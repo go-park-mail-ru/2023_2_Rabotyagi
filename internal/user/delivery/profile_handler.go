@@ -1,10 +1,11 @@
 package delivery
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	delivery2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"net/http"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
 //	GetUserHandler godoc
@@ -32,19 +33,19 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		delivery2.HandleErr(w, u.logger, err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
 
 	user, err := u.service.GetUserWithoutPasswordByID(ctx, userID)
 	if err != nil {
-		delivery2.HandleErr(w, u.logger, err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
 
-	delivery2.SendResponse(w, u.logger, NewProfileResponse(user))
+	delivery.SendResponse(w, u.logger, NewProfileResponse(user))
 	u.logger.Infof("in GetUserHandler: get product: %+v", user)
 }
 
@@ -75,9 +76,9 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	var err error
 
-	userID, err := delivery2.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery2.HandleErr(w, u.logger, err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
@@ -91,11 +92,11 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	if err != nil {
 		u.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
-		delivery2.HandleErr(w, u.logger, err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
 
-	delivery2.SendResponse(w, u.logger, NewProfileResponse(updatedUser))
+	delivery.SendResponse(w, u.logger, NewProfileResponse(updatedUser))
 	u.logger.Infof("Successfully updated: %+v", userID)
 }

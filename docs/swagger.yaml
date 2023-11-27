@@ -181,39 +181,57 @@ definitions:
         description: nolint
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse:
     properties:
       body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyError'
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseBodyError'
       status:
         type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseBody:
     properties:
       message:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyError:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseBodyError:
     properties:
       error:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseBodyID:
     properties:
       id:
         type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseID:
     properties:
       body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID'
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseBodyID'
       status:
         type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful:
     properties:
       body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody'
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseBody'
+      status:
+        type: integer
+    type: object
+  internal_category_delivery.CategoryListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category'
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_city_delivery.CityListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.City'
+        type: array
       status:
         type: integer
     type: object
@@ -252,25 +270,7 @@ definitions:
         - $ref: '#/definitions/sql.NullString'
         description: nolint
     type: object
-  internal_pkg_category_delivery.CategoryListResponse:
-    properties:
-      body:
-        items:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category'
-        type: array
-      status:
-        type: integer
-    type: object
-  internal_pkg_city_delivery.CityListResponse:
-    properties:
-      body:
-        items:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.City'
-        type: array
-      status:
-        type: integer
-    type: object
-  internal_pkg_product_delivery.OrderListResponse:
+  internal_product_delivery.OrderListResponse:
     properties:
       body:
         items:
@@ -279,14 +279,14 @@ definitions:
       status:
         type: integer
     type: object
-  internal_pkg_product_delivery.OrderResponse:
+  internal_product_delivery.OrderResponse:
     properties:
       body:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket'
       status:
         type: integer
     type: object
-  internal_pkg_product_delivery.ProductInSearchListResponse:
+  internal_product_delivery.ProductInSearchListResponse:
     properties:
       body:
         items:
@@ -295,7 +295,7 @@ definitions:
       status:
         type: integer
     type: object
-  internal_pkg_product_delivery.ProductListResponse:
+  internal_product_delivery.ProductListResponse:
     properties:
       body:
         items:
@@ -304,14 +304,14 @@ definitions:
       status:
         type: integer
     type: object
-  internal_pkg_product_delivery.ProductResponse:
+  internal_product_delivery.ProductResponse:
     properties:
       body:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Product'
       status:
         type: integer
     type: object
-  internal_pkg_user_delivery.ProfileResponse:
+  internal_user_delivery.ProfileResponse:
     properties:
       body:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
@@ -350,11 +350,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_category_delivery.CategoryListResponse'
+            $ref: '#/definitions/internal_category_delivery.CategoryListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -381,11 +381,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_category_delivery.CategoryListResponse'
+            $ref: '#/definitions/internal_category_delivery.CategoryListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -406,11 +406,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_city_delivery.CityListResponse'
+            $ref: '#/definitions/internal_city_delivery.CityListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -437,11 +437,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_city_delivery.CityListResponse'
+            $ref: '#/definitions/internal_city_delivery.CityListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -472,7 +472,11 @@ paths:
         "222":
           description: Тут статус http статус 200. Внутри body статус может быть badContent
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            type: string
         "405":
           description: Method Not Allowed
           schema:
@@ -497,10 +501,10 @@ paths:
           schema:
             $ref: '#/definitions/delivery.ResponseURLs'
         "222":
-          description: Тут статус http статус 200. Внутри body статус может быть badContent,
-            badFormat
+          description: Тут статус http статус 200. Внутри body статус может быть badContent(4400),
+            badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -521,11 +525,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -555,11 +559,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.OrderResponse'
+            $ref: '#/definitions/internal_product_delivery.OrderResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -582,11 +586,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -617,11 +621,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -644,11 +648,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.OrderListResponse'
+            $ref: '#/definitions/internal_product_delivery.OrderListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -678,11 +682,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -712,11 +716,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -747,11 +751,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -785,11 +789,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseID'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -819,11 +823,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -854,11 +858,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -889,11 +893,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -922,11 +926,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -960,11 +964,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1004,11 +1008,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1042,11 +1046,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1085,11 +1089,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1119,11 +1123,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1150,11 +1154,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductInSearchListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductInSearchListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1188,11 +1192,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseID'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1225,11 +1229,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseID'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1256,11 +1260,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_user_delivery.ProfileResponse'
+            $ref: '#/definitions/internal_user_delivery.ProfileResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1283,11 +1287,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1316,11 +1320,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_user_delivery.ProfileResponse'
+            $ref: '#/definitions/internal_user_delivery.ProfileResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1348,11 +1352,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_user_delivery.ProfileResponse'
+            $ref: '#/definitions/internal_user_delivery.ProfileResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1384,11 +1388,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1422,11 +1426,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ResponseSuccessful'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_server_delivery.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:

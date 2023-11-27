@@ -2,14 +2,15 @@ package delivery
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
-	delivery2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
-	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"go.uber.org/zap"
@@ -74,7 +75,7 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.service.AddUser(ctx, r.Body)
 	if err != nil {
-		delivery2.HandleErr(w, u.logger, err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
@@ -84,14 +85,14 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	jwtStr, err := jwt.GenerateJwtToken(
 		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.GetSecret())
 	if err != nil {
-		delivery2.SendResponse(w, u.logger,
-			delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
+		delivery.SendResponse(w, u.logger,
+			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:     delivery2.CookieAuthName,
+		Name:     delivery.CookieAuthName,
 		Value:    jwtStr,
 		Expires:  expire,
 		Path:     "/",
@@ -99,7 +100,7 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	delivery2.SendResponse(w, u.logger, delivery2.NewResponseSuccessful(ResponseSuccessfulSignUp))
+	delivery.SendResponse(w, u.logger, delivery.NewResponseSuccessful(ResponseSuccessfulSignUp))
 	u.logger.Infof("in SignUpHandler: added user: %+v", user)
 }
 
@@ -130,7 +131,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.service.GetUser(ctx, email, password)
 	if err != nil {
-		delivery2.HandleErr(w, u.logger, err)
+		delivery.HandleErr(w, u.logger, err)
 
 		return
 	}
@@ -145,14 +146,14 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		jwt.GetSecret(),
 	)
 	if err != nil {
-		delivery2.SendResponse(w, u.logger,
-			delivery2.NewErrResponse(statuses.StatusInternalServer, delivery2.ErrInternalServer))
+		delivery.SendResponse(w, u.logger,
+			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
 
 		return
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:     delivery2.CookieAuthName,
+		Name:     delivery.CookieAuthName,
 		Value:    jwtStr,
 		Expires:  expire,
 		Path:     "/",
@@ -160,7 +161,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	delivery2.SendResponse(w, u.logger, delivery2.NewResponseSuccessful(ResponseSuccessfulSignIn))
+	delivery.SendResponse(w, u.logger, delivery.NewResponseSuccessful(ResponseSuccessfulSignIn))
 	u.logger.Infof("in SignInHandler: signin user: %+v", user)
 }
 
@@ -182,10 +183,10 @@ func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie(delivery2.CookieAuthName)
+	cookie, err := r.Cookie(delivery.CookieAuthName)
 	if err != nil {
 		u.logger.Errorln(err)
-		delivery2.SendResponse(w, u.logger, delivery2.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
+		delivery.SendResponse(w, u.logger, delivery.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
 
 		return
 	}
@@ -193,6 +194,6 @@ func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie.Expires = time.Now()
 
 	http.SetCookie(w, cookie)
-	delivery2.SendResponse(w, u.logger, delivery2.NewResponseSuccessful(ResponseSuccessfulLogOut))
+	delivery.SendResponse(w, u.logger, delivery.NewResponseSuccessful(ResponseSuccessfulLogOut))
 	u.logger.Infof("in LogOutHandler: logout user with cookie: %+v", cookie)
 }
