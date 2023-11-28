@@ -124,8 +124,11 @@ func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error)
 	return newRawJwt, nil
 }
 
-func (a *AuthService) Check(ctx context.Context, rawJwt string) bool {
-	_, err := jwt.NewUserJwtPayload(rawJwt, jwt.GetSecret())
+func (a *AuthService) Check(ctx context.Context, rawJwt string) (uint64, error) {
+	userPayload, err := jwt.NewUserJwtPayload(rawJwt, jwt.GetSecret())
+	if err != nil {
+		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
 
-	return err == nil
+	return userPayload.UserID, nil
 }

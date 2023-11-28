@@ -2,7 +2,10 @@ package usecases
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
@@ -44,8 +47,17 @@ func (f FavouriteService) GetUserFavourites(ctx context.Context, userID uint64) 
 	return products, nil
 }
 
-func (f FavouriteService) AddToFavourites(ctx context.Context, userID uint64, productID uint64) error {
-	err := f.storage.AddToFavourites(ctx, userID, productID)
+func (f FavouriteService) AddToFavourites(ctx context.Context, userID uint64, r io.Reader) error {
+	productID := new(models.ProductID)
+	decoder := json.NewDecoder(r)
+
+	if err := decoder.Decode(productID); err != nil {
+		f.logger.Errorln(err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreOrder)
+	}
+
+	err := f.storage.AddToFavourites(ctx, userID, productID.ProductID)
 	if err != nil {
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}

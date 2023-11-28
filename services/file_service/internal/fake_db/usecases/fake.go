@@ -85,7 +85,7 @@ func NewFakeGeneratorImg(maxNameImage uint, prefixURL string, pathToRoot string)
 	imgStorage := make(map[string][]byte, maxNameImage)
 
 	for i := 1; i <= int(maxNameImage); i++ {
-		file, err := os.Open(fmt.Sprintf("%s/static/images_for_fake_db/%d.png", pathToRoot, i))
+		file, err := os.Open(fmt.Sprintf("%s/static/img/%d.png", pathToRoot, i))
 		if err != nil {
 			return nil, err
 		}

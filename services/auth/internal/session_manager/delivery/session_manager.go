@@ -8,8 +8,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/usecases"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 var _ IAuthService = (*usecases.AuthService)(nil)
@@ -18,7 +16,7 @@ type IAuthService interface {
 	AddUser(ctx context.Context, email string, password string) (string, error)
 	GetUserRawJWT(ctx context.Context, email string, password string) (string, error)
 	Delete(ctx context.Context, rawJwt string) (string, error)
-	Check(ctx context.Context, rawJwt string) bool
+	Check(ctx context.Context, rawJwt string) (uint64, error)
 }
 
 type SessionManager struct {
@@ -32,7 +30,7 @@ type SessionManager struct {
 func NewSessionManager(pool *pgxpool.Pool, authService IAuthService) (*SessionManager, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "logger failed get")
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return &SessionManager{
@@ -42,14 +40,17 @@ func NewSessionManager(pool *pgxpool.Pool, authService IAuthService) (*SessionMa
 	}, nil
 }
 
-func (s *SessionManager) Check(ctx context.Context, sessionUser *auth.Session) (*auth.SessionStatus, error) {
+func (s *SessionManager) Check(ctx context.Context, sessionUser *auth.Session) (*auth.UserID, error) {
 	if sessionUser == nil {
 		return nil, myerrors.NewErrorInternal("sessionUser == nil")
 	}
 
-	correct := s.service.Check(ctx, sessionUser.GetAccessToken())
+	userID, err := s.service.Check(ctx, sessionUser.GetAccessToken())
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
 
-	return &auth.SessionStatus{Correct: correct}, nil
+	return &auth.UserID{UserId: userID}, nil
 }
 
 func (s *SessionManager) Create(ctx context.Context, user *auth.User) (*auth.Session, error) {

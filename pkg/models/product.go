@@ -66,6 +66,10 @@ type ProductInFeed struct {
 	Favourites     uint64  `json:"favourites"      valid:"required"`
 }
 
+type ProductID struct {
+	ProductID uint64 `json:"product_id"`
+}
+
 func (p *Product) Sanitize() {
 	sanitizer := bluemonday.UGCPolicy()
 

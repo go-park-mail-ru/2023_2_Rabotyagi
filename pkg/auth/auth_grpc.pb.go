@@ -30,7 +30,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SessionMangerClient interface {
 	Login(ctx context.Context, in *User, opts ...grpc.CallOption) (*Session, error)
-	Check(ctx context.Context, in *Session, opts ...grpc.CallOption) (*SessionStatus, error)
+	Check(ctx context.Context, in *Session, opts ...grpc.CallOption) (*UserID, error)
 	Create(ctx context.Context, in *User, opts ...grpc.CallOption) (*Session, error)
 	Delete(ctx context.Context, in *Session, opts ...grpc.CallOption) (*Session, error)
 }
@@ -52,8 +52,8 @@ func (c *sessionMangerClient) Login(ctx context.Context, in *User, opts ...grpc.
 	return out, nil
 }
 
-func (c *sessionMangerClient) Check(ctx context.Context, in *Session, opts ...grpc.CallOption) (*SessionStatus, error) {
-	out := new(SessionStatus)
+func (c *sessionMangerClient) Check(ctx context.Context, in *Session, opts ...grpc.CallOption) (*UserID, error) {
+	out := new(UserID)
 	err := c.cc.Invoke(ctx, SessionManger_Check_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (c *sessionMangerClient) Delete(ctx context.Context, in *Session, opts ...g
 // for forward compatibility
 type SessionMangerServer interface {
 	Login(context.Context, *User) (*Session, error)
-	Check(context.Context, *Session) (*SessionStatus, error)
+	Check(context.Context, *Session) (*UserID, error)
 	Create(context.Context, *User) (*Session, error)
 	Delete(context.Context, *Session) (*Session, error)
 	mustEmbedUnimplementedSessionMangerServer()
@@ -97,7 +97,7 @@ type UnimplementedSessionMangerServer struct {
 func (UnimplementedSessionMangerServer) Login(context.Context, *User) (*Session, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedSessionMangerServer) Check(context.Context, *Session) (*SessionStatus, error) {
+func (UnimplementedSessionMangerServer) Check(context.Context, *Session) (*UserID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
 func (UnimplementedSessionMangerServer) Create(context.Context, *User) (*Session, error) {

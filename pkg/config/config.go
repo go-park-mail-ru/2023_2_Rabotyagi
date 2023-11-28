@@ -13,7 +13,6 @@ const (
 	StandardOutputLogPath      = "stdout /var/log/backend/logs.json"
 	StandardErrorOutputLogPath = "stderr /var/log/backend/err_logs.json"
 	StandardURLDataBase        = "postgres://postgres:postgres@localhost:5432/youla?sslmode=disable"
-	StandardSecret             = ""
 
 	EnvEnvironmentMode    = "ENVIRONMENT"
 	EnvAllowOrigin        = "ALLOW_ORIGIN"
@@ -22,14 +21,13 @@ const (
 	EnvOutputLogPath      = "OUTPUT_LOG_PATH"
 	EnvErrorOutputLogPath = "ERROR_OUTPUT_LOG_PATH"
 	EnvURLDataBase        = "URL_DATA_BASE"
-	EnvStandardSecret     = "JWT_SECRET"
 
 	// File service env
 
 	StandardPathToRoot             = "."
 	StandardFileServiceDir         = "./static/img"
-	StandardAddressFileServiceGrpc = "127.0.0.1:8081"
-	StandardFileServicePortHTTP    = "8018"
+	StandardAddressFileServiceGrpc = ":8011"
+	StandardFileServicePortHTTP    = "8081"
 
 	EnvPathToRoot             = "PATH_TO_ROOT"
 	EnvFileServiceDir         = "FILE_SERVICE_DIR"
@@ -38,7 +36,7 @@ const (
 
 	// Auth service env
 
-	StandardAddressAuthGrpc   = "127.0.0.1:8082"
+	StandardAddressAuthGrpc   = ":8012"
 	EnvAddressAuthServiceGrpc = "ADDRESS_AUTH_GRPC"
 )
 

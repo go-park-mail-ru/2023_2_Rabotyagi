@@ -2,10 +2,11 @@ package jwt_test
 
 import (
 	"errors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"reflect"
 	"testing"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
 )
 
 //nolint:funlen

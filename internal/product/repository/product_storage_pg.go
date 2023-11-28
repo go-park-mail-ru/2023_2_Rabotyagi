@@ -4,15 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Masterminds/squirrel"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
+
+	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"regexp"
-	"strings"
 )
 
 var (
@@ -768,17 +768,12 @@ func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
 }
 
 func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]string, error) {
-	regex := regexp.MustCompile("[^a-zA-Zа-яА-Я0-9\\s]+")
-	searchInput = regex.ReplaceAllString(searchInput, "")
-	regex = regexp.MustCompile(`\s+`)
-	searchInput = regex.ReplaceAllString(searchInput, " ")
-
 	SQLSearchProduct := `SELECT title
 							FROM product
 							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
-							   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
-							ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC,
-									 ts_rank(to_tsvector(description), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
+							   AND ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) > 0
+							   AND is_active = true
+							ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
 							LIMIT 5;`
 
 	var products []string
@@ -833,17 +828,11 @@ func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) 
 func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 	searchInput string, lastNumber uint64, limit uint64,
 ) ([]*models.ProductInFeed, error) {
-	regex := regexp.MustCompile("[^a-zA-Zа-яА-Я0-9\\s]+")
-	searchInput = regex.ReplaceAllString(searchInput, "")
-	regex = regexp.MustCompile(`\s+`)
-	searchInput = regex.ReplaceAllString(searchInput, " ")
-
-	searchInput = strings.TrimSpace(searchInput)
-
 	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
 	FROM product
-	WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
-	   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+	WHERE (to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+	   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | ')))
+	   AND is_active = true
 	ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC,
 			 ts_rank(to_tsvector(description), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
 	OFFSET $2

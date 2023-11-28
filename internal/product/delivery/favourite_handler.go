@@ -2,20 +2,21 @@ package delivery
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"io"
 	"net/http"
 	"strconv"
 
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 )
 
 var _ IFavouriteService = (*productusecases.FavouriteService)(nil)
 
 type IFavouriteService interface {
 	GetUserFavourites(ctx context.Context, userID uint64) ([]*models.ProductInFeed, error)
-	AddToFavourites(ctx context.Context, userID uint64, productID uint64) error
+	AddToFavourites(ctx context.Context, userID uint64, r io.Reader) error
 	DeleteFromFavourites(ctx context.Context, userID uint64, productID uint64) error
 }
 
@@ -41,7 +42,7 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -91,14 +92,14 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	err = p.service.AddToFavourites(ctx, userID, productID)
+	err = p.service.AddToFavourites(ctx, userID, r.Body)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -140,7 +141,7 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
