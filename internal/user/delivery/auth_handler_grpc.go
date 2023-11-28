@@ -147,8 +147,8 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	responses.SendResponse(w, logger, responses.NewResponseSuccessful(ResponseSuccessfulSignUp))
-	logger.Infof("in SignUpHandler: added user")
+	responses.SendResponse(w, logger, responses.NewResponseSuccessful(ResponseSuccessfulSignIn))
+	logger.Infof("in SignInHandler: added user")
 }
 
 // LogOutHandler godoc
