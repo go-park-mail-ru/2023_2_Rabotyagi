@@ -2,15 +2,15 @@ package fake_db
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	serverrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/fake_db/repository"
 
 	"github.com/jackc/pgx/v5"
-	"go.uber.org/zap"
 )
 
 func RunScriptFillDB(URLDataBase string,
-	logger *zap.SugaredLogger, baseCount uint, pathToRoot string,
+	logger *my_logger.MyLogger, baseCount uint, pathToRoot string,
 ) error {
 	prefixURL := "img/"
 	maxNameImg := uint(12)
