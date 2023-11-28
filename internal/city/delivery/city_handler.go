@@ -2,15 +2,14 @@ package delivery
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
-	"net/http"
-
-	"go.uber.org/zap"
 )
 
 var _ ICityService = (*usecases.CityService)(nil)
@@ -22,7 +21,7 @@ type ICityService interface {
 
 type CityHandler struct {
 	service ICityService
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewCityHandler(service ICityService) (*CityHandler, error) {
@@ -46,7 +45,7 @@ func NewCityHandler(service ICityService) (*CityHandler, error) {
 //	@Success    200  {object} CityListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /city/get_full [get]
 func (c *CityHandler) GetFullCitiesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -79,7 +78,7 @@ func (c *CityHandler) GetFullCitiesHandler(w http.ResponseWriter, r *http.Reques
 //	@Success    200  {object} CityListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /city/search [get]
 func (c *CityHandler) SearchCityHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

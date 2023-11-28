@@ -6,7 +6,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"go.uber.org/zap"
 )
 
 type ICategoryStorage interface {
@@ -16,7 +15,7 @@ type ICategoryStorage interface {
 
 type CategoryService struct {
 	storage ICategoryStorage
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewCategoryService(categoryStorage ICategoryStorage) (*CategoryService, error) {

@@ -3,6 +3,7 @@ package delivery
 import (
 	"context"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"io"
 	"net/http"
@@ -10,8 +11,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
-
-	"go.uber.org/zap"
 )
 
 const (
@@ -43,11 +42,11 @@ type IFileServiceHTTP interface {
 type FileHandlerHTTP struct {
 	fileServiceDir string
 	fileService    IFileServiceHTTP
-	logger         *zap.SugaredLogger
+	logger         *my_logger.MyLogger
 }
 
 func NewFileHandlerHTTP(fileService IFileServiceHTTP,
-	logger *zap.SugaredLogger, fileServiceDir string,
+	logger *my_logger.MyLogger, fileServiceDir string,
 ) *FileHandlerHTTP {
 	return &FileHandlerHTTP{
 		fileService: fileService, logger: logger,
@@ -67,7 +66,7 @@ func NewFileHandlerHTTP(fileService IFileServiceHTTP,
 //	@Success    200  {object} ResponseURLs
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400), badFormat(4000)"
+//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400), badFormat(4000)"
 //	@Router      /img/upload [post]
 func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, MaxSizePhotoBytes*MaxCountPhoto)
@@ -77,10 +76,12 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	logger := f.logger.LogReqID(r.Context())
+
 	err := r.ParseMultipartForm(MaxSizePhotoBytes)
 	if err != nil {
-		f.logger.Errorln(err)
-		responses.SendResponse(w, f.logger,
+		logger.Errorln(err)
+		responses.SendResponse(w, logger,
 			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
@@ -88,16 +89,16 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 
 	slFiles, ok := r.MultipartForm.File[nameImagesInForm]
 	if !ok {
-		f.logger.Errorln(err)
-		responses.SendResponse(w, f.logger,
+		logger.Errorln(err)
+		responses.SendResponse(w, logger,
 			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
 	if len(slFiles) > MaxCountPhoto {
-		f.logger.Errorln(ErrToManyCountFiles)
-		responses.HandleErr(w, f.logger, ErrToManyCountFiles)
+		logger.Errorln(ErrToManyCountFiles)
+		responses.HandleErr(w, logger, ErrToManyCountFiles)
 
 		return
 	}
@@ -109,16 +110,16 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 			err := myerrors.NewErrorBadContentRequest(
 				"файл: %s весит %d Мбайт. %+v\n", file.Filename, file.Size/1024/1024, ErrToBigFile.Error())
 
-			f.logger.Errorln(err)
-			responses.HandleErr(w, f.logger, err)
+			logger.Errorln(err)
+			responses.HandleErr(w, logger, err)
 
 			return
 		}
 
 		fileBody, err := file.Open()
 		if err != nil {
-			f.logger.Errorln(err)
-			responses.SendResponse(w, f.logger,
+			logger.Errorln(err)
+			responses.SendResponse(w, logger,
 				responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 			return
@@ -126,8 +127,8 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 
 		URLToFile, err := f.fileService.SaveImage(fileBody)
 		if err != nil {
-			f.logger.Errorln(err)
-			responses.HandleErr(w, f.logger, err)
+			logger.Errorln(err)
+			responses.HandleErr(w, logger, err)
 
 			return
 		}
@@ -135,10 +136,10 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 		slURL[i] = URLToFile
 	}
 
-	responses.SendResponse(w, f.logger, NewResponseURLs(slURL))
+	responses.SendResponse(w, logger, NewResponseURLs(slURL))
 
 	for _, fileName := range slURL {
-		f.logger.Infof("uploaded file %s", fileName)
+		logger.Infof("uploaded file %s", fileName)
 	}
 }
 
@@ -157,12 +158,14 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 //	@Failure    405  {string} string
 //	@Failure    404  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent"
+//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400)"
 //	@Router      /img/ [get]
 func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Request) {
+	logger := f.logger.LogReqID(r.Context())
+
 	if r.URL.Path == rootPath {
-		f.logger.Errorln(ErrForbiddenRootPath)
-		responses.HandleErr(w, f.logger, ErrForbiddenRootPath)
+		logger.Errorln(ErrForbiddenRootPath)
+		responses.HandleErr(w, logger, ErrForbiddenRootPath)
 
 		return
 	}
@@ -172,8 +175,8 @@ func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Reque
 
 	fileServer, ok := fileServerRaw.(http.Handler)
 	if !ok {
-		f.logger.Errorln(fmt.Sprintf("handler = %+v а должен быть типом http.Handler", fileServerRaw))
-		responses.SendResponse(w, f.logger,
+		logger.Errorln(fmt.Sprintf("handler = %+v а должен быть типом http.Handler", fileServerRaw))
+		responses.SendResponse(w, logger,
 			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return

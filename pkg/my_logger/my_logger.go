@@ -1,6 +1,7 @@
 package my_logger
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"sync"
@@ -15,15 +16,19 @@ var (
 	ErrNoLogger = fmt.Errorf("my_logger.Get для отсутствующего логгера")
 )
 
-func NewNop() *zap.SugaredLogger {
+type MyLogger struct {
+	*zap.SugaredLogger
+}
+
+func NewNop() *MyLogger {
 	once.Do(func() {
 		logger = zap.NewNop().Sugar()
 	})
 
-	return logger
+	return &MyLogger{logger}
 }
 
-func New(outputPaths []string, errorOutputPaths []string, options ...zap.Option) (*zap.SugaredLogger, error) {
+func New(outputPaths []string, errorOutputPaths []string, options ...zap.Option) (*MyLogger, error) {
 	var err error
 
 	once.Do(func() {
@@ -43,15 +48,21 @@ func New(outputPaths []string, errorOutputPaths []string, options ...zap.Option)
 		return nil, err
 	}
 
-	return logger, nil
+	return &MyLogger{logger}, nil
 }
 
-func Get() (*zap.SugaredLogger, error) {
+func Get() (*MyLogger, error) {
 	if logger == nil {
 		fmt.Println(ErrNoLogger)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrNoLogger)
 	}
 
-	return logger, nil
+	return &MyLogger{logger}, nil
+}
+
+func (m *MyLogger) LogReqID(ctx context.Context) *MyLogger {
+	return &MyLogger{m.With(
+		zap.String("req_id", GetRequestIDFromCtx(ctx)),
+	)}
 }

@@ -3,13 +3,12 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"io"
+
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"io"
-
-	"go.uber.org/zap"
 )
 
 var _ IBasketStorage = (*productrepo.ProductStorage)(nil)
@@ -25,7 +24,7 @@ type IBasketStorage interface {
 
 type BasketService struct {
 	storage IBasketStorage
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewBasketService(basketStorage IBasketStorage) (*BasketService, error) {

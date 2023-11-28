@@ -6,7 +6,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	fileservicerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/repository"
-	"go.uber.org/zap"
 	"image"
 	"io"
 	// Add png formats for image
@@ -29,7 +28,7 @@ type IFileStorageHTTP interface {
 type FileServiceHTTP struct {
 	urlPrefixPath string
 	fileStorage   IFileStorageHTTP
-	logger        *zap.SugaredLogger
+	logger        *my_logger.MyLogger
 }
 
 func NewFileServiceHTTP(fileStorage IFileStorageHTTP, urlPrefixPath string) (*FileServiceHTTP, error) {

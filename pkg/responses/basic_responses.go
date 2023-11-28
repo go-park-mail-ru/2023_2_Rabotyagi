@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
-
-	"go.uber.org/zap"
 )
 
 const (
@@ -65,7 +64,7 @@ func NewErrResponse(status int, err string) *ErrorResponse {
 	}
 }
 
-func sendResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
+func sendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response any) {
 	responseSend, err := json.Marshal(response)
 	if err != nil {
 		logger.Errorf("in sendResponse: %+v\n", err)
@@ -81,7 +80,7 @@ func sendResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any
 	}
 }
 
-func SendResponse(w http.ResponseWriter, logger *zap.SugaredLogger, response any) {
+func SendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	sendResponse(w, logger, response)

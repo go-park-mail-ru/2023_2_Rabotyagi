@@ -2,15 +2,16 @@ package mux
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"net/http"
+
 	categorydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/delivery"
 	citydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/delivery"
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/delivery"
-	"net/http"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
-
-	"go.uber.org/zap"
 )
 
 type ConfigMux struct {
@@ -29,9 +30,14 @@ func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMu
 
 func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.IUserService,
 	productService productdelivery.IProductService, categoryService categorydelivery.ICategoryService,
-	cityService citydelivery.ICityService, logger *zap.SugaredLogger,
+	cityService citydelivery.ICityService, authGrpcService auth.SessionMangerClient, logger *my_logger.MyLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
+
+	authHandler, err := userdelivery.NewAuthHandler(authGrpcService)
+	if err != nil {
+		return nil, err
+	}
 
 	userHandler, err := userdelivery.NewUserHandler(userService)
 	if err != nil {
@@ -54,10 +60,10 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	}
 
 	router.Handle("/api/v1/signup", middleware.Context(ctx,
-		middleware.SetupCORS(userHandler.SignUpHandler, configMux.addrOrigin, configMux.schema)))
+		middleware.SetupCORS(authHandler.SignUpHandler, configMux.addrOrigin, configMux.schema)))
 	router.Handle("/api/v1/signin", middleware.Context(ctx,
-		middleware.SetupCORS(userHandler.SignInHandler, configMux.addrOrigin, configMux.schema)))
-	router.Handle("/api/v1/logout", middleware.Context(ctx, http.HandlerFunc(userHandler.LogOutHandler)))
+		middleware.SetupCORS(authHandler.SignInHandler, configMux.addrOrigin, configMux.schema)))
+	router.Handle("/api/v1/logout", middleware.Context(ctx, http.HandlerFunc(authHandler.LogOutHandler)))
 
 	router.Handle("/api/v1/profile/get", middleware.Context(ctx,
 		middleware.SetupCORS(userHandler.GetUserHandler, configMux.addrOrigin, configMux.schema)))
@@ -118,7 +124,8 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(cityHandler.SearchCityHandler, configMux.addrOrigin, configMux.schema)))
 
 	mux := http.NewServeMux()
-	mux.Handle("/", middleware.Panic(middleware.AccessLogMiddleware(router, logger), logger))
+	mux.Handle("/", middleware.Panic(
+		middleware.AccessLogMiddleware(middleware.AddReqID(router), logger), logger))
 
 	return mux, nil
 }

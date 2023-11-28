@@ -29,7 +29,7 @@ type IFavouriteService interface {
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /profile/profile/favourites [get]
 func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -69,7 +69,7 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 //	@Router      /product/add-to-fav [post]
 func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -118,8 +118,7 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
-//	@Router      /product/remove-from-fav [delete]
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)

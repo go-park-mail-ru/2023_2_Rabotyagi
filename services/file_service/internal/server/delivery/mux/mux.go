@@ -2,11 +2,11 @@ package mux
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
-	"go.uber.org/zap"
 )
 
 type ConfigMux struct {
@@ -27,7 +27,7 @@ func NewConfigMux(allowOrigin string, schema string, portServer string, fileServ
 
 func NewMux(ctx context.Context, configMux *ConfigMux,
 	fileServiceHTTP delivery.IFileServiceHTTP,
-	logger *zap.SugaredLogger,
+	logger *my_logger.MyLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 
@@ -38,7 +38,8 @@ func NewMux(ctx context.Context, configMux *ConfigMux,
 		middleware.SetupCORS(fileHandler.UploadFileHandler, configMux.allowOrigin, configMux.schema)))
 
 	mux := http.NewServeMux()
-	mux.Handle("/", middleware.Panic(middleware.AccessLogMiddleware(router, logger), logger))
+	mux.Handle("/", middleware.Panic(
+		middleware.AccessLogMiddleware(middleware.AddReqID(router), logger), logger))
 
 	return mux, nil
 }

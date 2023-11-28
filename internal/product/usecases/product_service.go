@@ -3,6 +3,8 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"io"
+
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
@@ -10,9 +12,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/microcosm-cc/bluemonday"
-	"io"
-
-	"go.uber.org/zap"
 )
 
 var _ IProductStorage = (*productrepo.ProductStorage)(nil)
@@ -40,7 +39,7 @@ type ProductService struct {
 	BasketService
 	fileServiceClient fileservice.FileServiceClient
 	storage           IProductStorage
-	logger            *zap.SugaredLogger
+	logger            *my_logger.MyLogger
 }
 
 func NewProductService(productStorage IProductStorage, basketService BasketService,

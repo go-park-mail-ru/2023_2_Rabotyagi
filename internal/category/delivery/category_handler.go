@@ -2,15 +2,14 @@ package delivery
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
-	"net/http"
-
-	"go.uber.org/zap"
 )
 
 var _ ICategoryService = (*usecases.CategoryService)(nil)
@@ -22,7 +21,7 @@ type ICategoryService interface {
 
 type CategoryHandler struct {
 	service ICategoryService
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewCategoryHandler(service ICategoryService) (*CategoryHandler, error) {
@@ -46,7 +45,7 @@ func NewCategoryHandler(service ICategoryService) (*CategoryHandler, error) {
 //	@Success    200  {object} CategoryListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /category/get_full [get]
 func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -79,7 +78,7 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 //	@Success    200  {object} CategoryListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} delivery.ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /category/search [get]
 func (c *CategoryHandler) SearchCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

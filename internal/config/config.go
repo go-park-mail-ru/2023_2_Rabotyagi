@@ -12,6 +12,7 @@ type Config struct {
 	PortServer             string
 	URLDataBase            string
 	AddressFileServiceGrpc string
+	AddressAuthServiceGrpc string
 	OutputLogPath          string
 	ErrorOutputLogPath     string
 }
@@ -35,6 +36,7 @@ func New() *Config {
 		PortServer:             config.GetEnvStr(config.EnvPortBackend, config.StandardPort),
 		URLDataBase:            config.GetEnvStr(config.EnvURLDataBase, config.StandardURLDataBase),
 		AddressFileServiceGrpc: config.GetEnvStr(config.EnvAddressFileServiceGrpc, config.StandardAddressFileServiceGrpc),
+		AddressAuthServiceGrpc: config.GetEnvStr(config.EnvAddressAuthServiceGrpc, config.StandardAddressAuthGrpc),
 		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, config.StandardOutputLogPath),
 		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, config.StandardErrorOutputLogPath),
 		ProductionMode:         productionMode,

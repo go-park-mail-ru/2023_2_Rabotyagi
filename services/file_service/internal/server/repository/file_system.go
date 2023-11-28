@@ -8,15 +8,13 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-
-	"go.uber.org/zap"
 )
 
 type FileSystemStorage struct {
 	baseDir    string
 	mapFiles   map[string]struct{}
 	muMapFiles *sync.RWMutex
-	logger     *zap.SugaredLogger
+	logger     *my_logger.MyLogger
 }
 
 func NewFileSystemStorage(baseDir string) (*FileSystemStorage, error) {

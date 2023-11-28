@@ -3,14 +3,13 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"io"
+
 	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	utils2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
-
-	"go.uber.org/zap"
-	"io"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
 var ErrWrongUserID = myerrors.NewErrorBadFormatRequest("Попытка изменить данные другого пользователя")
@@ -29,7 +28,7 @@ type IUserStorage interface {
 
 type UserService struct {
 	storage IUserStorage
-	logger  *zap.SugaredLogger
+	logger  *my_logger.MyLogger
 }
 
 func NewUserService(userStorage IUserStorage) (*UserService, error) {
@@ -47,7 +46,7 @@ func (u *UserService) AddUser(ctx context.Context, r io.Reader) (*models.User, e
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	userWithoutID.Password, err = utils2.HashPass(userWithoutID.Password)
+	userWithoutID.Password, err = utils.HashPass(userWithoutID.Password)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -114,7 +113,7 @@ func (u *UserService) UpdateUser(ctx context.Context, r io.Reader,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrWrongUserID)
 	}
 
-	updateDataMap := utils2.StructToMap(userWithoutPassword)
+	updateDataMap := utils.StructToMap(userWithoutPassword)
 
 	delete(updateDataMap, "ID")
 

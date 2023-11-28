@@ -2,6 +2,11 @@ package server
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	categoryrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/repository"
 	categoryusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
 	cityrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/repository"
@@ -13,13 +18,11 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery/mux"
 	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/repository"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	"google.golang.org/grpc"
-	"net/http"
-	"strings"
-	"time"
 )
 
 const (
@@ -37,6 +40,17 @@ type Server struct {
 func (s *Server) Run(config *config.Config) error {
 	baseCtx := context.Background()
 
+	grcpConnAuth, err := grpc.Dial(
+		config.AddressAuthServiceGrpc,
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		fmt.Println(err)
+
+		return err
+	}
+	defer grcpConnAuth.Close()
+
 	grpcConnFileService, err := grpc.Dial(
 		config.AddressFileServiceGrpc,
 		grpc.WithInsecure(),
@@ -45,6 +59,9 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 	defer grpcConnFileService.Close()
+
+	authGrpcService := auth.NewSessionMangerClient(grcpConnAuth)
+	fileServiceClient := fileservice.NewFileServiceClient(grpcConnFileService)
 
 	pool, err := repository.NewPgxPool(baseCtx, config.URLDataBase)
 	if err != nil {
@@ -74,10 +91,7 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
-	fileServiceClient := fileservice.NewFileServiceClient(grpcConnFileService)
-
-	productService, err := usecases.NewProductService(productStorage,
-		*basketService, *favouriteService, fileServiceClient)
+	productService, err := usecases.NewProductService(productStorage, *basketService, *favouriteService, fileServiceClient)
 	if err != nil {
 		return err
 	}
@@ -114,7 +128,7 @@ func (s *Server) Run(config *config.Config) error {
 
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
 		config.Schema, config.PortServer),
-		userService, productService, categoryService, cityService, logger)
+		userService, productService, categoryService, cityService, authGrpcService, logger)
 	if err != nil {
 		return err
 	}
