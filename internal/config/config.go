@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 )
 
@@ -18,13 +17,6 @@ type Config struct {
 }
 
 func New() *Config {
-	secret := config.GetEnvStr(config.EnvStandardSecret, config.StandardSecret)
-	if secret != config.StandardSecret {
-		jwt.SetSecret([]byte(secret))
-	} else {
-		_ = jwt.GetSecret()
-	}
-
 	productionMode := false
 	if config.GetEnvStr(config.EnvEnvironmentMode, config.StandardDevelopmentMode) == config.StandardProductionMode {
 		productionMode = true

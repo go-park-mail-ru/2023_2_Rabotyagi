@@ -1,15 +1,17 @@
 package delivery
 
 import (
+	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"net/http"
 )
 
-func GetUserIDFromCookie(r *http.Request) (uint64, error) {
+func GetUserID(ctx context.Context, r *http.Request,
+	sessionManager auth.SessionMangerClient) (uint64, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -23,11 +25,9 @@ func GetUserIDFromCookie(r *http.Request) (uint64, error) {
 	}
 
 	rawJwt := cookie.Value
+	session := auth.Session{AccessToken: rawJwt}
 
-	userPayload, err := jwt.NewUserJwtPayload(rawJwt, jwt.GetSecret())
-	if err != nil {
-		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
+	userID, err := sessionManager.Check(ctx, &session)
 
-	return userPayload.UserID, nil
+	return userID.GetUserId(), nil
 }

@@ -12,7 +12,6 @@ import (
 	cityrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/repository"
 	cityusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/config"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery/mux"
@@ -61,6 +60,7 @@ func (s *Server) Run(config *config.Config) error {
 	defer grpcConnFileService.Close()
 
 	authGrpcService := auth.NewSessionMangerClient(grcpConnAuth)
+
 	fileServiceClient := fileservice.NewFileServiceClient(grpcConnFileService)
 
 	pool, err := repository.NewPgxPool(baseCtx, config.URLDataBase)
@@ -146,11 +146,6 @@ func (s *Server) Run(config *config.Config) error {
 	if config.ProductionMode {
 		return s.httpServer.ListenAndServeTLS(pathCertFile, pathKeyFile)
 	}
-
-	chCloseRefreshing := make(chan struct{})
-
-	// don`t want use chCloseRefreshing secret now
-	jwt.StartRefreshingSecret(time.Hour*jwt.TimeRefreshSecretInHours, chCloseRefreshing)
 
 	return s.httpServer.ListenAndServe() //nolint:wrapcheck
 }

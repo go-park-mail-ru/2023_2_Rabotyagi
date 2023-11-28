@@ -48,7 +48,7 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -88,7 +88,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -131,7 +131,7 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -175,7 +175,7 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -216,7 +216,7 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -259,7 +259,7 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 

@@ -30,7 +30,8 @@ func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMu
 
 func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.IUserService,
 	productService productdelivery.IProductService, categoryService categorydelivery.ICategoryService,
-	cityService citydelivery.ICityService, authGrpcService auth.SessionMangerClient, logger *my_logger.MyLogger,
+	cityService citydelivery.ICityService, authGrpcService auth.SessionMangerClient,
+	logger *my_logger.MyLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 
@@ -39,7 +40,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		return nil, err
 	}
 
-	userHandler, err := userdelivery.NewUserHandler(userService)
+	userHandler, err := userdelivery.NewUserHandler(userService, authGrpcService)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		return nil, err
 	}
 
-	productHandler, err := productdelivery.NewProductHandler(productService)
+	productHandler, err := productdelivery.NewProductHandler(productService, authGrpcService)
 	if err != nil {
 		return nil, err
 	}
