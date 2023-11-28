@@ -38,7 +38,7 @@ migrate-docker-down:
 
 .PHONY: fill-db-docker
 fill-db-docker: migrate-docker-up
-	docker exec -it 2023_2_rabotyagi-backend-1  ./fake_db postgres://postgres:postgres@postgres:5432/youla?sslmode=disable .
+	docker exec -it 2023_2_rabotyagi-backend-fs-1  ./fake_db postgres://postgres:postgres@postgres:5432/youla?sslmode=disable .
 
 .PHONY: refill-db-docker
 refill-db-docker: migrate-docker-down fill-db-docker
