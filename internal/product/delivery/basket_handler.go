@@ -46,23 +46,24 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	orderInBasket, err := p.service.AddOrder(ctx, r.Body, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, NewOrderResponse(orderInBasket))
-	p.logger.Infof("in AddOrderHandler: add order orderID=%d for userID=%d\n", orderInBasket.ID, userID)
+	responses.SendResponse(w, logger, NewOrderResponse(orderInBasket))
+	logger.Infof("in AddOrderHandler: add order orderID=%d for userID=%d\n", orderInBasket.ID, userID)
 }
 
 // GetBasketHandler godoc
@@ -85,23 +86,24 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	orders, err := p.service.GetOrdersByUserID(ctx, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, NewOrderListResponse(orders))
-	p.logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", orders)
+	responses.SendResponse(w, logger, NewOrderListResponse(orders))
+	logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", orders)
 }
 
 // UpdateOrderCountHandler godoc
@@ -127,24 +129,25 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	err = p.service.UpdateOrderCount(ctx, r.Body, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger,
+	responses.SendResponse(w, logger,
 		responses.NewResponseSuccessful(ResponseSuccessfulUpdateCountOrder))
-	p.logger.Infof("in UpdateOrderCountHandler: updated order count for user id=%d\n", userID)
+	logger.Infof("in UpdateOrderCountHandler: updated order count for user id=%d\n", userID)
 }
 
 // UpdateOrderStatusHandler godoc
@@ -170,24 +173,25 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	err = p.service.UpdateOrderStatus(ctx, r.Body, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger,
+	responses.SendResponse(w, logger,
 		responses.NewResponseSuccessful(ResponseSuccessfulUpdateStatusOrder))
-	p.logger.Infof("in UpdateOrderStatusHandler: updated order status for user id=%d\n", userID)
+	logger.Infof("in UpdateOrderStatusHandler: updated order status for user id=%d\n", userID)
 }
 
 // BuyFullBasketHandler godoc
@@ -210,24 +214,25 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	err = p.service.BuyFullBasket(ctx, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger,
+	responses.SendResponse(w, logger,
 		responses.NewResponseSuccessful(ResponseSuccessfulBuyFullBasket))
-	p.logger.Infof("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
+	logger.Infof("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
 }
 
 // DeleteOrderHandler godoc
@@ -252,29 +257,30 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	orderID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	err = p.service.DeleteOrder(ctx, orderID, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger,
+	responses.SendResponse(w, logger,
 		responses.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
-	p.logger.Infof("in DeleteOrderHandler: delete order id=%d", orderID)
+	logger.Infof("in DeleteOrderHandler: delete order id=%d", orderID)
 }

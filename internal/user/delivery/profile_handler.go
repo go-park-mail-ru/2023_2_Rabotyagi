@@ -60,7 +60,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := my_logger.AddRequestIDToCtx(r.Context())
+	ctx := r.Context()
 	logger := u.logger.LogReqID(ctx)
 
 	userID, err := utils.ParseUint64FromRequest(r, "id")
@@ -78,7 +78,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.SendResponse(w, logger, NewProfileResponse(user))
-	u.logger.Infof("in GetUserHandler: get product: %+v", user)
+	logger.Infof("in GetUserHandler: get product: %+v", user)
 }
 
 // PartiallyUpdateUserHandler godoc
@@ -105,12 +105,13 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 	}
 
 	ctx := r.Context()
+	logger := u.logger.LogReqID(ctx)
 
 	var err error
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, u.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
@@ -123,12 +124,12 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 	}
 
 	if err != nil {
-		u.logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
-		responses.HandleErr(w, u.logger, err)
+		logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, u.logger, NewProfileResponse(updatedUser))
-	u.logger.Infof("Successfully updated: %+v", userID)
+	responses.SendResponse(w, logger, NewProfileResponse(updatedUser))
+	logger.Infof("Successfully updated: %+v", userID)
 }

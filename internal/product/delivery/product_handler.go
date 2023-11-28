@@ -79,24 +79,25 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
-
-	ctx := r.Context()
 
 	productID, err := p.service.AddProduct(ctx, r.Body, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, responses.NewResponseIDRedirect(productID))
-	p.logger.Infof("in AddProductHandler: added product id= %+v", productID)
+	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(productID))
+	logger.Infof("in AddProductHandler: added product id= %+v", productID)
 }
 
 // GetProductHandler godoc
@@ -120,13 +121,14 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
 		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
 		} else {
-			responses.HandleErr(w, p.logger, err)
+			responses.HandleErr(w, logger, err)
 
 			return
 		}
@@ -134,20 +136,20 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	product, err := p.service.GetProduct(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, NewProductResponse(product))
-	p.logger.Infof("in GetProductHandler: get product: %+v", product)
+	responses.SendResponse(w, logger, NewProductResponse(product))
+	logger.Infof("in GetProductHandler: get product: %+v", product)
 }
 
 // GetProductListHandler godoc
@@ -171,28 +173,29 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
-
-	ctx := r.Context()
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
 		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
 		} else {
-			responses.HandleErr(w, p.logger, err)
+			responses.HandleErr(w, logger, err)
 
 			return
 		}
@@ -200,13 +203,13 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	products, err := p.service.GetProductsList(ctx, lastID, count, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, NewProductListResponse(products))
-	p.logger.Infof("in GetProductListHandler: get product list: %+v", products)
+	responses.SendResponse(w, logger, NewProductListResponse(products))
+	logger.Infof("in GetProductListHandler: get product list: %+v", products)
 }
 
 // GetListProductOfSalerHandler godoc
@@ -230,38 +233,39 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 		return
 	}
 
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	ctx := r.Context()
-
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	products, err := p.service.GetProductsOfSaler(ctx, lastID, count, userID, true)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, NewProductListResponse(products))
-	p.logger.Infof("in GetListProductOfSalerHandler: get product list: %+v", products)
+	responses.SendResponse(w, logger, NewProductListResponse(products))
+	logger.Infof("in GetListProductOfSalerHandler: get product list: %+v", products)
 }
 
 // GetListProductOfAnotherSalerHandler godoc
@@ -286,38 +290,39 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 		return
 	}
 
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	salerID, err := utils.ParseUint64FromRequest(r, "saler_id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
-
-	ctx := r.Context()
 
 	products, err := p.service.GetProductsOfSaler(ctx, lastID, count, salerID, false)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, NewProductListResponse(products))
-	p.logger.Infof("in GetListProductOfAnotherSalerHandler: get product list: %+v", products)
+	responses.SendResponse(w, logger, NewProductListResponse(products))
+	logger.Infof("in GetListProductOfAnotherSalerHandler: get product list: %+v", products)
 }
 
 // UpdateProductHandler godoc
@@ -342,18 +347,19 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	ctx := r.Context()
-
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
@@ -365,13 +371,13 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, responses.NewResponseIDRedirect(productID))
-	p.logger.Infof("in UpdateProductHandler: updated product with id = %+v", productID)
+	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(productID))
+	logger.Infof("in UpdateProductHandler: updated product with id = %+v", productID)
 }
 
 // CloseProductHandler godoc
@@ -396,31 +402,32 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	err = p.service.CloseProduct(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger,
+	responses.SendResponse(w, logger,
 		responses.NewResponseSuccessful(ResponseSuccessfulCloseProduct))
-	p.logger.Infof("in CloseProductHandler: close product id=%d", productID)
+	logger.Infof("in CloseProductHandler: close product id=%d", productID)
 }
 
 // ActivateProductHandler godoc
@@ -445,31 +452,32 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	err = p.service.ActivateProduct(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger,
+	responses.SendResponse(w, logger,
 		responses.NewResponseSuccessful(ResponseSuccessfulActivateProduct))
-	p.logger.Infof("in ActivateProductHandler: activated product id=%d", productID)
+	logger.Infof("in ActivateProductHandler: activated product id=%d", productID)
 }
 
 // DeleteProductHandler godoc
@@ -494,31 +502,32 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	err = p.service.DeleteProduct(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger,
+	responses.SendResponse(w, logger,
 		responses.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
-	p.logger.Infof("in DeleteProductHandler: delete product id=%d", productID)
+	logger.Infof("in DeleteProductHandler: delete product id=%d", productID)
 }
 
 // SearchProductHandler godoc
@@ -541,19 +550,20 @@ func (p *ProductHandler) SearchProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	searchInput := utils.ParseStringFromRequest(r, "searched")
 
 	products, err := p.service.SearchProduct(ctx, searchInput)
 	if err != nil {
-		responses.SendResponse(w, p.logger,
+		responses.SendResponse(w, logger,
 			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, NewProductInSearchListResponse(products))
-	p.logger.Infof("in SearchProductHandler: search products: %+v\n", products)
+	responses.SendResponse(w, logger, NewProductInSearchListResponse(products))
+	logger.Infof("in SearchProductHandler: search products: %+v\n", products)
 }
 
 // GetSearchProductFeedHandler godoc
@@ -578,30 +588,31 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 		return
 	}
 
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	offset, err := utils.ParseUint64FromRequest(r, "offset")
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	searchInput := utils.ParseStringFromRequest(r, "searched")
 
-	ctx := r.Context()
-
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
 		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
 		} else {
-			responses.HandleErr(w, p.logger, err)
+			responses.HandleErr(w, logger, err)
 
 			return
 		}
@@ -609,11 +620,11 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 
 	products, err := p.service.GetSearchProductFeed(ctx, searchInput, offset, count, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, NewProductListResponse(products))
-	p.logger.Infof("in GetProductListHandler: get product list: %+v", products)
+	responses.SendResponse(w, logger, NewProductListResponse(products))
+	logger.Infof("in GetProductListHandler: get product list: %+v", products)
 }

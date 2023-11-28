@@ -57,19 +57,20 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
+	logger := a.logger.LogReqID(ctx)
 
 	decoder := json.NewDecoder(r.Body)
 
 	userWithoutID := new(models.User)
 	if err := decoder.Decode(userWithoutID); err != nil {
-		responses.HandleErr(w, a.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	_, err := govalidator.ValidateStruct(userWithoutID)
 	if err != nil {
-		responses.HandleErr(w, a.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
@@ -78,7 +79,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	sessionWithToken, err := a.sessionManagerClient.Create(ctx, &userForCreate)
 	if err != nil {
-		responses.HandleErr(w, a.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
@@ -93,8 +94,8 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	responses.SendResponse(w, a.logger, responses.NewResponseSuccessful(ResponseSuccessfulSignUp))
-	a.logger.Infof("in SignUpHandler: added user")
+	responses.SendResponse(w, logger, responses.NewResponseSuccessful(ResponseSuccessfulSignUp))
+	logger.Infof("in SignUpHandler: added user")
 }
 
 // SignInHandler godoc
@@ -118,6 +119,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
+	logger := a.logger.LogReqID(ctx)
 
 	email := r.URL.Query().Get("email")
 	password := r.URL.Query().Get("password")
@@ -126,7 +128,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	sessionWithToken, err := a.sessionManagerClient.Login(ctx, &userForLogin)
 	if err != nil {
-		responses.HandleErr(w, a.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
@@ -141,8 +143,8 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	responses.SendResponse(w, a.logger, responses.NewResponseSuccessful(ResponseSuccessfulSignUp))
-	a.logger.Infof("in SignUpHandler: added user")
+	responses.SendResponse(w, logger, responses.NewResponseSuccessful(ResponseSuccessfulSignUp))
+	logger.Infof("in SignUpHandler: added user")
 }
 
 // LogOutHandler godoc
@@ -162,9 +164,12 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := context.Background()
+	logger := a.logger.LogReqID(ctx)
+
 	cookie, err := r.Cookie(responses.CookieAuthName)
 	if err != nil {
-		responses.HandleErr(w, a.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
@@ -173,11 +178,9 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		AccessToken: cookie.Value,
 	}
 
-	ctx := context.Background()
-
 	expiredSession, err := a.sessionManagerClient.Delete(ctx, sessionUser)
 	if err != nil {
-		responses.HandleErr(w, a.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
@@ -185,6 +188,6 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie.Value = expiredSession.GetAccessToken()
 
 	http.SetCookie(w, cookie)
-	responses.SendResponse(w, a.logger, responses.NewResponseSuccessful(ResponseSuccessfulLogOut))
-	a.logger.Infof("in LogOutHandler: logout user with cookie: %+v", cookie)
+	responses.SendResponse(w, logger, responses.NewResponseSuccessful(ResponseSuccessfulLogOut))
+	logger.Infof("in LogOutHandler: logout user with cookie: %+v", cookie)
 }

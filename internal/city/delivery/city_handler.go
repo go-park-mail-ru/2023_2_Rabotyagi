@@ -55,17 +55,18 @@ func (c *CityHandler) GetFullCitiesHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	ctx := r.Context()
+	logger := c.logger.LogReqID(ctx)
 
 	cities, err := c.service.GetFullCities(ctx)
 	if err != nil {
-		responses.SendResponse(w, c.logger,
+		responses.SendResponse(w, logger,
 			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	responses.SendResponse(w, c.logger, NewCityListResponse(cities))
-	c.logger.Infof("in GetFullCities: get all cities: %+v\n", cities)
+	responses.SendResponse(w, logger, NewCityListResponse(cities))
+	logger.Infof("in GetFullCities: get all cities: %+v\n", cities)
 }
 
 // SearchCityHandler godoc
@@ -88,17 +89,18 @@ func (c *CityHandler) SearchCityHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	ctx := r.Context()
+	logger := c.logger.LogReqID(ctx)
 
 	searchInput := utils.ParseStringFromRequest(r, "searched")
 
 	cities, err := c.service.SearchCity(ctx, searchInput)
 	if err != nil {
-		responses.SendResponse(w, c.logger,
+		responses.SendResponse(w, logger,
 			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	responses.SendResponse(w, c.logger, NewCityListResponse(cities))
-	c.logger.Infof("in SearchCityHandler: search city: %+v\n", cities)
+	responses.SendResponse(w, logger, NewCityListResponse(cities))
+	logger.Infof("in SearchCityHandler: search city: %+v\n", cities)
 }

@@ -39,23 +39,24 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	products, err := p.service.GetUserFavourites(ctx, userID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, NewProductListResponse(products))
-	p.logger.Infof("in GetFavouritesHandler: get user favourites: %+v\n", products)
+	responses.SendResponse(w, logger, NewProductListResponse(products))
+	logger.Infof("in GetFavouritesHandler: get user favourites: %+v\n", products)
 }
 
 // AddToFavouritesHandler godoc
@@ -78,33 +79,34 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
 	productIDStr := r.URL.Query().Get("product_id")
 
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
-
-	ctx := r.Context()
 
 	err = p.service.AddToFavourites(ctx, userID, productID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, responses.NewResponseIDRedirect(productID))
-	p.logger.Infof("in AddToFavouritesHandler: add to fav with product id = %+v", productID)
+	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(productID))
+	logger.Infof("in AddToFavouritesHandler: add to fav with product id = %+v", productID)
 }
 
 // DeleteFromFavouritesHandler godoc
@@ -126,31 +128,32 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 		return
 	}
 
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
 	productIDStr := r.URL.Query().Get("product_id")
 
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
-
-	ctx := r.Context()
 
 	err = p.service.DeleteFromFavourites(ctx, userID, productID)
 	if err != nil {
-		responses.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, logger, err)
 
 		return
 	}
 
-	responses.SendResponse(w, p.logger, responses.NewResponseIDRedirect(productID))
-	p.logger.Infof("in DeleteFromFavouritesHandler: del form fav with product id = %+v", productID)
+	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(productID))
+	logger.Infof("in DeleteFromFavouritesHandler: del form fav with product id = %+v", productID)
 }

@@ -65,7 +65,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(authHandler.SignInHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/api/v1/logout", http.HandlerFunc(authHandler.LogOutHandler))
 
-	router.Handle("api/v1/profile/get",
+	router.Handle("/api/v1/profile/get",
 		middleware.SetupCORS(userHandler.GetUserHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/api/v1/profile/update",
 		middleware.SetupCORS(userHandler.PartiallyUpdateUserHandler, configMux.addrOrigin, configMux.schema))

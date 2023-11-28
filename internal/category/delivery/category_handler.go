@@ -55,17 +55,18 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 	}
 
 	ctx := r.Context()
+	logger := c.logger.LogReqID(ctx)
 
 	categories, err := c.service.GetFullCategories(ctx)
 	if err != nil {
-		responses.SendResponse(w, c.logger,
+		responses.SendResponse(w, logger,
 			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	responses.SendResponse(w, c.logger, NewCategoryListResponse(categories))
-	c.logger.Infof("in GetFullCategories: get all categories: %+v\n", categories)
+	responses.SendResponse(w, logger, NewCategoryListResponse(categories))
+	logger.Infof("in GetFullCategories: get all categories: %+v\n", categories)
 }
 
 // SearchCategoryHandler godoc
@@ -88,17 +89,18 @@ func (c *CategoryHandler) SearchCategoryHandler(w http.ResponseWriter, r *http.R
 	}
 
 	ctx := r.Context()
+	logger := c.logger.LogReqID(ctx)
 
 	searchInput := utils.ParseStringFromRequest(r, "searched")
 
 	categories, err := c.service.SearchCategory(ctx, searchInput)
 	if err != nil {
-		responses.SendResponse(w, c.logger,
+		responses.SendResponse(w, logger,
 			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	responses.SendResponse(w, c.logger, NewCategoryListResponse(categories))
-	c.logger.Infof("in SearchCategoryHandler: search category: %+v\n", categories)
+	responses.SendResponse(w, logger, NewCategoryListResponse(categories))
+	logger.Infof("in SearchCategoryHandler: search category: %+v\n", categories)
 }
