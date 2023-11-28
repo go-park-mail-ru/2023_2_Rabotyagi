@@ -2,10 +2,11 @@ package delivery
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"net/http"
 	"strconv"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 )
@@ -41,19 +42,19 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	products, err := p.service.GetUserFavourites(ctx, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, NewProductListResponse(products))
+	responses.SendResponse(w, p.logger, NewProductListResponse(products))
 	p.logger.Infof("in GetFavouritesHandler: get user favourites: %+v\n", products)
 }
 
@@ -81,14 +82,14 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -97,12 +98,12 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 
 	err = p.service.AddToFavourites(ctx, userID, productID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, delivery.NewResponseIDRedirect(productID))
+	responses.SendResponse(w, p.logger, responses.NewResponseIDRedirect(productID))
 	p.logger.Infof("in AddToFavouritesHandler: add to fav with product id = %+v", productID)
 }
 
@@ -130,14 +131,14 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -146,11 +147,11 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 
 	err = p.service.DeleteFromFavourites(ctx, userID, productID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, delivery.NewResponseIDRedirect(productID))
+	responses.SendResponse(w, p.logger, responses.NewResponseIDRedirect(productID))
 	p.logger.Infof("in DeleteFromFavouritesHandler: del form fav with product id = %+v", productID)
 }

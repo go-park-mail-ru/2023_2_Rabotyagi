@@ -18,12 +18,12 @@ func main() {
 	if len(os.Args) != 3 {
 		fmt.Println(`command should be format ./fake_db postgres://postgres:postgres@localhost:5432/youla?sslmode=disable .
 where first arg is url_db and second path to root where find static/img`)
+
+		return
 	}
 
 	urlDB := os.Args[1]
 	pathRoot := os.Args[2]
-	fmt.Println(urlDB)
-	fmt.Println(pathRoot)
 
 	logger, err := my_logger.New([]string{"stdout"}, []string{"stderr"})
 	if err != nil {

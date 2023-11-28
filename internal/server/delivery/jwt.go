@@ -5,6 +5,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"net/http"
 )
 
@@ -14,11 +15,11 @@ func GetUserIDFromCookie(r *http.Request) (uint64, error) {
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	cookie, err := r.Cookie(CookieAuthName)
+	cookie, err := r.Cookie(responses.CookieAuthName)
 	if err != nil {
 		logger.Errorln(err)
 
-		return 0, fmt.Errorf(myerrors.ErrTemplate, ErrCookieNotPresented)
+		return 0, fmt.Errorf(myerrors.ErrTemplate, responses.ErrCookieNotPresented)
 	}
 
 	rawJwt := cookie.Value

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/config"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server"
 )

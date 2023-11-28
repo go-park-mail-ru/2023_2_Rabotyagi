@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"io"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 
 	"go.uber.org/zap"
@@ -82,7 +83,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -91,12 +92,12 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 
 	productID, err := p.service.AddProduct(ctx, r.Body, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, delivery.NewResponseIDRedirect(productID))
+	responses.SendResponse(w, p.logger, responses.NewResponseIDRedirect(productID))
 	p.logger.Infof("in AddProductHandler: added product id= %+v", productID)
 }
 
@@ -124,10 +125,10 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		if errors.Is(err, delivery.ErrCookieNotPresented) {
+		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
 		} else {
-			delivery.HandleErr(w, p.logger, err)
+			responses.HandleErr(w, p.logger, err)
 
 			return
 		}
@@ -135,19 +136,19 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	product, err := p.service.GetProduct(ctx, productID, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, NewProductResponse(product))
+	responses.SendResponse(w, p.logger, NewProductResponse(product))
 	p.logger.Infof("in GetProductHandler: get product: %+v", product)
 }
 
@@ -174,14 +175,14 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -190,10 +191,10 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		if errors.Is(err, delivery.ErrCookieNotPresented) {
+		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
 		} else {
-			delivery.HandleErr(w, p.logger, err)
+			responses.HandleErr(w, p.logger, err)
 
 			return
 		}
@@ -201,12 +202,12 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	products, err := p.service.GetProductsList(ctx, lastID, count, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, NewProductListResponse(products))
+	responses.SendResponse(w, p.logger, NewProductListResponse(products))
 	p.logger.Infof("in GetProductListHandler: get product list: %+v", products)
 }
 
@@ -233,14 +234,14 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -249,19 +250,19 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	products, err := p.service.GetProductsOfSaler(ctx, lastID, count, userID, true)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, NewProductListResponse(products))
+	responses.SendResponse(w, p.logger, NewProductListResponse(products))
 	p.logger.Infof("in GetListProductOfSalerHandler: get product list: %+v", products)
 }
 
@@ -289,21 +290,21 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	salerID, err := utils.ParseUint64FromRequest(r, "saler_id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -312,12 +313,12 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 
 	products, err := p.service.GetProductsOfSaler(ctx, lastID, count, salerID, false)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, NewProductListResponse(products))
+	responses.SendResponse(w, p.logger, NewProductListResponse(products))
 	p.logger.Infof("in GetListProductOfAnotherSalerHandler: get product list: %+v", products)
 }
 
@@ -345,7 +346,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -354,7 +355,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -366,12 +367,12 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, delivery.NewResponseIDRedirect(productID))
+	responses.SendResponse(w, p.logger, responses.NewResponseIDRedirect(productID))
 	p.logger.Infof("in UpdateProductHandler: updated product with id = %+v", productID)
 }
 
@@ -400,27 +401,27 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.CloseProduct(ctx, productID, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger,
-		delivery.NewResponseSuccessful(ResponseSuccessfulCloseProduct))
+	responses.SendResponse(w, p.logger,
+		responses.NewResponseSuccessful(ResponseSuccessfulCloseProduct))
 	p.logger.Infof("in CloseProductHandler: close product id=%d", productID)
 }
 
@@ -449,27 +450,27 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.ActivateProduct(ctx, productID, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger,
-		delivery.NewResponseSuccessful(ResponseSuccessfulActivateProduct))
+	responses.SendResponse(w, p.logger,
+		responses.NewResponseSuccessful(ResponseSuccessfulActivateProduct))
 	p.logger.Infof("in ActivateProductHandler: activated product id=%d", productID)
 }
 
@@ -498,27 +499,27 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.DeleteProduct(ctx, productID, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger,
-		delivery.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
+	responses.SendResponse(w, p.logger,
+		responses.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
 	p.logger.Infof("in DeleteProductHandler: delete product id=%d", productID)
 }
 
@@ -547,13 +548,13 @@ func (p *ProductHandler) SearchProductHandler(w http.ResponseWriter, r *http.Req
 
 	products, err := p.service.SearchProduct(ctx, searchInput)
 	if err != nil {
-		delivery.SendResponse(w, p.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		responses.SendResponse(w, p.logger,
+			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, NewProductInSearchListResponse(products))
+	responses.SendResponse(w, p.logger, NewProductInSearchListResponse(products))
 	p.logger.Infof("in SearchProductHandler: search products: %+v\n", products)
 }
 
@@ -581,14 +582,14 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	offset, err := utils.ParseUint64FromRequest(r, "offset")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
@@ -599,10 +600,10 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		if errors.Is(err, delivery.ErrCookieNotPresented) {
+		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
 		} else {
-			delivery.HandleErr(w, p.logger, err)
+			responses.HandleErr(w, p.logger, err)
 
 			return
 		}
@@ -610,11 +611,11 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 
 	products, err := p.service.GetSearchProductFeed(ctx, searchInput, offset, count, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, NewProductListResponse(products))
+	responses.SendResponse(w, p.logger, NewProductListResponse(products))
 	p.logger.Infof("in GetProductListHandler: get product list: %+v", products)
 }

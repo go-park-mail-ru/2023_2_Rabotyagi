@@ -37,7 +37,7 @@ services:
 
   backend-fs:
     build:
-      context: ./services/file_service
+      context: ./
       dockerfile: ./services/file_service/Dockerfile
     restart: always
     env_file:

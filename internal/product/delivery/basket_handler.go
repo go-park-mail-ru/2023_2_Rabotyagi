@@ -2,10 +2,11 @@ package delivery
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"io"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -48,19 +49,19 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	orderInBasket, err := p.service.AddOrder(ctx, r.Body, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, NewOrderResponse(orderInBasket))
+	responses.SendResponse(w, p.logger, NewOrderResponse(orderInBasket))
 	p.logger.Infof("in AddOrderHandler: add order orderID=%d for userID=%d\n", orderInBasket.ID, userID)
 }
 
@@ -87,19 +88,19 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	orders, err := p.service.GetOrdersByUserID(ctx, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger, NewOrderListResponse(orders))
+	responses.SendResponse(w, p.logger, NewOrderListResponse(orders))
 	p.logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", orders)
 }
 
@@ -129,20 +130,20 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.UpdateOrderCount(ctx, r.Body, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger,
-		delivery.NewResponseSuccessful(ResponseSuccessfulUpdateCountOrder))
+	responses.SendResponse(w, p.logger,
+		responses.NewResponseSuccessful(ResponseSuccessfulUpdateCountOrder))
 	p.logger.Infof("in UpdateOrderCountHandler: updated order count for user id=%d\n", userID)
 }
 
@@ -172,20 +173,20 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.UpdateOrderStatus(ctx, r.Body, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger,
-		delivery.NewResponseSuccessful(ResponseSuccessfulUpdateStatusOrder))
+	responses.SendResponse(w, p.logger,
+		responses.NewResponseSuccessful(ResponseSuccessfulUpdateStatusOrder))
 	p.logger.Infof("in UpdateOrderStatusHandler: updated order status for user id=%d\n", userID)
 }
 
@@ -212,20 +213,20 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.BuyFullBasket(ctx, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger,
-		delivery.NewResponseSuccessful(ResponseSuccessfulBuyFullBasket))
+	responses.SendResponse(w, p.logger,
+		responses.NewResponseSuccessful(ResponseSuccessfulBuyFullBasket))
 	p.logger.Infof("in BuyFullBasketHandler: buy full basket for userID=%d\n", userID)
 }
 
@@ -254,26 +255,26 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 
 	userID, err := delivery.GetUserIDFromCookie(r)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	orderID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
 	err = p.service.DeleteOrder(ctx, orderID, userID)
 	if err != nil {
-		delivery.HandleErr(w, p.logger, err)
+		responses.HandleErr(w, p.logger, err)
 
 		return
 	}
 
-	delivery.SendResponse(w, p.logger,
-		delivery.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
+	responses.SendResponse(w, p.logger,
+		responses.NewResponseSuccessful(ResponseSuccessfulDeleteProduct))
 	p.logger.Infof("in DeleteOrderHandler: delete order id=%d", orderID)
 }

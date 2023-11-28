@@ -3,13 +3,13 @@ package delivery
 import (
 	"context"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"go.uber.org/zap"
 )
 
@@ -59,13 +59,13 @@ func (c *CityHandler) GetFullCitiesHandler(w http.ResponseWriter, r *http.Reques
 
 	cities, err := c.service.GetFullCities(ctx)
 	if err != nil {
-		delivery.SendResponse(w, c.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		responses.SendResponse(w, c.logger,
+			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendResponse(w, c.logger, NewCityListResponse(cities))
+	responses.SendResponse(w, c.logger, NewCityListResponse(cities))
 	c.logger.Infof("in GetFullCities: get all cities: %+v\n", cities)
 }
 
@@ -94,12 +94,12 @@ func (c *CityHandler) SearchCityHandler(w http.ResponseWriter, r *http.Request) 
 
 	cities, err := c.service.SearchCity(ctx, searchInput)
 	if err != nil {
-		delivery.SendResponse(w, c.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		responses.SendResponse(w, c.logger,
+			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendResponse(w, c.logger, NewCityListResponse(cities))
+	responses.SendResponse(w, c.logger, NewCityListResponse(cities))
 	c.logger.Infof("in SearchCityHandler: search city: %+v\n", cities)
 }

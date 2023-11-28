@@ -1,8 +1,8 @@
 package delivery
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 )
 
 type CategoryListResponse struct {

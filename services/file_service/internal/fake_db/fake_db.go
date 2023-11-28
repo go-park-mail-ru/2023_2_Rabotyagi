@@ -2,7 +2,7 @@ package fake_db
 
 import (
 	"context"
-	serverrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/repository"
+	serverrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/fake_db/repository"
 
 	"github.com/jackc/pgx/v5"

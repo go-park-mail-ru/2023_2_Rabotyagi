@@ -110,6 +110,8 @@ update-env:
 	cp .env.example/.env.backend .env/.env.backend
 	cp .env.example/.env.pgadmin .env/.env.pgadmin
 	cp .env.example/.env.postgres .env/.env.postgres
+	cp services/file_service/.env.example/.env services/file_service/.env/.env
+	cp services/auth/.env.example/.env services/auth/.env/.env
 
 .PHONY: generate
 generate:

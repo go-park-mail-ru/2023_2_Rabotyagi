@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"github.com/jackc/pgx/v5"
 )
 

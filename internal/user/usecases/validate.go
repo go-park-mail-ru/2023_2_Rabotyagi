@@ -3,12 +3,12 @@ package usecases
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"io"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 )
 
 var (

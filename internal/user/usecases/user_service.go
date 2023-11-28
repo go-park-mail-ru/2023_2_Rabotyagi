@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	userrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	utils2 "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"go.uber.org/zap"
 	"io"
 )

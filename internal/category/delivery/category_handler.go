@@ -3,13 +3,13 @@ package delivery
 import (
 	"context"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"go.uber.org/zap"
 )
 
@@ -59,13 +59,13 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 
 	categories, err := c.service.GetFullCategories(ctx)
 	if err != nil {
-		delivery.SendResponse(w, c.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		responses.SendResponse(w, c.logger,
+			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendResponse(w, c.logger, NewCategoryListResponse(categories))
+	responses.SendResponse(w, c.logger, NewCategoryListResponse(categories))
 	c.logger.Infof("in GetFullCategories: get all categories: %+v\n", categories)
 }
 
@@ -94,12 +94,12 @@ func (c *CategoryHandler) SearchCategoryHandler(w http.ResponseWriter, r *http.R
 
 	categories, err := c.service.SearchCategory(ctx, searchInput)
 	if err != nil {
-		delivery.SendResponse(w, c.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		responses.SendResponse(w, c.logger,
+			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
-	delivery.SendResponse(w, c.logger, NewCategoryListResponse(categories))
+	responses.SendResponse(w, c.logger, NewCategoryListResponse(categories))
 	c.logger.Infof("in SearchCategoryHandler: search category: %+v\n", categories)
 }

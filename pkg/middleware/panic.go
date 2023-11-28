@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
 	"net/http"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 
 	"go.uber.org/zap"
 )
@@ -13,8 +14,8 @@ func Panic(next http.Handler, logger *zap.SugaredLogger) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				logger.Errorf("panic recovered: %+v\n", err)
-				delivery.SendResponse(w, logger,
-					delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+				responses.SendResponse(w, logger,
+					responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 			}
 		}()
 		next.ServeHTTP(w, r)

@@ -2,17 +2,17 @@ package delivery
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/jwt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
 	"go.uber.org/zap"
 )
 
@@ -75,7 +75,7 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.service.AddUser(ctx, r.Body)
 	if err != nil {
-		delivery.HandleErr(w, u.logger, err)
+		responses.HandleErr(w, u.logger, err)
 
 		return
 	}
@@ -85,14 +85,14 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	jwtStr, err := jwt.GenerateJwtToken(
 		&jwt.UserJwtPayload{UserID: user.ID, Email: user.Email, Expire: expire.Unix()}, jwt.GetSecret())
 	if err != nil {
-		delivery.SendResponse(w, u.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		responses.SendResponse(w, u.logger,
+			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:     delivery.CookieAuthName,
+		Name:     responses.CookieAuthName,
 		Value:    jwtStr,
 		Expires:  expire,
 		Path:     "/",
@@ -100,7 +100,7 @@ func (u *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	delivery.SendResponse(w, u.logger, delivery.NewResponseSuccessful(ResponseSuccessfulSignUp))
+	responses.SendResponse(w, u.logger, responses.NewResponseSuccessful(ResponseSuccessfulSignUp))
 	u.logger.Infof("in SignUpHandler: added user: %+v", user)
 }
 
@@ -131,7 +131,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.service.GetUser(ctx, email, password)
 	if err != nil {
-		delivery.HandleErr(w, u.logger, err)
+		responses.HandleErr(w, u.logger, err)
 
 		return
 	}
@@ -146,14 +146,14 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		jwt.GetSecret(),
 	)
 	if err != nil {
-		delivery.SendResponse(w, u.logger,
-			delivery.NewErrResponse(statuses.StatusInternalServer, delivery.ErrInternalServer))
+		responses.SendResponse(w, u.logger,
+			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
 
 		return
 	}
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:     delivery.CookieAuthName,
+		Name:     responses.CookieAuthName,
 		Value:    jwtStr,
 		Expires:  expire,
 		Path:     "/",
@@ -161,7 +161,7 @@ func (u *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	delivery.SendResponse(w, u.logger, delivery.NewResponseSuccessful(ResponseSuccessfulSignIn))
+	responses.SendResponse(w, u.logger, responses.NewResponseSuccessful(ResponseSuccessfulSignIn))
 	u.logger.Infof("in SignInHandler: signin user: %+v", user)
 }
 
@@ -183,10 +183,10 @@ func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie(delivery.CookieAuthName)
+	cookie, err := r.Cookie(responses.CookieAuthName)
 	if err != nil {
 		u.logger.Errorln(err)
-		delivery.SendResponse(w, u.logger, delivery.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
+		responses.SendResponse(w, u.logger, responses.NewErrResponse(StatusUnauthorized, ErrUnauthorized))
 
 		return
 	}
@@ -194,6 +194,6 @@ func (u *UserHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie.Expires = time.Now()
 
 	http.SetCookie(w, cookie)
-	delivery.SendResponse(w, u.logger, delivery.NewResponseSuccessful(ResponseSuccessfulLogOut))
+	responses.SendResponse(w, u.logger, responses.NewResponseSuccessful(ResponseSuccessfulLogOut))
 	u.logger.Infof("in LogOutHandler: logout user with cookie: %+v", cookie)
 }
