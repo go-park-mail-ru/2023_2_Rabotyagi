@@ -13,7 +13,6 @@ const (
 	StandardOutputLogPath      = "stdout /var/log/backend/logs.json"
 	StandardErrorOutputLogPath = "stderr /var/log/backend/err_logs.json"
 	StandardURLDataBase        = "postgres://postgres:postgres@localhost:5432/youla?sslmode=disable"
-	StandardSecret             = ""
 
 	EnvEnvironmentMode    = "ENVIRONMENT"
 	EnvAllowOrigin        = "ALLOW_ORIGIN"
@@ -22,7 +21,6 @@ const (
 	EnvOutputLogPath      = "OUTPUT_LOG_PATH"
 	EnvErrorOutputLogPath = "ERROR_OUTPUT_LOG_PATH"
 	EnvURLDataBase        = "URL_DATA_BASE"
-	EnvStandardSecret     = "JWT_SECRET"
 
 	// File service env
 
