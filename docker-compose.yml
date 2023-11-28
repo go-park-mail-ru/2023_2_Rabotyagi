@@ -33,8 +33,40 @@ services:
       - 8080:8080
     depends_on:
       - postgres
+      - backend-fs
+      - backend-auth
     volumes:
-      - imgs:/var/backend/static/img
+      - log:/var/log/backend
+
+  backend-fs:
+    build:
+      context: ./
+      dockerfile: ./services/file_service/Dockerfile
+    restart: always
+    env_file:
+      - ./services/file_service/.env/.env
+    ports:
+      - 8081:8081
+      - 8011:8011
+    depends_on:
+      - postgres
+    volumes:
+      - imgs:/var/file_service/static/img
+      - log-fs:/var/log/backend
+
+  backend-auth:
+    build:
+      context: ./
+      dockerfile: ./services/auth/Dockerfile
+    restart: always
+    env_file:
+      - services/auth/.env/.env
+    ports:
+      - 8012:8012
+    depends_on:
+      - postgres
+    volumes:
+      - log-auth:/var/log/backend
 
   frontend:
     image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
@@ -50,3 +82,6 @@ volumes:
   postgres:
   pgadmin:
   imgs:
+  log:
+  log-fs:
+  log-auth:

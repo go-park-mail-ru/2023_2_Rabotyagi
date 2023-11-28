@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+// protoc --go_out=. --go-grpc_out=. --go-grpc_opt=paths=source_relative --go_opt=paths=source_relative *.proto
+option go_package = "./;auth";
+
+package auth;
+
+message Nothing{}
+
+message SessionStatus {
+  bool correct = 1;
+}
+
+message Session {
+  string access_token = 1;
+}
+
+message User {
+  string email = 1;
+  string password = 2;
+}
+
+// grpc-сервис проверки авторизации
+service SessionManger {
+  rpc Login (User) returns (Session) {}
+  rpc Check (Session) returns (SessionStatus) {}
+  rpc Create (User) returns (Session) {}
+  rpc Delete (Session) returns (Session) {}
+}
