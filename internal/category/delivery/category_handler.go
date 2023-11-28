@@ -1,30 +1,24 @@
 package delivery
 
 import (
-	"context"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
-var _ ICategoryService = (*usecases.CategoryService)(nil)
-
-type ICategoryService interface {
-	GetFullCategories(ctx context.Context) ([]*models.Category, error)
-	SearchCategory(ctx context.Context, searchInput string) ([]*models.Category, error)
-}
+var _ category.ICategoryService = (*usecases.CategoryService)(nil)
 
 type CategoryHandler struct {
-	service ICategoryService
+	service category.ICategoryService
 	logger  *my_logger.MyLogger
 }
 
-func NewCategoryHandler(service ICategoryService) (*CategoryHandler, error) {
+func NewCategoryHandler(service category.ICategoryService) (*CategoryHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err

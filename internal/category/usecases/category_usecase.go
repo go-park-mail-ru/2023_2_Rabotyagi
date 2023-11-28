@@ -3,22 +3,18 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 )
 
-type ICategoryStorage interface {
-	GetFullCategories(ctx context.Context) ([]*models.Category, error)
-	SearchCategory(ctx context.Context, searchInput string) ([]*models.Category, error)
-}
-
 type CategoryService struct {
-	storage ICategoryStorage
+	storage category.ICategoryStorage
 	logger  *my_logger.MyLogger
 }
 
-func NewCategoryService(categoryStorage ICategoryStorage) (*CategoryService, error) {
+func NewCategoryService(categoryStorage category.ICategoryStorage) (*CategoryService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
