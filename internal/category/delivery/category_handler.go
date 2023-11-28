@@ -1,6 +1,8 @@
 package delivery
 
 import (
+	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category"
@@ -12,6 +14,11 @@ import (
 )
 
 var _ category.ICategoryService = (*usecases.CategoryService)(nil)
+
+type ICategoryService interface {
+	GetFullCategories(ctx context.Context) ([]*models.Category, error)
+	SearchCategory(ctx context.Context, searchInput string) ([]*models.Category, error)
+}
 
 type CategoryHandler struct {
 	service category.ICategoryService

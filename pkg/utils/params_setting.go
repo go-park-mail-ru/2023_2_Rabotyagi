@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -17,6 +17,6 @@ func AddQueryParamsToRequest(r *http.Request, params map[string]string) {
 
 func AddJSONBodyToRequest(r *http.Request, jsonStr string) {
 	r.Header.Set("Content-Type", "application/json")
-	r.Body = ioutil.NopCloser(strings.NewReader(jsonStr))
+	r.Body = io.NopCloser(strings.NewReader(jsonStr))
 	r.ContentLength = int64(len(jsonStr))
 }
