@@ -30,13 +30,15 @@ func NewCityStorage(pool *pgxpool.Pool) (*CityStorage, error) {
 }
 
 func (c *CityStorage) selectFullCities(ctx context.Context, tx pgx.Tx) ([]*models.City, error) {
+	logger := c.logger.LogReqID(ctx)
+
 	var cities []*models.City
 
 	SQLSelectFullCities := `SELECT "city".id,"city".name FROM public."city"`
 
 	citiesRows, err := tx.Query(ctx, SQLSelectFullCities)
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -54,7 +56,7 @@ func (c *CityStorage) selectFullCities(ctx context.Context, tx pgx.Tx) ([]*model
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -83,6 +85,8 @@ func (c *CityStorage) GetFullCities(ctx context.Context) ([]*models.City, error)
 }
 
 func (c *CityStorage) searchCity(ctx context.Context, tx pgx.Tx, searchInput string) ([]*models.City, error) {
+	logger := c.logger.LogReqID(ctx)
+
 	SQLSearchCity := `SELECT city.id, city.name
 						FROM public."city"
 						WHERE LOWER(name) LIKE $1 
@@ -92,7 +96,7 @@ func (c *CityStorage) searchCity(ctx context.Context, tx pgx.Tx, searchInput str
 
 	citiesRows, err := tx.Query(ctx, SQLSearchCity, "%"+strings.ToLower(searchInput)+"%")
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -110,7 +114,7 @@ func (c *CityStorage) searchCity(ctx context.Context, tx pgx.Tx, searchInput str
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -119,6 +123,8 @@ func (c *CityStorage) searchCity(ctx context.Context, tx pgx.Tx, searchInput str
 }
 
 func (c *CityStorage) SearchCity(ctx context.Context, searchInput string) ([]*models.City, error) {
+	logger := c.logger.LogReqID(ctx)
+
 	var cities []*models.City
 
 	err := pgx.BeginFunc(ctx, c.pool, func(tx pgx.Tx) error {
@@ -132,7 +138,7 @@ func (c *CityStorage) SearchCity(ctx context.Context, searchInput string) ([]*mo
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

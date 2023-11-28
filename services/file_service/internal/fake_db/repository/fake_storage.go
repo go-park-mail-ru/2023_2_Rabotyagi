@@ -3,18 +3,18 @@ package repository
 import (
 	"context"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/fake_db/usecases"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
 )
 
 type FakeStorage struct {
 	Pool   *pgxpool.Pool
-	Logger *zap.SugaredLogger
+	Logger *my_logger.MyLogger
 }
 
 func (f *FakeStorage) InsertUsersWithoutID(ctx context.Context, tx pgx.Tx, userCount uint) error {

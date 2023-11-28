@@ -13,6 +13,8 @@ var ErrNoAffectedFavouriteRows = myerrors.NewErrorBadFormatRequest("Не пол�
 func (p *ProductStorage) selectUserFavourites(ctx context.Context, tx pgx.Tx,
 	userID uint64,
 ) ([]*models.ProductInFeed, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLSelectUserFavourites := `SELECT p.id, p.title, p.price, p.city_id,
 		p.delivery, p.safe_deal, p.is_active, p.available_count
 		FROM public."product" p
@@ -21,7 +23,7 @@ func (p *ProductStorage) selectUserFavourites(ctx context.Context, tx pgx.Tx,
 
 	productsInFavouritesRows, err := tx.Query(ctx, SQLSelectUserFavourites, userID)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -49,7 +51,7 @@ func (p *ProductStorage) selectUserFavourites(ctx context.Context, tx pgx.Tx,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -58,6 +60,8 @@ func (p *ProductStorage) selectUserFavourites(ctx context.Context, tx pgx.Tx,
 }
 
 func (p *ProductStorage) GetUserFavourites(ctx context.Context, userID uint64) ([]*models.ProductInFeed, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	var slProduct []*models.ProductInFeed
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
@@ -82,7 +86,7 @@ func (p *ProductStorage) GetUserFavourites(ctx context.Context, userID uint64) (
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -91,12 +95,15 @@ func (p *ProductStorage) GetUserFavourites(ctx context.Context, userID uint64) (
 }
 
 func (p *ProductStorage) addToFavourites(ctx context.Context, tx pgx.Tx,
-	userID uint64, productID uint64) error {
+	userID uint64, productID uint64,
+) error {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLAddToFavourites := `INSERT INTO public."favourite"(owner_id, product_id) VALUES($1, $2)`
 
 	_, err := tx.Exec(ctx, SQLAddToFavourites, userID, productID)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -105,6 +112,8 @@ func (p *ProductStorage) addToFavourites(ctx context.Context, tx pgx.Tx,
 }
 
 func (p *ProductStorage) AddToFavourites(ctx context.Context, userID uint64, productID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		err := p.addToFavourites(ctx, tx, userID, productID)
 		if err != nil {
@@ -114,7 +123,7 @@ func (p *ProductStorage) AddToFavourites(ctx context.Context, userID uint64, pro
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -123,14 +132,16 @@ func (p *ProductStorage) AddToFavourites(ctx context.Context, userID uint64, pro
 }
 
 func (p *ProductStorage) deleteFromFavourites(ctx context.Context, tx pgx.Tx,
-	userID uint64, productID uint64) error {
-	SQLDeleteFromFavourites :=
-		`DELETE FROM public."favourite"
+	userID uint64, productID uint64,
+) error {
+	logger := p.logger.LogReqID(ctx)
+
+	SQLDeleteFromFavourites := `DELETE FROM public."favourite"
 		 WHERE owner_id=$1 AND product_id=$2`
 
 	result, err := tx.Exec(ctx, SQLDeleteFromFavourites, userID, productID)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
