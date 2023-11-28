@@ -23,6 +23,7 @@ func New() *Config {
 	}
 
 	return &Config{
+		ProductionMode:         productionMode,
 		AllowOrigin:            config.GetEnvStr(config.EnvAllowOrigin, config.StandardAllowOrigin),
 		Schema:                 config.GetEnvStr(config.EnvSchema, config.StandardSchema),
 		PortServer:             config.GetEnvStr(config.EnvPortBackend, config.StandardPort),
@@ -31,6 +32,5 @@ func New() *Config {
 		AddressAuthServiceGrpc: config.GetEnvStr(config.EnvAddressAuthServiceGrpc, config.StandardAddressAuthGrpc),
 		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, config.StandardOutputLogPath),
 		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, config.StandardErrorOutputLogPath),
-		ProductionMode:         productionMode,
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	reposhare "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	authconfig "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/config"
@@ -28,9 +27,9 @@ func main() {
 		return
 	}
 
-	lis, err := net.Listen("tcp", config.StandardAddressAuthGrpc)
+	lis, err := net.Listen("tcp", configServer.AddressAuthServiceGrpc)
 	if err != nil {
-		fmt.Printf("can`t listen port %s", err)
+		logger.Errorf("can`t listen port %s", err)
 
 		return
 	}
@@ -39,44 +38,37 @@ func main() {
 
 	baseCtx := context.Background()
 
-	_, err = my_logger.New([]string{configServer.OutputLogPath}, []string{configServer.ErrorOutputLogPath})
+	pool, err := reposhare.NewPgxPool(baseCtx, configServer.URLDataBase)
 	if err != nil {
-		fmt.Println(err)
-
-		return
-	}
-
-	pool, err := reposhare.NewPgxPool(baseCtx, config.StandardURLDataBase)
-	if err != nil {
-		fmt.Println(err)
+		logger.Errorln(err)
 
 		return
 	}
 
 	storage, err := repository.NewAuthStorage(pool)
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorln(err)
 
 		return
 	}
 
 	service, err := usecases.NewAuthService(storage)
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorln(err)
 
 		return
 	}
 
 	sessionManager, err := delivery.NewSessionManager(pool, service)
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorln(err)
 
 		return
 	}
 
 	auth.RegisterSessionMangerServer(server, sessionManager)
 
-	logger.Infof("starting server at :8082")
+	logger.Infof("starting server at: %s", configServer.AddressAuthServiceGrpc)
 
 	chCloseRefreshing := make(chan struct{})
 
@@ -84,7 +76,7 @@ func main() {
 	jwt.StartRefreshingSecret(jwt.TimeTokenLife, chCloseRefreshing)
 
 	if err := server.Serve(lis); err != nil {
-		fmt.Println(err)
+		logger.Errorln(err)
 
 		return
 	}

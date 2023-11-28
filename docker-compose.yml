@@ -47,7 +47,7 @@ services:
       - ./services/file_service/.env/.env
     ports:
       - 8081:8081
-      - 8011:8011
+#      - 8011:8011
     depends_on:
       - postgres
     volumes:
@@ -60,9 +60,9 @@ services:
       dockerfile: ./services/auth/Dockerfile
     restart: always
     env_file:
-      - services/auth/.env/.env
-    ports:
-      - 8012:8012
+      - ./services/auth/.env/.env
+#    ports:
+#      - 8012:8012
     depends_on:
       - postgres
     volumes:

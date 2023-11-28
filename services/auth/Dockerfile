@@ -25,7 +25,7 @@ RUN mkdir -p /var/log/backend
 
 ENV ENVIRONMENT=development
 ENV ADDRESS_AUTH_GRPC=:8012
-ENV URL_DATA_BASE=postgres://postgres:postgres@localhost:5432/youla?sslmode=disable
+ENV URL_DATA_BASE=postgres://postgres:postgres@postgres:5432/youla?sslmode=disable
 ENV OUTPUT_LOG_PATH=/var/log/backend/logs_auth.json
 ENV ERROR_OUTPUT_LOG_PATH=/var/log/backend/err_logs_auth.json
 
