@@ -2,120 +2,99 @@ package delivery
 
 //
 //import (
+//	"database/sql"
 //	"errors"
-//	"fmt"
-//	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/mocks"
-//	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
+//	mock_category "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/mocks"
 //	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-//	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-//	"github.com/stretchr/testify/mock"
 //	"go.uber.org/mock/gomock"
+//	"go.uber.org/zap"
+//	"io"
 //	"net/http"
+//	"net/http/httptest"
+//	"strings"
 //	"testing"
 //)
 //
-//type MockLogger struct {
-//	mock.Mock
-//	RealLogger *my_logger.MyLogger
-//}
-//
-//func (m *MockLogger) Info(message string) {
-//	m.Called(message)
-//}
-//
-//func (m *MockLogger) Error(message string, err error) {
-//	m.Called(message, err)
-//}
-//
-//func TestArtistDeliveryHTTP_Get(t *testing.T) {
-//	// Init
-//	type mockBehavior func(au *mock_category.MockICategoryService)
-//
-//	c := gomock.NewController(t)
-//
-//	mockService := mock_category.NewMockICategoryService(c)
-//
-//	h, _ := NewCategoryHandler(mockService)
-//
-//	// Routing
-//	router := http.NewServeMux()
-//	//router.Get("/api/artists/{artistID}/", h.Get)
-//	router.Handle("/api/v1/category/get_full",
-//		middleware.SetupCORS(h.GetFullCategories, "", ""))
-//
-//	// Test filling
-//	const correctArtistID uint32 = 1
-//	correctArtistIDPath := fmt.Sprint(correctArtistID)
-//
-//	expectedReturnArtist := models.Artist{
-//		ID:        1,
-//		Name:      "Oxxxymiron",
-//		AvatarSrc: "/artists/avatars/oxxxymiron.png",
+//func TestDelivery_ListByUser(t *testing.T) {
+//	type fields struct {
+//		serv *mock_category.MockICategoryService
 //	}
 //
-//	correctResponse := `{
-//		"id": 1,
-//		"name": "Oxxxymiron",
-//		"isLiked": false,
-//		"cover": "/artists/avatars/oxxxymiron.png"
-//	}`
+//	type testCase struct {
+//		prepare  func(f *fields)
+//		params   http.ServeMux
+//		response string
+//		err      error
+//	}
 //
-//	testTable := []struct {
-//		name             string
-//		artistIDPath     string
-//		user             *models.User
-//		mockBehavior     mockBehavior
-//		expectedStatus   int
-//		expectedResponse string
-//	}{
-//		{
-//			name:         "Common",
-//			artistIDPath: correctArtistIDPath,
-//			user:         &correctUser,
-//			mockBehavior: func(au *artistMocks.MockUsecase) {
-//				au.EXPECT().GetByID(gomock.Any(), correctArtistID).Return(&expectedReturnArtist, nil)
-//				au.EXPECT().IsLiked(gomock.Any(), correctArtistID, correctUser.ID).Return(false, nil)
+//	tests := map[string]testCase{
+//		"usual": {
+//			prepare: func(f *fields) {
+//				f.serv.EXPECT().GetFullCategories([]*models.Category{
+//					{ID: 1, Name: "aaaa", ParentID: sql.NullInt64{Int64: 0, Valid: false}},
+//					{ID: 2, Name: "bbbb", ParentID: sql.NullInt64{Int64: 1, Valid: true}},
+//					{ID: 3, Name: "aaaa", ParentID: sql.NullInt64{Valid: true, Int64: 2}},
+//				})
 //			},
-//			expectedStatus:   http.StatusOK,
-//			expectedResponse: correctResponse,
+//			params:   []httprouter.Param{{Key: "user-id", Value: "2"}},
+//			response: `{"items":[{"id":2,"user1_id":2,"user2_id":3,"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"},{"id":3,"user1_id":8,"user2_id":2,"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"},{"id":4,"user1_id":2,"user2_id":4,"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"}]}`,
+//			err:      nil,
 //		},
-//		{
-//			name:             "Incorrect ID In Path",
-//			artistIDPath:     "0",
-//			mockBehavior:     func(au *artistMocks.MockUsecase) {},
-//			expectedStatus:   http.StatusBadRequest,
-//			expectedResponse: commonTests.ErrorResponse(commonHttp.InvalidURLParameter),
-//		},
-//		{
-//			name:         "No Artist To Get",
-//			artistIDPath: correctArtistIDPath,
-//			user:         &correctUser,
-//			mockBehavior: func(au *artistMocks.MockUsecase) {
-//				au.EXPECT().GetByID(gomock.Any(), correctArtistID).Return(nil, &models.NoSuchArtistError{})
+//		"no chats": {
+//			prepare: func(f *fields) {
+//				f.serv.EXPECT().ListByUser(3).Return([]models.Chat{}, nil)
 //			},
-//			expectedStatus:   http.StatusBadRequest,
-//			expectedResponse: commonTests.ErrorResponse(artistNotFound),
+//			params:   []httprouter.Param{{Key: "user-id", Value: "3"}},
+//			response: `{"items":[]}`,
+//			err:      nil,
 //		},
-//		{
-//			name:         "Server Error",
-//			artistIDPath: correctArtistIDPath,
-//			user:         &correctUser,
-//			mockBehavior: func(au *artistMocks.MockUsecase) {
-//				au.EXPECT().GetByID(gomock.Any(), correctArtistID).Return(nil, errors.New(""))
-//			},
-//			expectedStatus:   http.StatusInternalServerError,
-//			expectedResponse: commonTests.ErrorResponse(artistGetServerError),
+//		"invalid user id param": {
+//			prepare:  nil,
+//			params:   []httprouter.Param{{Key: "user-id", Value: "a"}},
+//			response: ``,
+//			err:      pkgErrors.ErrInvalidUserIdParam,
+//		},
+//		"missing user id param": {
+//			prepare:  nil,
+//			params:   []httprouter.Param{},
+//			response: ``,
+//			err:      pkgErrors.ErrInvalidUserIdParam,
 //		},
 //	}
 //
-//	for _, tc := range testTable {
-//		t.Run(tc.name, func(t *testing.T) {
-//			// Call mock
-//			tc.mockBehavior(au)
+//	for name, test := range tests {
+//		test := test
+//		t.Run(name, func(t *testing.T) {
+//			t.Parallel()
 //
-//			commonTests.DeliveryTestGet(t, r, "/api/artists/"+tc.artistIDPath+"/",
-//				tc.expectedStatus, tc.expectedResponse,
-//				commonTests.WrapRequestWithUserNotNilFunc(tc.user))
+//			logger, err := zap.NewDevelopment()
+//			if err != nil {
+//				t.Fatalf("can't create logger: %s", err)
+//			}
+//
+//			ctrl := gomock.NewController(t)
+//			defer ctrl.Finish()
+//
+//			f := fields{serv: mocks.NewMockService(ctrl)}
+//			if test.prepare != nil {
+//				test.prepare(&f)
+//			}
+//
+//			del := delivery{
+//				serv: f.serv,
+//				log:  logger,
+//			}
+//
+//			req := httptest.NewRequest(http.MethodGet, "/", nil)
+//			rec := httptest.NewRecorder()
+//			err = del.ListByUser(rec, req, test.params)
+//			if !errors.Is(err, test.err) {
+//				t.Errorf("\nExpected: %s\nGot: %s", test.err, err)
+//			}
+//			body, _ := io.ReadAll(rec.Body)
+//			if strings.Trim(string(body), "\n") != test.response {
+//				t.Errorf("\nExpected: %s\nGot: %s", test.response, string(body))
+//			}
 //		})
 //	}
 //}
