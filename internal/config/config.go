@@ -17,13 +17,6 @@ type Config struct {
 }
 
 func New() *Config {
-	//secret := config.GetEnvStr(config.EnvStandardSecret, config.StandardSecret) //TODO delete
-	//if secret != config.StandardSecret {
-	//	jwt.SetSecret([]byte(secret))
-	//} else {
-	//	_ = jwt.GetSecret()
-	//}
-
 	productionMode := false
 	if config.GetEnvStr(config.EnvEnvironmentMode, config.StandardDevelopmentMode) == config.StandardProductionMode {
 		productionMode = true
