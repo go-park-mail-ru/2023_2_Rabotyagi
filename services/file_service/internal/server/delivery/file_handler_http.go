@@ -185,11 +185,11 @@ func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Reque
 	fileServer.ServeHTTP(w, r)
 }
 
-func (f *FileHandlerHTTP) DocFileServerHandler(ctx context.Context) http.Handler {
+func (f *FileHandlerHTTP) DocFileServerHandler() http.Handler {
 	fileServer := http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(f.fileServiceDir)))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r = r.WithContext(context.WithValue(ctx, keyCtxHandler, fileServer))
+		r = r.WithContext(context.WithValue(r.Context(), keyCtxHandler, fileServer))
 
 		f.fileServerHandler(w, r)
 	})

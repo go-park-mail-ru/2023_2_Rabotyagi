@@ -33,13 +33,13 @@ func NewMux(ctx context.Context, configMux *ConfigMux,
 
 	fileHandler := delivery.NewFileHandlerHTTP(fileServiceHTTP, logger, configMux.fileServiceDir)
 
-	router.Handle("/api/v1/img/", fileHandler.DocFileServerHandler(ctx))
+	router.Handle("/api/v1/img/", fileHandler.DocFileServerHandler())
 	router.Handle("/api/v1/img/upload", middleware.Context(ctx,
 		middleware.SetupCORS(fileHandler.UploadFileHandler, configMux.allowOrigin, configMux.schema)))
 
 	mux := http.NewServeMux()
-	mux.Handle("/", middleware.Panic(
-		middleware.AccessLogMiddleware(middleware.AddReqID(router), logger), logger))
+	mux.Handle("/", middleware.Panic(middleware.Context(ctx,
+		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger))), logger))
 
 	return mux, nil
 }

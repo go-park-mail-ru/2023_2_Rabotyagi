@@ -8,7 +8,7 @@ import (
 
 type keyCtx string
 
-var (
+const (
 	requestIDKey keyCtx = "req_id"
 
 	minRequestID = 100000
