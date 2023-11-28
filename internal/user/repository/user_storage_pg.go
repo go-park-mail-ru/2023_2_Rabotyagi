@@ -45,6 +45,8 @@ func NewUserStorage(pool *pgxpool.Pool) (*UserStorage, error) {
 }
 
 func (u *UserStorage) getUserByEmail(ctx context.Context, tx pgx.Tx, email string) (*models.User, error) {
+	logger := u.logger.LogReqID(ctx)
+
 	SQLGetUserByEmail := `SELECT id, email, phone, name, password, birthday FROM public."user" WHERE email=$1;`
 	userLine := tx.QueryRow(ctx, SQLGetUserByEmail, email)
 
@@ -53,7 +55,7 @@ func (u *UserStorage) getUserByEmail(ctx context.Context, tx pgx.Tx, email strin
 	}
 
 	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Password, &user.Birthday); err != nil {
-		u.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -79,6 +81,8 @@ func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models
 }
 
 func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx, id uint64) (*models.UserWithoutPassword, error) { //nolint:lll
+	logger := u.logger.LogReqID(ctx)
+
 	SQLGetUserByID := `SELECT email, phone, name, birthday, avatar, created_at FROM public."user" WHERE id=$1;`
 	userLine := tx.QueryRow(ctx, SQLGetUserByID, id)
 	user := models.UserWithoutPassword{ //nolint:exhaustruct
@@ -87,7 +91,7 @@ func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx,
 
 	if err := userLine.Scan(&user.Email,
 		&user.Phone, &user.Name, &user.Birthday, &user.Avatar, &user.CreatedAt); err != nil {
-		u.logger.Errorf("error in getUserWithoutPasswordByID: %+v", err)
+		logger.Errorf("error in getUserWithoutPasswordByID: %+v", err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -113,6 +117,8 @@ func (u *UserStorage) GetUserWithoutPasswordByID(ctx context.Context, id uint64)
 }
 
 func (u *UserStorage) isEmailBusy(ctx context.Context, tx pgx.Tx, email string) (bool, error) {
+	logger := u.logger.LogReqID(ctx)
+
 	SQLIsEmailBusy := `SELECT id FROM public."user" WHERE email=$1;`
 	userRow := tx.QueryRow(ctx, SQLIsEmailBusy, email)
 
@@ -123,7 +129,7 @@ func (u *UserStorage) isEmailBusy(ctx context.Context, tx pgx.Tx, email string) 
 			return false, nil
 		}
 
-		u.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -145,6 +151,8 @@ func (u *UserStorage) IsEmailBusy(ctx context.Context, email string) (bool, erro
 }
 
 func (u *UserStorage) isPhoneBusy(ctx context.Context, tx pgx.Tx, phone string) (bool, error) {
+	logger := u.logger.LogReqID(ctx)
+
 	SQLIsPhoneBusy := `SELECT id FROM public."user" WHERE phone=$1;`
 	userRow := tx.QueryRow(ctx, SQLIsPhoneBusy, phone)
 
@@ -155,7 +163,7 @@ func (u *UserStorage) isPhoneBusy(ctx context.Context, tx pgx.Tx, phone string) 
 			return false, nil
 		}
 
-		u.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -177,6 +185,8 @@ func (u *UserStorage) IsPhoneBusy(ctx context.Context, phone string) (bool, erro
 }
 
 func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models.UserWithoutID) error {
+	logger := u.logger.LogReqID(ctx)
+
 	var SQLCreateUser string
 
 	var err error
@@ -186,7 +196,7 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 		preUser.Email, preUser.Password)
 
 	if err != nil {
-		u.logger.Errorf("in createUser: preUser=%+v err=%+v", preUser, err)
+		logger.Errorf("in createUser: preUser=%+v err=%+v", preUser, err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -197,6 +207,8 @@ func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models
 func (u *UserStorage) updateUser(ctx context.Context,
 	tx pgx.Tx, userID uint64, updateDataMap map[string]interface{},
 ) error {
+	logger := u.logger.LogReqID(ctx)
+
 	if len(updateDataMap) == 0 {
 		return ErrNoUpdateFields
 	}
@@ -206,14 +218,14 @@ func (u *UserStorage) updateUser(ctx context.Context,
 
 	queryString, args, err := query.ToSql()
 	if err != nil {
-		u.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	result, err := tx.Exec(ctx, queryString, args...)
 	if err != nil {
-		u.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -253,6 +265,8 @@ func (u *UserStorage) UpdateUser(ctx context.Context,
 }
 
 func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID) (*models.User, error) {
+	logger := u.logger.LogReqID(ctx)
+
 	user := models.User{} //nolint:exhaustruct
 
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
@@ -270,7 +284,7 @@ func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		id, err := repository.GetLastValSeq(ctx, tx, u.logger, NameSeqUser)
+		id, err := repository.GetLastValSeq(ctx, tx, logger, NameSeqUser)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}

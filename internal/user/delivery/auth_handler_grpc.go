@@ -1,8 +1,8 @@
 package delivery
 
 import (
-	"context"
 	"encoding/json"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"net/http"
 	"time"
 
@@ -61,8 +61,9 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 
-	userWithoutID := new(models.User)
+	userWithoutID := new(models.UserWithoutID)
 	if err := decoder.Decode(userWithoutID); err != nil {
+		err = myerrors.NewErrorBadFormatRequest(err.Error())
 		responses.HandleErr(w, logger, err)
 
 		return
@@ -70,6 +71,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err := govalidator.ValidateStruct(userWithoutID)
 	if err != nil {
+		err = myerrors.NewErrorBadContentRequest(err.Error())
 		responses.HandleErr(w, logger, err)
 
 		return
@@ -79,6 +81,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	sessionWithToken, err := a.sessionManagerClient.Create(ctx, &userForCreate)
 	if err != nil {
+		logger.Errorln(err)
 		responses.HandleErr(w, logger, err)
 
 		return
@@ -128,6 +131,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	sessionWithToken, err := a.sessionManagerClient.Login(ctx, &userForLogin)
 	if err != nil {
+		logger.Errorln(err)
 		responses.HandleErr(w, logger, err)
 
 		return
@@ -161,14 +165,16 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
 		return
 	}
 
-	ctx := context.Background()
+	ctx := r.Context()
 	logger := a.logger.LogReqID(ctx)
 
 	cookie, err := r.Cookie(responses.CookieAuthName)
 	if err != nil {
+		logger.Errorln(err)
 		responses.HandleErr(w, logger, err)
 
 		return
@@ -180,6 +186,7 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	expiredSession, err := a.sessionManagerClient.Delete(ctx, sessionUser)
 	if err != nil {
+		logger.Errorln(err)
 		responses.HandleErr(w, logger, err)
 
 		return

@@ -91,6 +91,8 @@ func (u *UserService) GetUserWithoutPasswordByID(ctx context.Context,
 func (u *UserService) UpdateUser(ctx context.Context, r io.Reader,
 	isPartialUpdate bool, userID uint64,
 ) (*models.UserWithoutPassword, error) {
+	logger := u.logger.LogReqID(ctx)
+
 	var userWithoutPassword *models.UserWithoutPassword
 
 	var err error
@@ -108,7 +110,7 @@ func (u *UserService) UpdateUser(ctx context.Context, r io.Reader,
 	}
 
 	if userWithoutPassword.ID != userID && userWithoutPassword.ID != 0 {
-		u.logger.Errorln(ErrWrongUserID)
+		logger.Errorln(ErrWrongUserID)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrWrongUserID)
 	}

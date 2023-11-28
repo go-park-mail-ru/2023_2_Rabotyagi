@@ -30,13 +30,15 @@ func NewCategoryStorage(pool *pgxpool.Pool) (*CategoryStorage, error) {
 }
 
 func (c *CategoryStorage) selectFullCatgories(ctx context.Context, tx pgx.Tx) ([]*models.Category, error) {
+	logger := c.logger.LogReqID(ctx)
+
 	var categories []*models.Category
 
 	SQLSelectFullCatgories := `SELECT "category".id,"category".name, "category".parent_id FROM public."category"`
 
 	categoriesRows, err := tx.Query(ctx, SQLSelectFullCatgories)
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -55,7 +57,7 @@ func (c *CategoryStorage) selectFullCatgories(ctx context.Context, tx pgx.Tx) ([
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -84,6 +86,8 @@ func (c *CategoryStorage) GetFullCategories(ctx context.Context) ([]*models.Cate
 }
 
 func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchInput string) ([]*models.Category, error) {
+	logger := c.logger.LogReqID(ctx)
+
 	SQLSearchCategory := `SELECT category.id, category.name, category.parent_id
 						FROM public."category"
 						WHERE LOWER(name) LIKE $1 
@@ -93,7 +97,7 @@ func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchI
 
 	categoriesRows, err := tx.Query(ctx, SQLSearchCategory, "%"+strings.ToLower(searchInput)+"%")
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -112,7 +116,7 @@ func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchI
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -121,6 +125,8 @@ func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchI
 }
 
 func (c *CategoryStorage) SearchCategory(ctx context.Context, searchInput string) ([]*models.Category, error) {
+	logger := c.logger.LogReqID(ctx)
+
 	var categories []*models.Category
 
 	err := pgx.BeginFunc(ctx, c.pool, func(tx pgx.Tx) error {
@@ -134,7 +140,7 @@ func (c *CategoryStorage) SearchCategory(ctx context.Context, searchInput string
 		return nil
 	})
 	if err != nil {
-		c.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

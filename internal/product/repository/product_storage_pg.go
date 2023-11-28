@@ -46,6 +46,8 @@ func NewProductStorage(pool *pgxpool.Pool) (*ProductStorage, error) {
 func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 	tx pgx.Tx, productID uint64,
 ) ([]models.Image, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	var images []models.Image
 
 	SQLSelectImages := `SELECT url FROM public."image" WHERE product_id=$1`
@@ -56,7 +58,7 @@ func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 			return images, nil
 		}
 
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -69,7 +71,7 @@ func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -80,6 +82,8 @@ func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
 func (p *ProductStorage) selectProductByID(ctx context.Context,
 	tx pgx.Tx, productID uint64,
 ) (*models.Product, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city_id,
        delivery, safe_deal, is_active FROM public."product" WHERE id=$1`
@@ -94,7 +98,7 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
 		}
 
-		p.logger.Errorf("error with productId=%d: %+v", productID, err)
+		logger.Errorf("error with productId=%d: %+v", productID, err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -108,6 +112,8 @@ func (p *ProductStorage) selectCountFavouritesByProductID(ctx context.Context,
 	tx pgx.Tx,
 	productID uint64,
 ) (uint64, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	var favouritesCount uint64
 
 	SQLCountFavourites := `SELECT COUNT(id) FROM public."favourite" WHERE product_id=$1`
@@ -118,7 +124,7 @@ func (p *ProductStorage) selectCountFavouritesByProductID(ctx context.Context,
 			return 0, nil
 		}
 
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -130,6 +136,8 @@ func (p *ProductStorage) selectIsUserFavouriteProduct(ctx context.Context,
 	tx pgx.Tx, productID uint64,
 	userID uint64,
 ) (bool, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	var rawRow string
 
 	SQLSelectIsUserFavouriteProduct := `SELECT id FROM public.favourite WHERE product_id=$1 AND owner_id=$2`
@@ -140,7 +148,7 @@ func (p *ProductStorage) selectIsUserFavouriteProduct(ctx context.Context,
 			return false, nil
 		}
 
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -257,20 +265,22 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Context, tx pgx.Tx,
 	limit uint64, whereClause any, orderByClause []string,
 ) ([]*models.ProductInFeed, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Select("id, title," +
 		"price, city_id, delivery, safe_deal, is_active, available_count").From(`public."product"`).
 		Where(whereClause).OrderBy(orderByClause...).Limit(limit)
 
 	SQLQuery, args, err := query.ToSql()
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	rowsProducts, err := tx.Query(ctx, SQLQuery, args...)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -298,7 +308,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -309,6 +319,8 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 func (p *ProductStorage) GetOldProducts(ctx context.Context,
 	lastProductID uint64, count uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	var slProduct []*models.ProductInFeed
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
@@ -336,7 +348,7 @@ func (p *ProductStorage) GetOldProducts(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -347,6 +359,8 @@ func (p *ProductStorage) GetOldProducts(ctx context.Context,
 func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 	lastProductID uint64, count uint64, userID uint64, isMy bool,
 ) ([]*models.ProductInFeed, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	var slProduct []*models.ProductInFeed
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
@@ -382,7 +396,7 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -391,11 +405,13 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 }
 
 func (p *ProductStorage) deleteAllImagesOfProduct(ctx context.Context, tx pgx.Tx, productID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLDeleteImage := `DELETE FROM public."image" WHERE product_id=$1;`
 
 	_, err := tx.Exec(ctx, SQLDeleteImage, productID)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -404,6 +420,8 @@ func (p *ProductStorage) deleteAllImagesOfProduct(ctx context.Context, tx pgx.Tx
 }
 
 func (p *ProductStorage) insertImages(ctx context.Context, tx pgx.Tx, productID uint64, slImg []models.Image) error {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLInsertImage := `INSERT INTO public."image" (url, product_id) VALUES(@imgURL, @productID)`
 	batch := &pgx.Batch{}
 
@@ -421,7 +439,7 @@ func (p *ProductStorage) insertImages(ctx context.Context, tx pgx.Tx, productID 
 	for _, image := range slImg {
 		_, err := results.Exec()
 		if err != nil {
-			p.logger.Errorf("with product_id=%d with URL=%s %+v", productID, image.URL, err)
+			logger.Errorf("with product_id=%d with URL=%s %+v", productID, image.URL, err)
 
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -431,6 +449,8 @@ func (p *ProductStorage) insertImages(ctx context.Context, tx pgx.Tx, productID 
 }
 
 func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduct *models.PreProduct) error {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLInsertProduct := `INSERT INTO public."product"(saler_id,
 		category_id, title, description, price,available_count,
 		city_id, delivery, safe_deal) VALUES(
@@ -440,7 +460,7 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 		preProduct.CityID, preProduct.Delivery, preProduct.SafeDeal)
 
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -449,6 +469,8 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 }
 
 func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	var productID uint64
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
@@ -457,7 +479,7 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 			return err
 		}
 
-		LastProductID, err := repository.GetLastValSeq(ctx, tx, p.logger, NameSeqProduct)
+		LastProductID, err := repository.GetLastValSeq(ctx, tx, logger, NameSeqProduct)
 		if err != nil {
 			return err
 		}
@@ -472,7 +494,7 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 		return err
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

@@ -60,15 +60,19 @@ func NewProductService(productStorage IProductStorage, basketService BasketServi
 }
 
 func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []models.Image) error {
+	logger := p.logger.LogReqID(ctx)
+
 	checkedURLs, err := p.fileServiceClient.Check(
 		ctx, &fileservice.ImgURLs{Url: convertImagesToSl(slImg)})
 	if err != nil {
+		logger.Errorln(err)
+
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	if checkedURLs == nil {
 		err := myerrors.NewErrorInternal("checkedURLs == nil")
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return err
 	}
@@ -77,7 +81,7 @@ func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []mo
 		err := myerrors.NewErrorInternal(
 			"Different lens of checkedURLs.Correct and slImg %d != %d",
 			len(checkedURLs.Correct), len(slImg))
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return err
 	}
