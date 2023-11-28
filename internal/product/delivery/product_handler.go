@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"io"
@@ -39,19 +40,21 @@ type IProductService interface {
 }
 
 type ProductHandler struct {
-	service IProductService
-	logger  *my_logger.MyLogger
+	sessionManagerClient auth.SessionMangerClient
+	service              IProductService
+	logger               *my_logger.MyLogger
 }
 
-func NewProductHandler(productService IProductService) (*ProductHandler, error) {
+func NewProductHandler(productService IProductService, sessionManagerClient auth.SessionMangerClient) (*ProductHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return &ProductHandler{
-		service: productService,
-		logger:  logger,
+		service:              productService,
+		logger:               logger,
+		sessionManagerClient: sessionManagerClient,
 	}, nil
 }
 
@@ -82,7 +85,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -123,7 +126,7 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
@@ -190,7 +193,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
@@ -250,7 +253,7 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 		return
 	}
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -357,7 +360,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -404,7 +407,7 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -454,7 +457,7 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -504,7 +507,7 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -607,7 +610,7 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 
 	searchInput := utils.ParseStringFromRequest(r, "searched")
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0

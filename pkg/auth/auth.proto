@@ -7,8 +7,8 @@ package auth;
 
 message Nothing{}
 
-message SessionStatus {
-  bool correct = 1;
+message UserID {
+  uint64 user_id = 1;
 }
 
 message Session {
@@ -23,7 +23,7 @@ message User {
 // grpc-сервис проверки авторизации
 service SessionManger {
   rpc Login (User) returns (Session) {}
-  rpc Check (Session) returns (SessionStatus) {}
+  rpc Check (Session) returns (UserID) {}
   rpc Create (User) returns (Session) {}
   rpc Delete (Session) returns (Session) {}
 }

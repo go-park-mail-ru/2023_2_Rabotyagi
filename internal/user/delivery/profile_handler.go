@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"io"
 	"net/http"
 
@@ -23,19 +24,21 @@ type IUserService interface {
 }
 
 type UserHandler struct {
-	service IUserService
-	logger  *my_logger.MyLogger
+	sessionManagerClient auth.SessionMangerClient
+	service              IUserService
+	logger               *my_logger.MyLogger
 }
 
-func NewUserHandler(userService IUserService) (*UserHandler, error) {
+func NewUserHandler(userService IUserService, sessionManagerClient auth.SessionMangerClient) (*UserHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
 	}
 
 	return &UserHandler{
-		service: userService,
-		logger:  logger,
+		service:              userService,
+		logger:               logger,
+		sessionManagerClient: sessionManagerClient,
 	}, nil
 }
 
@@ -109,7 +112,7 @@ func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.
 
 	var err error
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, u.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 

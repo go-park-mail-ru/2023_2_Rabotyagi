@@ -41,7 +41,7 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -91,7 +91,7 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
@@ -140,7 +140,7 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	userID, err := delivery.GetUserIDFromCookie(r)
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
 
