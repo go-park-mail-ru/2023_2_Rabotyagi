@@ -44,6 +44,41 @@ func TestGetFullCategories(t *testing.T) {
 					{ID: 1, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
 					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}},
 		},
+		{
+			name: "test empty work",
+			behavior: func(m *mocks.MockICategoryService) {
+				m.EXPECT().GetFullCategories(gomock.Any()).Return([]*models.Category{}, nil)
+			},
+			expectedResponse: CategoryListResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body:   []*models.Category{},
+			},
+		},
+		{
+			name: "test repeated names a lot",
+			behavior: func(m *mocks.MockICategoryService) {
+				m.EXPECT().GetFullCategories(gomock.Any()).Return(
+					[]*models.Category{
+						{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+						{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+						{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+						{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+						{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+						{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					}, nil)
+			},
+			expectedResponse: CategoryListResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body: []*models.Category{
+					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+				},
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -119,6 +154,35 @@ func TestSearchCategoryHandler(t *testing.T) {
 			expectedResponse: CategoryListResponse{Status: statuses.StatusResponseSuccessful,
 				Body: []*models.Category{{ID: 3, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 2}},
 					{ID: 7, Name: "Cars", ParentID: sql.NullInt64{Valid: true, Int64: 4}}}},
+		},
+		{
+			name:        "test empty query",
+			method:      http.MethodGet,
+			searchInput: "",
+			behavior: func(m *mocks.MockICategoryService) {
+				m.EXPECT().SearchCategory(gomock.Any(), "").Return([]*models.Category{}, nil)
+			},
+			expectedResponse: CategoryListResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body:   []*models.Category{},
+			},
+		},
+		{
+			name:        "test special symbols query",
+			searchInput: "Кошки &&& Собаки",
+			behavior: func(m *mocks.MockICategoryService) {
+				m.EXPECT().SearchCategory(gomock.Any(), "Кошки &&& Собаки").Return([]*models.Category{
+					{ID: 1, Name: "Кошки", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					{ID: 2, Name: "Собаки", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+				}, nil)
+			},
+			expectedResponse: CategoryListResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body: []*models.Category{
+					{ID: 1, Name: "Кошки", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					{ID: 2, Name: "Собаки", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+				},
+			},
 		},
 	}
 
