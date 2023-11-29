@@ -38,7 +38,7 @@ func main() {
 	}
 
 	server := grpc.NewServer(
-		grpc.UnaryInterceptor(interceptors.ErrConvertInterceptor))
+		grpc.ChainUnaryInterceptor(interceptors.AccessInterceptor, interceptors.ErrConvertInterceptor))
 
 	baseCtx := context.Background()
 

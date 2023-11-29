@@ -89,7 +89,8 @@ func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error {
 		return err //nolint:wrapcheck
 	}
 
-	server := grpc.NewServer(grpc.UnaryInterceptor(interceptors.ErrConvertInterceptor))
+	server := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(interceptors.AccessInterceptor, interceptors.ErrConvertInterceptor))
 	fileServiceGrpc := usecases.NewFileServiceGrpc(urlPrefixPathFS, fileStorage)
 	fileHandlerGrpc := delivery.NewFileHandlerGrpc(fileServiceGrpc)
 
