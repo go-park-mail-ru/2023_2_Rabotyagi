@@ -1136,3 +1136,80 @@ func TestSearchProduct(t *testing.T) {
 		})
 	}
 }
+
+// nolint:funlen
+func TestGetSearchProductFeed(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		queryParams            map[string]string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:        "test basic work",
+			queryParams: map[string]string{"count": "2", "offset": "0", "searched": "ноутбук"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetSearchProductFeed(gomock.Any(), "ноутбук",
+					uint64(0), uint64(2), uint64(testUserID)).Return(
+					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
+			},
+			expectedResponse: delivery.ProductListResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body:   []*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_search_feed", nil)
+			utils.AddQueryParamsToRequest(req, testCase.queryParams)
+			req.AddCookie(&testCookie)
+			productHandler.GetSearchProductFeedHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
