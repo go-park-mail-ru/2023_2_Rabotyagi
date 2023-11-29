@@ -29,85 +29,88 @@ func TestAddOrder(t *testing.T) {
 		request                *http.Request
 		expectedResponse       *delivery.OrderResponse
 	}
+
 	testCases := [...]TestCase{
-		//{
-		//	name: "test basic work",
-		//	request: httptest.NewRequest(http.MethodPost, "/api/v1/order/add", strings.NewReader(
-		//		`{
-		//			"owner_id": 67890,
-		//			"saler_id": 54321,
-		//			"product_id": 98765,
-		//			"city_id": 24680,
-		//			"title": "Example Product",
-		//			"price": 999,
-		//			"count": 3,
-		//			"available_count": 5,
-		//			"delivery": true,
-		//			"safe_deal": false,
-		//			"in_favourites": true,
-		//			"images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
-		//						{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)),
-		//	behaviorProductService: func(m *mocks.MockIProductService) {
-		//		m.EXPECT().AddOrder(gomock.Any(), io.NopCloser(strings.NewReader(
-		//			`{"owner_id": 67890,
-		//			"saler_id": 54321,
-		//			"product_id": 98765,
-		//			"city_id": 24680,
-		//			"title": "Example Product",
-		//			"price": 999,
-		//			"count": 3,
-		//			"available_count": 5,
-		//			"delivery": true,
-		//			"safe_deal": false,
-		//			"in_favourites": true,
-		//			"images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
-		//						{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)), uint64(testUserID)).Return(&models.OrderInBasket{
-		//			OwnerID:        67890,
-		//			SalerID:        54321,
-		//			ProductID:      98765,
-		//			CityID:         24680,
-		//			Title:          "Example Product",
-		//			Price:          999,
-		//			Count:          3,
-		//			AvailableCount: 5,
-		//			Delivery:       true,
-		//			SafeDeal:       false,
-		//			InFavourites:   true,
-		//			Images: []models.Image{
-		//				{
-		//					URL: "img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695",
-		//				},
-		//				{
-		//					URL: "8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1",
-		//				},
-		//			},
-		//		}, nil)
-		//	},
-		//	expectedResponse: &delivery.OrderResponse{
-		//		Status: statuses.StatusResponseSuccessful,
-		//		Body: &models.OrderInBasket{
-		//			OwnerID:        67890,
-		//			SalerID:        54321,
-		//			ProductID:      98765,
-		//			CityID:         24680,
-		//			Title:          "Example Product",
-		//			Price:          999,
-		//			Count:          3,
-		//			AvailableCount: 5,
-		//			Delivery:       true,
-		//			SafeDeal:       false,
-		//			InFavourites:   true,
-		//			Images: []models.Image{
-		//				{
-		//					URL: "img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695",
-		//				},
-		//				{
-		//					URL: "8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1",
-		//				},
-		//			},
-		//		},
-		//	},
-		//},
+		{
+			name: "test basic work",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/order/add", strings.NewReader(
+				`{
+					"owner_id": 67890,
+					"saler_id": 54321,
+					"product_id": 98765,
+					"city_id": 24680,
+					"title": "Example Product",
+					"price": 999,
+					"count": 3,
+					"available_count": 5,
+					"delivery": true,
+					"safe_deal": false,
+					"in_favourites": true,
+					"images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
+								{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().AddOrder(gomock.Any(), io.NopCloser(strings.NewReader(
+					`{
+					"owner_id": 67890,
+					"saler_id": 54321,
+					"product_id": 98765,
+					"city_id": 24680,
+					"title": "Example Product",
+					"price": 999,
+					"count": 3,
+					"available_count": 5,
+					"delivery": true,
+					"safe_deal": false,
+					"in_favourites": true,
+					"images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
+								{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)),
+					uint64(testUserID)).Return(&models.OrderInBasket{
+					OwnerID:        67890,
+					SalerID:        54321,
+					ProductID:      98765,
+					CityID:         24680,
+					Title:          "Example Product",
+					Price:          999,
+					Count:          3,
+					AvailableCount: 5,
+					Delivery:       true,
+					SafeDeal:       false,
+					InFavourites:   true,
+					Images: []models.Image{
+						{
+							URL: "img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695",
+						},
+						{
+							URL: "8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1",
+						},
+					},
+				}, nil)
+			},
+			expectedResponse: &delivery.OrderResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body: &models.OrderInBasket{
+					OwnerID:        67890,
+					SalerID:        54321,
+					ProductID:      98765,
+					CityID:         24680,
+					Title:          "Example Product",
+					Price:          999,
+					Count:          3,
+					AvailableCount: 5,
+					Delivery:       true,
+					SafeDeal:       false,
+					InFavourites:   true,
+					Images: []models.Image{
+						{
+							URL: "img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695",
+						},
+						{
+							URL: "8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1",
+						},
+					},
+				},
+			},
+		},
 		{
 			name:    "test partial",
 			request: httptest.NewRequest(http.MethodPost, "/api/v1/order/add", strings.NewReader(`{"product_id":3, "count":3}`)),
@@ -277,17 +280,17 @@ func TestUpdateOrderCountBasket(t *testing.T) {
 		request                  *http.Request
 		expectedResponse         any
 	}
+
 	testCases := [...]TestCase{
 		{
-			name:    "test basic work",
-			request: httptest.NewRequest(http.MethodPatch, "/api/v1/order/update_count", strings.NewReader(`{"id":3, "count":3}`)),
+			name: "test basic work",
+			request: httptest.NewRequest(http.MethodPatch, "/api/v1/order/update_count",
+				strings.NewReader(`{"id":3, "count":3}`)),
 			behaviorFavouriteService: func(m *mocks.MockIProductService) {
 				m.EXPECT().UpdateOrderCount(gomock.Any(), io.NopCloser(strings.NewReader(
 					`{"id":3, "count":3}`)), uint64(testUserID)).Return(nil)
 			},
-			expectedResponse: responses.ResponseSuccessful{
-				Status: statuses.StatusResponseSuccessful,
-			},
+			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulUpdateCountOrder),
 		},
 	}
 
@@ -329,7 +332,7 @@ func TestUpdateOrderCountBasket(t *testing.T) {
 				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
 			}
 
-			err = utils.EqualTest(&receivedResponse, expectedResponseRaw)
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
 			if err != nil {
 				t.Fatal(err)
 			}
