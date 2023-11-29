@@ -5,7 +5,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
@@ -13,7 +12,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
-var _ category.ICategoryService = (*usecases.CategoryService)(nil)
+var _ ICategoryService = (*usecases.CategoryService)(nil)
 
 type ICategoryService interface {
 	GetFullCategories(ctx context.Context) ([]*models.Category, error)
@@ -21,11 +20,11 @@ type ICategoryService interface {
 }
 
 type CategoryHandler struct {
-	service category.ICategoryService
+	service ICategoryService
 	logger  *my_logger.MyLogger
 }
 
-func NewCategoryHandler(service category.ICategoryService) (*CategoryHandler, error) {
+func NewCategoryHandler(service ICategoryService) (*CategoryHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
