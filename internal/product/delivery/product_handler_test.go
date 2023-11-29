@@ -2,6 +2,7 @@ package delivery_test
 
 import (
 	"encoding/json"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -50,7 +51,7 @@ func TestAddProduct(t *testing.T) {
 		name                   string
 		behaviorProductService func(m *mocks.MockIProductService)
 		request                *http.Request
-		expectedResponse       responses.ResponseID
+		expectedResponse       any
 	}
 
 	testCases := [...]TestCase{
@@ -199,7 +200,7 @@ func TestGetProduct(t *testing.T) {
 		name                   string
 		idProduct              string
 		behaviorProductService func(m *mocks.MockIProductService)
-		expectedResponse       *delivery.ProductResponse
+		expectedResponse       any
 	}
 
 	testCases := [...]TestCase{
@@ -301,7 +302,7 @@ func TestGetProductList(t *testing.T) {
 		name                   string
 		queryParams            map[string]string
 		behaviorProductService func(m *mocks.MockIProductService)
-		expectedResponse       *delivery.ProductListResponse
+		expectedResponse       any
 	}
 
 	testCases := [...]TestCase{
@@ -420,7 +421,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 		name                   string
 		queryParams            map[string]string
 		behaviorProductService func(m *mocks.MockIProductService)
-		expectedResponse       *delivery.ProductListResponse
+		expectedResponse       any
 	}
 
 	testCases := [...]TestCase{
@@ -539,7 +540,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 		name                   string
 		queryParams            map[string]string
 		behaviorProductService func(m *mocks.MockIProductService)
-		expectedResponse       *delivery.ProductListResponse
+		expectedResponse       any
 	}
 
 	testCases := [...]TestCase{
@@ -655,7 +656,7 @@ func TestUpdateProduct(t *testing.T) {
 		name                   string
 		behaviorProductService func(m *mocks.MockIProductService)
 		request                *http.Request
-		expectedResponse       responses.ResponseID
+		expectedResponse       any
 	}
 
 	testCases := [...]TestCase{
@@ -753,6 +754,89 @@ func TestUpdateProduct(t *testing.T) {
 			}
 
 			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestCloseProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		queryID                string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:    "test basic work",
+			queryID: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), uint64(testUserID))
+			},
+			expectedResponse: responses.ResponseSuccessful{
+				Status: statuses.StatusResponseSuccessful,
+				Body:   responses.ResponseBody{Message: delivery.ResponseSuccessfulCloseProduct},
+			},
+		},
+		{
+			name:    "test error in close",
+			queryID: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+					myerrors.NewErrorInternal("Test Error Internal"))
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/close", nil)
+			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
+			req.AddCookie(&testCookie)
+			productHandler.CloseProductHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
 			if err != nil {
 				t.Fatal(err)
 			}
