@@ -2,10 +2,10 @@ package delivery
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"

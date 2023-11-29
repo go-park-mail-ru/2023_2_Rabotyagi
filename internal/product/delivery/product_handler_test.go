@@ -1,234 +1,290 @@
 package delivery_test
 
-//
-//import (
-//	"bytes"
-//	"encoding/json"
-//	"fmt"
-//	"io"
-//	"net/http"
-//	"net/http/httptest"
-//	"reflect"
-//	"testing"
-//
-//	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-//	postdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/delivery"
-//	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/product/repository"
-//	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-//)
-//
-//type TestCase struct {
-//	Post     *models.PreProduct
-//	Response []byte
-//}
-//
-//func TestAddPostHandler(t *testing.T) {
-//	prePost := &models.PreProduct{
-//		SalerID:        1,
-//		Title:           "Test Product",
-//		Description:     "This is a test product",
-//		Price:           100,
-//		SafeDeal: true,
-//		Delivery:        true,
-//		City:            "Moscow",
-//	}
-//
-//	expectedResponse, err := json.Marshal(delivery.NewResponse(
-//		delivery.StatusResponseSuccessful, postdelivery.ResponseSuccessfulAddProduct))
-//	if err != nil {
-//		t.Fatalf("Failed to marshall expepectedResponse. Error: %v", err)
-//	}
-//
-//	testCase := TestCase{
-//		Post:     prePost,
-//		Response: expectedResponse,
-//	}
-//
-//	reqBody, err := json.Marshal(&prePost)
-//	if err != nil {
-//		t.Fatalf("Failed to marshal request body: %v", err)
-//	}
-//
-//	req := httptest.NewRequest(http.MethodPost, "/api/v1/product/add", bytes.NewBuffer(reqBody))
-//	if req == nil {
-//		t.Fatalf("Failed to create request: %v", err)
-//	}
-//
-//	w := httptest.NewRecorder()
-//
-//	postStorageMap := repository.NewPostStorageMap()
-//	postHandler := &postdelivery.ProductHandler{
-//		storage: postStorageMap,
-//	}
-//
-//	postHandler.AddProductHandler(w, req)
-//
-//	resp := w.Result()
-//
-//	defer resp.Body.Close()
-//
-//	body, err := io.ReadAll(resp.Body)
-//	if err != nil {
-//		t.Fatalf("Failed to io.ReadAll(). Error: %v", err)
-//	}
-//
-//	bodyStr := string(body)
-//	if bodyStr != string(testCase.Response) {
-//		t.Errorf("wrong Response: got %+v, expected %+v",
-//			bodyStr, testCase.Response)
-//	}
-//}
-//
-//func TestGetPostHandler(t *testing.T) {
-//	prePost := &models.PreProduct{
-//		SalerID:        1,
-//		Title:           "Test Product",
-//		Description:     "This is a test product",
-//		Price:           100,
-//		SafeDeal: true,
-//		Delivery:        true,
-//		City:            "Moscow",
-//	}
-//
-//	post := &models.Product{
-//		ID:              1,
-//		SalerID:        1,
-//		Title:           "Test Product",
-//		Description:     "This is a test product",
-//		Price:           100,
-//		SafeDeal: true,
-//		Delivery:        true,
-//		City:            "Moscow",
-//	}
-//
-//	ResponseSuccessfulGetPost := postdelivery.ProductResponse{
-//		Status: delivery.StatusResponseSuccessful,
-//		Body:   post,
-//	}
-//
-//	expectedResponse, err := json.Marshal(ResponseSuccessfulGetPost)
-//	if err != nil {
-//		t.Fatalf("Failed to marshall expepectedResponse. Error: %v", err)
-//	}
-//
-//	testCase := TestCase{
-//		Post:     prePost,
-//		Response: expectedResponse,
-//	}
-//
-//	req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get/1", nil)
-//
-//	w := httptest.NewRecorder()
-//
-//	postStorageMap := repository.NewPostStorageMap()
-//	postHandler := &postdelivery.ProductHandler{
-//		storage: postStorageMap,
-//	}
-//
-//	postHandler.storage.AddPost(prePost)
-//
-//	postHandler.GetProductHandler(w, req)
-//
-//	resp := w.Result()
-//
-//	defer resp.Body.Close()
-//
-//	body, err := io.ReadAll(resp.Body)
-//	if err != nil {
-//		t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-//	}
-//
-//	bodyStr := string(body)
-//	if bodyStr != string(testCase.Response) {
-//		t.Errorf("wrong Response: got %+v, expected %+v",
-//			bodyStr, testCase.Response)
-//	}
-//}
-//
-////nolint:funlen
-//func TestGetPostsListHandlerSuccessful(t *testing.T) {
-//	t.Parallel()
-//
-//	type TestCase struct {
-//		name             string
-//		inputParamCount  int
-//		handler          *postdelivery.ProductHandler
-//		postsForStorage  []models.PreProduct
-//		expectedResponse postdelivery.ProductListResponse
-//	}
-//
-//	testCases := [...]TestCase{
-//		{
-//			name:            "test basic work",
-//			inputParamCount: 1,
-//			handler:         &postdelivery.ProductHandler{storage: repository.NewPostStorageMap()},
-//			postsForStorage: []models.PreProduct{{
-//				SalerID: 1,
-//				Title:    "Test Product",
-//				Images: models.Images{
-//					URL: "test_url",
-//					Alt: "test_alt",
-//				},
-//				Description:     "This is a test product",
-//				Price:           100,
-//				SafeDeal: true,
-//				Delivery:        true,
-//				City:            "Moscow",
-//			}},
-//			expectedResponse: postdelivery.ProductListResponse{
-//				Status: delivery.StatusResponseSuccessful,
-//				Body: []*models.ProductInFeed{{
-//					ID:    1,
-//					Title: "Test Product",
-//					Images: models.Images{
-//						URL: "test_url",
-//						Alt: "test_alt",
-//					},
-//					Price:           100,
-//					SafeDeal: true,
-//					Delivery:        true,
-//					City:            "Moscow",
-//				}},
-//			},
-//		},
-//	}
-//
-//	for _, testCase := range testCases {
-//		testCase := testCase
-//
-//		t.Run(testCase.name, func(t *testing.T) {
-//			t.Parallel()
-//
-//			for _, v := range testCase.postsForStorage {
-//				testCase.handler.storage.AddPost(&v)
-//			}
-//
-//			req := httptest.NewRequest(http.MethodGet,
-//				fmt.Sprintf("/api/v1/product/get_list?count=%d", testCase.inputParamCount), nil)
-//
-//			w := httptest.NewRecorder()
-//
-//			testCase.handler.GetProductListHandler(w, req)
-//
-//			resp := w.Result()
-//			defer resp.Body.Close()
-//
-//			receivedResponse, err := io.ReadAll(resp.Body)
-//			if err != nil {
-//				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-//			}
-//
-//			var resultResponse postdelivery.ProductListResponse
-//
-//			err = json.Unmarshal(receivedResponse, &resultResponse)
-//			if err != nil {
-//				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-//			}
-//
-//			if !reflect.DeepEqual(testCase.expectedResponse, resultResponse) {
-//				t.Errorf("wrong Response: got %+v, expected %+v",
-//					resultResponse, testCase.expectedResponse)
-//			}
-//		})
-//	}
-//}
+import (
+	"encoding/json"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
+	mocksauth "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth/mocks"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+
+	"go.uber.org/mock/gomock"
+)
+
+// testAccessToken for read only, because async usage
+const testAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+	"eyJlbWFpbCI6Iml2bi0xNS0wN0BtYWlsLnJ1IiwiZXhwaXJlIjoxNzAxMjg1MzE4LCJ1c2VySUQiOjExfQ." +
+	"jIPlwcF5xGPpgQ5WYp5kFv9Av-yguX2aOYsAgbodDM4"
+
+// testCookie for read only, because async usage
+var testCookie = http.Cookie{Name: responses.CookieAuthName,
+	Value: testAccessToken, Expires: time.Now().Add(time.Hour)}
+
+const testUserID = 1
+
+var behaviorSessionManagerClientCheck = func(m *mocksauth.MockSessionMangerClient) { //nolint:gochecknoglobals
+	m.EXPECT().Check(gomock.Any(), &auth.Session{AccessToken: testAccessToken}).Return(
+		&auth.UserID{UserId: testUserID}, nil)
+}
+
+//nolint:funlen
+func TestAddProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		behaviorProductService func(m *mocks.MockIProductService)
+		request                *http.Request
+		expectedResponse       responses.ResponseID
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/product/add", strings.NewReader(
+				`{"saler_id":1,
+"category_id" :2,
+"title":"adsf",
+"description":"  description",
+"price":123,
+"available_count":1,
+"city_id":1,
+"delivery":false, "safe_deal":false}`)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().AddProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					`{"saler_id":1,
+"category_id" :2,
+"title":"adsf",
+"description":"  description",
+"price":123,
+"available_count":1,
+"city_id":1,
+"delivery":false, "safe_deal":false}`)), uint64(testUserID)).Return(uint64(1), nil)
+			},
+			expectedResponse: responses.ResponseID{
+				Status: statuses.StatusRedirectAfterSuccessful,
+				Body:   responses.ResponseBodyID{ID: 1},
+			},
+		},
+		{
+			name: "test another product",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/product/add", strings.NewReader(
+				`{"saler_id":1,
+"category_id" :1,
+"title":"TItle",
+"description":"  de scription",
+"price":1232,
+"available_count":12,
+"city_id":1,
+"delivery":false, "safe_deal":false}`)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().AddProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					`{"saler_id":1,
+"category_id" :1,
+"title":"TItle",
+"description":"  de scription",
+"price":1232,
+"available_count":12,
+"city_id":1,
+"delivery":false, "safe_deal":false}`)), uint64(testUserID)).Return(uint64(1), nil)
+			},
+			expectedResponse: responses.ResponseID{
+				Status: statuses.StatusRedirectAfterSuccessful,
+				Body:   responses.ResponseBodyID{ID: 1},
+			},
+		},
+		{
+			name: "test product with images",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/product/add", strings.NewReader(
+				`{"saler_id":1,
+"category_id" :1,
+"title":"TItle",
+"description":"  de scription",
+"price":1232,
+"available_count":12,
+"city_id":1,
+"delivery":false, "safe_deal":false, 
+"images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
+{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().AddProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					`{"saler_id":1,
+"category_id" :1,
+"title":"TItle",
+"description":"  de scription",
+"price":1232,
+"available_count":12,
+"city_id":1,
+"delivery":false, "safe_deal":false, 
+"images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
+{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)), uint64(testUserID)).Return(uint64(1), nil)
+			},
+			expectedResponse: responses.ResponseID{
+				Status: statuses.StatusRedirectAfterSuccessful,
+				Body:   responses.ResponseBodyID{ID: 1},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			testCase.request.AddCookie(&testCookie)
+			productHandler.AddProductHandler(w, testCase.request)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			var resultResponse responses.ResponseID
+
+			err = json.Unmarshal(receivedResponse, &resultResponse)
+			if err != nil {
+				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
+			}
+
+			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestGetProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		idProduct              string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       *delivery.ProductResponse
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:      "test basic work",
+			idProduct: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+					&models.Product{ID: 1, Title: "Title"}, nil) //nolint:exhaustruct
+			},
+			expectedResponse: delivery.NewProductResponse(&models.Product{ID: 1, Title: "Title"}), //nolint:exhaustruct
+		},
+		{
+			name:      "test empty product",
+			idProduct: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+					&models.Product{}, nil) //nolint:exhaustruct
+			},
+			expectedResponse: delivery.NewProductResponse(&models.Product{}), //nolint:exhaustruct
+		},
+		{
+			name:      "test full required fields of product",
+			idProduct: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+					&models.Product{ //nolint:exhaustruct
+						ID: 1, SalerID: 1, CategoryID: 1, CityID: 1,
+						Title: "Title", Description: "desc", Price: 123,
+						CreatedAt: time.Unix(0, 0), Views: 12, AvailableCount: 1, Favourites: 12,
+					}, nil)
+			},
+			expectedResponse: delivery.NewProductResponse(&models.Product{ //nolint:exhaustruct
+				ID: 1, SalerID: 1, CategoryID: 1, CityID: 1,
+				Title: "Title", Description: "desc", Price: 123,
+				CreatedAt: time.Unix(0, 0), Views: 12, AvailableCount: 1, Favourites: 12,
+			}), //nolint:exhaustruct
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get", nil)
+			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.idProduct})
+
+			req.AddCookie(&testCookie)
+			productHandler.GetProductHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			var resultResponse delivery.ProductResponse
+
+			err = json.Unmarshal(receivedResponse, &resultResponse)
+			if err != nil {
+				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
+			}
+
+			err = utils.EqualTest(&resultResponse, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}

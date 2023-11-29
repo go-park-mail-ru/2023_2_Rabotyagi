@@ -9,6 +9,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgx/v5 v5.5.0
 	github.com/microcosm-cc/bluemonday v1.0.26
+	go.uber.org/mock v0.3.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.15.0
 	google.golang.org/grpc v1.59.0

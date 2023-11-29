@@ -66,7 +66,10 @@ mkdir-bin:
 
 .PHONY: test
 test: mkdir-bin
-	 go test -coverprofile=bin/cover.out ./internal/... && go tool cover -html=bin/cover.out -o=bin/cover.html && go tool cover --func bin/cover.out
+	 go test -coverprofile=bin/cover.out ./... \
+ 	 && cat bin/cover.out | fgrep -v "mocks" > bin/pure_cover.out \
+  	 && go tool cover -html=bin/pure_cover.out -o=bin/cover.html \
+  	 && go tool cover --func bin/pure_cover.out
 
 .PHONY: build
 build: mkdir-bin
