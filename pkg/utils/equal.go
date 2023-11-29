@@ -15,8 +15,13 @@ func EqualTest(received any, expected any) error {
 			return err //nolint:wrapcheck
 		}
 
+		receivedRaw, err := json.Marshal(expected)
+		if err != nil {
+			return err //nolint:wrapcheck
+		}
+
 		return fmt.Errorf("%w response: got %s, expected %s", errTemplate,
-			string(expectedRaw), string(expectedRaw))
+			string(receivedRaw), string(expectedRaw))
 	}
 
 	return nil
