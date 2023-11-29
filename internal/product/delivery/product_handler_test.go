@@ -645,3 +645,117 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		behaviorProductService func(m *mocks.MockIProductService)
+		request                *http.Request
+		expectedResponse       responses.ResponseID
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work patch",
+			request: httptest.NewRequest(http.MethodPatch, "/api/v1/product/update?id=1", strings.NewReader(
+				`{"available_count": 1,
+  "category_id": 1,
+  "delivery": true,
+  "description": "description not empty"}`)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().UpdateProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					`{"available_count": 1,
+  "category_id": 1,
+  "delivery": true,
+  "description": "description not empty"}`)), true, uint64(1), uint64(testUserID)).Return(nil)
+			},
+			expectedResponse: responses.ResponseID{
+				Status: statuses.StatusRedirectAfterSuccessful,
+				Body:   responses.ResponseBodyID{ID: 1},
+			},
+		},
+		{
+			name: "test empty patch",
+			request: httptest.NewRequest(http.MethodPatch, "/api/v1/product/update?id=1", strings.NewReader(
+				``)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().UpdateProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					``)), true, uint64(1), uint64(testUserID)).Return(nil)
+			},
+			expectedResponse: responses.ResponseID{
+				Status: statuses.StatusRedirectAfterSuccessful,
+				Body:   responses.ResponseBodyID{ID: 1},
+			},
+		},
+		{
+			name: "test basic work put",
+			request: httptest.NewRequest(http.MethodPut, "/api/v1/product/update?id=1", strings.NewReader(
+				`{"available_count": 1,
+  "category_id": 1,  "city_id": 1, "saler_id": 1,
+  "title": "title", "price" : 123,
+  "description": "description not empty"}`)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().UpdateProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					`{"available_count": 1,
+  "category_id": 1,  "city_id": 1, "saler_id": 1,
+  "title": "title", "price" : 123,
+  "description": "description not empty"}`)), false, uint64(1), uint64(testUserID)).Return(nil)
+			},
+			expectedResponse: responses.ResponseID{
+				Status: statuses.StatusRedirectAfterSuccessful,
+				Body:   responses.ResponseBodyID{ID: 1},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			testCase.request.AddCookie(&testCookie)
+			productHandler.UpdateProductHandler(w, testCase.request)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			var resultResponse responses.ResponseID
+
+			err = json.Unmarshal(receivedResponse, &resultResponse)
+			if err != nil {
+				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
+			}
+
+			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
