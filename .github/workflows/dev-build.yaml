@@ -28,7 +28,7 @@ jobs:
               id: meta
               uses: docker/metadata-action@v5
               with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  images: ${{ .env.REGISTRY }}/${{ .env.IMAGE_NAME }}
                   tags: |
                     type=raw,value=backend-main-latest
                     
@@ -58,7 +58,7 @@ jobs:
               id: meta
               uses: docker/metadata-action@v5
               with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  images: ${{ .env.REGISTRY }}/${{ .env.IMAGE_NAME }}
                   tags: |
                     type=raw,value=backend-auth-latest
 
@@ -88,7 +88,7 @@ jobs:
               id: meta
               uses: docker/metadata-action@v5
               with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  images: ${{ .env.REGISTRY }}/${{ .env.IMAGE_NAME }}
                   tags: |
                     type=raw,value=backend-fs-latest
 
