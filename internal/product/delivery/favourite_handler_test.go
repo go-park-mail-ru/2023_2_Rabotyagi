@@ -113,6 +113,15 @@ func TestGetFavourites(t *testing.T) {
 			},
 			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{{ID: 1, Title: "sofa"}, {ID: 2, Title: "laptop"}}),
 		},
+		{
+			name:    "test empty",
+			request: httptest.NewRequest(http.MethodGet, "/api/v1/profile/favourites", nil),
+			behaviorFavouriteService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetUserFavourites(gomock.Any(), uint64(testUserID)).Return(
+					[]*models.ProductInFeed{}, nil)
+			},
+			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{}),
+		},
 	}
 
 	for _, testCase := range testCases {
