@@ -25,7 +25,7 @@ func TestGetFullCities(t *testing.T) {
 	type TestCase struct {
 		name             string
 		behavior         func(m *mocks.MockICityService)
-		expectedResponse delivery.CityListResponse
+		expectedResponse any
 	}
 
 	testCases := [...]TestCase{
@@ -137,7 +137,7 @@ func TestSearchCityHandler(t *testing.T) {
 		name             string
 		query            string
 		behavior         func(m *mocks.MockICityService)
-		expectedResponse delivery.CityListResponse
+		expectedResponse any
 	}
 
 	testCases := [...]TestCase{

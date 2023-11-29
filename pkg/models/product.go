@@ -16,8 +16,8 @@ type Product struct {
 	SalerID        uint64    `json:"saler_id"        valid:"required"`
 	CategoryID     uint64    `json:"category_id"     valid:"required"`
 	CityID         uint64    `json:"city_id"         valid:"required"`
-	Title          string    `json:"title"           valid:"required, length(1|256)~Title length must be from 1 to 256"`
-	Description    string    `json:"description"     valid:"required, length(1|4000)~Description length must be from 1 to 4000"` //nolint
+	Title          string    `json:"title"           valid:"required, length(1|256)~Заголовок должен быть длинной от 1 до 256 символов"`
+	Description    string    `json:"description"     valid:"required, length(1|4000)~Описание должно быть длинной от 1 до 4000 симвволов"` //nolint
 	Price          uint64    `json:"price"           valid:"required"`
 	CreatedAt      time.Time `json:"created_at"      valid:"required"`
 	Views          uint32    `json:"views"           valid:"required"`
@@ -37,8 +37,8 @@ type PreProduct struct {
 	SalerID        uint64  `json:"saler_id"        valid:"required"`
 	CategoryID     uint64  `json:"category_id"     valid:"required"`
 	CityID         uint64  `json:"city_id"         valid:"required"`
-	Title          string  `json:"title"           valid:"required, length(1|256)~Title length must be from 1 to 256"`
-	Description    string  `json:"description"     valid:"required, length(1|4000)~Description length must be from 1 to 4000"` //nolint
+	Title          string  `json:"title"           valid:"required, length(1|256)~Заголовок должен быть длинной от 1 до 256 символов"`
+	Description    string  `json:"description"     valid:"required, length(1|4000)~Описание должно быть длинной от 1 до 4000 симвволов"` //nolint
 	Price          uint64  `json:"price"           valid:"required"`
 	AvailableCount uint32  `json:"available_count" valid:"required"`
 	Delivery       bool    `json:"delivery"        valid:"optional"`
@@ -54,7 +54,7 @@ func (p *PreProduct) Trim() {
 
 type ProductInFeed struct {
 	ID             uint64  `json:"id"              valid:"required"`
-	Title          string  `json:"title"           valid:"required, length(1|256)~Title length must be from 1 to 256"`
+	Title          string  `json:"title"           valid:"required, length(1|256)~Заголовок должен быть длинной от 1 до 256 символов"`
 	Price          uint64  `json:"price"           valid:"required"`
 	CityID         uint64  `json:"city_id"         valid:"required"`
 	AvailableCount uint32  `json:"available_count" valid:"required"`

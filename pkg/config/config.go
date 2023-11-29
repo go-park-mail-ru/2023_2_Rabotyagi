@@ -3,7 +3,7 @@ package config
 import "os"
 
 const (
-	// Main env
+	// Main .env
 
 	StandardDevelopmentMode    = "development"
 	StandardProductionMode     = "production"
@@ -22,7 +22,7 @@ const (
 	EnvErrorOutputLogPath = "ERROR_OUTPUT_LOG_PATH"
 	EnvURLDataBase        = "URL_DATA_BASE"
 
-	// File service env
+	// File service .env
 
 	StandardPathToRoot             = "."
 	StandardFileServiceDir         = "./static/img"
@@ -34,7 +34,7 @@ const (
 	EnvAddressFileServiceGrpc = "ADDRESS_FS_GRPC"
 	EnvFileServicePortHTTP    = "PORT_FS"
 
-	// Auth service env
+	// Auth service .env
 
 	StandardAddressAuthGrpc   = ":8012"
 	EnvAddressAuthServiceGrpc = "ADDRESS_AUTH_GRPC"

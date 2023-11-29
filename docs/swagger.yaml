@@ -753,7 +753,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400)
+          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -857,7 +857,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400)
+          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -963,7 +963,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1007,7 +1007,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1045,7 +1045,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1119,7 +1119,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductInSearchListResponse'
         "222":
-          description: Error
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1210,6 +1210,33 @@ paths:
       summary: update product
       tags:
       - product
+  /profile/favourites:
+    get:
+      consumes:
+      - application/json
+      description: get user favourites by user id from cookie\jwt token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get user favourites
+      tags:
+      - favourite
   /profile/get:
     get:
       description: get profile by id
@@ -1241,33 +1268,6 @@ paths:
       summary: get profile
       tags:
       - profile
-  /profile/profile/favourites:
-    get:
-      consumes:
-      - application/json
-      description: get user favourites by user id from cookie\jwt token
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
-        "222":
-          description: Error
-          schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
-        "405":
-          description: Method Not Allowed
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: get user favourites
-      tags:
-      - favourite
   /profile/update:
     patch:
       consumes:

@@ -2,13 +2,14 @@ package utils
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"net/http"
 	"strconv"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 )
 
-var MessageErrWrongNumberParam = "Получили некорректный числовой параметр. Он должен быть целым"
+var MessageErrWrongNumberParam = "Получили некорректный числовой параметр. Он должен быть целым" //nolint:gochecknoglobals
 
 func ParseUint64FromRequest(r *http.Request, paramName string) (uint64, error) {
 	logger, err := my_logger.Get()
