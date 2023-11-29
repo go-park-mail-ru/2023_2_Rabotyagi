@@ -2,6 +2,7 @@ package delivery_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"io"
 	"net/http"
@@ -793,6 +794,15 @@ func TestCloseProduct(t *testing.T) {
 					myerrors.NewErrorInternal("Test Error Internal"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name:    "test error uncorrected query param",
+			queryID: "wrong type",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT()
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusBadFormatRequest,
+				fmt.Sprintf("%s id=wrong type", utils.MessageErrWrongNumberParam)),
 		},
 	}
 
