@@ -30,7 +30,7 @@ jobs:
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
                   tags: |
-                    type=raw,value=backend-main-latest
+                    type=raw,value=main-latest-dev
                     
             - name: Build and push
               uses: docker/build-push-action@v5
@@ -60,13 +60,14 @@ jobs:
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
                   tags: |
-                    type=raw,value=backend-auth-latest
+                    type=raw,value=auth-latest-dev
 
             - name: Build and push
               uses: docker/build-push-action@v5
               id: build
               with:
-                  context: ./services/auth
+                  context: .
+                  file: ./services/auth/Dockerfile
                   push: true
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
@@ -90,13 +91,14 @@ jobs:
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
                   tags: |
-                    type=raw,value=backend-fs-latest
+                    type=raw,value=fs-latest-dev
 
             - name: Build and push
               uses: docker/build-push-action@v5
               id: build
               with:
-                  context: ./services/file_service
+                  context: .
+                  file: ./services/file_service/Dockerfile
                   push: true
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
