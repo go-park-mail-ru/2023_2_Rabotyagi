@@ -226,9 +226,9 @@ func TestSearchCategoryHandler(t *testing.T) {
 				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
 			}
 
-			if !reflect.DeepEqual(testCase.expectedResponse, resultResponse) {
-				t.Errorf("Wrong Response: got %+v, expected %+v",
-					resultResponse, testCase.expectedResponse)
+			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
 			}
 		})
 	}

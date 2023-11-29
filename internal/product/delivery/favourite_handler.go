@@ -31,7 +31,7 @@ type IFavouriteService interface {
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error"
-//	@Router      /profile/profile/favourites [get]
+//	@Router      /profile/favourites [get]
 func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -83,15 +83,6 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
-	productIDStr := r.URL.Query().Get("product_id")
-
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
-	if err != nil {
-		responses.HandleErr(w, logger, err)
-
-		return
-	}
-
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
 		responses.HandleErr(w, logger, err)
@@ -106,8 +97,8 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(productID))
-	logger.Infof("in AddToFavouritesHandler: add to fav with product id = %+v", productID)
+	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(userID))
+	logger.Infof("in AddToFavouritesHandler: add to fav with product id = %+v", userID)
 }
 
 // DeleteFromFavouritesHandler godoc
