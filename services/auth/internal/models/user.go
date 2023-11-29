@@ -1,9 +1,10 @@
 package models
 
 import (
+	"strings"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/microcosm-cc/bluemonday"
-	"strings"
 )
 
 const MinLenPassword = 6
@@ -27,9 +28,9 @@ func init() {
 }
 
 type User struct {
-	ID       uint64 `json:"id"    valid:"required"`
-	Email    string `json:"email" valid:"required,email~Not valid email"`
-	Password string `json:"password" valid:"required,password~Password must be at least 6 symbols"`
+	ID       uint64 `json:"id"       valid:"required"`
+	Email    string `json:"email"    valid:"required,email~Некорректный формат email"`
+	Password string `json:"password" valid:"required,password~Пароль должен быть минимум 6 символов длинной"`
 }
 
 func (u *User) Trim() {
