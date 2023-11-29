@@ -119,11 +119,6 @@ func TestGetFullCities(t *testing.T) {
 				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
 			}
 
-			if resultResponse.Status != testCase.expectedResponse.Status {
-				t.Errorf("Wrong Response: got status %+v, expected status%+v", resultResponse.Status,
-					testCase.expectedResponse.Status)
-			}
-
 			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
 			if err != nil {
 				t.Fatal(err)
