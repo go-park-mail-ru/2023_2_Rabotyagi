@@ -3,7 +3,6 @@ package delivery_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -17,6 +16,7 @@ import (
 	mocksauth "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -30,7 +30,7 @@ const testAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
 	"jIPlwcF5xGPpgQ5WYp5kFv9Av-yguX2aOYsAgbodDM4"
 
 // testCookie for read only, because async usage.
-var testCookie = http.Cookie{
+var testCookie = http.Cookie{ //nolint:exhaustruct
 	Name:  responses.CookieAuthName,
 	Value: testAccessToken, Expires: time.Now().Add(time.Hour),
 }
@@ -39,7 +39,7 @@ const testUserID = 1
 
 var behaviorSessionManagerClientCheck = func(m *mocksauth.MockSessionMangerClient) { //nolint:gochecknoglobals
 	m.EXPECT().Check(gomock.Any(), &auth.Session{AccessToken: testAccessToken}).Return(
-		&auth.UserID{UserId: testUserID}, nil)
+		&auth.UserID{UserId: testUserID}, nil).AnyTimes()
 }
 
 //nolint:funlen
@@ -1020,6 +1020,101 @@ func TestDeleteProduct(t *testing.T) {
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
 			req.AddCookie(&testCookie)
 			productHandler.DeleteProductHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+// nolint:funlen
+func TestSearchProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		querySearched          string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:          "test basic work",
+			querySearched: "ноутбук",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().SearchProduct(gomock.Any(), "ноутбук").Return(
+					[]string{"ноутбук Acer", "ноутбук HP", "ноутбук Mac"}, nil)
+			},
+			expectedResponse: delivery.ProductInSearchListResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body:   []string{"ноутбук Acer", "ноутбук HP", "ноутбук Mac"},
+			},
+		},
+		{
+			name:          "test empty param",
+			querySearched: "",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().SearchProduct(gomock.Any(), "").Return([]string{}, nil)
+			},
+			expectedResponse: delivery.ProductInSearchListResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body:   []string{},
+			},
+		},
+		{
+			name:          "test error in internal",
+			querySearched: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().SearchProduct(gomock.Any(), "1").Return(nil,
+					myerrors.NewErrorInternal("Test Error Internal"))
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/search", nil)
+			utils.AddQueryParamsToRequest(req, map[string]string{"searched": testCase.querySearched})
+			req.AddCookie(&testCookie)
+			productHandler.SearchProductHandler(w, req)
 
 			resp := w.Result()
 			defer resp.Body.Close()
