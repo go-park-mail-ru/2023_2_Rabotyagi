@@ -2,7 +2,6 @@ package delivery_test
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -14,6 +13,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	mocksauth "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth/mocks"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
@@ -22,14 +22,16 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-// testAccessToken for read only, because async usage
+// testAccessToken for read only, because async usage.
 const testAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
 	"eyJlbWFpbCI6Iml2bi0xNS0wN0BtYWlsLnJ1IiwiZXhwaXJlIjoxNzAxMjg1MzE4LCJ1c2VySUQiOjExfQ." +
 	"jIPlwcF5xGPpgQ5WYp5kFv9Av-yguX2aOYsAgbodDM4"
 
-// testCookie for read only, because async usage
-var testCookie = http.Cookie{Name: responses.CookieAuthName,
-	Value: testAccessToken, Expires: time.Now().Add(time.Hour)}
+// testCookie for read only, because async usage.
+var testCookie = http.Cookie{
+	Name:  responses.CookieAuthName,
+	Value: testAccessToken, Expires: time.Now().Add(time.Hour),
+}
 
 const testUserID = 1
 
@@ -234,7 +236,7 @@ func TestGetProduct(t *testing.T) {
 				ID: 1, SalerID: 1, CategoryID: 1, CityID: 1,
 				Title: "Title", Description: "desc", Price: 123,
 				CreatedAt: time.Unix(0, 0), Views: 12, AvailableCount: 1, Favourites: 12,
-			}), //nolint:exhaustruct
+			}),
 		},
 	}
 
@@ -275,6 +277,361 @@ func TestGetProduct(t *testing.T) {
 			}
 
 			var resultResponse delivery.ProductResponse
+
+			err = json.Unmarshal(receivedResponse, &resultResponse)
+			if err != nil {
+				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
+			}
+
+			err = utils.EqualTest(&resultResponse, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestGetProductList(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		queryParams            map[string]string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       *delivery.ProductListResponse
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:        "test basic work",
+			queryParams: map[string]string{"count": "2", "last_id": "1"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(2), uint64(testUserID)).Return(
+					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
+			},
+			expectedResponse: delivery.NewProductListResponse(
+				[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}),
+		},
+		{
+			name:        "test zero work",
+			queryParams: map[string]string{"count": "0", "last_id": "0"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProductsList(gomock.Any(), uint64(0), uint64(0), uint64(testUserID)).Return(
+					[]*models.ProductInFeed{}, nil)
+			},
+			expectedResponse: delivery.NewProductListResponse(
+				[]*models.ProductInFeed{}),
+		},
+		{
+			name:        "test a lot of count",
+			queryParams: map[string]string{"count": "10", "last_id": "1"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(10), uint64(testUserID)).Return(
+					[]*models.ProductInFeed{
+						{ID: 1, Title: "Title"},
+						{ID: 2, Title: "Title2"},
+						{ID: 3, Title: "Title2"},
+						{ID: 4, Title: "Title2"},
+						{ID: 5, Title: "Title2"},
+						{ID: 6, Title: "Title2"},
+						{ID: 7, Title: "Title2"},
+						{ID: 8, Title: "Title2"},
+						{ID: 9, Title: "Title2"},
+						{ID: 10, Title: "Title2"},
+					}, nil) //nolint:exhaustruct
+			},
+			expectedResponse: delivery.NewProductListResponse(
+				[]*models.ProductInFeed{
+					{ID: 1, Title: "Title"},
+					{ID: 2, Title: "Title2"},
+					{ID: 3, Title: "Title2"},
+					{ID: 4, Title: "Title2"},
+					{ID: 5, Title: "Title2"},
+					{ID: 6, Title: "Title2"},
+					{ID: 7, Title: "Title2"},
+					{ID: 8, Title: "Title2"},
+					{ID: 9, Title: "Title2"},
+					{ID: 10, Title: "Title2"},
+				}), //nolint:exhaustruct
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list", nil)
+			utils.AddQueryParamsToRequest(req, testCase.queryParams)
+
+			req.AddCookie(&testCookie)
+			productHandler.GetProductListHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			var resultResponse delivery.ProductListResponse
+
+			err = json.Unmarshal(receivedResponse, &resultResponse)
+			if err != nil {
+				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
+			}
+
+			err = utils.EqualTest(&resultResponse, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestGetListProductOfSaler(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		queryParams            map[string]string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       *delivery.ProductListResponse
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:        "test basic work",
+			queryParams: map[string]string{"count": "2", "last_id": "1"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), uint64(testUserID), true).Return(
+					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
+			},
+			expectedResponse: delivery.NewProductListResponse(
+				[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}),
+		},
+		{
+			name:        "test zero work",
+			queryParams: map[string]string{"count": "0", "last_id": "0"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), uint64(testUserID), true).Return(
+					[]*models.ProductInFeed{}, nil)
+			},
+			expectedResponse: delivery.NewProductListResponse(
+				[]*models.ProductInFeed{}),
+		},
+		{
+			name:        "test a lot of count",
+			queryParams: map[string]string{"count": "10", "last_id": "1"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), uint64(testUserID), true).Return(
+					[]*models.ProductInFeed{
+						{ID: 1, Title: "Title"},
+						{ID: 2, Title: "Title2"},
+						{ID: 3, Title: "Title2"},
+						{ID: 4, Title: "Title2"},
+						{ID: 5, Title: "Title2"},
+						{ID: 6, Title: "Title2"},
+						{ID: 7, Title: "Title2"},
+						{ID: 8, Title: "Title2"},
+						{ID: 9, Title: "Title2"},
+						{ID: 10, Title: "Title2"},
+					}, nil) //nolint:exhaustruct
+			},
+			expectedResponse: delivery.NewProductListResponse(
+				[]*models.ProductInFeed{
+					{ID: 1, Title: "Title"},
+					{ID: 2, Title: "Title2"},
+					{ID: 3, Title: "Title2"},
+					{ID: 4, Title: "Title2"},
+					{ID: 5, Title: "Title2"},
+					{ID: 6, Title: "Title2"},
+					{ID: 7, Title: "Title2"},
+					{ID: 8, Title: "Title2"},
+					{ID: 9, Title: "Title2"},
+					{ID: 10, Title: "Title2"},
+				}), //nolint:exhaustruct
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list_of_saler", nil)
+			utils.AddQueryParamsToRequest(req, testCase.queryParams)
+
+			req.AddCookie(&testCookie)
+			productHandler.GetListProductOfSalerHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			var resultResponse delivery.ProductListResponse
+
+			err = json.Unmarshal(receivedResponse, &resultResponse)
+			if err != nil {
+				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
+			}
+
+			err = utils.EqualTest(&resultResponse, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestGetListProductOfAnotherSaler(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		queryParams            map[string]string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       *delivery.ProductListResponse
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:        "test basic work",
+			queryParams: map[string]string{"count": "2", "last_id": "1", "saler_id": "1"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), uint64(testUserID), false).Return(
+					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
+			},
+			expectedResponse: delivery.NewProductListResponse(
+				[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}),
+		},
+		{
+			name:        "test zero work",
+			queryParams: map[string]string{"count": "0", "last_id": "0", "saler_id": "1"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), uint64(testUserID), false).Return(
+					[]*models.ProductInFeed{}, nil)
+			},
+			expectedResponse: delivery.NewProductListResponse(
+				[]*models.ProductInFeed{}),
+		},
+		{
+			name:        "test a lot of count",
+			queryParams: map[string]string{"count": "10", "last_id": "1", "saler_id": "1"},
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), uint64(testUserID), false).Return(
+					[]*models.ProductInFeed{
+						{ID: 1, Title: "Title"},
+						{ID: 2, Title: "Title2"},
+						{ID: 3, Title: "Title2"},
+						{ID: 4, Title: "Title2"},
+						{ID: 5, Title: "Title2"},
+						{ID: 6, Title: "Title2"},
+						{ID: 7, Title: "Title2"},
+						{ID: 8, Title: "Title2"},
+						{ID: 9, Title: "Title2"},
+						{ID: 10, Title: "Title2"},
+					}, nil) //nolint:exhaustruct
+			},
+			expectedResponse: delivery.NewProductListResponse(
+				[]*models.ProductInFeed{
+					{ID: 1, Title: "Title"},
+					{ID: 2, Title: "Title2"},
+					{ID: 3, Title: "Title2"},
+					{ID: 4, Title: "Title2"},
+					{ID: 5, Title: "Title2"},
+					{ID: 6, Title: "Title2"},
+					{ID: 7, Title: "Title2"},
+					{ID: 8, Title: "Title2"},
+					{ID: 9, Title: "Title2"},
+					{ID: 10, Title: "Title2"},
+				}), //nolint:exhaustruct
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list_of_another_saler", nil)
+			utils.AddQueryParamsToRequest(req, testCase.queryParams)
+
+			productHandler.GetListProductOfAnotherSalerHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			var resultResponse delivery.ProductListResponse
 
 			err = json.Unmarshal(receivedResponse, &resultResponse)
 			if err != nil {
