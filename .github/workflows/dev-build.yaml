@@ -103,7 +103,7 @@ jobs:
 
     notify-good:
         runs-on: ubuntu-latest
-        if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+        if: ${{ always() && needs.build-main.result == 'success' && needs.build-auth.result == 'success' && needs.build-fs.result == 'success' }}
         needs: [build-main, build-auth, build-fs]
         steps:
             - name: send
