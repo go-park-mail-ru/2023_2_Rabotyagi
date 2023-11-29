@@ -2,97 +2,89 @@ package delivery
 
 import (
 	"database/sql"
-	"errors"
-	mock_category "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/mocks"
+	"encoding/json"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"go.uber.org/mock/gomock"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
+	"reflect"
 	"testing"
 )
 
-func TestDelivery_ListByUser(t *testing.T) {
-	type fields struct {
-		serv *mock_category.MockICategoryService
+//nolint:funlen
+func TestGetFullCategories(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name             string
+		behavior         func(m *mocks.MockICategoryService)
+		expectedResponse CategoryListResponse
 	}
 
-	type testCase struct {
-		prepare  func(f *fields)
-		params   http.ServeMux
-		response string
-		err      error
-	}
-
-	tests := map[string]testCase{
-		"usual": {
-			prepare: func(f *fields) {
-				f.serv.EXPECT().GetFullCategories([]*models.Category{
-					{ID: 1, Name: "aaaa", ParentID: sql.NullInt64{Int64: 0, Valid: false}},
-					{ID: 2, Name: "bbbb", ParentID: sql.NullInt64{Int64: 1, Valid: true}},
-					{ID: 3, Name: "aaaa", ParentID: sql.NullInt64{Valid: true, Int64: 2}},
-				})
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			behavior: func(m *mocks.MockICategoryService) {
+				m.EXPECT().GetFullCategories(gomock.Any()).Return([]*models.Category{
+					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					{ID: 1, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
+					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}, nil)
 			},
-			params:   []httprouter.Param{{Key: "user-id", Value: "2"}},
-			response: `{"items":[{"id":2,"user1_id":2,"user2_id":3,"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"},{"id":3,"user1_id":8,"user2_id":2,"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"},{"id":4,"user1_id":2,"user2_id":4,"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"}]}`,
-			err:      nil,
-		},
-		"no chats": {
-			prepare: func(f *fields) {
-				f.serv.EXPECT().ListByUser(3).Return([]models.Chat{}, nil)
-			},
-			params:   []httprouter.Param{{Key: "user-id", Value: "3"}},
-			response: `{"items":[]}`,
-			err:      nil,
-		},
-		"invalid user id param": {
-			prepare:  nil,
-			params:   []httprouter.Param{{Key: "user-id", Value: "a"}},
-			response: ``,
-			err:      pkgErrors.ErrInvalidUserIdParam,
-		},
-		"missing user id param": {
-			prepare:  nil,
-			params:   []httprouter.Param{},
-			response: ``,
-			err:      pkgErrors.ErrInvalidUserIdParam,
+			expectedResponse: CategoryListResponse{Status: statuses.StatusResponseSuccessful,
+				Body: []*models.Category{{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+					{ID: 1, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
+					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}},
 		},
 	}
 
-	for name, test := range tests {
-		test := test
-		t.Run(name, func(t *testing.T) {
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
-
-			logger, err := zap.NewDevelopment()
-			if err != nil {
-				t.Fatalf("can't create logger: %s", err)
-			}
 
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			f := fields{serv: mocks.NewMockService(ctrl)}
-			if test.prepare != nil {
-				test.prepare(&f)
+			mockServ := mocks.NewMockICategoryService(ctrl)
+
+			testCase.behavior(mockServ)
+
+			cityHandler, err := NewCategoryHandler(mockServ)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			del := delivery{
-				serv: f.serv,
-				log:  logger,
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/city/get_full", nil)
+
+			w := httptest.NewRecorder()
+
+			cityHandler.GetFullCategories(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
 			}
 
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
-			rec := httptest.NewRecorder()
-			err = del.ListByUser(rec, req, test.params)
-			if !errors.Is(err, test.err) {
-				t.Errorf("\nExpected: %s\nGot: %s", test.err, err)
+			var resultResponse CategoryListResponse
+
+			err = json.Unmarshal(receivedResponse, &resultResponse)
+			if err != nil {
+				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
 			}
-			body, _ := io.ReadAll(rec.Body)
-			if strings.Trim(string(body), "\n") != test.response {
-				t.Errorf("\nExpected: %s\nGot: %s", test.response, string(body))
+
+			if !reflect.DeepEqual(testCase.expectedResponse, resultResponse) {
+				t.Errorf("Wrong Response: got %+v, expected %+v",
+					resultResponse, testCase.expectedResponse)
 			}
 		})
 	}
