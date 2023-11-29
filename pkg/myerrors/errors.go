@@ -31,6 +31,11 @@ func (e *Error) IsErrorClient() bool {
 	return e.status >= statuses.MinValueClientError && e.status <= statuses.MaxValueClientError
 }
 
+// NewErrorCustom prefer this function to other NewError... from this package. Use this function only if you understand why
+func NewErrorCustom(status int, format string, args ...any) *Error {
+	return &Error{status: status, err: fmt.Sprintf(format, args...)}
+}
+
 // NewErrorBadFormatRequest error with status =
 // StatusBadFormatRequest uses when get bad request from frontend and errors with this status need frontend developer
 func NewErrorBadFormatRequest(format string, args ...any) *Error {
