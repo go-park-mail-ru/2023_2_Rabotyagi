@@ -18,7 +18,7 @@
 # vendor/
 
 # Images
-static/img/*
+services/file_service/static/img/*
 
 # Go workspace file
 go.work
@@ -27,3 +27,6 @@ go.work
 .idea
 bin
 .obsidian
+
+# Env
+**.env/

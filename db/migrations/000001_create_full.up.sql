@@ -1,5 +1,7 @@
 CREATE SEQUENCE IF NOT EXISTS user_id_seq;
 CREATE SEQUENCE IF NOT EXISTS product_id_seq;
+CREATE SEQUENCE IF NOT EXISTS view_id_seq;
+CREATE SEQUENCE IF NOT EXISTS city_id_seq;
 CREATE SEQUENCE IF NOT EXISTS category_id_seq;
 CREATE SEQUENCE IF NOT EXISTS order_id_seq;
 CREATE SEQUENCE IF NOT EXISTS image_id_seq;
@@ -7,16 +9,19 @@ CREATE SEQUENCE IF NOT EXISTS favourite_id_seq;
 
 CREATE TABLE IF NOT EXISTS public."user"
 (
-    id       BIGINT DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
-    email    TEXT UNIQUE                                     NOT NULL CHECK (email <> '')
-        CONSTRAINT max_len_email CHECK (LENGTH(email) <= 256),
-    phone    TEXT UNIQUE                                     NOT NULL CHECK (phone <> '')
-        CONSTRAINT max_len_phone CHECK (LENGTH(phone) <= 18),
-    name     TEXT                                            NOT NULL CHECK (name <> '')
-        CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256),
-    password TEXT                                            NOT NULL CHECK (password <> '')
-        CONSTRAINT max_len_password CHECK (LENGTH(password) <= 256),
-    birthday TIMESTAMP WITH TIME ZONE
+    id         BIGINT                   DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    email      TEXT UNIQUE                                                       NOT NULL CHECK (email <> '')
+    CONSTRAINT max_len_email CHECK (LENGTH(email) <= 256),
+    phone      TEXT UNIQUE DEFAULT NULL
+    CONSTRAINT max_len_phone CHECK (LENGTH(phone) <= 18),
+    name       TEXT UNIQUE DEFAULT NULL
+    CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256),
+    password   TEXT                                                              NOT NULL CHECK (password <> '')
+    CONSTRAINT max_len_password CHECK (LENGTH(password) <= 256),
+    birthday   TIMESTAMP WITH TIME ZONE,
+                             avatar     TEXT UNIQUE
+                             CONSTRAINT max_len_avatar CHECK (LENGTH(avatar) <= 256),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()                            NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public."category"
@@ -27,11 +32,19 @@ CREATE TABLE IF NOT EXISTS public."category"
     parent_id BIGINT DEFAULT NULL REFERENCES public."category" (id)
 );
 
+CREATE TABLE IF NOT EXISTS public."city"
+(
+    id              BIGINT            DEFAULT NEXTVAL('city_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    name            TEXT                                                       NOT NULL CHECK (name <> '')
+    CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256)
+);
+
 CREATE TABLE IF NOT EXISTS public."product"
 (
     id              BIGINT                   DEFAULT NEXTVAL('product_id_seq'::regclass) NOT NULL PRIMARY KEY,
     saler_id        BIGINT                                                               NOT NULL REFERENCES public."user" (id),
     category_id     BIGINT                                                               NOT NULL REFERENCES public."category" (id),
+    city_id         BIGINT                                                               NOT NULL REFERENCES public."city" (id),
     title           TEXT                                                                 NOT NULL CHECK (title <> '')
         CONSTRAINT max_len_title CHECK (LENGTH(title) <= 256),
     description     TEXT                                                                 NOT NULL CHECK (description <> '')
@@ -43,12 +56,18 @@ CREATE TABLE IF NOT EXISTS public."product"
         CONSTRAINT not_negative_views CHECK (views >= 0),
     available_count INT                      DEFAULT 0                                   NOT NULL
         CONSTRAINT max_len_available_count CHECK (available_count >= 0),
-    city            TEXT                                                                 NOT NULL CHECK (city <> '')
-        CONSTRAINT max_len_city CHECK (LENGTH(city) <= 256),
     delivery        BOOLEAN                  DEFAULT FALSE                               NOT NULL,
     safe_deal       BOOLEAN                  DEFAULT FALSE                               NOT NULL,
-    is_active       BOOLEAN                  DEFAULT TRUE                               NOT NULL,
+    is_active       BOOLEAN                  DEFAULT TRUE                                NOT NULL,
     CONSTRAINT not_zero_count_with_active CHECK (not (available_count = 0 and is_active))
+);
+
+CREATE TABLE IF NOT EXISTS public."view"
+(
+    id              BIGINT      DEFAULT NEXTVAL('view_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    user_id         BIGINT                                               NOT NULL REFERENCES public."user" (id),
+    product_id      BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE,
+    CONSTRAINT uniq_together_product_id_user_id unique (user_id, product_id)
 );
 
 CREATE TABLE IF NOT EXISTS public."order"
@@ -78,7 +97,7 @@ CREATE TABLE IF NOT EXISTS public."favourite"
     id         BIGINT DEFAULT NEXTVAL('favourite_id_seq'::regclass) NOT NULL PRIMARY KEY,
     owner_id   BIGINT                                               NOT NULL REFERENCES public."user" (id),
     product_id BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE,
-        CONSTRAINT uniq_together_product_id_owner_id unique (owner_id, product_id)
+    CONSTRAINT uniq_together_product_id_owner_id unique (owner_id, product_id)
 );
 
 CREATE OR REPLACE FUNCTION updated_at_now()

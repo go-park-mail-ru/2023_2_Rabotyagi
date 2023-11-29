@@ -1,27 +1,57 @@
 basePath: /api/v1
 definitions:
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category:
+  delivery.ResponseURLBody:
+    properties:
+      urls:
+        items:
+          type: string
+        type: array
+    type: object
+  delivery.ResponseURLs:
+    properties:
+      body:
+        $ref: '#/definitions/delivery.ResponseURLBody'
+      status:
+        type: integer
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Category:
     properties:
       id:
         type: integer
       name:
         type: string
       parent_id:
-        allOf:
-        - $ref: '#/definitions/sql.NullInt64'
         description: nolint
+        type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.City:
+    properties:
+      id:
+        type: integer
+      name:
+        description: nolint
+        type: string
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Image:
     properties:
       url:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.OrderChanges:
+    properties:
+      count:
+        type: integer
+      id:
+        type: integer
+      status:
+        type: integer
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.OrderInBasket:
     properties:
       available_count:
         type: integer
-      city:
-        type: string
+      city_id:
+        type: integer
       count:
         type: integer
       delivery:
@@ -30,7 +60,7 @@ definitions:
         type: integer
       images:
         items:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Image'
         type: array
       in_favourites:
         type: boolean
@@ -47,16 +77,22 @@ definitions:
       title:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreOrder:
+    properties:
+      count:
+        type: integer
+      product_id:
+        type: integer
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreProduct:
     description: safe_deal optional delivery optional
     properties:
       available_count:
         type: integer
       category_id:
         type: integer
-      city:
-        description: nolint
-        type: string
+      city_id:
+        type: integer
       delivery:
         type: boolean
       description:
@@ -64,7 +100,7 @@ definitions:
         type: string
       images:
         items:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Image'
         type: array
       is_active:
         type: boolean
@@ -77,15 +113,14 @@ definitions:
       title:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Product:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Product:
     properties:
       available_count:
         type: integer
       category_id:
         type: integer
-      city:
-        description: nolint
-        type: string
+      city_id:
+        type: integer
       created_at:
         type: string
       delivery:
@@ -99,7 +134,7 @@ definitions:
         type: integer
       images:
         items:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Image'
         type: array
       in_favourites:
         type: boolean
@@ -116,10 +151,12 @@ definitions:
       views:
         type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.ProductInFeed:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.ProductInFeed:
     properties:
-      city:
-        type: string
+      available_count:
+        type: integer
+      city_id:
+        type: integer
       delivery:
         type: boolean
       favourites:
@@ -128,7 +165,7 @@ definitions:
         type: integer
       images:
         items:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Image'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Image'
         type: array
       in_favourites:
         type: boolean
@@ -141,12 +178,34 @@ definitions:
       title:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.UserWithoutID:
     properties:
+      avatar:
+        $ref: '#/definitions/sql.NullString'
       birthday:
         allOf:
         - $ref: '#/definitions/sql.NullTime'
         description: nolint
+      email:
+        type: string
+      name:
+        $ref: '#/definitions/sql.NullString'
+      password:
+        type: string
+      phone:
+        allOf:
+        - $ref: '#/definitions/sql.NullString'
+        description: nolint
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.UserWithoutPassword:
+    properties:
+      avatar:
+        type: string
+      birthday:
+        example: "2014-12-12T14:00:12+07:00"
+        type: string
+      created_at:
+        type: string
       email:
         type: string
       id:
@@ -157,140 +216,114 @@ definitions:
         description: nolint
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse:
     properties:
       body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyError'
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBodyError'
       status:
         type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response:
-    properties:
-      body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody'
-      status:
-        type: integer
-    type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBody:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBody:
     properties:
       message:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyError:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBodyError:
     properties:
       error:
         type: string
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBodyID:
     properties:
       id:
         type: integer
     type: object
-  github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID:
     properties:
       body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseBodyID'
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBodyID'
       status:
         type: integer
     type: object
-  internal_models.OrderChanges:
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful:
     properties:
-      count:
-        type: integer
-      id:
-        type: integer
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBody'
       status:
         type: integer
     type: object
-  internal_models.PreOrder:
-    properties:
-      count:
-        type: integer
-      product_id:
-        type: integer
-    type: object
-  internal_models.UserWithoutID:
-    properties:
-      birthday:
-        allOf:
-        - $ref: '#/definitions/sql.NullTime'
-        description: nolint
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      phone:
-        description: nolint
-        type: string
-    type: object
-  internal_pkg_category_delivery.CategoryListResponse:
+  internal_category_delivery.CategoryListResponse:
     properties:
       body:
         items:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Category'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Category'
         type: array
       status:
         type: integer
     type: object
-  internal_pkg_file_service_delivery.ResponseURL:
+  internal_city_delivery.CityListResponse:
     properties:
       body:
-        $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURLBody'
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.City'
+        type: array
       status:
         type: integer
     type: object
-  internal_pkg_file_service_delivery.ResponseURLBody:
+  internal_product_delivery.OrderListResponse:
     properties:
-      url:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.OrderInBasket'
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_product_delivery.OrderResponse:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.OrderInBasket'
+      status:
+        type: integer
+    type: object
+  internal_product_delivery.ProductInSearchListResponse:
+    properties:
+      body:
+        items:
+          type: string
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_product_delivery.ProductListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.ProductInFeed'
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_product_delivery.ProductResponse:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Product'
+      status:
+        type: integer
+    type: object
+  internal_user_delivery.ProfileResponse:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.UserWithoutPassword'
+      status:
+        type: integer
+    type: object
+  sql.NullString:
+    properties:
+      string:
         type: string
-    type: object
-  internal_pkg_product_delivery.OrderListResponse:
-    properties:
-      body:
-        items:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket'
-        type: array
-      status:
-        type: integer
-    type: object
-  internal_pkg_product_delivery.OrderResponse:
-    properties:
-      body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.OrderInBasket'
-      status:
-        type: integer
-    type: object
-  internal_pkg_product_delivery.ProductListResponse:
-    properties:
-      body:
-        items:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.ProductInFeed'
-        type: array
-      status:
-        type: integer
-    type: object
-  internal_pkg_product_delivery.ProductResponse:
-    properties:
-      body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.Product'
-      status:
-        type: integer
-    type: object
-  internal_pkg_user_delivery.ProfileResponse:
-    properties:
-      body:
-        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
-      status:
-        type: integer
-    type: object
-  sql.NullInt64:
-    properties:
-      int64:
-        type: integer
       valid:
-        description: Valid is true if Int64 is not NULL
+        description: Valid is true if String is not NULL
         type: boolean
     type: object
   sql.NullTime:
@@ -317,11 +350,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_category_delivery.CategoryListResponse'
+            $ref: '#/definitions/internal_category_delivery.CategoryListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -333,29 +366,145 @@ paths:
       summary: get all categories
       tags:
       - category
-  /img/upload:
-    post:
-      description: |-
-        upload photo to file service and return its url
-        @Accept      multipart-form-data TODO fix
+  /category/search:
+    get:
+      description: search top 5 common named categories
       parameters:
-      - description: photo row TODO fix type
-        in: body
-        name: photo
+      - description: searched string
+        in: query
+        name: searched
         required: true
-        schema:
-          type: string
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_file_service_delivery.ResponseURL'
+            $ref: '#/definitions/internal_category_delivery.CategoryListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: search category
+      tags:
+      - category
+  /city/get_full:
+    get:
+      description: get all cities
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_city_delivery.CityListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get all cities
+      tags:
+      - city
+  /city/search:
+    get:
+      description: search top 5 common named cities
+      parameters:
+      - description: searched string
+        in: query
+        name: searched
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_city_delivery.CityListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: search city
+      tags:
+      - city
+  /img/:
+    get:
+      consumes:
+      - application/json
+      description: download photo of file by its name
+      parameters:
+      - description: name of image
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - image/png
+      - image/jpeg
+      - application/json
+      responses:
+        "222":
+          description: Тут статус http статус 200. Внутри body статус может быть badContent(4400)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: download photo
+      tags:
+      - fileService
+  /img/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: upload photo to file service and return its url
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.ResponseURLs'
+        "222":
+          description: Тут статус http статус 200. Внутри body статус может быть badContent(4400),
+            badFormat(4000)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -369,8 +518,6 @@ paths:
       - fileService
   /logout:
     post:
-      consumes:
-      - application/json
       description: logout in app
       produces:
       - application/json
@@ -378,11 +525,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error".
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -405,18 +552,18 @@ paths:
         name: preOrder
         required: true
         schema:
-          $ref: '#/definitions/internal_models.PreOrder'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreOrder'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.OrderResponse'
+            $ref: '#/definitions/internal_product_delivery.OrderResponse'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -439,11 +586,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badContent(4400)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -474,11 +621,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badContent(4400)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -501,11 +648,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.OrderListResponse'
+            $ref: '#/definitions/internal_product_delivery.OrderListResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -528,18 +675,18 @@ paths:
         name: orderChanges
         required: true
         schema:
-          $ref: '#/definitions/internal_models.OrderChanges'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.OrderChanges'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -562,18 +709,18 @@ paths:
         name: orderChanges
         required: true
         schema:
-          $ref: '#/definitions/internal_models.OrderChanges'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.OrderChanges'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badContent(4400)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -604,11 +751,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -624,29 +771,26 @@ paths:
     post:
       consumes:
       - application/json
-      description: |-
-        add product by data
-        Error.status can be:
-        StatusErrBadRequest      = 400
-        StatusErrInternalServer  = 500
+      description: add product by data
       parameters:
       - description: product data for adding
         in: body
         name: product
         required: true
         schema:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreProduct'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
         "222":
-          description: Error
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
+            badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -658,6 +802,40 @@ paths:
       summary: add product
       tags:
       - product
+  /product/add-to-fav:
+    post:
+      consumes:
+      - application/json
+      description: add product to favs using product id from query and user id form
+        cookie
+      parameters:
+      - description: product id
+        in: query
+        name: product_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
+        "222":
+          description: Error". Внутри body статус может быть badContent(4400)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: add product to favs
+      tags:
+      - favourite
   /product/close:
     patch:
       consumes:
@@ -677,11 +855,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -712,11 +890,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -745,11 +923,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductResponse'
         "222":
-          description: Error
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -765,7 +943,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: get products by count and last_id return new products
+      description: get products by count and last_id return old products
       parameters:
       - description: count products
         in: query
@@ -783,11 +961,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -797,6 +975,50 @@ paths:
           schema:
             type: string
       summary: get products list
+      tags:
+      - product
+  /product/get_list_of_another_saler:
+    get:
+      consumes:
+      - application/json
+      description: get list of products for another saler using saler id, count and
+        last product id from query
+      parameters:
+      - description: saler id
+        in: query
+        name: saler_id
+        required: true
+        type: integer
+      - description: count products
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: 'last product id '
+        in: query
+        name: last_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
+        "222":
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get list of products for another saler
       tags:
       - product
   /product/get_list_of_saler:
@@ -821,11 +1043,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_product_delivery.ProductListResponse'
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -835,6 +1057,80 @@ paths:
           schema:
             type: string
       summary: get list of products for saler
+      tags:
+      - product
+  /product/get_search_feed:
+    get:
+      consumes:
+      - application/json
+      description: get products feed after search
+      parameters:
+      - description: count products
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: last product id
+        in: query
+        name: offset
+        required: true
+        type: integer
+      - description: searched string
+        in: query
+        name: searched
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
+        "222":
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get products search feed
+      tags:
+      - product
+  /product/search:
+    get:
+      description: search top 5 common named/descripted products
+      parameters:
+      - description: searched string
+        in: query
+        name: searched
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.ProductInSearchListResponse'
+        "222":
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: search products
       tags:
       - product
   /product/update:
@@ -852,18 +1148,19 @@ paths:
         in: body
         name: preProduct
         schema:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreProduct'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
         "222":
-          description: Error
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
+            badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -889,18 +1186,19 @@ paths:
         in: body
         name: preProduct
         schema:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.PreProduct'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreProduct'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ResponseID'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
         "222":
-          description: Error
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
+            badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -912,10 +1210,35 @@ paths:
       summary: update product
       tags:
       - product
-  /profile/get:
+  /profile/favourites:
     get:
       consumes:
       - application/json
+      description: get user favourites by user id from cookie\jwt token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
+        "222":
+          description: Error
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get user favourites
+      tags:
+      - favourite
+  /profile/get:
+    get:
       description: get profile by id
       parameters:
       - description: user id
@@ -929,11 +1252,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_user_delivery.ProfileResponse'
+            $ref: '#/definitions/internal_user_delivery.ProfileResponse'
         "222":
           description: Error
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -955,18 +1278,18 @@ paths:
         in: body
         name: user
         schema:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.UserWithoutPassword'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_user_delivery.ProfileResponse'
+            $ref: '#/definitions/internal_user_delivery.ProfileResponse'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -987,18 +1310,18 @@ paths:
         in: body
         name: user
         schema:
-          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_models.UserWithoutPassword'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.UserWithoutPassword'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_pkg_user_delivery.ProfileResponse'
+            $ref: '#/definitions/internal_user_delivery.ProfileResponse'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1012,8 +1335,6 @@ paths:
       - profile
   /signin:
     get:
-      consumes:
-      - application/json
       description: signin in app
       parameters:
       - description: user email for signin
@@ -1032,11 +1353,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
@@ -1063,18 +1384,18 @@ paths:
         name: preUser
         required: true
         schema:
-          $ref: '#/definitions/internal_models.UserWithoutID'
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.UserWithoutID'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.Response'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_internal_pkg_server_delivery.ErrorResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
           description: Method Not Allowed
           schema:
