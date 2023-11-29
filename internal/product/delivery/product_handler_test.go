@@ -648,6 +648,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 	}
 }
 
+//nolint:funlen
 func TestUpdateProduct(t *testing.T) {
 	t.Parallel()
 
@@ -762,6 +763,7 @@ func TestUpdateProduct(t *testing.T) {
 	}
 }
 
+// nolint:funlen
 func TestCloseProduct(t *testing.T) {
 	t.Parallel()
 
@@ -832,6 +834,192 @@ func TestCloseProduct(t *testing.T) {
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
 			req.AddCookie(&testCookie)
 			productHandler.CloseProductHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+// nolint:funlen
+func TestActivateProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		queryID                string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:    "test basic work",
+			queryID: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), uint64(testUserID))
+			},
+			expectedResponse: responses.ResponseSuccessful{
+				Status: statuses.StatusResponseSuccessful,
+				Body:   responses.ResponseBody{Message: delivery.ResponseSuccessfulActivateProduct},
+			},
+		},
+		{
+			name:    "test error in internal activate",
+			queryID: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+					myerrors.NewErrorInternal("Test Error Internal"))
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name:    "test error uncorrected query param",
+			queryID: "wrong type",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT()
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusBadFormatRequest,
+				fmt.Sprintf("%s id=wrong type", utils.MessageErrWrongNumberParam)),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/activate", nil)
+			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
+			req.AddCookie(&testCookie)
+			productHandler.ActivateProductHandler(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+// nolint:funlen
+func TestDeleteProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		queryID                string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:    "test basic work",
+			queryID: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(nil)
+			},
+			expectedResponse: responses.ResponseSuccessful{
+				Status: statuses.StatusResponseSuccessful,
+				Body:   responses.ResponseBody{Message: delivery.ResponseSuccessfulDeleteProduct},
+			},
+		},
+		{
+			name:    "test error in internal",
+			queryID: "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+					myerrors.NewErrorInternal("Test Error Internal"))
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name:    "test error uncorrected query param",
+			queryID: "wrong type",
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT()
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusBadFormatRequest,
+				fmt.Sprintf("%s id=wrong type", utils.MessageErrWrongNumberParam)),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodDelete, "/api/v1/product/delete", nil)
+			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
+			req.AddCookie(&testCookie)
+			productHandler.DeleteProductHandler(w, req)
 
 			resp := w.Result()
 			defer resp.Body.Close()
