@@ -3,7 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
+	"strings"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/interceptors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	reposhare "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	authconfig "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/config"
@@ -11,9 +15,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/usecases"
+
 	"google.golang.org/grpc"
-	"net"
-	"strings"
 )
 
 func main() {
@@ -34,7 +37,8 @@ func main() {
 		return
 	}
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptors.ErrConvertInterceptor))
 
 	baseCtx := context.Background()
 
