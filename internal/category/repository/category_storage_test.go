@@ -3,10 +3,11 @@ package repository_test
 import (
 	"context"
 	"database/sql"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/mocks"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+	"github.com/jackc/pgx/v5"
 	"go.uber.org/mock/gomock"
 	"testing"
 
@@ -25,27 +26,24 @@ func TestGetFullCategories(t *testing.T) {
 
 	type TestCase struct {
 		name                    string
-		behaviorCategoryStorage func(m *mocks.MockICategoryStorage)
+		behaviorCategoryStorage func(m *repository.CategoryStorage)
 		expectedResponse        any
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorCategoryStorage: func(m *mocks.MockICategoryStorage) {
-				m.EXPECT().GetFullCategories(gomock.Any()).Return([]*models.Category{
-					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
-					{ID: 2, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
-					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}, nil)
-
-				mockPool.ExpectQuery(`SELECT "category".id,"category".name, "category".parent_id FROM public."category"`).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "name", "parent_id"}).AddRow(1, "Animal", nil).
+			behaviorCategoryStorage: func(m *repository.CategoryStorage) {
+				mockPool.ExpectBeginTx(pgx.TxOptions{})
+				mockPool.ExpectQuery(`^SELECT (.+) FROM public."category"$`).
+					WillReturnRows(pgxmock.NewRows([]string{"id", "name", "parent_id"}).
+						AddRow(1, "Animal", 4).
 						AddRow(2, "Cats", 1).
 						AddRow(3, "Dogs", 1))
-
+				mockPool.ExpectCommit()
 			},
 			expectedResponse: []*models.Category{
-				{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+				{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 4}},
 				{ID: 2, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
 				{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}},
 		},
@@ -62,7 +60,10 @@ func TestGetFullCategories(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			catStorage := mocks.NewMockICategoryStorage(ctrl)
+			catStorage, err := repository.NewCategoryStorage(mockPool)
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
 
 			testCase.behaviorCategoryStorage(catStorage)
 
