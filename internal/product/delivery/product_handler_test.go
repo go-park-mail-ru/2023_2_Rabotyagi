@@ -159,6 +159,43 @@ func TestAddProduct(t *testing.T) {
 				Body:   responses.ResponseBodyID{ID: 1},
 			},
 		},
+		{
+			name: "test another product",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/product/add", strings.NewReader(
+				`{"saler_id":1,
+"category_id" :1,
+"title":"TItle",
+"description":"  de scription",
+"price":1232,
+"available_count":12,
+"city_id":1,
+"delivery":false, "safe_deal":false}`)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().AddProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					`{"saler_id":1,
+"category_id" :1,
+"title":"TItle",
+"description":"  de scription",
+"price":1232,
+"available_count":12,
+"city_id":1,
+"delivery":false, "safe_deal":false}`)), uint64(testUserID)).Return(uint64(1), nil)
+			},
+			expectedResponse: responses.ResponseID{
+				Status: statuses.StatusRedirectAfterSuccessful,
+				Body:   responses.ResponseBodyID{ID: 1},
+			},
+		},
+		{
+			name: "test error AddProduct",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/product/add", strings.NewReader(
+				``)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().AddProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					``)), uint64(testUserID)).Return(uint64(0), myerrors.NewErrorInternal("Test internal error"))
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
 	}
 
 	for _, testCase := range testCases {
