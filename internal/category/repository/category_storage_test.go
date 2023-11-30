@@ -35,17 +35,18 @@ func TestGetFullCategories(t *testing.T) {
 			behaviorCategoryStorage: func(m *mocks.MockICategoryStorage) {
 				m.EXPECT().GetFullCategories(gomock.Any()).Return([]*models.Category{
 					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
-					{ID: 1, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
+					{ID: 2, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
 					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}, nil)
 
-				mockPool.ExpectBegin()
-				mockPool.ExpectQuery("SELECT category").
-					WillReturnRows(pgxmock.NewRows([]string{"id", "name", "parent_id"}))
+				mockPool.ExpectQuery(`SELECT "category".id,"category".name, "category".parent_id FROM public."category"`).
+					WillReturnRows(pgxmock.NewRows([]string{"id", "name", "parent_id"}).AddRow(1, "Animal", nil).
+						AddRow(2, "Cats", 1).
+						AddRow(3, "Dogs", 1))
 
 			},
 			expectedResponse: []*models.Category{
 				{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
-				{ID: 1, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
+				{ID: 2, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
 				{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}},
 		},
 	}
@@ -68,6 +69,10 @@ func TestGetFullCategories(t *testing.T) {
 			response, err := catStorage.GetFullCategories(ctx)
 			if err != nil {
 				t.Fatal(err)
+			}
+
+			if err := mockPool.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
 			}
 
 			err = utils.EqualTest(response, testCase.expectedResponse)
