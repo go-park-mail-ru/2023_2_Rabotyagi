@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
-	mocksauth "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
@@ -24,16 +23,16 @@ func TestAddToFavourites(t *testing.T) {
 	_ = my_logger.NewNop()
 
 	type TestCase struct {
-		name                     string
-		behaviorFavouriteService func(m *mocks.MockIProductService)
-		request                  *http.Request
-		expectedResponse         responses.ResponseID
+		name                   string
+		behaviorProductService func(m *mocks.MockIProductService)
+		request                *http.Request
+		expectedResponse       responses.ResponseID
 	}
 	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodPost, "/api/v1/product/add-to-fav", strings.NewReader(`{"product_id":1}`)),
-			behaviorFavouriteService: func(m *mocks.MockIProductService) {
+			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().AddToFavourites(gomock.Any(), uint64(testUserID), io.NopCloser(strings.NewReader(
 					`{"product_id":1}`))).Return(nil)
 			},
@@ -53,13 +52,7 @@ func TestAddToFavourites(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorFavouriteService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
@@ -98,16 +91,16 @@ func TestGetFavourites(t *testing.T) {
 	_ = my_logger.NewNop()
 
 	type TestCase struct {
-		name                     string
-		behaviorFavouriteService func(m *mocks.MockIProductService)
-		request                  *http.Request
-		expectedResponse         *delivery.ProductListResponse
+		name                   string
+		behaviorProductService func(m *mocks.MockIProductService)
+		request                *http.Request
+		expectedResponse       *delivery.ProductListResponse
 	}
 	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/profile/favourites", nil),
-			behaviorFavouriteService: func(m *mocks.MockIProductService) {
+			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetUserFavourites(gomock.Any(), uint64(testUserID)).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "sofa"}, {ID: 2, Title: "laptop"}}, nil)
 			},
@@ -116,7 +109,7 @@ func TestGetFavourites(t *testing.T) {
 		{
 			name:    "test empty",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/profile/favourites", nil),
-			behaviorFavouriteService: func(m *mocks.MockIProductService) {
+			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetUserFavourites(gomock.Any(), uint64(testUserID)).Return(
 					[]*models.ProductInFeed{}, nil)
 			},
@@ -133,13 +126,7 @@ func TestGetFavourites(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorFavouriteService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
@@ -178,16 +165,16 @@ func TestDeleteFavourite(t *testing.T) {
 	_ = my_logger.NewNop()
 
 	type TestCase struct {
-		name                     string
-		behaviorFavouriteService func(m *mocks.MockIProductService)
-		expectedResponse         responses.ResponseID
-		queryProductID           string
+		name                   string
+		behaviorProductService func(m *mocks.MockIProductService)
+		expectedResponse       responses.ResponseID
+		queryProductID         string
 	}
 	testCases := [...]TestCase{
 		{
 			name:           "test basic work",
 			queryProductID: "1",
-			behaviorFavouriteService: func(m *mocks.MockIProductService) {
+			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().DeleteFromFavourites(gomock.Any(), uint64(testUserID), uint64(1)).Return(nil)
 			},
 			expectedResponse: responses.ResponseID{
@@ -206,13 +193,7 @@ func TestDeleteFavourite(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorFavouriteService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
