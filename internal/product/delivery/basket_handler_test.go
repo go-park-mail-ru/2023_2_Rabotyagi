@@ -410,3 +410,146 @@ func TestUpdateOrderStatusBasket(t *testing.T) {
 		})
 	}
 }
+
+func TestBuyFullBasket(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                     string
+		behaviorFavouriteService func(m *mocks.MockIProductService)
+		request                  *http.Request
+		expectedResponse         any
+	}
+	testCases := [...]TestCase{
+		{
+			name:    "test basic work",
+			request: httptest.NewRequest(http.MethodPatch, "/api/v1/order/buy_full_basket", nil),
+			behaviorFavouriteService: func(m *mocks.MockIProductService) {
+				m.EXPECT().BuyFullBasket(gomock.Any(), uint64(testUserID)).Return(nil)
+			},
+			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulBuyFullBasket),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorFavouriteService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			testCase.request.AddCookie(&testCookie)
+			productHandler.BuyFullBasketHandler(w, testCase.request)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestDeleteOrderBasket(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		queryID                string
+		behaviorProductService func(m *mocks.MockIProductService)
+		request                *http.Request
+		expectedResponse       any
+	}
+	testCases := [...]TestCase{
+		{
+			name:    "test basic work",
+			queryID: "1",
+			request: httptest.NewRequest(http.MethodDelete, "/api/v1/order/delete", nil),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().DeleteOrder(gomock.Any(), uint64(1), uint64(testUserID)).Return(nil)
+			},
+			expectedResponse: responses.ResponseSuccessful{
+				Status: statuses.StatusResponseSuccessful,
+				Body:   responses.ResponseBody{Message: delivery.ResponseSuccessfulDeleteProduct},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorProductService(mockProductService)
+
+			utils.AddQueryParamsToRequest(testCase.request, map[string]string{"id": testCase.queryID})
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			testCase.request.AddCookie(&testCookie)
+			productHandler.DeleteOrderHandler(w, testCase.request)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
