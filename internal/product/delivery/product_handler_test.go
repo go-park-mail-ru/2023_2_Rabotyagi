@@ -1,7 +1,6 @@
 package delivery_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -195,6 +194,16 @@ func TestAddProduct(t *testing.T) {
 					``)), uint64(testUserID)).Return(uint64(0), myerrors.NewErrorInternal("Test internal error"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name: "test wrong method",
+			request: httptest.NewRequest(http.MethodDelete, "/api/v1/product/add", strings.NewReader(
+				``)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT()
+			},
+			expectedResponse: `Method not allowed
+`,
 		},
 	}
 
@@ -666,6 +675,16 @@ func TestUpdateProduct(t *testing.T) {
 				Body:   responses.ResponseBodyID{ID: 1},
 			},
 		},
+		{
+			name: "test wrong method",
+			request: httptest.NewRequest(http.MethodDelete, "/api/v1/product/update", strings.NewReader(
+				``)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT()
+			},
+			expectedResponse: `Method not allowed
+`,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -687,24 +706,9 @@ func TestUpdateProduct(t *testing.T) {
 			testCase.request.AddCookie(&testCookie)
 			productHandler.UpdateProductHandler(w, testCase.request)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse responses.ResponseID
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -924,7 +928,6 @@ func TestDeleteProduct(t *testing.T) {
 			req.AddCookie(&testCookie)
 			productHandler.DeleteProductHandler(w, req)
 
-			// func CompareHTTPTestResult(received io.Reader, expected any) err
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)

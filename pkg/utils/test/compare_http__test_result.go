@@ -8,6 +8,13 @@ import (
 	"net/http/httptest"
 )
 
+func trimQuotesJson(json []byte) []byte {
+	json = bytes.TrimPrefix(json, []byte(`"`))
+	json = bytes.TrimSuffix(json, []byte(`"`))
+
+	return json
+}
+
 func CompareHTTPTestResult(recorder *httptest.ResponseRecorder, expected any) error {
 	resp := recorder.Result()
 	defer resp.Body.Close()
@@ -15,6 +22,16 @@ func CompareHTTPTestResult(recorder *httptest.ResponseRecorder, expected any) er
 	receivedRespRaw, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to ReadAll resp.Body: %w", err)
+	}
+
+	if expectedStr, ok := expected.(string); ok {
+		receivedStr := string(receivedRespRaw)
+		if expectedStr != receivedStr {
+			return fmt.Errorf("response: got %s, expected %s",
+				expectedStr, receivedStr)
+		}
+
+		return nil
 	}
 
 	expectedResponseRaw, err := json.Marshal(expected)
