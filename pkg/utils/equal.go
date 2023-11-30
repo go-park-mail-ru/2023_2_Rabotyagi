@@ -8,6 +8,7 @@ import (
 
 var errTemplate = fmt.Errorf("result WRONG: ")
 
+// EqualTest accept arguments that should be work with json.Marshal
 func EqualTest(received any, expected any) error {
 	if !reflect.DeepEqual(received, expected) {
 		expectedRaw, err := json.Marshal(expected)

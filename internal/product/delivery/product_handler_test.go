@@ -20,6 +20,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 
 	"go.uber.org/mock/gomock"
 )
@@ -30,7 +31,7 @@ const testAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
 	"jIPlwcF5xGPpgQ5WYp5kFv9Av-yguX2aOYsAgbodDM4"
 
 // testCookie for read only, because async usage.
-var testCookie = http.Cookie{ //nolint:exhaustruct
+var testCookie = http.Cookie{ //nolint:gochecknoglobals,exhaustruct
 	Name:  responses.CookieAuthName,
 	Value: testAccessToken, Expires: time.Now().Add(time.Hour),
 }
@@ -40,6 +41,23 @@ const testUserID = 1
 var behaviorSessionManagerClientCheck = func(m *mocksauth.MockSessionMangerClient) { //nolint:gochecknoglobals
 	m.EXPECT().Check(gomock.Any(), &auth.Session{AccessToken: testAccessToken}).Return(
 		&auth.UserID{UserId: testUserID}, nil).AnyTimes()
+}
+
+func NewProductHandler(ctrl *gomock.Controller,
+	behaviorProductService func(m *mocks.MockIProductService),
+) (*delivery.ProductHandler, error) {
+	mockProductService := mocks.NewMockIProductService(ctrl)
+	mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+	behaviorSessionManagerClientCheck(mockSessionManagerClient)
+	behaviorProductService(mockProductService)
+
+	productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+	if err != nil {
+		return nil, fmt.Errorf("unexpected err=%w", err)
+	}
+
+	return productHandler, nil
 }
 
 //nolint:funlen
@@ -152,15 +170,9 @@ func TestAddProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
@@ -168,24 +180,9 @@ func TestAddProduct(t *testing.T) {
 			testCase.request.AddCookie(&testCookie)
 			productHandler.AddProductHandler(w, testCase.request)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse responses.ResponseID
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -251,43 +248,21 @@ func TestGetProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.idProduct})
-
 			req.AddCookie(&testCookie)
 			productHandler.GetProductHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse delivery.ProductResponse
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(&resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -462,7 +437,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 						{ID: 8, Title: "Title2"},
 						{ID: 9, Title: "Title2"},
 						{ID: 10, Title: "Title2"},
-					}, nil) //nolint:exhaustruct
+					}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
 				[]*models.ProductInFeed{
@@ -1021,6 +996,7 @@ func TestDeleteProduct(t *testing.T) {
 			req.AddCookie(&testCookie)
 			productHandler.DeleteProductHandler(w, req)
 
+			// func CompareHTTPTestResult(received io.Reader, expected any) err
 			resp := w.Result()
 			defer resp.Body.Close()
 
