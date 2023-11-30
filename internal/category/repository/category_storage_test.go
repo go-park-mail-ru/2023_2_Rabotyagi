@@ -13,10 +13,11 @@ import (
 	"github.com/pashagolub/pgxmock/v3"
 )
 
-func TestFullCategories(t *testing.T) {
+func TestGetFullCategories(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
+
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
 		t.Fatalf("%v", err)
