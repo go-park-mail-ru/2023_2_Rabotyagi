@@ -339,3 +339,74 @@ func TestUpdateOrderCountBasket(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateOrderStatusBasket(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                     string
+		behaviorFavouriteService func(m *mocks.MockIProductService)
+		request                  *http.Request
+		expectedResponse         any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			request: httptest.NewRequest(http.MethodPatch, "/api/v1/order/update_status",
+				strings.NewReader(`{"id":3, "status":1}`)),
+			behaviorFavouriteService: func(m *mocks.MockIProductService) {
+				m.EXPECT().UpdateOrderStatus(gomock.Any(), io.NopCloser(strings.NewReader(
+					`{"id":3, "status":1}`)), uint64(testUserID)).Return(nil)
+			},
+			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulUpdateStatusOrder),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockProductService := mocks.NewMockIProductService(ctrl)
+			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
+
+			behaviorSessionManagerClientCheck(mockSessionManagerClient)
+			testCase.behaviorFavouriteService(mockProductService)
+
+			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			testCase.request.AddCookie(&testCookie)
+			productHandler.UpdateOrderStatusHandler(w, testCase.request)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
