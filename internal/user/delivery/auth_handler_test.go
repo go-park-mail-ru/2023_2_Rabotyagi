@@ -241,3 +241,112 @@ func TestSignIn(t *testing.T) {
 		})
 	}
 }
+
+//nolint:funlen
+func TestLogOut(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                         string
+		behaviorSessionManagerClient func(m *mocks.MockSessionMangerClient)
+		request                      *http.Request
+		checkHeader                  func(recorder *httptest.ResponseRecorder) error
+		expectedResponse             any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			request: func() *http.Request {
+				req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
+				req.AddCookie(&http.Cookie{Name: responses.CookieAuthName, Value: testAccessToken}) //nolint:exhaustruct
+
+				return req
+			}(),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
+				m.EXPECT().Delete(gomock.Any(),
+					&auth.Session{AccessToken: testAccessToken}).Return(
+					&auth.Session{AccessToken: "jwt_test_token"}, nil)
+			},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				cookieRaw := recorder.Header().Get("Set-Cookie")
+				if !strings.Contains(cookieRaw, "jwt_test_token") {
+					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
+				}
+
+				return nil
+			},
+			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulLogOut),
+		},
+		{
+			name: "test internal error",
+			request: func() *http.Request {
+				req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
+				req.AddCookie(&http.Cookie{Name: responses.CookieAuthName, Value: testAccessToken}) //nolint:exhaustruct
+
+				return req
+			}(),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
+				m.EXPECT().Delete(gomock.Any(),
+					&auth.Session{AccessToken: testAccessToken}).Return(nil,
+					myerrors.NewErrorInternal("Test error"))
+			},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				return nil
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name:                         "test cookie not presented",
+			request:                      httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				return nil
+			},
+			expectedResponse: responses.NewErrResponse(
+				responses.ErrCookieNotPresented.Status(), responses.ErrCookieNotPresented.Error()),
+		},
+		{
+			name:                         "test wrong method",
+			request:                      httptest.NewRequest(http.MethodDelete, "/api/v1/logout", nil),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				return nil
+			},
+			expectedResponse: `Method not allowed
+`,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			authHandler, err := NewAuthHandler(ctrl, testCase.behaviorSessionManagerClient)
+			if err != nil {
+				t.Fatalf("Failed create authHandler %s", err.Error())
+			}
+
+			w := httptest.NewRecorder()
+
+			authHandler.LogOutHandler(w, testCase.request)
+
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
+			}
+
+			err = testCase.checkHeader(w)
+			if err != nil {
+				t.Fatalf("Wrong Headers %s", err.Error())
+			}
+		})
+	}
+}

@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"net/http"
 	"time"
@@ -172,6 +173,11 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(responses.CookieAuthName)
 	if err != nil {
 		logger.Errorln(err)
+
+		if errors.Is(err, http.ErrNoCookie) {
+			err = responses.ErrCookieNotPresented
+		}
+
 		responses.HandleErr(w, logger, err)
 
 		return
