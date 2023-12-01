@@ -11,8 +11,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -27,11 +27,11 @@ var (
 )
 
 type ProductStorage struct {
-	pool   *pgxpool.Pool
+	pool   pgxpool.IPgxPool
 	logger *my_logger.MyLogger
 }
 
-func NewProductStorage(pool *pgxpool.Pool) (*ProductStorage, error) {
+func NewProductStorage(pool pgxpool.IPgxPool) (*ProductStorage, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
