@@ -9,6 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 	"go.uber.org/mock/gomock"
 	"io"
 	"net/http"
@@ -63,7 +64,7 @@ func TestAddOrder(t *testing.T) {
 					"in_favourites": true,
 					"images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
 								{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)),
-					uint64(testUserID)).Return(&models.OrderInBasket{
+					test.UserID).Return(&models.OrderInBasket{
 					OwnerID:        67890,
 					SalerID:        54321,
 					ProductID:      98765,
@@ -115,7 +116,7 @@ func TestAddOrder(t *testing.T) {
 			request: httptest.NewRequest(http.MethodPost, "/api/v1/order/add", strings.NewReader(`{"product_id":3, "count":3}`)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().AddOrder(gomock.Any(), io.NopCloser(strings.NewReader(
-					`{"product_id":3, "count":3}`)), uint64(testUserID)).Return(&models.OrderInBasket{
+					`{"product_id":3, "count":3}`)), test.UserID).Return(&models.OrderInBasket{
 					ProductID: 3,
 					Count:     3,
 				}, nil)
@@ -133,7 +134,7 @@ func TestAddOrder(t *testing.T) {
 			request: httptest.NewRequest(http.MethodPost, "/api/v1/order/add", strings.NewReader(`{}`)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().AddOrder(gomock.Any(), io.NopCloser(strings.NewReader(
-					`{}`)), uint64(testUserID)).Return(&models.OrderInBasket{}, nil)
+					`{}`)), test.UserID).Return(&models.OrderInBasket{}, nil)
 			},
 			expectedResponse: &delivery.OrderResponse{
 				Status: statuses.StatusResponseSuccessful,
@@ -158,7 +159,7 @@ func TestAddOrder(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.AddOrderHandler(w, testCase.request)
 
 			resp := w.Result()
@@ -200,7 +201,7 @@ func TestGetBasket(t *testing.T) {
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetOrdersByUserID(gomock.Any(), uint64(testUserID)).Return(
+				m.EXPECT().GetOrdersByUserID(gomock.Any(), test.UserID).Return(
 					[]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}, nil)
 			},
 			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}),
@@ -209,7 +210,7 @@ func TestGetBasket(t *testing.T) {
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetOrdersByUserID(gomock.Any(), uint64(testUserID)).Return(
+				m.EXPECT().GetOrdersByUserID(gomock.Any(), test.UserID).Return(
 					[]*models.OrderInBasket{}, nil)
 			},
 			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{}),
@@ -232,7 +233,7 @@ func TestGetBasket(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.GetBasketHandler(w, testCase.request)
 
 			resp := w.Result()
@@ -275,7 +276,7 @@ func TestUpdateOrderCountBasket(t *testing.T) {
 				strings.NewReader(`{"id":3, "count":3}`)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().UpdateOrderCount(gomock.Any(), io.NopCloser(strings.NewReader(
-					`{"id":3, "count":3}`)), uint64(testUserID)).Return(nil)
+					`{"id":3, "count":3}`)), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulUpdateCountOrder),
 		},
@@ -297,7 +298,7 @@ func TestUpdateOrderCountBasket(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.UpdateOrderCountHandler(w, testCase.request)
 
 			resp := w.Result()
@@ -340,7 +341,7 @@ func TestUpdateOrderStatusBasket(t *testing.T) {
 				strings.NewReader(`{"id":3, "status":1}`)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().UpdateOrderStatus(gomock.Any(), io.NopCloser(strings.NewReader(
-					`{"id":3, "status":1}`)), uint64(testUserID)).Return(nil)
+					`{"id":3, "status":1}`)), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulUpdateStatusOrder),
 		},
@@ -362,7 +363,7 @@ func TestUpdateOrderStatusBasket(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.UpdateOrderStatusHandler(w, testCase.request)
 
 			resp := w.Result()
@@ -402,7 +403,7 @@ func TestBuyFullBasket(t *testing.T) {
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodPatch, "/api/v1/order/buy_full_basket", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().BuyFullBasket(gomock.Any(), uint64(testUserID)).Return(nil)
+				m.EXPECT().BuyFullBasket(gomock.Any(), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulBuyFullBasket),
 		},
@@ -424,7 +425,7 @@ func TestBuyFullBasket(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.BuyFullBasketHandler(w, testCase.request)
 
 			resp := w.Result()
@@ -466,7 +467,7 @@ func TestDeleteOrderBasket(t *testing.T) {
 			queryID: "1",
 			request: httptest.NewRequest(http.MethodDelete, "/api/v1/order/delete", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().DeleteOrder(gomock.Any(), uint64(1), uint64(testUserID)).Return(nil)
+				m.EXPECT().DeleteOrder(gomock.Any(), uint64(1), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.ResponseSuccessful{
 				Status: statuses.StatusResponseSuccessful,
@@ -493,7 +494,7 @@ func TestDeleteOrderBasket(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.DeleteOrderHandler(w, testCase.request)
 
 			resp := w.Result()

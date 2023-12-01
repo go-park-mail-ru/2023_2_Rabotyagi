@@ -19,11 +19,6 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-// testAccessToken for read only, because async usage.
-const testAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-	"eyJlbWFpbCI6Iml2bi0xNS0wN0BtYWlsLnJ1IiwiZXhwaXJlIjoxNzAxMjg1MzE4LCJ1c2VySUQiOjExfQ." +
-	"jIPlwcF5xGPpgQ5WYp5kFv9Av-yguX2aOYsAgbodDM4"
-
 func NewAuthHandler(ctrl *gomock.Controller,
 	behaviorSessionManagerClient func(m *mocks.MockSessionMangerClient),
 ) (*delivery.AuthHandler, error) {
@@ -61,11 +56,11 @@ func TestSignUp(t *testing.T) {
 			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
 				m.EXPECT().Create(gomock.Any(),
 					&auth.User{Email: "ivn-tyt@mail.ru", Password: "strong"}).Return(
-					&auth.Session{AccessToken: testAccessToken}, nil)
+					&auth.Session{AccessToken: test.AccessToken}, nil)
 			},
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
 				cookieRaw := recorder.Header().Get("Set-Cookie")
-				if !strings.Contains(cookieRaw, testAccessToken) {
+				if !strings.Contains(cookieRaw, test.AccessToken) {
 					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
 				}
 
@@ -172,11 +167,11 @@ func TestSignIn(t *testing.T) {
 			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
 				m.EXPECT().Login(gomock.Any(),
 					&auth.User{Email: "ivn-tyt@mail.ru", Password: "strong"}).Return(
-					&auth.Session{AccessToken: testAccessToken}, nil)
+					&auth.Session{AccessToken: test.AccessToken}, nil)
 			},
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
 				cookieRaw := recorder.Header().Get("Set-Cookie")
-				if !strings.Contains(cookieRaw, testAccessToken) {
+				if !strings.Contains(cookieRaw, test.AccessToken) {
 					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
 				}
 
@@ -261,13 +256,13 @@ func TestLogOut(t *testing.T) {
 			name: "test basic work",
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
-				req.AddCookie(&http.Cookie{Name: responses.CookieAuthName, Value: testAccessToken}) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie) //nolint:exhaustruct
 
 				return req
 			}(),
 			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
 				m.EXPECT().Delete(gomock.Any(),
-					&auth.Session{AccessToken: testAccessToken}).Return(
+					&auth.Session{AccessToken: test.AccessToken}).Return(
 					&auth.Session{AccessToken: "jwt_test_token"}, nil)
 			},
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
@@ -284,13 +279,13 @@ func TestLogOut(t *testing.T) {
 			name: "test internal error",
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
-				req.AddCookie(&http.Cookie{Name: responses.CookieAuthName, Value: testAccessToken}) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie) //nolint:exhaustruct
 
 				return req
 			}(),
 			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
 				m.EXPECT().Delete(gomock.Any(),
-					&auth.Session{AccessToken: testAccessToken}).Return(nil,
+					&auth.Session{AccessToken: test.AccessToken}).Return(nil,
 					myerrors.NewErrorInternal("Test error"))
 			},
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {

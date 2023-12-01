@@ -23,19 +23,21 @@ type IUserService interface {
 	UpdateUser(ctx context.Context, r io.Reader, isPartialUpdate bool, userID uint64) (*models.UserWithoutPassword, error)
 }
 
-type UserHandler struct {
+type ProfileHandler struct {
 	sessionManagerClient auth.SessionMangerClient
 	service              IUserService
 	logger               *my_logger.MyLogger
 }
 
-func NewUserHandler(userService IUserService, sessionManagerClient auth.SessionMangerClient) (*UserHandler, error) {
+func NewProfileHandler(userService IUserService,
+	sessionManagerClient auth.SessionMangerClient,
+) (*ProfileHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
 	}
 
-	return &UserHandler{
+	return &ProfileHandler{
 		service:              userService,
 		logger:               logger,
 		sessionManagerClient: sessionManagerClient,
@@ -54,9 +56,9 @@ func NewUserHandler(userService IUserService, sessionManagerClient auth.SessionM
 //	@Success    200  {object} ProfileResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error" Внутри body статус может быть badFormat(4000)
 //	@Router      /profile/get [get]
-func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+func (u *ProfileHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -100,7 +102,7 @@ func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /profile/update [patch]
 //	@Router      /profile/update [put]
-func (u *UserHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+func (u *ProfileHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch && r.Method != http.MethodPut {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

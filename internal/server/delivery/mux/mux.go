@@ -40,7 +40,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		return nil, err
 	}
 
-	userHandler, err := userdelivery.NewUserHandler(userService, authGrpcService)
+	userHandler, err := userdelivery.NewProfileHandler(userService, authGrpcService)
 	if err != nil {
 		return nil, err
 	}
