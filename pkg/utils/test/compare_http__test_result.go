@@ -8,13 +8,6 @@ import (
 	"net/http/httptest"
 )
 
-func trimQuotesJson(json []byte) []byte {
-	json = bytes.TrimPrefix(json, []byte(`"`))
-	json = bytes.TrimSuffix(json, []byte(`"`))
-
-	return json
-}
-
 func CompareHTTPTestResult(recorder *httptest.ResponseRecorder, expected any) error {
 	resp := recorder.Result()
 	defer resp.Body.Close()
