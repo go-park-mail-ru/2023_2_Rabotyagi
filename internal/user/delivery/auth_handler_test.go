@@ -1,222 +1,134 @@
 package delivery_test
 
-// import (
-//	"bytes"
-//	"encoding/json"
-//	"io"
-//	"net/http"
-//	"net/http/httptest"
-//	"reflect"
-//	"testing"
-//	"time"
-//
-//	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/models"
-//	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/server/delivery"
-//	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/delivery"
-//	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/pkg/user/repository"
-//)
-//
-//func TestSignUpHandlerSuccessful(t *testing.T) {
-//	t.Parallel()
-//
-//	type TestCase struct {
-//		name             string
-//		inputPreUser     *models.PreUser
-//		expectedResponse *delivery.Response
-//	}
-//
-//	testCases := [...]TestCase{
-//		{
-//			name:             "test basic work",
-//			inputPreUser:     &models.PreUser{Email: "example@mail.ru", Password: "password"},
-//			expectedResponse: delivery.NewResponse(delivery.StatusResponseSuccessful, userdelivery.ResponseSuccessfulSignUp),
-//		},
-//	}
-//
-//	for _, testCase := range testCases {
-//		testCase := testCase
-//
-//		t.Run(testCase.name, func(t *testing.T) {
-//			t.Parallel()
-//
-//			reqBody, err := json.Marshal(&testCase.inputPreUser)
-//			if err != nil {
-//				t.Fatalf("Failed to marshal request body: %v", err)
-//			}
-//
-//			req := httptest.NewRequest(http.MethodPost, "/api/v1/signup", bytes.NewBuffer(reqBody))
-//
-//			w := httptest.NewRecorder()
-//
-//			authStorageMap := repository.NewAuthStorageMap()
-//			authHandler := &userdelivery.AuthHandler{
-//				storage: authStorageMap,
-//			}
-//
-//			authHandler.SignUpHandler(w, req)
-//
-//			resp := w.Result()
-//			defer resp.Body.Close()
-//
-//			receivedResponse, err := io.ReadAll(resp.Body)
-//			if err != nil {
-//				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-//			}
-//
-//			var resultResponse delivery.Response
-//
-//			err = json.Unmarshal(receivedResponse, &resultResponse)
-//			if err != nil {
-//				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-//			}
-//
-//			if !reflect.DeepEqual(*testCase.expectedResponse, resultResponse) {
-//				t.Errorf("wrong Response: got %+v, expected %+v",
-//					resultResponse, testCase.expectedResponse)
-//			}
-//		})
-//	}
-//}
-//
-////nolint:funlen
-//func TestSignInHandlerSuccessful(t *testing.T) {
-//	t.Parallel()
-//
-//	type TestCase struct {
-//		name             string
-//		inputPreUser     *models.PreUser
-//		expectedResponse *delivery.Response
-//	}
-//
-//	testCases := [...]TestCase{
-//		{
-//			name:             "test basic work",
-//			inputPreUser:     &models.PreUser{Email: "example@mail.ru", Password: "password"},
-//			expectedResponse: delivery.NewResponse(delivery.StatusResponseSuccessful, userdelivery.ResponseSuccessfulSignIn),
-//		},
-//	}
-//
-//	for _, testCase := range testCases {
-//		testCase := testCase
-//
-//		t.Run(testCase.name, func(t *testing.T) {
-//			t.Parallel()
-//
-//			reqBody, err := json.Marshal(&testCase.inputPreUser)
-//			if err != nil {
-//				t.Fatalf("Failed to marshal request body: %v", err)
-//			}
-//
-//			req := httptest.NewRequest(http.MethodPost, "/api/v1/signin", bytes.NewBuffer(reqBody))
-//
-//			w := httptest.NewRecorder()
-//
-//			authStorageMap := repository.NewAuthStorageMap()
-//			err = authStorageMap.CreateUser(testCase.inputPreUser)
-//			if err != nil {
-//				t.Fatalf("Failed to CreateUser err: %v", err)
-//			}
-//
-//			authHandler := &userdelivery.AuthHandler{
-//				storage: authStorageMap,
-//			}
-//
-//			authHandler.SignInHandler(w, req)
-//
-//			resp := w.Result()
-//			defer resp.Body.Close()
-//
-//			receivedResponse, err := io.ReadAll(resp.Body)
-//			if err != nil {
-//				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-//			}
-//
-//			var resultResponse delivery.Response
-//
-//			err = json.Unmarshal(receivedResponse, &resultResponse)
-//			if err != nil {
-//				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-//			}
-//
-//			if !reflect.DeepEqual(*testCase.expectedResponse, resultResponse) {
-//				t.Errorf("wrong Response: got %+v, expected %+v",
-//					resultResponse, testCase.expectedResponse)
-//			}
-//		})
-//	}
-//}
-//
-////nolint:funlen
-//func TestLogOutHandlerSuccessful(t *testing.T) {
-//	t.Parallel()
-//
-//	type TestCase struct {
-//		name             string
-//		inputCookie      *http.Cookie
-//		expectedResponse *delivery.Response
-//	}
-//
-//	testCases := [...]TestCase{
-//		{
-//			name: "test basic work",
-//			inputCookie: &http.Cookie{
-//				Name: userdelivery.CookieAuthName,
-//				Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-//					"eyJlbWFpbCI6ImV4YW1wbGVAbWFpbC5ydSIsImV4cGlyZSI6MCwidXNlcklEIjoxfQ." +
-//					"GBCEb3XJ6aHTsyl8jC3lxSWK6byjbYN0kg2e3NH2i9s",
-//				Expires: time.Now().Add(time.Hour)},
-//			expectedResponse: delivery.NewResponse(delivery.StatusResponseSuccessful, userdelivery.ResponseSuccessfulLogOut),
-//		},
-//	}
-//
-//	for _, testCase := range testCases {
-//		testCase := testCase
-//
-//		t.Run(testCase.name, func(t *testing.T) {
-//			t.Parallel()
-//
-//			req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
-//			req.Header.Add("Cookie", testCase.inputCookie.String())
-//
-//			w := httptest.NewRecorder()
-//
-//			authStorageMap := repository.NewAuthStorageMap()
-//			authHandler := &userdelivery.AuthHandler{
-//				storage: authStorageMap,
-//			}
-//
-//			authHandler.LogOutHandler(w, req)
-//
-//			resp := w.Result()
-//			defer resp.Body.Close()
-//
-//			receivedResponse, err := io.ReadAll(resp.Body)
-//			if err != nil {
-//				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-//			}
-//
-//			var resultResponse delivery.Response
-//
-//			err = json.Unmarshal(receivedResponse, &resultResponse)
-//			if err != nil {
-//				t.Fatalf("Failed to Unmarshal(receivedResponse): %v\n receivedResponse: %+v", err, receivedResponse)
-//			}
-//
-//			if !reflect.DeepEqual(*testCase.expectedResponse, resultResponse) {
-//				t.Errorf("wrong Response: got %+v, expected %+v",
-//					resultResponse, testCase.expectedResponse)
-//			}
-//
-//			allCookies := resp.Cookies()
-//			for _, cookie := range allCookies {
-//				if cookie.Name == userdelivery.CookieAuthName {
-//					if cookie.Expires.Before(time.Now()) {
-//						return
-//					}
-//				}
-//			}
-//
-//			t.Fatalf("wrong cookie expire: %+v", allCookies)
-//		})
-//	}
-//}
+import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth/mocks"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
+
+	"go.uber.org/mock/gomock"
+)
+
+// testAccessToken for read only, because async usage.
+const testAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+	"eyJlbWFpbCI6Iml2bi0xNS0wN0BtYWlsLnJ1IiwiZXhwaXJlIjoxNzAxMjg1MzE4LCJ1c2VySUQiOjExfQ." +
+	"jIPlwcF5xGPpgQ5WYp5kFv9Av-yguX2aOYsAgbodDM4"
+
+func NewAuthHandler(ctrl *gomock.Controller,
+	behaviorSessionManagerClient func(m *mocks.MockSessionMangerClient),
+) (*delivery.AuthHandler, error) {
+	mockSessionManagerClient := mocks.NewMockSessionMangerClient(ctrl)
+
+	behaviorSessionManagerClient(mockSessionManagerClient)
+
+	authHandler, err := delivery.NewAuthHandler(mockSessionManagerClient)
+	if err != nil {
+		return nil, fmt.Errorf("unexpected err=%w", err)
+	}
+
+	return authHandler, nil
+}
+
+//nolint:funlen
+func TestSignUp(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                         string
+		behaviorSessionManagerClient func(m *mocks.MockSessionMangerClient)
+		request                      *http.Request
+		checkHeader                  func(recorder *httptest.ResponseRecorder) error
+		expectedResponse             any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/signup", strings.NewReader(
+				`{"email":"ivn-tyt@mail.ru", "password": "strong"}`)),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
+				m.EXPECT().Create(gomock.Any(),
+					&auth.User{Email: "ivn-tyt@mail.ru", Password: "strong"}).Return(
+					&auth.Session{AccessToken: testAccessToken}, nil)
+			},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				cookieRaw := recorder.Header().Get("Set-Cookie")
+				if !strings.Contains(cookieRaw, testAccessToken) {
+					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
+				}
+
+				return nil
+			},
+			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulSignUp),
+		},
+		{
+			name: "test error create",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/signup", strings.NewReader(
+				`{"email":"ivn-tyt@mail.ru", "password": "strong"}`)),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
+				m.EXPECT().Create(gomock.Any(),
+					&auth.User{Email: "ivn-tyt@mail.ru", Password: "strong"}).Return(
+					nil, myerrors.NewErrorInternal("Test error"))
+			},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				return nil
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name: "test wrong method",
+			request: httptest.NewRequest(http.MethodDelete, "/api/v1/signup", strings.NewReader(
+				`{"email":"ivn-tyt@mail.ru", "password": "strong"}`)),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
+				m.EXPECT()
+			},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				return nil
+			},
+			expectedResponse: `Method not allowed
+`,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			authHandler, err := NewAuthHandler(ctrl, testCase.behaviorSessionManagerClient)
+			if err != nil {
+				t.Fatalf("Failed create authHandler %s", err.Error())
+			}
+
+			w := httptest.NewRecorder()
+
+			authHandler.SignUpHandler(w, testCase.request)
+
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
+			}
+
+			err = testCase.checkHeader(w)
+			if err != nil {
+				t.Fatalf("Wrong Headers %s", err.Error())
+			}
+		})
+	}
+}

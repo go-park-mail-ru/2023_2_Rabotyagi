@@ -36,9 +36,6 @@ func NewAuthHandler(sessionManagerClient auth.SessionMangerClient) (*AuthHandler
 //	@Summary    signup
 //	@Description  signup in app
 //
-//	@Description Error.status can be:
-//	@Description StatusErrBadRequest      = 400
-//	@Description  StatusErrInternalServer  = 500
 //	@Tags auth
 //
 //	@Accept      json
