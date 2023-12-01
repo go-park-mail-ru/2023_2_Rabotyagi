@@ -21,7 +21,7 @@ func CompareHTTPTestResult(recorder *httptest.ResponseRecorder, expected any) er
 		receivedStr := string(receivedRespRaw)
 		if expectedStr != receivedStr {
 			return fmt.Errorf("response: got %s, expected %s",
-				expectedStr, receivedStr)
+				receivedStr, expectedStr)
 		}
 
 		return nil
