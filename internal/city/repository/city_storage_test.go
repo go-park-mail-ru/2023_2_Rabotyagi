@@ -2,8 +2,7 @@ package repository_test
 
 import (
 	"context"
-	"database/sql"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -11,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestGetFullCategories(t *testing.T) {
+func TestGetFullCity(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -23,27 +22,27 @@ func TestGetFullCategories(t *testing.T) {
 
 	type TestCase struct {
 		name                    string
-		behaviorCategoryStorage func(m *repository.CategoryStorage)
+		behaviorCategoryStorage func(m *repository.CityStorage)
 		expectedResponse        any
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorCategoryStorage: func(m *repository.CategoryStorage) {
+			behaviorCategoryStorage: func(m *repository.CityStorage) {
 				mockPool.ExpectBegin()
-				mockPool.ExpectQuery(`^SELECT (.+) FROM public."category"$`).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "name", "parent_id"}).
-						AddRow(uint64(1), "Animal", sql.NullInt64{Valid: false, Int64: 0}).
-						AddRow(uint64(2), "Cats", sql.NullInt64{Valid: true, Int64: 1}).
-						AddRow(uint64(3), "Dogs", sql.NullInt64{Valid: true, Int64: 1}))
+				mockPool.ExpectQuery(`SELECT "city".id,"city".name FROM public."city"`).
+					WillReturnRows(pgxmock.NewRows([]string{"id", "name"}).
+						AddRow(uint64(1), "Moscow").
+						AddRow(uint64(2), "St. Petersburg").
+						AddRow(uint64(3), "Podolsk"))
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},
-			expectedResponse: []*models.Category{
-				{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
-				{ID: 2, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
-				{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}},
+			expectedResponse: []*models.City{
+				{ID: 1, Name: "Moscow"},
+				{ID: 2, Name: "St. Petersburg"},
+				{ID: 3, Name: "Podolsk"}},
 		},
 	}
 
@@ -55,14 +54,14 @@ func TestGetFullCategories(t *testing.T) {
 
 			ctx := context.Background()
 
-			catStorage, err := repository.NewCategoryStorage(mockPool)
+			catStorage, err := repository.NewCityStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
 			testCase.behaviorCategoryStorage(catStorage)
 
-			response, err := catStorage.GetFullCategories(ctx)
+			response, err := catStorage.GetFullCities(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -79,7 +78,7 @@ func TestGetFullCategories(t *testing.T) {
 	}
 }
 
-func TestSearchCategory(t *testing.T) {
+func TestSearchCity(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -90,28 +89,28 @@ func TestSearchCategory(t *testing.T) {
 	}
 
 	type TestCase struct {
-		name                    string
-		behaviorCategoryStorage func(m *repository.CategoryStorage)
-		expectedResponse        any
-		searchInput             string
+		name                string
+		behaviorCityStorage func(m *repository.CityStorage)
+		expectedResponse    any
+		searchInput         string
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorCategoryStorage: func(m *repository.CategoryStorage) {
+			behaviorCityStorage: func(m *repository.CityStorage) {
 				mockPool.ExpectBegin()
-				mockPool.ExpectQuery(`SELECT category.id, category.name, category.parent_id FROM public."category"`).
-					WithArgs("%ani%").
-					WillReturnRows(pgxmock.NewRows([]string{"id", "name", "parent_id"}).
-						AddRow(uint64(1), "Animal", sql.NullInt64{Valid: false, Int64: 0}))
+				mockPool.ExpectQuery(`SELECT city.id, city.name FROM public."city"`).
+					WithArgs("%mos%").
+					WillReturnRows(pgxmock.NewRows([]string{"id", "name"}).
+						AddRow(uint64(1), "Moscow"))
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},
-			expectedResponse: []*models.Category{
-				{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+			expectedResponse: []*models.City{
+				{ID: 1, Name: "Moscow"},
 			},
-			searchInput: "Ani",
+			searchInput: "Mos",
 		},
 	}
 
@@ -123,14 +122,14 @@ func TestSearchCategory(t *testing.T) {
 
 			ctx := context.Background()
 
-			catStorage, err := repository.NewCategoryStorage(mockPool)
+			cityStorage, err := repository.NewCityStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorCategoryStorage(catStorage)
+			testCase.behaviorCityStorage(cityStorage)
 
-			response, err := catStorage.SearchCategory(ctx, testCase.searchInput)
+			response, err := cityStorage.SearchCity(ctx, testCase.searchInput)
 			if err != nil {
 				t.Fatal(err)
 			}
