@@ -38,7 +38,7 @@ func NewAuthService(authStorage IAuthStorage) (*AuthService, error) {
 	return &AuthService{storage: authStorage, logger: logger}, nil
 }
 
-func (a *AuthService) GetUserRawJWT(ctx context.Context, email string, password string) (string, error) {
+func (a *AuthService) LoginUser(ctx context.Context, email string, password string) (string, error) {
 	user, err := a.storage.GetUser(ctx, email)
 	if err != nil {
 		a.logger.Errorln(err)
@@ -57,7 +57,7 @@ func (a *AuthService) GetUserRawJWT(ctx context.Context, email string, password 
 		return "", ErrWrongCredentials
 	}
 
-	jwtPayload := jwt.UserJwtPayload{}
+	jwtPayload := jwt.UserJwtPayload{} //nolint:exhaustruct
 
 	jwtPayload.UserID = user.ID
 	jwtPayload.Email = user.Email

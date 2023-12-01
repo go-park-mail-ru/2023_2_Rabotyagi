@@ -74,7 +74,7 @@ func TestSignUp(t *testing.T) {
 			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulSignUp),
 		},
 		{
-			name: "test error create",
+			name: "test internal error",
 			request: httptest.NewRequest(http.MethodPost, "/api/v1/signup", strings.NewReader(
 				`{"email":"ivn-tyt@mail.ru", "password": "strong"}`)),
 			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
@@ -91,9 +91,118 @@ func TestSignUp(t *testing.T) {
 			name: "test wrong method",
 			request: httptest.NewRequest(http.MethodDelete, "/api/v1/signup", strings.NewReader(
 				`{"email":"ivn-tyt@mail.ru", "password": "strong"}`)),
-			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
-				m.EXPECT()
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				return nil
 			},
+			expectedResponse: `Method not allowed
+`,
+		},
+		{
+			name: "test wrong format",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/signup", strings.NewReader(
+				`{`)),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				return nil
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusBadFormatRequest, "unexpected EOF"),
+		},
+		{
+			name: "test wrong content",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/signup", strings.NewReader(
+				`{"email":"wrong_email", "password":"123333"}`)),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				return nil
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusBadContentRequest, "Некорректный формат email"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			authHandler, err := NewAuthHandler(ctrl, testCase.behaviorSessionManagerClient)
+			if err != nil {
+				t.Fatalf("Failed create authHandler %s", err.Error())
+			}
+
+			w := httptest.NewRecorder()
+
+			authHandler.SignUpHandler(w, testCase.request)
+
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
+			}
+
+			err = testCase.checkHeader(w)
+			if err != nil {
+				t.Fatalf("Wrong Headers %s", err.Error())
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestSignIn(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                         string
+		behaviorSessionManagerClient func(m *mocks.MockSessionMangerClient)
+		request                      *http.Request
+		checkHeader                  func(recorder *httptest.ResponseRecorder) error
+		expectedResponse             any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:    "test basic work",
+			request: httptest.NewRequest(http.MethodGet, "/api/v1/signin?email=ivn-tyt@mail.ru&password=strong", nil),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
+				m.EXPECT().Login(gomock.Any(),
+					&auth.User{Email: "ivn-tyt@mail.ru", Password: "strong"}).Return(
+					&auth.Session{AccessToken: testAccessToken}, nil)
+			},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				cookieRaw := recorder.Header().Get("Set-Cookie")
+				if !strings.Contains(cookieRaw, testAccessToken) {
+					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
+				}
+
+				return nil
+			},
+			expectedResponse: responses.NewResponseSuccessful(delivery.ResponseSuccessfulSignIn),
+		},
+		{
+			name: "test internal error",
+			request: httptest.NewRequest(http.MethodGet,
+				"/api/v1/signin?email=ivn-tyt@mail.ru&password=strong", nil),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {
+				m.EXPECT().Login(gomock.Any(),
+					&auth.User{Email: "ivn-tyt@mail.ru", Password: "strong"}).Return(
+					nil, myerrors.NewErrorInternal("Test error"))
+			},
+			checkHeader: func(recorder *httptest.ResponseRecorder) error {
+				return nil
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name: "test wrong method",
+			request: httptest.NewRequest(http.MethodDelete,
+				"/api/v1/signin", nil),
+			behaviorSessionManagerClient: func(m *mocks.MockSessionMangerClient) {},
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
 				return nil
 			},
@@ -118,7 +227,7 @@ func TestSignUp(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			authHandler.SignUpHandler(w, testCase.request)
+			authHandler.SignInHandler(w, testCase.request)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
