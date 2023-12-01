@@ -3,15 +3,17 @@ package repository_test
 import (
 	"context"
 	"database/sql"
+	"testing"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+
 	"github.com/pashagolub/pgxmock/v3"
-	"go.uber.org/mock/gomock"
-	"testing"
 )
 
+//nolint:funlen
 func TestGetFullCategories(t *testing.T) {
 	t.Parallel()
 
@@ -44,7 +46,8 @@ func TestGetFullCategories(t *testing.T) {
 			expectedResponse: []*models.Category{
 				{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
 				{ID: 2, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
-				{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}},
+				{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
+			},
 		},
 	}
 
@@ -55,9 +58,6 @@ func TestGetFullCategories(t *testing.T) {
 			t.Parallel()
 
 			ctx := context.Background()
-
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
 
 			catStorage, err := repository.NewCategoryStorage(mockPool)
 			if err != nil {
