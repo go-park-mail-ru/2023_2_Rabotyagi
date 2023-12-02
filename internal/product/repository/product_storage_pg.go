@@ -11,8 +11,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -27,11 +27,11 @@ var (
 )
 
 type ProductStorage struct {
-	pool   *pgxpool.Pool
+	pool   pgxpool.IPgxPool
 	logger *my_logger.MyLogger
 }
 
-func NewProductStorage(pool *pgxpool.Pool) (*ProductStorage, error) {
+func NewProductStorage(pool pgxpool.IPgxPool) (*ProductStorage, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -724,43 +724,6 @@ func (p *ProductStorage) incViews(ctx context.Context, tx pgx.Tx, productID uint
 	if err != nil {
 		p.logger.Errorln(err)
 
-		return fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return nil
-}
-
-func (p *ProductStorage) updateAllViews(ctx context.Context, tx pgx.Tx) error {
-	SQLUpdateAllViews := `UPDATE public."product"
-						  SET views = subquery.view_count
-						  FROM (
-							  SELECT product_id, COUNT(*) AS view_count
-							  FROM public."view"
-							  GROUP BY product_id
-						  ) AS subquery
-						  WHERE product.id = subquery.product_id;`
-
-	_, err := tx.Exec(ctx, SQLUpdateAllViews)
-
-	if err != nil {
-		p.logger.Errorln(err)
-
-		return fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return nil
-}
-
-func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
-	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		err := p.updateAllViews(ctx, tx)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-	if err != nil {
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 

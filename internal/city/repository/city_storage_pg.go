@@ -8,16 +8,16 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"strings"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type CityStorage struct {
-	pool   *pgxpool.Pool
+	pool   pgxpool.IPgxPool
 	logger *my_logger.MyLogger
 }
 
-func NewCityStorage(pool *pgxpool.Pool) (*CityStorage, error) {
+func NewCityStorage(pool pgxpool.IPgxPool) (*CityStorage, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
