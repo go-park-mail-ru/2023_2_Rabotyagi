@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/models"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -19,11 +19,11 @@ var (
 )
 
 type AuthStorage struct {
-	pool   *pgxpool.Pool
+	pool   pgxpool.IPgxPool
 	logger *my_logger.MyLogger
 }
 
-func NewAuthStorage(pool *pgxpool.Pool) (*AuthStorage, error) {
+func NewAuthStorage(pool pgxpool.IPgxPool) (*AuthStorage, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
