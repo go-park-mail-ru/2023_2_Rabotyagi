@@ -24,22 +24,9 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-// testAccessToken for read only, because async usage.
-const testAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-	"eyJlbWFpbCI6Iml2bi0xNS0wN0BtYWlsLnJ1IiwiZXhwaXJlIjoxNzAxMjg1MzE4LCJ1c2VySUQiOjExfQ." +
-	"jIPlwcF5xGPpgQ5WYp5kFv9Av-yguX2aOYsAgbodDM4"
-
-// testCookie for read only, because async usage.
-var testCookie = http.Cookie{ //nolint:gochecknoglobals,exhaustruct
-	Name:  responses.CookieAuthName,
-	Value: testAccessToken, Expires: time.Now().Add(time.Hour),
-}
-
-const testUserID = 1
-
 var behaviorSessionManagerClientCheck = func(m *mocksauth.MockSessionMangerClient) { //nolint:gochecknoglobals
-	m.EXPECT().Check(gomock.Any(), &auth.Session{AccessToken: testAccessToken}).Return(
-		&auth.UserID{UserId: testUserID}, nil).AnyTimes()
+	m.EXPECT().Check(gomock.Any(), &auth.Session{AccessToken: test.AccessToken}).Return(
+		&auth.UserID{UserId: test.UserID}, nil).AnyTimes()
 }
 
 func NewProductHandler(ctrl *gomock.Controller,
@@ -93,7 +80,7 @@ func TestAddProduct(t *testing.T) {
 "price":123,
 "available_count":1,
 "city_id":1,
-"delivery":false, "safe_deal":false}`)), uint64(testUserID)).Return(uint64(1), nil)
+"delivery":false, "safe_deal":false}`)), test.UserID).Return(uint64(1), nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -120,7 +107,7 @@ func TestAddProduct(t *testing.T) {
 "price":1232,
 "available_count":12,
 "city_id":1,
-"delivery":false, "safe_deal":false}`)), uint64(testUserID)).Return(uint64(1), nil)
+"delivery":false, "safe_deal":false}`)), test.UserID).Return(uint64(1), nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -151,7 +138,7 @@ func TestAddProduct(t *testing.T) {
 "city_id":1,
 "delivery":false, "safe_deal":false, 
 "images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
-{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)), uint64(testUserID)).Return(uint64(1), nil)
+{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)), test.UserID).Return(uint64(1), nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -178,7 +165,7 @@ func TestAddProduct(t *testing.T) {
 "price":1232,
 "available_count":12,
 "city_id":1,
-"delivery":false, "safe_deal":false}`)), uint64(testUserID)).Return(uint64(1), nil)
+"delivery":false, "safe_deal":false}`)), test.UserID).Return(uint64(1), nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -191,7 +178,7 @@ func TestAddProduct(t *testing.T) {
 				``)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().AddProduct(gomock.Any(), io.NopCloser(strings.NewReader(
-					``)), uint64(testUserID)).Return(uint64(0), myerrors.NewErrorInternal("Test internal error"))
+					``)), test.UserID).Return(uint64(0), myerrors.NewErrorInternal("Test internal error"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
 		},
@@ -223,7 +210,7 @@ func TestAddProduct(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.AddProductHandler(w, testCase.request)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
@@ -252,7 +239,7 @@ func TestGetProduct(t *testing.T) {
 			name:      "test basic work",
 			idProduct: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().GetProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					&models.Product{ID: 1, Title: "Title"}, nil) //nolint:exhaustruct
 			},
 			expectedResponse: delivery.NewProductResponse(&models.Product{ID: 1, Title: "Title"}), //nolint:exhaustruct
@@ -261,7 +248,7 @@ func TestGetProduct(t *testing.T) {
 			name:      "test empty product",
 			idProduct: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().GetProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					&models.Product{}, nil) //nolint:exhaustruct
 			},
 			expectedResponse: delivery.NewProductResponse(&models.Product{}), //nolint:exhaustruct
@@ -270,7 +257,7 @@ func TestGetProduct(t *testing.T) {
 			name:      "test full required fields of product",
 			idProduct: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().GetProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					&models.Product{ //nolint:exhaustruct
 						ID: 1, SalerID: 1, CategoryID: 1, CityID: 1,
 						Title: "Title", Description: "desc", Price: 123,
@@ -303,7 +290,7 @@ func TestGetProduct(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.idProduct})
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.GetProductHandler(w, req)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
@@ -332,7 +319,7 @@ func TestGetProductList(t *testing.T) {
 			name:        "test basic work",
 			queryParams: map[string]string{"count": "2", "last_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(2), uint64(testUserID)).Return(
+				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(2), test.UserID).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -342,7 +329,7 @@ func TestGetProductList(t *testing.T) {
 			name:        "test zero work",
 			queryParams: map[string]string{"count": "0", "last_id": "0"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsList(gomock.Any(), uint64(0), uint64(0), uint64(testUserID)).Return(
+				m.EXPECT().GetProductsList(gomock.Any(), uint64(0), uint64(0), test.UserID).Return(
 					[]*models.ProductInFeed{}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -352,7 +339,7 @@ func TestGetProductList(t *testing.T) {
 			name:        "test a lot of count",
 			queryParams: map[string]string{"count": "10", "last_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(10), uint64(testUserID)).Return(
+				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(10), test.UserID).Return(
 					[]*models.ProductInFeed{
 						{ID: 1, Title: "Title"},
 						{ID: 2, Title: "Title2"},
@@ -400,7 +387,7 @@ func TestGetProductList(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.GetProductListHandler(w, req)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
@@ -429,7 +416,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 			name:        "test basic work",
 			queryParams: map[string]string{"count": "2", "last_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), uint64(testUserID), true).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), test.UserID, true).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -439,7 +426,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 			name:        "test zero work",
 			queryParams: map[string]string{"count": "0", "last_id": "0"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), uint64(testUserID), true).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), test.UserID, true).Return(
 					[]*models.ProductInFeed{}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -449,7 +436,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 			name:        "test a lot of count",
 			queryParams: map[string]string{"count": "10", "last_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), uint64(testUserID), true).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), test.UserID, true).Return(
 					[]*models.ProductInFeed{
 						{ID: 1, Title: "Title"},
 						{ID: 2, Title: "Title2"},
@@ -497,7 +484,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list_of_saler", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.GetListProductOfSalerHandler(w, req)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
@@ -526,7 +513,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 			name:        "test basic work",
 			queryParams: map[string]string{"count": "2", "last_id": "1", "saler_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), uint64(testUserID), false).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), test.UserID, false).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -536,7 +523,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 			name:        "test zero work",
 			queryParams: map[string]string{"count": "0", "last_id": "0", "saler_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), uint64(testUserID), false).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), test.UserID, false).Return(
 					[]*models.ProductInFeed{}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -546,7 +533,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 			name:        "test a lot of count",
 			queryParams: map[string]string{"count": "10", "last_id": "1", "saler_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), uint64(testUserID), false).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), test.UserID, false).Return(
 					[]*models.ProductInFeed{
 						{ID: 1, Title: "Title"},
 						{ID: 2, Title: "Title2"},
@@ -636,7 +623,7 @@ func TestUpdateProduct(t *testing.T) {
 					`{"available_count": 1,
   "category_id": 1,
   "delivery": true,
-  "description": "description not empty"}`)), true, uint64(1), uint64(testUserID)).Return(nil)
+  "description": "description not empty"}`)), true, uint64(1), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -649,7 +636,7 @@ func TestUpdateProduct(t *testing.T) {
 				``)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().UpdateProduct(gomock.Any(), io.NopCloser(strings.NewReader(
-					``)), true, uint64(1), uint64(testUserID)).Return(nil)
+					``)), true, uint64(1), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -668,7 +655,7 @@ func TestUpdateProduct(t *testing.T) {
 					`{"available_count": 1,
   "category_id": 1,  "city_id": 1, "saler_id": 1,
   "title": "title", "price" : 123,
-  "description": "description not empty"}`)), false, uint64(1), uint64(testUserID)).Return(nil)
+  "description": "description not empty"}`)), false, uint64(1), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -703,7 +690,7 @@ func TestUpdateProduct(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.UpdateProductHandler(w, testCase.request)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
@@ -732,7 +719,7 @@ func TestCloseProduct(t *testing.T) {
 			name:    "test basic work",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), uint64(testUserID))
+				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), test.UserID)
 			},
 			expectedResponse: responses.ResponseSuccessful{
 				Status: statuses.StatusResponseSuccessful,
@@ -743,7 +730,7 @@ func TestCloseProduct(t *testing.T) {
 			name:    "test error in close",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					myerrors.NewErrorInternal("Test Error Internal"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
@@ -777,7 +764,7 @@ func TestCloseProduct(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/close", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.CloseProductHandler(w, req)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
@@ -806,7 +793,7 @@ func TestActivateProduct(t *testing.T) {
 			name:    "test basic work",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), uint64(testUserID))
+				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), test.UserID)
 			},
 			expectedResponse: responses.ResponseSuccessful{
 				Status: statuses.StatusResponseSuccessful,
@@ -817,7 +804,7 @@ func TestActivateProduct(t *testing.T) {
 			name:    "test error in internal activate",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					myerrors.NewErrorInternal("Test Error Internal"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
@@ -851,7 +838,7 @@ func TestActivateProduct(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/activate", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.ActivateProductHandler(w, req)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
@@ -880,7 +867,7 @@ func TestDeleteProduct(t *testing.T) {
 			name:    "test basic work",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(nil)
+				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.ResponseSuccessful{
 				Status: statuses.StatusResponseSuccessful,
@@ -891,7 +878,7 @@ func TestDeleteProduct(t *testing.T) {
 			name:    "test error in internal",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					myerrors.NewErrorInternal("Test Error Internal"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
@@ -925,7 +912,7 @@ func TestDeleteProduct(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodDelete, "/api/v1/product/delete", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.DeleteProductHandler(w, req)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
@@ -1007,7 +994,7 @@ func TestSearchProduct(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/search", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"searched": testCase.querySearched})
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.SearchProductHandler(w, req)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
@@ -1037,7 +1024,7 @@ func TestGetSearchProductFeed(t *testing.T) {
 			queryParams: map[string]string{"count": "2", "offset": "0", "searched": "ноутбук"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetSearchProductFeed(gomock.Any(), "ноутбук",
-					uint64(0), uint64(2), uint64(testUserID)).Return(
+					uint64(0), uint64(2), test.UserID).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
 			},
 			expectedResponse: delivery.ProductListResponse{
@@ -1065,7 +1052,7 @@ func TestGetSearchProductFeed(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_search_feed", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.GetSearchProductFeedHandler(w, req)
 
 			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)

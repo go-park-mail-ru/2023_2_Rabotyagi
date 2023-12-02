@@ -9,6 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 	"go.uber.org/mock/gomock"
 	"io"
 	"net/http"
@@ -33,7 +34,7 @@ func TestAddToFavourites(t *testing.T) {
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodPost, "/api/v1/product/add-to-fav", strings.NewReader(`{"product_id":1}`)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().AddToFavourites(gomock.Any(), uint64(testUserID), io.NopCloser(strings.NewReader(
+				m.EXPECT().AddToFavourites(gomock.Any(), test.UserID, io.NopCloser(strings.NewReader(
 					`{"product_id":1}`))).Return(nil)
 			},
 			expectedResponse: responses.ResponseID{
@@ -59,7 +60,7 @@ func TestAddToFavourites(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.AddToFavouritesHandler(w, testCase.request)
 
 			resp := w.Result()
@@ -101,7 +102,7 @@ func TestGetFavourites(t *testing.T) {
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/profile/favourites", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetUserFavourites(gomock.Any(), uint64(testUserID)).Return(
+				m.EXPECT().GetUserFavourites(gomock.Any(), test.UserID).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "sofa"}, {ID: 2, Title: "laptop"}}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{{ID: 1, Title: "sofa"}, {ID: 2, Title: "laptop"}}),
@@ -110,7 +111,7 @@ func TestGetFavourites(t *testing.T) {
 			name:    "test empty",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/profile/favourites", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetUserFavourites(gomock.Any(), uint64(testUserID)).Return(
+				m.EXPECT().GetUserFavourites(gomock.Any(), test.UserID).Return(
 					[]*models.ProductInFeed{}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{}),
@@ -133,7 +134,7 @@ func TestGetFavourites(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.GetFavouritesHandler(w, testCase.request)
 
 			resp := w.Result()
@@ -175,7 +176,7 @@ func TestDeleteFavourite(t *testing.T) {
 			name:           "test basic work",
 			queryProductID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().DeleteFromFavourites(gomock.Any(), uint64(testUserID), uint64(1)).Return(nil)
+				m.EXPECT().DeleteFromFavourites(gomock.Any(), test.UserID, uint64(1)).Return(nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -203,7 +204,7 @@ func TestDeleteFavourite(t *testing.T) {
 			request := httptest.NewRequest(http.MethodDelete, "/api/v1/product/remove-from-fav", nil)
 			utils.AddQueryParamsToRequest(request, map[string]string{"product_id": testCase.queryProductID})
 
-			request.AddCookie(&testCookie)
+			request.AddCookie(&test.Cookie)
 			productHandler.DeleteFromFavouritesHandler(w, request)
 
 			resp := w.Result()

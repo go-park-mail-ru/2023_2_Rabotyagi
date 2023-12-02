@@ -48,7 +48,7 @@ func (c *CategoryStorage) selectFullCatgories(ctx context.Context, tx pgx.Tx) ([
 	_, err = pgx.ForEachRow(categoriesRows, []any{
 		&curCat.ID, &curCat.Name, &curCat.ParentID,
 	}, func() error {
-		categories = append(categories, &models.Category{ //nolint:exhaustruct
+		categories = append(categories, &models.Category{
 			ID:       curCat.ID,
 			Name:     curCat.Name,
 			ParentID: curCat.ParentID,

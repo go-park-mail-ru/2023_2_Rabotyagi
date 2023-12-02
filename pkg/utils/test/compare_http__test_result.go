@@ -8,13 +8,6 @@ import (
 	"net/http/httptest"
 )
 
-func trimQuotesJson(json []byte) []byte {
-	json = bytes.TrimPrefix(json, []byte(`"`))
-	json = bytes.TrimSuffix(json, []byte(`"`))
-
-	return json
-}
-
 func CompareHTTPTestResult(recorder *httptest.ResponseRecorder, expected any) error {
 	resp := recorder.Result()
 	defer resp.Body.Close()
@@ -28,7 +21,7 @@ func CompareHTTPTestResult(recorder *httptest.ResponseRecorder, expected any) er
 		receivedStr := string(receivedRespRaw)
 		if expectedStr != receivedStr {
 			return fmt.Errorf("response: got %s, expected %s",
-				expectedStr, receivedStr)
+				receivedStr, expectedStr)
 		}
 
 		return nil

@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -25,7 +26,11 @@ func GetUserID(ctx context.Context, r *http.Request,
 	if err != nil {
 		logger.Errorln(err)
 
-		return 0, fmt.Errorf(myerrors.ErrTemplate, responses.ErrCookieNotPresented)
+		if errors.Is(err, http.ErrNoCookie) {
+			err = responses.ErrCookieNotPresented
+		}
+
+		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	rawJwt := cookie.Value
