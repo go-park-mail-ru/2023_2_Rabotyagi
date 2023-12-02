@@ -82,7 +82,7 @@ func TestAddProduct(t *testing.T) {
 "city_id":1,
 "delivery":false, "safe_deal":false}`),
 			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
-				m.EXPECT().AddProduct(baseCtx, &models.PreProduct{
+				m.EXPECT().AddProduct(baseCtx, &models.PreProduct{ //nolint:exhaustruct
 					SalerID:        1,
 					CategoryID:     2,
 					Title:          "adsf",
@@ -140,7 +140,7 @@ func TestAddProduct(t *testing.T) {
 			"delivery":false, "safe_deal":false,
 			"images": [{"url": "test_url"}]}`),
 			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
-				m.EXPECT().AddProduct(baseCtx, &models.PreProduct{
+				m.EXPECT().AddProduct(baseCtx, &models.PreProduct{ //nolint:exhaustruct
 					SalerID:        1,
 					CategoryID:     2,
 					Title:          "adsf",
@@ -173,7 +173,7 @@ func TestAddProduct(t *testing.T) {
 			"delivery":false, "safe_deal":false,
 			"images": [{"url": "test_url"}]}`),
 			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
-				m.EXPECT().AddProduct(baseCtx, &models.PreProduct{
+				m.EXPECT().AddProduct(baseCtx, &models.PreProduct{ //nolint:exhaustruct
 					SalerID:        1,
 					CategoryID:     2,
 					Title:          "adsf",
@@ -278,6 +278,77 @@ func TestAddProduct(t *testing.T) {
 
 			if err := utils.CompareSameType(productID, testCase.expectedProductID); err != nil {
 				t.Fatalf("Failed CompareSameType %+v", err)
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestGetProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                   string
+		behaviorProductStorage func(m *mocks.MockIProductStorage)
+		inputProductID         uint64
+		expectedProductID      *models.Product
+		expectedError          error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:           "test basic work",
+			inputProductID: test.ProductID,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().GetProduct(baseCtx, test.ProductID, test.UserID).Return(&models.Product{ //nolint:exhaustruct
+					ID: test.ProductID, Title: "Test",
+				}, nil)
+			},
+			expectedProductID: &models.Product{ //nolint:exhaustruct
+				ID: test.ProductID, Title: "Test",
+			},
+			expectedError: nil,
+		},
+		{
+			name:           "test intrenal error",
+			inputProductID: test.ProductID,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().GetProduct(baseCtx, test.ProductID, test.UserID).Return(nil, testInternalErr)
+			},
+			expectedProductID: nil,
+			expectedError:     testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewProductService(ctrl, testCase.behaviorProductStorage,
+				func(m *mocksfileservice.MockFileServiceClient) {})
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			product, err := productService.GetProduct(baseCtx, testCase.inputProductID, test.UserID)
+			if !errors.Is(err, testCase.expectedError) {
+				if !(err.Error() == testCase.expectedError.Error()) {
+					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
+				}
+			}
+
+			if err := utils.EqualTest(product, testCase.expectedProductID); err != nil {
+				t.Fatalf("Failed EqualTest %+v", err)
 			}
 		})
 	}
