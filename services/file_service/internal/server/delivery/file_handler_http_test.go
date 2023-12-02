@@ -174,3 +174,58 @@ func TestUploadFile(t *testing.T) {
 		})
 	}
 }
+
+//nolint:funlen
+func TestDocFileHandler(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name             string
+		request          *http.Request
+		expectedResponse any
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:             "test basic work",
+			request:          httptest.NewRequest(http.MethodGet, "/api/v1/img/file_for_test.txt", nil),
+			expectedResponse: "Test string",
+		},
+		{
+			name:             "method not allowed",
+			request:          httptest.NewRequest(http.MethodDelete, "/api/v1/img/file_for_test.txt", nil),
+			expectedResponse: "Method not allowed\n",
+		},
+		{
+			name:    "can`t request root",
+			request: httptest.NewRequest(http.MethodGet, "/api/v1/img/", nil),
+			expectedResponse: responses.NewErrResponse(delivery.ErrForbiddenRootPath.Status(),
+				delivery.ErrForbiddenRootPath.Error()),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			profileHandler := NewFileHandlerHTTP(ctrl, func(m *mocks.MockIFileServiceHTTP) {})
+			docFileServer := profileHandler.DocFileServerHandler()
+
+			w := httptest.NewRecorder()
+
+			docFileServer.ServeHTTP(w, testCase.request)
+
+			err := test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
+			}
+		})
+	}
+}

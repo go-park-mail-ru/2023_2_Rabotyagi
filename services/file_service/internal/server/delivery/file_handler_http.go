@@ -160,6 +160,12 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 //	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400)"
 //	@Router      /img/ [get]
 func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
 	logger := f.logger.LogReqID(r.Context())
 
 	if r.URL.Path == rootPath {
