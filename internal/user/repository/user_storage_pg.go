@@ -2,16 +2,11 @@ package repository
 
 import (
 	"context"
-	"encoding/hex"
-	"errors"
 	"fmt"
+	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
-
-	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -42,42 +37,6 @@ func NewUserStorage(pool *pgxpool.Pool) (*UserStorage, error) {
 		pool:   pool,
 		logger: logger,
 	}, nil
-}
-
-func (u *UserStorage) getUserByEmail(ctx context.Context, tx pgx.Tx, email string) (*models.User, error) {
-	logger := u.logger.LogReqID(ctx)
-
-	SQLGetUserByEmail := `SELECT id, email, phone, name, password, birthday FROM public."user" WHERE email=$1;`
-	userLine := tx.QueryRow(ctx, SQLGetUserByEmail, email)
-
-	user := models.User{ //nolint:exhaustruct
-		Email: email,
-	}
-
-	if err := userLine.Scan(&user.ID, &user.Email, &user.Phone, &user.Name, &user.Password, &user.Birthday); err != nil {
-		logger.Errorln(err)
-
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return &user, nil
-}
-
-func (u *UserStorage) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	var user *models.User
-
-	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		userInner, err := u.getUserByEmail(ctx, tx, email)
-		user = userInner
-
-		return err
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return user, nil
 }
 
 func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx, id uint64) (*models.UserWithoutPassword, error) { //nolint:lll
@@ -114,94 +73,6 @@ func (u *UserStorage) GetUserWithoutPasswordByID(ctx context.Context, id uint64)
 	}
 
 	return user, nil
-}
-
-func (u *UserStorage) isEmailBusy(ctx context.Context, tx pgx.Tx, email string) (bool, error) {
-	logger := u.logger.LogReqID(ctx)
-
-	SQLIsEmailBusy := `SELECT id FROM public."user" WHERE email=$1;`
-	userRow := tx.QueryRow(ctx, SQLIsEmailBusy, email)
-
-	var user string
-
-	if err := userRow.Scan(&user); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return false, nil
-		}
-
-		logger.Errorln(err)
-
-		return false, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return true, nil
-}
-
-func (u *UserStorage) IsEmailBusy(ctx context.Context, email string) (bool, error) {
-	var emailBusy bool
-
-	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		emailBusyInner, err := u.isEmailBusy(ctx, tx, email)
-		emailBusy = emailBusyInner
-
-		return err
-	})
-
-	return emailBusy, fmt.Errorf(myerrors.ErrTemplate, err)
-}
-
-func (u *UserStorage) isPhoneBusy(ctx context.Context, tx pgx.Tx, phone string) (bool, error) {
-	logger := u.logger.LogReqID(ctx)
-
-	SQLIsPhoneBusy := `SELECT id FROM public."user" WHERE phone=$1;`
-	userRow := tx.QueryRow(ctx, SQLIsPhoneBusy, phone)
-
-	var user string
-
-	if err := userRow.Scan(&user); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return false, nil
-		}
-
-		logger.Errorln(err)
-
-		return false, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return true, nil
-}
-
-func (u *UserStorage) IsPhoneBusy(ctx context.Context, phone string) (bool, error) {
-	var phoneBusy bool
-
-	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		phoneBusyInner, err := u.isPhoneBusy(ctx, tx, phone)
-		phoneBusy = phoneBusyInner
-
-		return err
-	})
-
-	return phoneBusy, fmt.Errorf(myerrors.ErrTemplate, err)
-}
-
-func (u *UserStorage) createUser(ctx context.Context, tx pgx.Tx, preUser *models.UserWithoutID) error {
-	logger := u.logger.LogReqID(ctx)
-
-	var SQLCreateUser string
-
-	var err error
-
-	SQLCreateUser = `INSERT INTO public."user" (email, password) VALUES ($1, $2);`
-	_, err = tx.Exec(ctx, SQLCreateUser,
-		preUser.Email, preUser.Password)
-
-	if err != nil {
-		logger.Errorf("in createUser: preUser=%+v err=%+v", preUser, err)
-
-		return fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return nil
 }
 
 func (u *UserStorage) updateUser(ctx context.Context,
@@ -260,89 +131,6 @@ func (u *UserStorage) UpdateUser(ctx context.Context,
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
-
-	return userWithoutPass, nil
-}
-
-func (u *UserStorage) AddUser(ctx context.Context, preUser *models.UserWithoutID) (*models.User, error) {
-	logger := u.logger.LogReqID(ctx)
-
-	user := models.User{} //nolint:exhaustruct
-
-	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		emailBusy, err := u.isEmailBusy(ctx, tx, preUser.Email)
-		if err != nil {
-			return fmt.Errorf(myerrors.ErrTemplate, err)
-		}
-
-		if emailBusy {
-			return ErrEmailBusy
-		}
-
-		err = u.createUser(ctx, tx, preUser)
-		if err != nil {
-			return fmt.Errorf(myerrors.ErrTemplate, err)
-		}
-
-		id, err := repository.GetLastValSeq(ctx, tx, logger, NameSeqUser)
-		if err != nil {
-			return fmt.Errorf(myerrors.ErrTemplate, err)
-		}
-
-		user.ID = id
-
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	user.Email = preUser.Email
-	user.Password = preUser.Password
-
-	return &user, nil
-}
-
-func (u *UserStorage) GetUser(ctx context.Context, email string, password string) (*models.UserWithoutPassword, error) {
-	user := &models.User{}                           //nolint:exhaustruct
-	userWithoutPass := &models.UserWithoutPassword{} //nolint:exhaustruct
-
-	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		emailBusy, err := u.isEmailBusy(ctx, tx, email)
-		if err != nil {
-			return fmt.Errorf(myerrors.ErrTemplate, err)
-		}
-
-		if !emailBusy {
-			return ErrEmailNotExist
-		}
-
-		user, err = u.getUserByEmail(ctx, tx, email)
-		if err != nil {
-			return fmt.Errorf(myerrors.ErrTemplate, err)
-		}
-
-		hashPass, err := hex.DecodeString(user.Password)
-		if err != nil {
-			return fmt.Errorf(myerrors.ErrTemplate, err)
-		}
-
-		if !utils.ComparePassAndHash(hashPass, password) {
-			return ErrWrongCredentials
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	userWithoutPass.ID = user.ID
-	userWithoutPass.Email = user.Email
-	userWithoutPass.Phone = user.Phone
-	userWithoutPass.Name = user.Name
-	userWithoutPass.Birthday = user.Birthday
 
 	return userWithoutPass, nil
 }
