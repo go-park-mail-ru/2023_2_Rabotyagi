@@ -17,7 +17,7 @@ const (
 	MaxSizePhotoBytes = 5 * 1024 * 1024
 	MaxCountPhoto     = 4
 
-	nameImagesInForm = "images"
+	NameImagesInForm = "images"
 
 	rootPath = "/api/v1/img/"
 )
@@ -29,8 +29,9 @@ const keyCtxHandler keyCtx = "handler"
 var (
 	ErrToBigFile = myerrors.NewErrorBadContentRequest("Максимальный размер фото %d Мбайт",
 		MaxSizePhotoBytes%1024%1024)
-	ErrToManyCountFiles  = myerrors.NewErrorBadContentRequest("Максимальное количество фото = %d", MaxCountPhoto)
-	ErrForbiddenRootPath = myerrors.NewErrorBadContentRequest("Нельзя вызывать корневой путь")
+	ErrToManyCountFiles   = myerrors.NewErrorBadContentRequest("Максимальное количество фото = %d", MaxCountPhoto)
+	ErrForbiddenRootPath  = myerrors.NewErrorBadContentRequest("Нельзя вызывать корневой путь")
+	ErrWrongNameMultipart = myerrors.NewErrorBadFormatRequest("в multipart/form нет нужного имени: %s", NameImagesInForm)
 )
 
 var _ IFileServiceHTTP = (*fileusecases.FileServiceHTTP)(nil)
@@ -81,17 +82,15 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 	err := r.ParseMultipartForm(MaxSizePhotoBytes)
 	if err != nil {
 		logger.Errorln(err)
-		responses.SendResponse(w, logger,
-			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
+		responses.HandleErr(w, logger, myerrors.NewErrorBadFormatRequest(err.Error()))
 
 		return
 	}
 
-	slFiles, ok := r.MultipartForm.File[nameImagesInForm]
+	slFiles, ok := r.MultipartForm.File[NameImagesInForm]
 	if !ok {
 		logger.Errorln(err)
-		responses.SendResponse(w, logger,
-			responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer))
+		responses.HandleErr(w, logger, ErrWrongNameMultipart)
 
 		return
 	}
