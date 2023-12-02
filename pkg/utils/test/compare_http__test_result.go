@@ -8,6 +8,15 @@ import (
 	"net/http/httptest"
 )
 
+func CompareSameType[T comparable](received T, expected T) error {
+	if received != expected {
+		return fmt.Errorf("response: got %d, expected %d",
+			received, expected)
+	}
+
+	return nil
+}
+
 func CompareHTTPTestResult(recorder *httptest.ResponseRecorder, expected any) error {
 	resp := recorder.Result()
 	defer resp.Body.Close()
