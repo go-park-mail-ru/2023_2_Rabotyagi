@@ -44,8 +44,8 @@ type ProductService struct {
 	logger            *my_logger.MyLogger
 }
 
-func NewProductService(productStorage IProductStorage, basketService BasketService,
-	favouriteService FavouriteService, fileServiceClient fileservice.FileServiceClient,
+func NewProductService(productStorage IProductStorage, basketService *BasketService,
+	favouriteService *FavouriteService, fileServiceClient fileservice.FileServiceClient,
 ) (*ProductService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
@@ -53,8 +53,8 @@ func NewProductService(productStorage IProductStorage, basketService BasketServi
 	}
 
 	return &ProductService{
-		FavouriteService:  favouriteService,
-		BasketService:     basketService,
+		FavouriteService:  *favouriteService,
+		BasketService:     *basketService,
 		fileServiceClient: fileServiceClient,
 		storage:           productStorage,
 		logger:            logger,
