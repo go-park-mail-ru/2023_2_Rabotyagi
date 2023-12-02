@@ -18,3 +18,5 @@ var Cookie = http.Cookie{ //nolint:gochecknoglobals,exhaustruct
 }
 
 const UserID uint64 = 1
+
+const ProductID uint64 = 1
