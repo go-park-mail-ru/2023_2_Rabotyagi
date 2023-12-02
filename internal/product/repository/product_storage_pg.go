@@ -730,43 +730,6 @@ func (p *ProductStorage) incViews(ctx context.Context, tx pgx.Tx, productID uint
 	return nil
 }
 
-func (p *ProductStorage) updateAllViews(ctx context.Context, tx pgx.Tx) error {
-	SQLUpdateAllViews := `UPDATE public."product"
-						  SET views = subquery.view_count
-						  FROM (
-							  SELECT product_id, COUNT(*) AS view_count
-							  FROM public."view"
-							  GROUP BY product_id
-						  ) AS subquery
-						  WHERE product.id = subquery.product_id;`
-
-	_, err := tx.Exec(ctx, SQLUpdateAllViews)
-
-	if err != nil {
-		p.logger.Errorln(err)
-
-		return fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return nil
-}
-
-func (p *ProductStorage) UpdateAllViews(ctx context.Context) error {
-	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		err := p.updateAllViews(ctx, tx)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-	if err != nil {
-		return fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return nil
-}
-
 func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]string, error) {
 	SQLSearchProduct := `SELECT title
 							FROM product
