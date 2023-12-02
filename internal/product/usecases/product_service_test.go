@@ -430,3 +430,80 @@ func TestGetProductList(t *testing.T) {
 		})
 	}
 }
+
+//nolint:funlen
+func TestGetProductsOfSaler(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                   string
+		behaviorProductStorage func(m *mocks.MockIProductStorage)
+		inputLastProductID     uint64
+		inputCount             uint64
+		expectedProductID      []*models.ProductInFeed
+		expectedError          error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:               "test basic work",
+			inputLastProductID: test.ProductID,
+			inputCount:         test.CountProduct,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().GetProductsOfSaler(baseCtx, test.ProductID, test.CountProduct, test.UserID, true).Return(
+					[]*models.ProductInFeed{
+						{ID: test.ProductID, Title: "Title"}, {ID: test.ProductID + 1, Title: "Title"},
+					}, nil)
+			},
+			expectedProductID: []*models.ProductInFeed{
+				{ID: test.ProductID, Title: "Title"}, {ID: test.ProductID + 1, Title: "Title"},
+			},
+			expectedError: nil,
+		},
+		{
+			name:               "test internal error",
+			inputLastProductID: test.ProductID,
+			inputCount:         test.CountProduct,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().GetProductsOfSaler(baseCtx, test.ProductID, test.CountProduct, test.UserID, true).Return(
+					nil, testInternalErr)
+			},
+			expectedProductID: nil,
+			expectedError:     testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewProductService(ctrl, testCase.behaviorProductStorage,
+				func(m *mocksfileservice.MockFileServiceClient) {})
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			product, err := productService.GetProductsOfSaler(baseCtx,
+				testCase.inputLastProductID, test.CountProduct, test.UserID, true)
+			if !errors.Is(err, testCase.expectedError) {
+				if !(err.Error() == testCase.expectedError.Error()) {
+					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
+				}
+			}
+
+			if err := utils.EqualTest(product, testCase.expectedProductID); err != nil {
+				t.Fatalf("Failed EqualTest %+v", err)
+			}
+		})
+	}
+}
