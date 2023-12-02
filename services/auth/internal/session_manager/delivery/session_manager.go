@@ -14,7 +14,7 @@ var _ IAuthService = (*usecases.AuthService)(nil)
 
 type IAuthService interface {
 	AddUser(ctx context.Context, email string, password string) (string, error)
-	GetUserRawJWT(ctx context.Context, email string, password string) (string, error)
+	LoginUser(ctx context.Context, email string, password string) (string, error)
 	Delete(ctx context.Context, rawJwt string) (string, error)
 	Check(ctx context.Context, rawJwt string) (uint64, error)
 }
@@ -71,7 +71,7 @@ func (s *SessionManager) Login(ctx context.Context, user *auth.User) (*auth.Sess
 		return nil, myerrors.NewErrorInternal("user == nil")
 	}
 
-	rawJWT, err := s.service.GetUserRawJWT(ctx, user.GetEmail(), user.GetPassword())
+	rawJWT, err := s.service.LoginUser(ctx, user.GetEmail(), user.GetPassword())
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

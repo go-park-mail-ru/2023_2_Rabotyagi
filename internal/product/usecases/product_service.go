@@ -13,6 +13,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -44,8 +45,8 @@ type ProductService struct {
 	logger            *my_logger.MyLogger
 }
 
-func NewProductService(productStorage IProductStorage, basketService BasketService,
-	favouriteService FavouriteService, fileServiceClient fileservice.FileServiceClient,
+func NewProductService(productStorage IProductStorage, basketService *BasketService,
+	favouriteService *FavouriteService, fileServiceClient fileservice.FileServiceClient,
 ) (*ProductService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
@@ -53,8 +54,8 @@ func NewProductService(productStorage IProductStorage, basketService BasketServi
 	}
 
 	return &ProductService{
-		FavouriteService:  favouriteService,
-		BasketService:     basketService,
+		FavouriteService:  *favouriteService,
+		BasketService:     *basketService,
 		fileServiceClient: fileServiceClient,
 		storage:           productStorage,
 		logger:            logger,
@@ -63,6 +64,10 @@ func NewProductService(productStorage IProductStorage, basketService BasketServi
 
 func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []models.Image) error {
 	logger := p.logger.LogReqID(ctx)
+
+	if len(slImg) == 0 {
+		return nil
+	}
 
 	checkedURLs, err := p.fileServiceClient.Check(
 		ctx, &fileservice.ImgURLs{Url: convertImagesToSl(slImg)})
@@ -92,12 +97,12 @@ func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []mo
 
 	for i, urlCorrect := range checkedURLs.Correct {
 		if !urlCorrect {
-			messageUnCorrect += fmt.Sprintf("файл с урлом: %s не найден в хранилище\n", slImg[i].URL)
+			messageUnCorrect += fmt.Sprintf("файл с урлом: %s не найден в хранилище", slImg[i].URL)
 		}
 	}
 
 	if messageUnCorrect != "" {
-		return myerrors.NewErrorBadContentRequest(messageUnCorrect)
+		return myerrors.NewErrorBadFormatRequest(messageUnCorrect)
 	}
 
 	return nil

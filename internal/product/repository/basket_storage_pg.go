@@ -140,29 +140,6 @@ func (p *ProductStorage) updateOrderCountByOrderID(ctx context.Context,
 	return nil
 }
 
-func (p *ProductStorage) getOrderByID(ctx context.Context, tx pgx.Tx, orderID uint64) (*models.Order, error) {
-	logger := p.logger.LogReqID(ctx)
-
-	SQLGetOrderByID := `SELECT owner_id, product_id, count, status, created_at, updated_at, closed_at 
-		 FROM public."order" WHERE id=$1`
-
-	orderRow := tx.QueryRow(ctx, SQLGetOrderByID, orderID)
-	order := models.Order{ //nolint:exhaustruct
-		ID: orderID,
-	}
-
-	err := orderRow.Scan(&order.OwnerID, &order.ProductID, &order.Count, &order.Status, &order.CreatedAt,
-		&order.UpdatedAt, &order.CreatedAt)
-
-	if err != nil {
-		logger.Errorln(err)
-
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return &order, nil
-}
-
 func (p *ProductStorage) UpdateOrderCount(ctx context.Context, userID uint64, orderID uint64, newCount uint32) error {
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		err := p.updateOrderCountByOrderID(ctx, tx, userID, orderID, newCount)

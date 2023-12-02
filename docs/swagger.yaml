@@ -1254,7 +1254,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_user_delivery.ProfileResponse'
         "222":
-          description: Error
+          description: Error" Внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1373,11 +1373,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: |-
-        signup in app
-        Error.status can be:
-        StatusErrBadRequest      = 400
-        StatusErrInternalServer  = 500
+      description: signup in app
       parameters:
       - description: user data for signup
         in: body

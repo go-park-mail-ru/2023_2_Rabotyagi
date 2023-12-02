@@ -1,8 +1,7 @@
 package delivery_test
 
 import (
-	"encoding/json"
-	"io"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -104,24 +103,9 @@ func TestGetFullCities(t *testing.T) {
 
 			cityHandler.GetFullCitiesHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse delivery.CityListResponse
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -208,24 +192,9 @@ func TestSearchCityHandler(t *testing.T) {
 
 			cityHandler.SearchCityHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse delivery.CityListResponse
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}

@@ -1,7 +1,6 @@
 package delivery_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,26 +19,31 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 
 	"go.uber.org/mock/gomock"
 )
 
-// testAccessToken for read only, because async usage.
-const testAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-	"eyJlbWFpbCI6Iml2bi0xNS0wN0BtYWlsLnJ1IiwiZXhwaXJlIjoxNzAxMjg1MzE4LCJ1c2VySUQiOjExfQ." +
-	"jIPlwcF5xGPpgQ5WYp5kFv9Av-yguX2aOYsAgbodDM4"
-
-// testCookie for read only, because async usage.
-var testCookie = http.Cookie{ //nolint:exhaustruct
-	Name:  responses.CookieAuthName,
-	Value: testAccessToken, Expires: time.Now().Add(time.Hour),
+var behaviorSessionManagerClientCheck = func(m *mocksauth.MockSessionMangerClient) { //nolint:gochecknoglobals
+	m.EXPECT().Check(gomock.Any(), &auth.Session{AccessToken: test.AccessToken}).Return(
+		&auth.UserID{UserId: test.UserID}, nil).AnyTimes()
 }
 
-const testUserID = 1
+func NewProductHandler(ctrl *gomock.Controller,
+	behaviorProductService func(m *mocks.MockIProductService),
+) (*delivery.ProductHandler, error) {
+	mockProductService := mocks.NewMockIProductService(ctrl)
+	mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
 
-var behaviorSessionManagerClientCheck = func(m *mocksauth.MockSessionMangerClient) { //nolint:gochecknoglobals
-	m.EXPECT().Check(gomock.Any(), &auth.Session{AccessToken: testAccessToken}).Return(
-		&auth.UserID{UserId: testUserID}, nil).AnyTimes()
+	behaviorSessionManagerClientCheck(mockSessionManagerClient)
+	behaviorProductService(mockProductService)
+
+	productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+	if err != nil {
+		return nil, fmt.Errorf("unexpected err=%w", err)
+	}
+
+	return productHandler, nil
 }
 
 //nolint:funlen
@@ -76,7 +80,7 @@ func TestAddProduct(t *testing.T) {
 "price":123,
 "available_count":1,
 "city_id":1,
-"delivery":false, "safe_deal":false}`)), uint64(testUserID)).Return(uint64(1), nil)
+"delivery":false, "safe_deal":false}`)), test.UserID).Return(uint64(1), nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -103,7 +107,7 @@ func TestAddProduct(t *testing.T) {
 "price":1232,
 "available_count":12,
 "city_id":1,
-"delivery":false, "safe_deal":false}`)), uint64(testUserID)).Return(uint64(1), nil)
+"delivery":false, "safe_deal":false}`)), test.UserID).Return(uint64(1), nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -134,12 +138,59 @@ func TestAddProduct(t *testing.T) {
 "city_id":1,
 "delivery":false, "safe_deal":false, 
 "images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
-{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)), uint64(testUserID)).Return(uint64(1), nil)
+{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)), test.UserID).Return(uint64(1), nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
 				Body:   responses.ResponseBodyID{ID: 1},
 			},
+		},
+		{
+			name: "test another product",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/product/add", strings.NewReader(
+				`{"saler_id":1,
+"category_id" :1,
+"title":"TItle",
+"description":"  de scription",
+"price":1232,
+"available_count":12,
+"city_id":1,
+"delivery":false, "safe_deal":false}`)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().AddProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					`{"saler_id":1,
+"category_id" :1,
+"title":"TItle",
+"description":"  de scription",
+"price":1232,
+"available_count":12,
+"city_id":1,
+"delivery":false, "safe_deal":false}`)), test.UserID).Return(uint64(1), nil)
+			},
+			expectedResponse: responses.ResponseID{
+				Status: statuses.StatusRedirectAfterSuccessful,
+				Body:   responses.ResponseBodyID{ID: 1},
+			},
+		},
+		{
+			name: "test error AddProduct",
+			request: httptest.NewRequest(http.MethodPost, "/api/v1/product/add", strings.NewReader(
+				``)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().AddProduct(gomock.Any(), io.NopCloser(strings.NewReader(
+					``)), test.UserID).Return(uint64(0), myerrors.NewErrorInternal("Test internal error"))
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name: "test wrong method",
+			request: httptest.NewRequest(http.MethodDelete, "/api/v1/product/add", strings.NewReader(
+				``)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT()
+			},
+			expectedResponse: `Method not allowed
+`,
 		},
 	}
 
@@ -152,40 +203,19 @@ func TestAddProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.AddProductHandler(w, testCase.request)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse responses.ResponseID
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -209,7 +239,7 @@ func TestGetProduct(t *testing.T) {
 			name:      "test basic work",
 			idProduct: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().GetProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					&models.Product{ID: 1, Title: "Title"}, nil) //nolint:exhaustruct
 			},
 			expectedResponse: delivery.NewProductResponse(&models.Product{ID: 1, Title: "Title"}), //nolint:exhaustruct
@@ -218,7 +248,7 @@ func TestGetProduct(t *testing.T) {
 			name:      "test empty product",
 			idProduct: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().GetProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					&models.Product{}, nil) //nolint:exhaustruct
 			},
 			expectedResponse: delivery.NewProductResponse(&models.Product{}), //nolint:exhaustruct
@@ -227,7 +257,7 @@ func TestGetProduct(t *testing.T) {
 			name:      "test full required fields of product",
 			idProduct: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().GetProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					&models.Product{ //nolint:exhaustruct
 						ID: 1, SalerID: 1, CategoryID: 1, CityID: 1,
 						Title: "Title", Description: "desc", Price: 123,
@@ -251,43 +281,21 @@ func TestGetProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.idProduct})
-
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.GetProductHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse delivery.ProductResponse
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(&resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -311,7 +319,7 @@ func TestGetProductList(t *testing.T) {
 			name:        "test basic work",
 			queryParams: map[string]string{"count": "2", "last_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(2), uint64(testUserID)).Return(
+				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(2), test.UserID).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -321,7 +329,7 @@ func TestGetProductList(t *testing.T) {
 			name:        "test zero work",
 			queryParams: map[string]string{"count": "0", "last_id": "0"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsList(gomock.Any(), uint64(0), uint64(0), uint64(testUserID)).Return(
+				m.EXPECT().GetProductsList(gomock.Any(), uint64(0), uint64(0), test.UserID).Return(
 					[]*models.ProductInFeed{}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -331,7 +339,7 @@ func TestGetProductList(t *testing.T) {
 			name:        "test a lot of count",
 			queryParams: map[string]string{"count": "10", "last_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(10), uint64(testUserID)).Return(
+				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(10), test.UserID).Return(
 					[]*models.ProductInFeed{
 						{ID: 1, Title: "Title"},
 						{ID: 2, Title: "Title2"},
@@ -357,7 +365,7 @@ func TestGetProductList(t *testing.T) {
 					{ID: 8, Title: "Title2"},
 					{ID: 9, Title: "Title2"},
 					{ID: 10, Title: "Title2"},
-				}), //nolint:exhaustruct
+				}),
 		},
 	}
 
@@ -370,43 +378,21 @@ func TestGetProductList(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
-
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.GetProductListHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse delivery.ProductListResponse
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(&resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -430,7 +416,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 			name:        "test basic work",
 			queryParams: map[string]string{"count": "2", "last_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), uint64(testUserID), true).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), test.UserID, true).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -440,7 +426,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 			name:        "test zero work",
 			queryParams: map[string]string{"count": "0", "last_id": "0"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), uint64(testUserID), true).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), test.UserID, true).Return(
 					[]*models.ProductInFeed{}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -450,7 +436,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 			name:        "test a lot of count",
 			queryParams: map[string]string{"count": "10", "last_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), uint64(testUserID), true).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), test.UserID, true).Return(
 					[]*models.ProductInFeed{
 						{ID: 1, Title: "Title"},
 						{ID: 2, Title: "Title2"},
@@ -462,7 +448,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 						{ID: 8, Title: "Title2"},
 						{ID: 9, Title: "Title2"},
 						{ID: 10, Title: "Title2"},
-					}, nil) //nolint:exhaustruct
+					}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
 				[]*models.ProductInFeed{
@@ -489,43 +475,21 @@ func TestGetListProductOfSaler(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list_of_saler", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
-
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.GetListProductOfSalerHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse delivery.ProductListResponse
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(&resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -549,7 +513,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 			name:        "test basic work",
 			queryParams: map[string]string{"count": "2", "last_id": "1", "saler_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), uint64(testUserID), false).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), test.UserID, false).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -559,7 +523,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 			name:        "test zero work",
 			queryParams: map[string]string{"count": "0", "last_id": "0", "saler_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), uint64(testUserID), false).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), test.UserID, false).Return(
 					[]*models.ProductInFeed{}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
@@ -569,7 +533,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 			name:        "test a lot of count",
 			queryParams: map[string]string{"count": "10", "last_id": "1", "saler_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), uint64(testUserID), false).Return(
+				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), test.UserID, false).Return(
 					[]*models.ProductInFeed{
 						{ID: 1, Title: "Title"},
 						{ID: 2, Title: "Title2"},
@@ -625,24 +589,9 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 
 			productHandler.GetListProductOfAnotherSalerHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse delivery.ProductListResponse
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(&resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -674,7 +623,7 @@ func TestUpdateProduct(t *testing.T) {
 					`{"available_count": 1,
   "category_id": 1,
   "delivery": true,
-  "description": "description not empty"}`)), true, uint64(1), uint64(testUserID)).Return(nil)
+  "description": "description not empty"}`)), true, uint64(1), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -687,7 +636,7 @@ func TestUpdateProduct(t *testing.T) {
 				``)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().UpdateProduct(gomock.Any(), io.NopCloser(strings.NewReader(
-					``)), true, uint64(1), uint64(testUserID)).Return(nil)
+					``)), true, uint64(1), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
@@ -706,12 +655,22 @@ func TestUpdateProduct(t *testing.T) {
 					`{"available_count": 1,
   "category_id": 1,  "city_id": 1, "saler_id": 1,
   "title": "title", "price" : 123,
-  "description": "description not empty"}`)), false, uint64(1), uint64(testUserID)).Return(nil)
+  "description": "description not empty"}`)), false, uint64(1), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.ResponseID{
 				Status: statuses.StatusRedirectAfterSuccessful,
 				Body:   responses.ResponseBodyID{ID: 1},
 			},
+		},
+		{
+			name: "test wrong method",
+			request: httptest.NewRequest(http.MethodDelete, "/api/v1/product/update", strings.NewReader(
+				``)),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT()
+			},
+			expectedResponse: `Method not allowed
+`,
 		},
 	}
 
@@ -724,40 +683,19 @@ func TestUpdateProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
-			testCase.request.AddCookie(&testCookie)
+			testCase.request.AddCookie(&test.Cookie)
 			productHandler.UpdateProductHandler(w, testCase.request)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse responses.ResponseID
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -781,7 +719,7 @@ func TestCloseProduct(t *testing.T) {
 			name:    "test basic work",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), uint64(testUserID))
+				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), test.UserID)
 			},
 			expectedResponse: responses.ResponseSuccessful{
 				Status: statuses.StatusResponseSuccessful,
@@ -792,7 +730,7 @@ func TestCloseProduct(t *testing.T) {
 			name:    "test error in close",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().CloseProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					myerrors.NewErrorInternal("Test Error Internal"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
@@ -817,40 +755,21 @@ func TestCloseProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/close", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.CloseProductHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
-			if err != nil {
-				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
-			}
-
-			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -874,7 +793,7 @@ func TestActivateProduct(t *testing.T) {
 			name:    "test basic work",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), uint64(testUserID))
+				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), test.UserID)
 			},
 			expectedResponse: responses.ResponseSuccessful{
 				Status: statuses.StatusResponseSuccessful,
@@ -885,7 +804,7 @@ func TestActivateProduct(t *testing.T) {
 			name:    "test error in internal activate",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().ActivateProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					myerrors.NewErrorInternal("Test Error Internal"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
@@ -910,40 +829,21 @@ func TestActivateProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/activate", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.ActivateProductHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
-			if err != nil {
-				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
-			}
-
-			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -967,7 +867,7 @@ func TestDeleteProduct(t *testing.T) {
 			name:    "test basic work",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(nil)
+				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), test.UserID).Return(nil)
 			},
 			expectedResponse: responses.ResponseSuccessful{
 				Status: statuses.StatusResponseSuccessful,
@@ -978,7 +878,7 @@ func TestDeleteProduct(t *testing.T) {
 			name:    "test error in internal",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), uint64(testUserID)).Return(
+				m.EXPECT().DeleteProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					myerrors.NewErrorInternal("Test Error Internal"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
@@ -1003,40 +903,21 @@ func TestDeleteProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodDelete, "/api/v1/product/delete", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.DeleteProductHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
-			if err != nil {
-				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
-			}
-
-			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -1113,25 +994,12 @@ func TestSearchProduct(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/search", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"searched": testCase.querySearched})
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.SearchProductHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
-			if err != nil {
-				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
-			}
-
-			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -1156,7 +1024,7 @@ func TestGetSearchProductFeed(t *testing.T) {
 			queryParams: map[string]string{"count": "2", "offset": "0", "searched": "ноутбук"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetSearchProductFeed(gomock.Any(), "ноутбук",
-					uint64(0), uint64(2), uint64(testUserID)).Return(
+					uint64(0), uint64(2), test.UserID).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
 			},
 			expectedResponse: delivery.ProductListResponse{
@@ -1175,40 +1043,21 @@ func TestGetSearchProductFeed(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			behaviorSessionManagerClientCheck(mockSessionManagerClient)
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
-				t.Fatalf("UnExpected err=%+v\n", err)
+				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_search_feed", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
-			req.AddCookie(&testCookie)
+			req.AddCookie(&test.Cookie)
 			productHandler.GetSearchProductFeedHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
-			if err != nil {
-				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
-			}
-
-			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}

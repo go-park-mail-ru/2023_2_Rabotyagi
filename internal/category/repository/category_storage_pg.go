@@ -6,18 +6,18 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type CategoryStorage struct {
-	pool   *pgxpool.Pool
+	pool   pgxpool.IPgxPool
 	logger *my_logger.MyLogger
 }
 
-func NewCategoryStorage(pool *pgxpool.Pool) (*CategoryStorage, error) {
+func NewCategoryStorage(pool pgxpool.IPgxPool) (*CategoryStorage, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -48,7 +48,7 @@ func (c *CategoryStorage) selectFullCatgories(ctx context.Context, tx pgx.Tx) ([
 	_, err = pgx.ForEachRow(categoriesRows, []any{
 		&curCat.ID, &curCat.Name, &curCat.ParentID,
 	}, func() error {
-		categories = append(categories, &models.Category{ //nolint:exhaustruct
+		categories = append(categories, &models.Category{
 			ID:       curCat.ID,
 			Name:     curCat.Name,
 			ParentID: curCat.ParentID,
@@ -93,7 +93,7 @@ func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchI
 						WHERE LOWER(name) LIKE $1 
 						LIMIT 5;`
 
-	var cities []*models.Category
+	var categories []*models.Category
 
 	categoriesRows, err := tx.Query(ctx, SQLSearchCategory, "%"+strings.ToLower(searchInput)+"%")
 	if err != nil {
@@ -107,7 +107,7 @@ func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchI
 	_, err = pgx.ForEachRow(categoriesRows, []any{
 		&curCategory.ID, &curCategory.Name, &curCategory.ParentID,
 	}, func() error {
-		cities = append(cities, &models.Category{ //nolint:exhaustruct
+		categories = append(categories, &models.Category{ //nolint:exhaustruct
 			ID:       curCategory.ID,
 			Name:     curCategory.Name,
 			ParentID: curCategory.ParentID,
@@ -121,7 +121,7 @@ func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchI
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return cities, nil
+	return categories, nil
 }
 
 func (c *CategoryStorage) SearchCategory(ctx context.Context, searchInput string) ([]*models.Category, error) {
