@@ -13,6 +13,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -63,6 +64,10 @@ func NewProductService(productStorage IProductStorage, basketService *BasketServ
 
 func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []models.Image) error {
 	logger := p.logger.LogReqID(ctx)
+
+	if len(slImg) == 0 {
+		return nil
+	}
 
 	checkedURLs, err := p.fileServiceClient.Check(
 		ctx, &fileservice.ImgURLs{Url: convertImagesToSl(slImg)})
