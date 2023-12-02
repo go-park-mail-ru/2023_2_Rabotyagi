@@ -7,8 +7,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -23,11 +23,11 @@ var (
 )
 
 type UserStorage struct {
-	pool   *pgxpool.Pool
+	pool   pgxpool.IPgxPool
 	logger *my_logger.MyLogger
 }
 
-func NewUserStorage(pool *pgxpool.Pool) (*UserStorage, error) {
+func NewUserStorage(pool pgxpool.IPgxPool) (*UserStorage, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, err
