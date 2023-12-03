@@ -899,3 +899,83 @@ func TestSearchProduct(t *testing.T) {
 		})
 	}
 }
+
+//nolint:funlen
+func TestSearchProductFeed(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                   string
+		inputSearch            string
+		inputLastNumber        uint64
+		inputLimit             uint64
+		behaviorProductStorage func(m *mocks.MockIProductStorage)
+		expectedProducts       []*models.ProductInFeed
+		expectedError          error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:            "test basic work",
+			inputSearch:     "ноутбук",
+			inputLastNumber: 0,
+			inputLimit:      2,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().GetSearchProductFeed(baseCtx, "ноутбук", uint64(0), uint64(2), test.UserID).Return(
+					[]*models.ProductInFeed{
+						{ID: test.ProductID, Title: "ноутбук Mac"},
+						{ID: test.ProductID, Title: "ноутбук Hp"},
+					}, nil)
+			},
+			expectedProducts: []*models.ProductInFeed{
+				{ID: test.ProductID, Title: "ноутбук Mac"},
+				{ID: test.ProductID, Title: "ноутбук Hp"},
+			},
+			expectedError: nil,
+		},
+		{
+			name:            "test basic work",
+			inputSearch:     "ноутбук",
+			inputLastNumber: 0,
+			inputLimit:      2,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().GetSearchProductFeed(baseCtx, "ноутбук", uint64(0), uint64(2), test.UserID).Return(
+					nil, testInternalErr)
+			},
+			expectedProducts: nil,
+			expectedError:    testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewProductService(ctrl, testCase.behaviorProductStorage,
+				func(m *mocksfileservice.MockFileServiceClient) {})
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			productsInFeed, err := productService.GetSearchProductFeed(baseCtx, testCase.inputSearch,
+				testCase.inputLastNumber, testCase.inputLimit, test.UserID)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
+			}
+
+			if err := utils.EqualTest(productsInFeed, testCase.expectedProducts); err != nil {
+				t.Fatalf("Failed EqualTest %+v", err)
+			}
+		})
+	}
+}
