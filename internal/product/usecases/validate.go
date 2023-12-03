@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 
@@ -46,7 +47,8 @@ func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 	if err != nil {
 		logger.Errorln(err)
 
-		return preProduct, myerrors.NewErrorBadContentRequest(err.Error())
+		// In this place  return non wrapped error because later it should be use in govalidator.ErrorsByField(err)
+		return preProduct, err //nolint:wrapcheck
 	}
 
 	return preProduct, nil
@@ -55,7 +57,12 @@ func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 func ValidatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
 	preProduct, err := validatePreProduct(r, userID)
 	if err != nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		myErr := &myerrors.Error{}
+		if errors.As(err, &myErr) {
+			return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+
+		return nil, myerrors.NewErrorBadContentRequest(err.Error())
 	}
 
 	return preProduct, nil
@@ -131,7 +138,8 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return orderChanges, myerrors.NewErrorBadFormatRequest(err.Error())
+		// In this place  return non wrapped error because later it should be use in govalidator.ErrorsByField(err)
+		return orderChanges, err //nolint:wrapcheck
 	}
 
 	return orderChanges, nil

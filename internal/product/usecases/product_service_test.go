@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"strings"
+	"testing"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
@@ -13,9 +17,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
-	"io"
-	"strings"
-	"testing"
 
 	"go.uber.org/mock/gomock"
 )
@@ -503,6 +504,167 @@ func TestGetProductsOfSaler(t *testing.T) {
 
 			if err := utils.EqualTest(product, testCase.expectedProductID); err != nil {
 				t.Fatalf("Failed EqualTest %+v", err)
+			}
+		})
+	}
+}
+
+func generateString(lenStr int) string {
+	templateStr := "aaaaaaaaaa"
+	result := ""
+
+	for i := 0; i < lenStr/10; i++ {
+		result += templateStr
+	}
+
+	for len(result) < lenStr {
+		result += "a"
+	}
+
+	return result
+}
+
+//nolint:funlen
+func TestUpdateProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                      string
+		inputReader               io.Reader
+		inputPartialUpdate        bool
+		inputProductID            uint64
+		behaviorProductStorage    func(m *mocks.MockIProductStorage)
+		behaviorFileServiceClient func(m *mocksfileservice.MockFileServiceClient)
+		expectedError             error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			inputReader: io.NopCloser(strings.NewReader(`{"available_count": 1,
+  "description": "description empty",
+  "title": "Product",
+  "images": [
+    {
+      "url": "test_url"
+    }]
+  }`)),
+			inputPartialUpdate: true,
+			inputProductID:     test.ProductID,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().UpdateProduct(baseCtx, test.ProductID,
+					map[string]any{
+						"available_count": uint32(1), "delivery": false,
+						"description": "description empty", "images": []models.Image{{URL: "test_url"}},
+						"is_active": false, "safe_deal": false, "saler_id": uint64(1), "title": "Product",
+					}).Return(nil)
+			},
+			behaviorFileServiceClient: func(m *mocksfileservice.MockFileServiceClient) {
+				m.EXPECT().Check(baseCtx, &fileservice.ImgURLs{Url: []string{"test_url"}}).Return(
+					&fileservice.CheckedURLs{Correct: []bool{true}}, nil)
+			},
+			expectedError: nil,
+		},
+		{
+			name: "test internal error update",
+			inputReader: io.NopCloser(strings.NewReader(`{"available_count": 1,
+  "description": "description empty",
+  "title": "Product",
+  "images": [
+    {
+      "url": "test_url"
+    }]
+  }`)),
+			inputPartialUpdate: true,
+			inputProductID:     test.ProductID,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().UpdateProduct(baseCtx, test.ProductID,
+					map[string]any{
+						"available_count": uint32(1), "delivery": false,
+						"description": "description empty", "images": []models.Image{{URL: "test_url"}},
+						"is_active": false, "safe_deal": false, "saler_id": uint64(1), "title": "Product",
+					}).Return(testInternalErr)
+			},
+			behaviorFileServiceClient: func(m *mocksfileservice.MockFileServiceClient) {
+				m.EXPECT().Check(baseCtx, &fileservice.ImgURLs{Url: []string{"test_url"}}).Return(
+					&fileservice.CheckedURLs{Correct: []bool{true}}, nil)
+			},
+			expectedError: testInternalErr,
+		},
+		{
+			name: "test internal error check ",
+			inputReader: io.NopCloser(strings.NewReader(`{"available_count": 1,
+  "description": "description empty",
+  "title": "Product",
+  "images": [
+    {
+      "url": "test_url"
+    }]
+  }`)),
+			inputPartialUpdate:     true,
+			inputProductID:         test.ProductID,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {},
+			behaviorFileServiceClient: func(m *mocksfileservice.MockFileServiceClient) {
+				m.EXPECT().Check(baseCtx, &fileservice.ImgURLs{Url: []string{"test_url"}}).Return(
+					nil, testInternalErr)
+			},
+			expectedError: testInternalErr,
+		},
+		{
+			name: "test validation error long title",
+			inputReader: io.NopCloser(strings.NewReader(fmt.Sprintf(`{"available_count": 1,
+  "description": "1",
+  "title": "%s",
+  "images": [
+    {
+      "url": "test_url"
+    }]
+  }`, generateString(257)))),
+			inputPartialUpdate:        true,
+			inputProductID:            test.ProductID,
+			behaviorProductStorage:    func(m *mocks.MockIProductStorage) {},
+			behaviorFileServiceClient: func(m *mocksfileservice.MockFileServiceClient) {},
+			expectedError:             fmt.Errorf("в поле title ошибка: Заголовок должен быть длинной от 1 до 256 символов"),
+		},
+		{
+			name:                      "test validation error on PUT update",
+			inputReader:               io.NopCloser(strings.NewReader(`{"available_count": 1}`)),
+			inputPartialUpdate:        false,
+			inputProductID:            test.ProductID,
+			behaviorProductStorage:    func(m *mocks.MockIProductStorage) {},
+			behaviorFileServiceClient: func(m *mocksfileservice.MockFileServiceClient) {},
+			expectedError: fmt.Errorf("category_id: non zero value required;city_id:" +
+				" non zero value required;description: non zero value required;price:" +
+				" non zero value required;title: non zero value required"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewProductService(ctrl, testCase.behaviorProductStorage,
+				testCase.behaviorFileServiceClient)
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			err = productService.UpdateProduct(baseCtx, testCase.inputReader,
+				testCase.inputPartialUpdate, testCase.inputProductID, test.UserID)
+			if !errors.Is(err, testCase.expectedError) {
+				if !(err.Error() == testCase.expectedError.Error()) {
+					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
+				}
 			}
 		})
 	}
