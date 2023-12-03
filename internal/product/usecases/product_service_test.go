@@ -2,7 +2,6 @@ package usecases_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -271,10 +270,8 @@ func TestAddProduct(t *testing.T) {
 			}
 
 			productID, err := productService.AddProduct(baseCtx, testCase.inputReader, test.UserID)
-			if !errors.Is(err, testCase.expectedError) {
-				if !(err.Error() == testCase.expectedError.Error()) {
-					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
-				}
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 
 			if err := utils.CompareSameType(productID, testCase.expectedProductID); err != nil {
@@ -342,10 +339,8 @@ func TestGetProduct(t *testing.T) {
 			}
 
 			product, err := productService.GetProduct(baseCtx, testCase.inputProductID, test.UserID)
-			if !errors.Is(err, testCase.expectedError) {
-				if !(err.Error() == testCase.expectedError.Error()) {
-					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
-				}
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 
 			if err := utils.EqualTest(product, testCase.expectedProductID); err != nil {
@@ -419,10 +414,8 @@ func TestGetProductList(t *testing.T) {
 
 			product, err := productService.GetProductsList(baseCtx,
 				testCase.inputLastProductID, test.CountProduct, test.UserID)
-			if !errors.Is(err, testCase.expectedError) {
-				if !(err.Error() == testCase.expectedError.Error()) {
-					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
-				}
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 
 			if err := utils.EqualTest(product, testCase.expectedProductID); err != nil {
@@ -496,10 +489,8 @@ func TestGetProductsOfSaler(t *testing.T) {
 
 			product, err := productService.GetProductsOfSaler(baseCtx,
 				testCase.inputLastProductID, test.CountProduct, test.UserID, true)
-			if !errors.Is(err, testCase.expectedError) {
-				if !(err.Error() == testCase.expectedError.Error()) {
-					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
-				}
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 
 			if err := utils.EqualTest(product, testCase.expectedProductID); err != nil {
@@ -661,10 +652,8 @@ func TestUpdateProduct(t *testing.T) {
 
 			err = productService.UpdateProduct(baseCtx, testCase.inputReader,
 				testCase.inputPartialUpdate, testCase.inputProductID, test.UserID)
-			if !errors.Is(err, testCase.expectedError) {
-				if !(err.Error() == testCase.expectedError.Error()) {
-					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
-				}
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 		})
 	}
@@ -721,10 +710,8 @@ func TestCloseProduct(t *testing.T) {
 			}
 
 			err = productService.CloseProduct(baseCtx, testCase.inputProductID, test.UserID)
-			if !errors.Is(err, testCase.expectedError) {
-				if !(err.Error() == testCase.expectedError.Error()) {
-					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
-				}
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 		})
 	}
@@ -781,10 +768,8 @@ func TestActivateProduct(t *testing.T) {
 			}
 
 			err = productService.ActivateProduct(baseCtx, testCase.inputProductID, test.UserID)
-			if !errors.Is(err, testCase.expectedError) {
-				if !(err.Error() == testCase.expectedError.Error()) {
-					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
-				}
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 		})
 	}
@@ -841,10 +826,75 @@ func TestDeleteProduct(t *testing.T) {
 			}
 
 			err = productService.DeleteProduct(baseCtx, testCase.inputProductID, test.UserID)
-			if !errors.Is(err, testCase.expectedError) {
-				if !(err.Error() == testCase.expectedError.Error()) {
-					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
-				}
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestSearchProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                   string
+		inputSearch            string
+		behaviorProductStorage func(m *mocks.MockIProductStorage)
+		expectedProducts       []string
+		expectedError          error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:        "test basic work",
+			inputSearch: "ноутбук",
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().SearchProduct(baseCtx, "ноутбук").Return(
+					[]string{"ноутбук Mac", "ноутбук Hp"}, nil)
+			},
+			expectedProducts: []string{"ноутбук Mac", "ноутбук Hp"},
+			expectedError:    nil,
+		},
+		{
+			name:        "test internal error",
+			inputSearch: "ноутбук",
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().SearchProduct(baseCtx, "ноутбук").Return(
+					nil, testInternalErr)
+			},
+			expectedProducts: nil,
+			expectedError:    testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewProductService(ctrl, testCase.behaviorProductStorage,
+				func(m *mocksfileservice.MockFileServiceClient) {})
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			products, err := productService.SearchProduct(baseCtx, testCase.inputSearch)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
+			}
+
+			if err := utils.EqualTest(products, testCase.expectedProducts); err != nil {
+				t.Fatalf("Failed EqualTest %+v", err)
 			}
 		})
 	}
