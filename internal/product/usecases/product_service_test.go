@@ -729,3 +729,63 @@ func TestCloseProduct(t *testing.T) {
 		})
 	}
 }
+
+//nolint:funlen
+func TestActivateProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                   string
+		inputProductID         uint64
+		behaviorProductStorage func(m *mocks.MockIProductStorage)
+		expectedError          error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:           "test basic work",
+			inputProductID: test.ProductID,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().ActivateProduct(baseCtx, test.ProductID, test.UserID).Return(nil)
+			},
+			expectedError: nil,
+		},
+		{
+			name:           "test internal error",
+			inputProductID: test.ProductID,
+			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
+				m.EXPECT().ActivateProduct(baseCtx, test.ProductID, test.UserID).Return(testInternalErr)
+			},
+			expectedError: testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewProductService(ctrl, testCase.behaviorProductStorage,
+				func(m *mocksfileservice.MockFileServiceClient) {})
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			err = productService.ActivateProduct(baseCtx, testCase.inputProductID, test.UserID)
+			if !errors.Is(err, testCase.expectedError) {
+				if !(err.Error() == testCase.expectedError.Error()) {
+					t.Fatalf("Failed AddProduct: err got %+v err expected: %+v", err, testCase.expectedError)
+				}
+			}
+		})
+	}
+}
