@@ -19,6 +19,8 @@ var (
 	ErrDecodeOrderChanges = myerrors.NewErrorBadFormatRequest("Некорректный json изменения заказа")
 	ErrNotExistingStatus  = myerrors.NewErrorBadFormatRequest(
 		"Статус заказа не может быть больше %d", models.OrderStatusClosed)
+	ErrValidatePreProduct = myerrors.NewErrorBadContentRequest("Ошибка валидации объявления: ")
+	ErrValidatePreOrder   = myerrors.NewErrorBadContentRequest("Ошибка валидации заказа: ")
 )
 
 func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
@@ -62,7 +64,7 @@ func ValidatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 			return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		return nil, myerrors.NewErrorBadContentRequest(err.Error())
+		return nil, fmt.Errorf("%w %v", ErrValidatePreProduct, err)
 	}
 
 	return preProduct, nil
@@ -86,7 +88,8 @@ func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, e
 			if err != "non zero value required" {
 				logger.Errorln(err)
 
-				return nil, myerrors.NewErrorBadContentRequest("в поле %s ошибка: %s", field, err)
+				return nil, fmt.Errorf("%w в поле %s ошибка: %s",
+					ErrValidatePreProduct, field, err)
 			}
 		}
 	}
@@ -113,7 +116,7 @@ func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, myerrors.NewErrorBadContentRequest(err.Error())
+		return nil, fmt.Errorf("%w %v", ErrValidatePreOrder, err)
 	}
 
 	return preOrder, nil

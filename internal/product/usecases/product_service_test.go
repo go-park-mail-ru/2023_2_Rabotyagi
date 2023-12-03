@@ -211,7 +211,7 @@ func TestAddProduct(t *testing.T) {
 					nil, nil)
 			},
 			expectedProductID: 0,
-			expectedError:     myerrors.NewErrorInternal("checkedURLs == nil"),
+			expectedError:     usecases.ErrCheckedUrlsNil,
 		},
 		{
 			name: "test different len checkedURLs and requested urls",
@@ -231,7 +231,7 @@ func TestAddProduct(t *testing.T) {
 					&fileservice.CheckedURLs{Correct: []bool{true, true}}, nil)
 			},
 			expectedProductID: 0,
-			expectedError:     myerrors.NewErrorInternal("Different lens of checkedURLs.Correct and slImg 2 != 1"),
+			expectedError:     usecases.ErrDifUrls,
 		},
 		{
 			name: "test uncorrected url",
@@ -251,7 +251,7 @@ func TestAddProduct(t *testing.T) {
 					&fileservice.CheckedURLs{Correct: []bool{false}}, nil)
 			},
 			expectedProductID: 0,
-			expectedError:     myerrors.NewErrorBadFormatRequest("файл с урлом: test_url не найден в хранилище"),
+			expectedError:     usecases.ErrCheckFiles,
 		},
 	}
 
@@ -620,7 +620,7 @@ func TestUpdateProduct(t *testing.T) {
 			inputProductID:            test.ProductID,
 			behaviorProductStorage:    func(m *mocks.MockIProductStorage) {},
 			behaviorFileServiceClient: func(m *mocksfileservice.MockFileServiceClient) {},
-			expectedError:             fmt.Errorf("в поле title ошибка: Заголовок должен быть длинной от 1 до 256 символов"),
+			expectedError:             usecases.ErrValidatePreProduct,
 		},
 		{
 			name:                      "test validation error on PUT update",
@@ -629,9 +629,7 @@ func TestUpdateProduct(t *testing.T) {
 			inputProductID:            test.ProductID,
 			behaviorProductStorage:    func(m *mocks.MockIProductStorage) {},
 			behaviorFileServiceClient: func(m *mocksfileservice.MockFileServiceClient) {},
-			expectedError: fmt.Errorf("category_id: non zero value required;city_id:" +
-				" non zero value required;description: non zero value required;price:" +
-				" non zero value required;title: non zero value required"),
+			expectedError:             usecases.ErrValidatePreProduct,
 		},
 	}
 

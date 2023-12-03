@@ -8,9 +8,8 @@ import (
 )
 
 var (
-	errTemplate             = fmt.Errorf("result WRONG: ")
-	errNilCheck             = fmt.Errorf("failed nil check: ")
-	errCompareErrorsStrings = fmt.Errorf("failed strings compare: ")
+	errTemplate      = fmt.Errorf("result WRONG: ")
+	errCompareErrors = fmt.Errorf("failed err compare: ")
 )
 
 func CompareSameType[T comparable](received T, expected T) error {
@@ -42,16 +41,9 @@ func EqualTest(received any, expected any) error {
 	return nil
 }
 
-// EqualError use check errors.Is first and then use direct string errors compare.
 func EqualError(received error, expected error) error {
 	if !errors.Is(received, expected) {
-		if expected == nil && received != nil || received == nil && expected != nil {
-			return fmt.Errorf("%w: err got: %+v err expexted: %+v", errNilCheck, received, expected)
-		}
-
-		if !(received.Error() == expected.Error()) {
-			return fmt.Errorf("%w: err got %+v err expected: %+v", errCompareErrorsStrings, received, expected)
-		}
+		return fmt.Errorf("%w got %+v expected wrapped: %+v", errCompareErrors, received, expected)
 	}
 
 	return nil
