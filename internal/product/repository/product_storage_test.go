@@ -190,3 +190,144 @@ func TestDeleteProduct(t *testing.T) {
 		})
 	}
 }
+
+func TestSearchProduct(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	mockPool, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	type TestCase struct {
+		name                   string
+		behaviorProductStorage func(m *repository.ProductStorage)
+		searchInput            string
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			behaviorProductStorage: func(m *repository.ProductStorage) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT title FROM product`).WithArgs("Ca").
+					WillReturnRows(pgxmock.NewRows([]string{"title"}).
+						AddRow("Car"))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			searchInput: "Ca",
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctx := context.Background()
+
+			catStorage, err := repository.NewProductStorage(mockPool)
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
+			testCase.behaviorProductStorage(catStorage)
+
+			_, err = catStorage.SearchProduct(ctx, testCase.searchInput)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := mockPool.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestGetSearchProductFeed(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	mockPool, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	type TestCase struct {
+		name                   string
+		behaviorProductStorage func(m *repository.ProductStorage)
+		searchInput            string
+		lastNumber             uint64
+		limit                  uint64
+		userID                 uint64
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			behaviorProductStorage: func(m *repository.ProductStorage) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT id, title, price, city_id, 
+       delivery, safe_deal, is_active, available_count FROM product`).WithArgs("Ca", uint64(0), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id", "title", "price", "city_id",
+						"delivery", "safe_deal", "is_active", "available_count"}).
+						AddRow(uint64(1), "Car", uint64(1212), uint64(6), true, true, true, uint32(2)))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("safsafddasf"))
+
+				mockPool.ExpectQuery(`SELECT COUNT`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{`count`}).
+						AddRow(uint64(1)))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			searchInput: "Ca",
+			lastNumber:  0,
+			limit:       1,
+			userID:      1,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctx := context.Background()
+
+			prodStorage, err := repository.NewProductStorage(mockPool)
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
+			testCase.behaviorProductStorage(prodStorage)
+
+			_, err = prodStorage.GetSearchProductFeed(ctx, testCase.searchInput,
+				testCase.lastNumber, testCase.limit, testCase.userID)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := mockPool.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
