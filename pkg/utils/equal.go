@@ -2,11 +2,15 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 )
 
-var errTemplate = fmt.Errorf("result WRONG: ")
+var (
+	errTemplate      = fmt.Errorf("result WRONG: ")
+	errCompareErrors = fmt.Errorf("failed err compare: ")
+)
 
 func CompareSameType[T comparable](received T, expected T) error {
 	if received != expected {
@@ -32,6 +36,14 @@ func EqualTest(received any, expected any) error {
 
 		return fmt.Errorf("%w response: got %s, expected %s", errTemplate,
 			string(receivedRaw), string(expectedRaw))
+	}
+
+	return nil
+}
+
+func EqualError(received error, expected error) error {
+	if !errors.Is(received, expected) {
+		return fmt.Errorf("%w got %+v expected wrapped: %+v", errCompareErrors, received, expected)
 	}
 
 	return nil

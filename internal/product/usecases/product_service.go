@@ -17,6 +17,12 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
+var (
+	ErrCheckedUrlsNil = myerrors.NewErrorInternal("checkedURLs == nil")
+	ErrDifUrls        = myerrors.NewErrorInternal("Different urls lens: ")
+	ErrCheckFiles     = myerrors.NewErrorBadFormatRequest("Ошибка поиска файлов: ")
+)
+
 var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 
 type IProductStorage interface {
@@ -78,16 +84,14 @@ func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []mo
 	}
 
 	if checkedURLs == nil {
-		err := myerrors.NewErrorInternal("checkedURLs == nil")
-		logger.Errorln(err)
+		logger.Errorln(ErrCheckedUrlsNil)
 
-		return err
+		return ErrCheckedUrlsNil
 	}
 
 	if len(checkedURLs.Correct) != len(slImg) {
-		err := myerrors.NewErrorInternal(
-			"Different lens of checkedURLs.Correct and slImg %d != %d",
-			len(checkedURLs.Correct), len(slImg))
+		err := fmt.Errorf("%w: of checkedURLs.Correct and slImg %d != %d",
+			ErrDifUrls, len(checkedURLs.Correct), len(slImg))
 		logger.Errorln(err)
 
 		return err
@@ -102,7 +106,7 @@ func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []mo
 	}
 
 	if messageUnCorrect != "" {
-		return myerrors.NewErrorBadFormatRequest(messageUnCorrect)
+		return fmt.Errorf("%w %s", ErrCheckFiles, messageUnCorrect)
 	}
 
 	return nil
