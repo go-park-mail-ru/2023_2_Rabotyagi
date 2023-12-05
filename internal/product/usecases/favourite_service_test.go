@@ -3,6 +3,10 @@ package usecases_test
 import (
 	"context"
 	"fmt"
+	"io"
+	"strings"
+	"testing"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
@@ -10,10 +14,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
+
 	"go.uber.org/mock/gomock"
-	"io"
-	"strings"
-	"testing"
 )
 
 func NewFavoutiteService(ctrl *gomock.Controller,

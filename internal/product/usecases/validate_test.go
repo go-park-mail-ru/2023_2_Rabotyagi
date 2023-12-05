@@ -18,14 +18,14 @@ func TestValidatePreProduct(t *testing.T) {
 
 	_ = my_logger.NewNop()
 
-	type testCase struct {
+	type TestCase struct {
 		name               string
 		inputReader        io.Reader
 		expectedPreProduct *models.PreProduct
 		expectedError      error
 	}
 
-	testCases := [...]testCase{
+	testCases := [...]TestCase{
 		{
 			name: "test basic work",
 			inputReader: strings.NewReader(`{"available_count": 1,
@@ -74,14 +74,14 @@ func TestValidatePartOfPreProduct(t *testing.T) {
 
 	_ = my_logger.NewNop()
 
-	type testCase struct {
+	type TestCase struct {
 		name               string
 		inputReader        io.Reader
 		expectedPreProduct *models.PreProduct
 		expectedError      error
 	}
 
-	testCases := [...]testCase{
+	testCases := [...]TestCase{
 		{
 			name: "test basic work",
 			inputReader: strings.NewReader(`{
@@ -126,14 +126,14 @@ func TestValidatePreOrder(t *testing.T) {
 
 	_ = my_logger.NewNop()
 
-	type testCase struct {
+	type TestCase struct {
 		name             string
 		inputReader      io.Reader
 		expectedPreOrder *models.PreOrder
 		expectedError    error
 	}
 
-	testCases := [...]testCase{
+	testCases := [...]TestCase{
 		{
 			name: "test basic work",
 			inputReader: strings.NewReader(`{
@@ -179,14 +179,14 @@ func TestValidateOrderChangesCount(t *testing.T) {
 
 	_ = my_logger.NewNop()
 
-	type testCase struct {
+	type TestCase struct {
 		name                 string
 		inputReader          io.Reader
 		expectedOrderChanges *models.OrderChanges
 		expectedError        error
 	}
 
-	testCases := [...]testCase{
+	testCases := [...]TestCase{
 		{
 			name: "test basic work",
 			inputReader: strings.NewReader(`{
@@ -233,14 +233,14 @@ func TestValidateOrderChangesStatus(t *testing.T) {
 
 	_ = my_logger.NewNop()
 
-	type testCase struct {
+	type TestCase struct {
 		name                 string
 		inputReader          io.Reader
 		expectedOrderChanges *models.OrderChanges
 		expectedError        error
 	}
 
-	testCases := [...]testCase{
+	testCases := [...]TestCase{
 		{
 			name: "test basic work",
 			inputReader: strings.NewReader(`{
