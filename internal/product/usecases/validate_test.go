@@ -226,3 +226,64 @@ func TestValidateOrderChangesCount(t *testing.T) {
 		})
 	}
 }
+
+//nolint:nolintlint,funlen
+func TestValidateOrderChangesStatus(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type testCase struct {
+		name                 string
+		inputReader          io.Reader
+		expectedOrderChanges *models.OrderChanges
+		expectedError        error
+	}
+
+	testCases := [...]testCase{
+		{
+			name: "test basic work",
+			inputReader: strings.NewReader(`{
+        "id":1, "status":1}`),
+			expectedOrderChanges: &models.OrderChanges{ID: 1, Status: 1}, //nolint:exhaustruct
+			expectedError:        nil,
+		},
+		{
+			name:                 "test error decode",
+			inputReader:          strings.NewReader(`{`),
+			expectedOrderChanges: nil,
+			expectedError:        usecases.ErrDecodeOrderChanges,
+		},
+		{
+			name: "test error validation required status",
+			inputReader: strings.NewReader(`{
+        "id":1}`),
+			expectedOrderChanges: nil,
+			expectedError:        usecases.ErrValidateOrderChangesStatus,
+		},
+		{
+			name: "test error status > OrderStatusClosed",
+			inputReader: strings.NewReader(`{
+        "id":1, "status": 100}`),
+			expectedOrderChanges: nil,
+			expectedError:        usecases.ErrNotExistingStatus,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			preProduct, err := usecases.ValidateOrderChangesStatus(testCase.inputReader)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
+			}
+
+			if err := utils.EqualTest(preProduct, testCase.expectedOrderChanges); err != nil {
+				t.Fatalf("Failed EqualTest %+v", err)
+			}
+		})
+	}
+}
