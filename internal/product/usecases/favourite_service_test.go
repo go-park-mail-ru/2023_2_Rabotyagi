@@ -162,3 +162,60 @@ func TestAddToFavourites(t *testing.T) {
 		})
 	}
 }
+
+//nolint:funlen
+func TestDeleteFromFavourites(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                     string
+		inputProductID           uint64
+		behaviorFavouriteStorage func(m *mocks.MockIFavouriteStorage)
+		expectedError            error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:           "test basic work",
+			inputProductID: test.ProductID,
+			behaviorFavouriteStorage: func(m *mocks.MockIFavouriteStorage) {
+				m.EXPECT().DeleteFromFavourites(baseCtx, test.UserID, test.ProductID).Return(nil)
+			},
+			expectedError: nil,
+		},
+		{
+			name:           "test internal error",
+			inputProductID: test.ProductID,
+			behaviorFavouriteStorage: func(m *mocks.MockIFavouriteStorage) {
+				m.EXPECT().DeleteFromFavourites(baseCtx, test.UserID, test.ProductID).Return(testInternalErr)
+			},
+			expectedError: testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewFavoutiteService(ctrl, testCase.behaviorFavouriteStorage)
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			err = productService.DeleteFromFavourites(baseCtx, test.UserID, testCase.inputProductID)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
+			}
+		})
+	}
+}
