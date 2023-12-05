@@ -117,3 +117,55 @@ func TestValidatePartOfPreProduct(t *testing.T) {
 		})
 	}
 }
+
+func TestValidatePreOrder(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type testCase struct {
+		name             string
+		inputReader      io.Reader
+		expectedPreOrder *models.PreOrder
+		expectedError    error
+	}
+
+	testCases := [...]testCase{
+		{
+			name: "test basic work",
+			inputReader: strings.NewReader(`{
+        "product_id":1, "count":1}`),
+			expectedPreOrder: &models.PreOrder{ProductID: test.ProductID, Count: 1},
+			expectedError:    nil,
+		},
+		{
+			name:             "test error decode",
+			inputReader:      strings.NewReader(`{`),
+			expectedPreOrder: nil,
+			expectedError:    usecases.ErrDecodePreOrder,
+		},
+		{
+			name:             "test error validate",
+			inputReader:      strings.NewReader(`{"product_id":1}`),
+			expectedPreOrder: nil,
+			expectedError:    usecases.ErrValidatePreOrder,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			preProduct, err := usecases.ValidatePreOrder(testCase.inputReader)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
+			}
+
+			if err := utils.EqualTest(preProduct, testCase.expectedPreOrder); err != nil {
+				t.Fatalf("Failed EqualTest %+v", err)
+			}
+		})
+	}
+}
