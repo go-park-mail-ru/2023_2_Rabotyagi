@@ -333,7 +333,7 @@ func TestGetSearchProductFeed(t *testing.T) {
 	}
 }
 
-func TestGetProductFeed(t *testing.T) {
+func TestGetProduct(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
