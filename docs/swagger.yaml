@@ -151,6 +151,11 @@ definitions:
       views:
         type: integer
     type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.ProductID:
+    properties:
+      product_id:
+        type: integer
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.ProductInFeed:
     properties:
       available_count:
@@ -810,10 +815,11 @@ paths:
         cookie
       parameters:
       - description: product id
-        in: query
+        in: body
         name: product_id
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.ProductID'
       produces:
       - application/json
       responses:
@@ -822,7 +828,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error". Внутри body статус может быть badContent(4400)
+          description: Error". Внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1223,7 +1229,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":

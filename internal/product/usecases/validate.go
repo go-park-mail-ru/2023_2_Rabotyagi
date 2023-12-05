@@ -16,6 +16,7 @@ import (
 var (
 	ErrDecodePreProduct   = myerrors.NewErrorBadFormatRequest("Некорректный json объявления")
 	ErrDecodePreOrder     = myerrors.NewErrorBadFormatRequest("Некорректный json заказа")
+	ErrDecodeProductID    = myerrors.NewErrorBadFormatRequest("Некорректный json product_id")
 	ErrDecodeOrderChanges = myerrors.NewErrorBadFormatRequest("Некорректный json изменения заказа")
 	ErrNotExistingStatus  = myerrors.NewErrorBadFormatRequest(
 		"Статус заказа не может быть больше %d", models.OrderStatusClosed)

@@ -11,6 +11,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 	"go.uber.org/mock/gomock"
+	"io"
+	"strings"
 	"testing"
 )
 
@@ -93,6 +95,69 @@ func TestGetUserFavourites(t *testing.T) {
 
 			if err := utils.EqualTest(slProductInFeed, testCase.expectedProductInFeed); err != nil {
 				t.Fatalf("Failed EqualTest %+v", err)
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestAddToFavourites(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                     string
+		inputReader              io.Reader
+		behaviorFavouriteStorage func(m *mocks.MockIFavouriteStorage)
+		expectedError            error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name:        "test basic work",
+			inputReader: strings.NewReader(`{"product_id":1}`),
+			behaviorFavouriteStorage: func(m *mocks.MockIFavouriteStorage) {
+				m.EXPECT().AddToFavourites(baseCtx, test.UserID, test.ProductID).Return(nil)
+			},
+			expectedError: nil,
+		},
+		{
+			name:                     "test error decode",
+			inputReader:              strings.NewReader(`{"product_id":"wrong_type"}`),
+			behaviorFavouriteStorage: func(m *mocks.MockIFavouriteStorage) {},
+			expectedError:            usecases.ErrDecodeProductID,
+		},
+		{
+			name:        "test internal error",
+			inputReader: strings.NewReader(`{"product_id":1}`),
+			behaviorFavouriteStorage: func(m *mocks.MockIFavouriteStorage) {
+				m.EXPECT().AddToFavourites(baseCtx, test.UserID, test.ProductID).Return(testInternalErr)
+			},
+			expectedError: testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewFavoutiteService(ctrl, testCase.behaviorFavouriteStorage)
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			err = productService.AddToFavourites(baseCtx, test.UserID, testCase.inputReader)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 		})
 	}
