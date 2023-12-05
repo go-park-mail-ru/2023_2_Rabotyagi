@@ -11,16 +11,16 @@ CREATE TABLE IF NOT EXISTS public."user"
 (
     id         BIGINT                   DEFAULT NEXTVAL('user_id_seq'::regclass) NOT NULL PRIMARY KEY,
     email      TEXT UNIQUE                                                       NOT NULL CHECK (email <> '')
-    CONSTRAINT max_len_email CHECK (LENGTH(email) <= 256),
+        CONSTRAINT max_len_email CHECK (LENGTH(email) <= 256),
     phone      TEXT UNIQUE DEFAULT NULL
-    CONSTRAINT max_len_phone CHECK (LENGTH(phone) <= 18),
+        CONSTRAINT max_len_phone CHECK (LENGTH(phone) <= 18),
     name       TEXT UNIQUE DEFAULT NULL
-    CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256),
+        CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256),
     password   TEXT                                                              NOT NULL CHECK (password <> '')
-    CONSTRAINT max_len_password CHECK (LENGTH(password) <= 256),
+        CONSTRAINT max_len_password CHECK (LENGTH(password) <= 256),
     birthday   TIMESTAMP WITH TIME ZONE,
-                             avatar     TEXT UNIQUE
-                             CONSTRAINT max_len_avatar CHECK (LENGTH(avatar) <= 256),
+    avatar     TEXT UNIQUE
+        CONSTRAINT max_len_avatar CHECK (LENGTH(avatar) <= 256),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()                            NOT NULL
 );
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS public."city"
 (
     id              BIGINT            DEFAULT NEXTVAL('city_id_seq'::regclass) NOT NULL PRIMARY KEY,
     name            TEXT                                                       NOT NULL CHECK (name <> '')
-    CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256)
+        CONSTRAINT max_len_name CHECK (LENGTH(name) <= 256)
 );
 
 CREATE TABLE IF NOT EXISTS public."product"

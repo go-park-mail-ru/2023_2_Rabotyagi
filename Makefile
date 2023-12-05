@@ -79,6 +79,10 @@ build: mkdir-bin
 run: build
 	sudo ./bin/main
 
+.PHONY: create-migration
+create-migration:
+	migrate create -ext sql -dir ./db/migrations $(name)
+
 .PHONY: migrate-up
 migrate-up:
 	migrate -database postgres://postgres:postgres@localhost:5432/youla?sslmode=disable -path db/migrations up
