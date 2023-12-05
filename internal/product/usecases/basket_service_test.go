@@ -184,3 +184,71 @@ func TestUpdateOrderCount(t *testing.T) {
 		})
 	}
 }
+
+//nolint:funlen
+func TestUpdateOrderStatus(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                  string
+		inputReader           io.Reader
+		behaviorBasketStorage func(m *mocks.MockIBasketStorage)
+		expectedError         error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			inputReader: strings.NewReader(
+				`{"id": 1, 
+					"status": 1 }`),
+			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {
+				m.EXPECT().UpdateOrderStatus(baseCtx, test.UserID, test.ProductID, uint8(1)).Return(nil)
+			},
+			expectedError: nil,
+		},
+		{
+			name: "test validation error",
+			inputReader: strings.NewReader(
+				`{"id": 1}`),
+			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {},
+			expectedError:         usecases.ErrValidateOrderChangesStatus,
+		},
+		{
+			name: "test internal error",
+			inputReader: strings.NewReader(
+				`{"id": 1, 
+					"status": 1 }`),
+			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {
+				m.EXPECT().UpdateOrderStatus(baseCtx, test.UserID, test.ProductID, uint8(1)).Return(testInternalErr)
+			},
+			expectedError: testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewBasketService(ctrl, testCase.behaviorBasketStorage)
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			err = productService.UpdateOrderStatus(baseCtx, testCase.inputReader, test.UserID)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
+			}
+		})
+	}
+}
