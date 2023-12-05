@@ -319,3 +319,57 @@ func TestUpdateOrderStatus(t *testing.T) {
 		})
 	}
 }
+
+//nolint:funlen
+func TestBuyFullBasket(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type testCase struct {
+		name                  string
+		behaviorBasketStorage func(m *mocks.MockIBasketStorage)
+		expectedError         error
+	}
+
+	testCases := [...]testCase{
+		{
+			name: "test basic work",
+			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {
+				m.EXPECT().BuyFullBasket(baseCtx, test.UserID).Return(nil)
+			},
+			expectedError: nil,
+		},
+		{
+			name: "test internal error",
+			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {
+				m.EXPECT().BuyFullBasket(baseCtx, test.UserID).Return(testInternalErr)
+			},
+			expectedError: testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewBasketService(ctrl, testCase.behaviorBasketStorage)
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			err = productService.BuyFullBasket(baseCtx, test.UserID)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
+			}
+		})
+	}
+}
