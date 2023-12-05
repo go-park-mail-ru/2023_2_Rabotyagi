@@ -29,7 +29,7 @@ func EqualTest(received any, expected any) error {
 			return err //nolint:wrapcheck
 		}
 
-		receivedRaw, err := json.Marshal(expected)
+		receivedRaw, err := json.Marshal(received)
 		if err != nil {
 			return err //nolint:wrapcheck
 		}

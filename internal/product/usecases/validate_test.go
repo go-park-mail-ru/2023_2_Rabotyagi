@@ -12,6 +12,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 )
 
+//nolint:nolintlint,funlen
 func TestValidatePreProduct(t *testing.T) {
 	t.Parallel()
 
@@ -67,6 +68,7 @@ func TestValidatePreProduct(t *testing.T) {
 	}
 }
 
+//nolint:nolintlint,funlen
 func TestValidatePartOfPreProduct(t *testing.T) {
 	t.Parallel()
 
@@ -118,6 +120,7 @@ func TestValidatePartOfPreProduct(t *testing.T) {
 	}
 }
 
+//nolint:nolintlint,funlen
 func TestValidatePreOrder(t *testing.T) {
 	t.Parallel()
 
@@ -164,6 +167,60 @@ func TestValidatePreOrder(t *testing.T) {
 			}
 
 			if err := utils.EqualTest(preProduct, testCase.expectedPreOrder); err != nil {
+				t.Fatalf("Failed EqualTest %+v", err)
+			}
+		})
+	}
+}
+
+//nolint:nolintlint,funlen
+func TestValidateOrderChangesCount(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type testCase struct {
+		name                 string
+		inputReader          io.Reader
+		expectedOrderChanges *models.OrderChanges
+		expectedError        error
+	}
+
+	testCases := [...]testCase{
+		{
+			name: "test basic work",
+			inputReader: strings.NewReader(`{
+        "id":1, "count":1}`),
+			expectedOrderChanges: &models.OrderChanges{ID: 1, Count: 1}, //nolint:exhaustruct
+			expectedError:        nil,
+		},
+		{
+			name:                 "test error decode",
+			inputReader:          strings.NewReader(`{`),
+			expectedOrderChanges: nil,
+			expectedError:        usecases.ErrDecodeOrderChanges,
+		},
+		{
+			name: "test error validation required count",
+			inputReader: strings.NewReader(`{
+        "id":1}`),
+			expectedOrderChanges: nil,
+			expectedError:        usecases.ErrValidateOrderChangesCount,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			preProduct, err := usecases.ValidateOrderChangesCount(testCase.inputReader)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
+			}
+
+			if err := utils.EqualTest(preProduct, testCase.expectedOrderChanges); err != nil {
 				t.Fatalf("Failed EqualTest %+v", err)
 			}
 		})

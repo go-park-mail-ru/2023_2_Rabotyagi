@@ -19,8 +19,10 @@ var (
 	ErrDecodeOrderChanges = myerrors.NewErrorBadFormatRequest("Некорректный json изменения заказа")
 	ErrNotExistingStatus  = myerrors.NewErrorBadFormatRequest(
 		"Статус заказа не может быть больше %d", models.OrderStatusClosed)
-	ErrValidatePreProduct = myerrors.NewErrorBadContentRequest("Ошибка валидации объявления: ")
-	ErrValidatePreOrder   = myerrors.NewErrorBadContentRequest("Ошибка валидации заказа: ")
+	ErrValidatePreProduct         = myerrors.NewErrorBadContentRequest("Ошибка валидации объявления: ")
+	ErrValidatePreOrder           = myerrors.NewErrorBadContentRequest("Ошибка валидации заказа: ")
+	ErrValidateOrderChangesCount  = myerrors.NewErrorBadFormatRequest("Ошибка валидации количества изменения заказа: ")
+	ErrValidateOrderChangesStatus = myerrors.NewErrorBadFormatRequest("Ошибка валидации статуса изменения заказа: ")
 )
 
 func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
@@ -164,7 +166,7 @@ func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
 		errCount := govalidator.ErrorByField(err, "count")
 
 		if errID != "" || errCount != "" {
-			errInner := myerrors.NewErrorBadFormatRequest("%s\n%s", errCount, errID)
+			errInner := fmt.Errorf("%w %s\n%s", ErrValidateOrderChangesCount, errCount, errID)
 			logger.Errorln(errInner)
 
 			return nil, errInner
@@ -190,7 +192,7 @@ func ValidateOrderChangesStatus(r io.Reader) (*models.OrderChanges, error) {
 		errID := govalidator.ErrorByField(err, "id")
 
 		if errID != "" || errStatus != "" {
-			errInner := myerrors.NewErrorBadFormatRequest("%s\n%s", errStatus, errID)
+			errInner := fmt.Errorf("%w %s\n%s", ErrValidateOrderChangesStatus, errStatus, errID)
 			logger.Errorln(errInner)
 
 			return nil, errInner
