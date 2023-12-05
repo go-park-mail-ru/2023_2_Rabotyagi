@@ -54,7 +54,7 @@ func (f FavouriteService) AddToFavourites(ctx context.Context, userID uint64, r 
 	if err := decoder.Decode(productID); err != nil {
 		f.logger.Errorln(err)
 
-		return fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreOrder)
+		return fmt.Errorf(myerrors.ErrTemplate, ErrDecodeProductID)
 	}
 
 	err := f.storage.AddToFavourites(ctx, userID, productID.ProductID)

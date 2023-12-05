@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 
@@ -15,9 +16,14 @@ import (
 var (
 	ErrDecodePreProduct   = myerrors.NewErrorBadFormatRequest("Некорректный json объявления")
 	ErrDecodePreOrder     = myerrors.NewErrorBadFormatRequest("Некорректный json заказа")
+	ErrDecodeProductID    = myerrors.NewErrorBadFormatRequest("Некорректный json product_id")
 	ErrDecodeOrderChanges = myerrors.NewErrorBadFormatRequest("Некорректный json изменения заказа")
 	ErrNotExistingStatus  = myerrors.NewErrorBadFormatRequest(
 		"Статус заказа не может быть больше %d", models.OrderStatusClosed)
+	ErrValidatePreProduct         = myerrors.NewErrorBadContentRequest("Ошибка валидации объявления: ")
+	ErrValidatePreOrder           = myerrors.NewErrorBadContentRequest("Ошибка валидации заказа: ")
+	ErrValidateOrderChangesCount  = myerrors.NewErrorBadFormatRequest("Ошибка валидации количества изменения заказа: ")
+	ErrValidateOrderChangesStatus = myerrors.NewErrorBadFormatRequest("Ошибка валидации статуса изменения заказа: ")
 )
 
 func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
@@ -46,7 +52,8 @@ func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 	if err != nil {
 		logger.Errorln(err)
 
-		return preProduct, myerrors.NewErrorBadContentRequest(err.Error())
+		// In this place  return non wrapped error because later it should be use in govalidator.ErrorsByField(err)
+		return preProduct, err //nolint:wrapcheck
 	}
 
 	return preProduct, nil
@@ -55,7 +62,12 @@ func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 func ValidatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
 	preProduct, err := validatePreProduct(r, userID)
 	if err != nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		myErr := &myerrors.Error{}
+		if errors.As(err, &myErr) {
+			return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		}
+
+		return nil, fmt.Errorf("%w %v", ErrValidatePreProduct, err)
 	}
 
 	return preProduct, nil
@@ -79,7 +91,8 @@ func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, e
 			if err != "non zero value required" {
 				logger.Errorln(err)
 
-				return nil, myerrors.NewErrorBadContentRequest("в поле %s ошибка: %s", field, err)
+				return nil, fmt.Errorf("%w в поле %s ошибка: %s",
+					ErrValidatePreProduct, field, err)
 			}
 		}
 	}
@@ -106,7 +119,7 @@ func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, myerrors.NewErrorBadContentRequest(err.Error())
+		return nil, fmt.Errorf("%w %v", ErrValidatePreOrder, err)
 	}
 
 	return preOrder, nil
@@ -131,7 +144,8 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return orderChanges, myerrors.NewErrorBadFormatRequest(err.Error())
+		// In this place  return non wrapped error because later it should be use in govalidator.ErrorsByField(err)
+		return orderChanges, err //nolint:wrapcheck
 	}
 
 	return orderChanges, nil
@@ -153,7 +167,7 @@ func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
 		errCount := govalidator.ErrorByField(err, "count")
 
 		if errID != "" || errCount != "" {
-			errInner := myerrors.NewErrorBadFormatRequest("%s\n%s", errCount, errID)
+			errInner := fmt.Errorf("%w %s\n%s", ErrValidateOrderChangesCount, errCount, errID)
 			logger.Errorln(errInner)
 
 			return nil, errInner
@@ -179,7 +193,7 @@ func ValidateOrderChangesStatus(r io.Reader) (*models.OrderChanges, error) {
 		errID := govalidator.ErrorByField(err, "id")
 
 		if errID != "" || errStatus != "" {
-			errInner := myerrors.NewErrorBadFormatRequest("%s\n%s", errStatus, errID)
+			errInner := fmt.Errorf("%w %s\n%s", ErrValidateOrderChangesStatus, errStatus, errID)
 			logger.Errorln(errInner)
 
 			return nil, errInner

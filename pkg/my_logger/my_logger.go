@@ -13,7 +13,7 @@ var (
 	logger *zap.SugaredLogger //nolint:gochecknoglobals
 	once   sync.Once          //nolint:gochecknoglobals
 
-	ErrNoLogger = fmt.Errorf("my_logger.Get для отсутствующего логгера")
+	ErrNoLogger = myerrors.NewErrorInternal("my_logger.Get для отсутствующего логгера")
 )
 
 type MyLogger struct {
