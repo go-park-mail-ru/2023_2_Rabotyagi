@@ -70,7 +70,7 @@ func TestAddOrder(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			name: "test validation error: required status",
+			name: "test validation error",
 			inputReader: strings.NewReader(
 				`{"product_id": 1}`),
 			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {},
@@ -112,6 +112,74 @@ func TestAddOrder(t *testing.T) {
 
 			if err := utils.EqualTest(orderInBasket, testCase.expectedOrderInBasket); err != nil {
 				t.Fatalf("Failed EqualTest %+v", err)
+			}
+		})
+	}
+}
+
+//nolint:funlen
+func TestUpdateOrderCount(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	baseCtx := context.Background()
+	testInternalErr := myerrors.NewErrorInternal("Test error")
+
+	type TestCase struct {
+		name                  string
+		inputReader           io.Reader
+		behaviorBasketStorage func(m *mocks.MockIBasketStorage)
+		expectedError         error
+	}
+
+	testCases := [...]TestCase{
+		{
+			name: "test basic work",
+			inputReader: strings.NewReader(
+				`{"id": 1, 
+					"count": 1 }`),
+			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {
+				m.EXPECT().UpdateOrderCount(baseCtx, test.UserID, test.ProductID, uint32(1)).Return(nil)
+			},
+			expectedError: nil,
+		},
+		{
+			name: "test validation error",
+			inputReader: strings.NewReader(
+				`{"id": 1}`),
+			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {},
+			expectedError:         usecases.ErrValidateOrderChangesCount,
+		},
+		{
+			name: "test internal error",
+			inputReader: strings.NewReader(
+				`{"id": 1, 
+					"count": 1 }`),
+			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {
+				m.EXPECT().UpdateOrderCount(baseCtx, test.UserID, test.ProductID, uint32(1)).Return(testInternalErr)
+			},
+			expectedError: testInternalErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productService, err := NewBasketService(ctrl, testCase.behaviorBasketStorage)
+			if err != nil {
+				t.Fatalf("Failed create productService %+v", err)
+			}
+
+			err = productService.UpdateOrderCount(baseCtx, testCase.inputReader, test.UserID)
+			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
+				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 		})
 	}
