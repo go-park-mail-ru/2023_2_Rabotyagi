@@ -70,6 +70,14 @@ func TestAddOrder(t *testing.T) {
 			expectedError: nil,
 		},
 		{
+			name: "test validation error: required status",
+			inputReader: strings.NewReader(
+				`{"product_id": 1}`),
+			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {},
+			expectedOrderInBasket: nil,
+			expectedError:         usecases.ErrValidatePreOrder,
+		},
+		{
 			name: "test internal error",
 			inputReader: strings.NewReader(
 				`{"product_id": 1, 
