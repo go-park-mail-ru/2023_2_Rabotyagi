@@ -491,6 +491,11 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 
 		productID = LastProductID
 
+		err = p.addPriceHistoryRecord(ctx, tx, productID, preProduct.Price)
+		if err != nil {
+			return err
+		}
+
 		return err
 	})
 	if err != nil {
@@ -563,6 +568,14 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 			}
 
 			err = p.insertImages(ctx, tx, productID, slImages)
+		}
+
+		price, ok := updateFields["price"]
+		if ok {
+			err = p.addPriceHistoryRecord(ctx, tx, productID, price.(uint64))
+			if err != nil {
+				return err
+			}
 		}
 
 		return err
