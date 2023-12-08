@@ -116,9 +116,7 @@ update-env:
 	mkdir -p ".env"
 	mkdir -p "services/file_service/.env"
 	mkdir -p "services/auth/.env"
-	cp .env.example/.env.backend .env/.env.backend
-	cp .env.example/.env.pgadmin .env/.env.pgadmin
-	cp .env.example/.env.postgres .env/.env.postgres
+	cp -r .env.example/. .env
 	cp services/file_service/.env.example/.env services/file_service/.env/.env
 	cp services/auth/.env.example/.env services/auth/.env/.env
 
