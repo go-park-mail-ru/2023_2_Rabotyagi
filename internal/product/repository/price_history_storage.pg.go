@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/jackc/pgx/v5"
@@ -26,7 +27,7 @@ func (p *ProductStorage) addPriceHistoryRecord(ctx context.Context, tx pgx.Tx,
 
 func (p *ProductStorage) selectPriceHistory(ctx context.Context, tx pgx.Tx,
 	productID uint64,
-) ([]*models.PriceHistoryRecord, error) {
+) ([]models.PriceHistoryRecord, error) {
 	logger := p.logger.LogReqID(ctx)
 
 	SQLSelectPriceHistory := `SELECT price, created_at
@@ -42,12 +43,12 @@ func (p *ProductStorage) selectPriceHistory(ctx context.Context, tx pgx.Tx,
 
 	curRecord := new(models.PriceHistoryRecord)
 
-	var slRecord []*models.PriceHistoryRecord
+	var slRecord []models.PriceHistoryRecord
 
 	_, err = pgx.ForEachRow(productsInFavouritesRows, []any{
 		&curRecord.Price, &curRecord.CreatedAt,
 	}, func() error {
-		slRecord = append(slRecord, &models.PriceHistoryRecord{ //nolint:exhaustruct
+		slRecord = append(slRecord, models.PriceHistoryRecord{ //nolint:exhaustruct
 			Price:     curRecord.Price,
 			CreatedAt: curRecord.CreatedAt,
 		})

@@ -157,9 +157,10 @@ func (p *ProductStorage) selectIsUserFavouriteProduct(ctx context.Context,
 }
 
 type productAddition struct {
-	favourites  uint64
-	images      []models.Image
-	inFavourite bool
+	favourites   uint64
+	images       []models.Image
+	inFavourite  bool
+	priceHistory []models.PriceHistoryRecord
 }
 
 func (p *ProductStorage) getProductAddition(ctx context.Context,
@@ -182,6 +183,12 @@ func (p *ProductStorage) getProductAddition(ctx context.Context,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
+	priceHistory, err := p.selectPriceHistory(ctx, tx, productID)
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	innerProductAddition.priceHistory = priceHistory
 	innerProductAddition.images = images
 	innerProductAddition.favourites = favouritesCount
 	innerProductAddition.inFavourite = inFavouriteProduct
@@ -202,6 +209,7 @@ func (p *ProductStorage) getProduct(ctx context.Context,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
+	product.PriceHistory = productAdditionInner.priceHistory
 	product.Images = productAdditionInner.images
 	product.Favourites = productAdditionInner.favourites
 	product.InFavourites = productAdditionInner.inFavourite
