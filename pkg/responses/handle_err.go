@@ -25,9 +25,11 @@ func trimErrMessage(message string) string {
 
 // HandleErr this function handle err. If err is myerror.
 // Error then we built this error and client get it, otherwise it is internal error and client shouldn`t get it.
-func HandleErr(w http.ResponseWriter, logger *my_logger.MyLogger, err error) {
+// Also hear added status in ctx of request
+func HandleErr(w http.ResponseWriter, request *http.Request, logger *my_logger.MyLogger, err error) {
 	myErr := &myerrors.Error{}
 	if errors.As(err, &myErr) && myErr.IsErrorClient() {
+		*request = *request.WithContext(statuses.FillStatusCtx(request.Context(), myErr.Status()))
 		SendResponse(w, logger, NewErrResponse(myErr.Status(), err.Error()))
 
 		return
@@ -36,11 +38,13 @@ func HandleErr(w http.ResponseWriter, logger *my_logger.MyLogger, err error) {
 	if grpcErr := status.Convert(err); grpcErr != nil {
 		myErr = myerrors.NewErrorCustom(int(grpcErr.Code()), grpcErr.Message())
 		if myErr.IsErrorClient() {
+			*request = *request.WithContext(statuses.FillStatusCtx(request.Context(), myErr.Status()))
 			SendResponse(w, logger, NewErrResponse(myErr.Status(), trimErrMessage(grpcErr.Message())))
 
 			return
 		}
 	}
 
+	*request = *request.WithContext(statuses.FillStatusCtx(request.Context(), myErr.Status()))
 	SendResponse(w, logger, NewErrResponse(statuses.StatusInternalServer, ErrInternalServer))
 }

@@ -20,7 +20,7 @@ func GetUserID(ctx context.Context, r *http.Request,
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	logger = logger.LogReqID(r.Context())
+	logger = logger.LogReqID(r.Context()) //nolint:contextcheck
 
 	cookie, err := r.Cookie(responses.CookieAuthName)
 	if err != nil {

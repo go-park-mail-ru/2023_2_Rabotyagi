@@ -50,9 +50,10 @@ func (f FavouriteService) GetUserFavourites(ctx context.Context, userID uint64) 
 func (f FavouriteService) AddToFavourites(ctx context.Context, userID uint64, r io.Reader) error {
 	productID := new(models.ProductID)
 	decoder := json.NewDecoder(r)
+	logger := f.logger.LogReqID(ctx)
 
 	if err := decoder.Decode(productID); err != nil {
-		f.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, ErrDecodeProductID)
 	}

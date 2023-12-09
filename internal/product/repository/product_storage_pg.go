@@ -509,19 +509,21 @@ func (p *ProductStorage) updateProduct(ctx context.Context, tx pgx.Tx,
 		return ErrNoUpdateFields
 	}
 
+	logger := p.logger.LogReqID(ctx)
+
 	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Update(`public."product"`).
 		Where(squirrel.Eq{"id": productID}).SetMap(updateFields)
 
 	queryString, args, err := query.ToSql()
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	result, err := tx.Exec(ctx, queryString, args...)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -537,6 +539,8 @@ func (p *ProductStorage) updateProduct(ctx context.Context, tx pgx.Tx,
 func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 	updateFields map[string]interface{},
 ) error {
+	logger := p.logger.LogReqID(ctx)
+
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		updateImages, imagesExist := updateFields["images"]
 		if imagesExist {
@@ -557,7 +561,7 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 			slImages, ok := updateImages.([]models.Image)
 			if !ok {
 				errMessage := fmt.Errorf("%w product_id=%d", ErrGetUncorrectedFormatImages, productID)
-				p.logger.Errorln(errMessage)
+				logger.Errorln(errMessage)
 
 				return errMessage
 			}
@@ -568,7 +572,7 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 		return err
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -577,11 +581,13 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 }
 
 func (p *ProductStorage) closeProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLCloseProduct := `UPDATE public."product" SET is_active=false WHERE id=$1 AND saler_id=$2`
 
 	result, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -595,6 +601,8 @@ func (p *ProductStorage) closeProduct(ctx context.Context, tx pgx.Tx, productID 
 }
 
 func (p *ProductStorage) CloseProduct(ctx context.Context, productID uint64, userID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		err := p.closeProduct(ctx, tx, productID, userID)
 		if err != nil {
@@ -604,7 +612,7 @@ func (p *ProductStorage) CloseProduct(ctx context.Context, productID uint64, use
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -613,11 +621,13 @@ func (p *ProductStorage) CloseProduct(ctx context.Context, productID uint64, use
 }
 
 func (p *ProductStorage) activateProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLActivateProduct := `UPDATE public."product" SET is_active=true WHERE id=$1 AND saler_id=$2`
 
 	result, err := tx.Exec(ctx, SQLActivateProduct, productID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -631,6 +641,8 @@ func (p *ProductStorage) activateProduct(ctx context.Context, tx pgx.Tx, product
 }
 
 func (p *ProductStorage) ActivateProduct(ctx context.Context, productID uint64, userID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		err := p.activateProduct(ctx, tx, productID, userID)
 		if err != nil {
@@ -640,7 +652,7 @@ func (p *ProductStorage) ActivateProduct(ctx context.Context, productID uint64, 
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -649,11 +661,13 @@ func (p *ProductStorage) ActivateProduct(ctx context.Context, productID uint64, 
 }
 
 func (p *ProductStorage) deleteProduct(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLCloseProduct := `DELETE FROM public."product" WHERE id=$1 AND saler_id=$2`
 
 	result, err := tx.Exec(ctx, SQLCloseProduct, productID, userID)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -667,6 +681,8 @@ func (p *ProductStorage) deleteProduct(ctx context.Context, tx pgx.Tx, productID
 }
 
 func (p *ProductStorage) DeleteProduct(ctx context.Context, productID uint64, userID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		err := p.deleteProduct(ctx, tx, productID, userID)
 		if err != nil {
@@ -676,7 +692,7 @@ func (p *ProductStorage) DeleteProduct(ctx context.Context, productID uint64, us
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -685,13 +701,15 @@ func (p *ProductStorage) DeleteProduct(ctx context.Context, productID uint64, us
 }
 
 func (p *ProductStorage) viewExist(ctx context.Context, tx pgx.Tx, userID uint64, productID uint64) (bool, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLViewExist := `SELECT EXISTS(SELECT * FROM public."view" WHERE user_id = $1 AND product_id = $2);`
 
 	exist := false
 
 	existRow := tx.QueryRow(ctx, SQLViewExist, userID, productID)
 	if err := existRow.Scan(&exist); err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -700,13 +718,15 @@ func (p *ProductStorage) viewExist(ctx context.Context, tx pgx.Tx, userID uint64
 }
 
 func (p *ProductStorage) addView(ctx context.Context, tx pgx.Tx, userID uint64, productID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLAddView := `INSERT INTO public."view" (user_id, product_id)
 				   VALUES ($1, $2)`
 
 	_, err := tx.Exec(ctx, SQLAddView, userID, productID)
 
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -715,6 +735,8 @@ func (p *ProductStorage) addView(ctx context.Context, tx pgx.Tx, userID uint64, 
 }
 
 func (p *ProductStorage) incViews(ctx context.Context, tx pgx.Tx, productID uint64) error {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLAddView := `UPDATE public."product" 
 				   SET views = views + 1 
 				   WHERE id=$1`
@@ -722,7 +744,7 @@ func (p *ProductStorage) incViews(ctx context.Context, tx pgx.Tx, productID uint
 	_, err := tx.Exec(ctx, SQLAddView, productID)
 
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -731,6 +753,8 @@ func (p *ProductStorage) incViews(ctx context.Context, tx pgx.Tx, productID uint
 }
 
 func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInput string) ([]string, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLSearchProduct := `SELECT title
 							FROM product
 							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
@@ -743,7 +767,7 @@ func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInp
 
 	productsRows, err := tx.Query(ctx, SQLSearchProduct, searchInput)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -758,7 +782,7 @@ func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInp
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -768,6 +792,8 @@ func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInp
 
 func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) ([]string, error) {
 	var products []string
+
+	logger := p.logger.LogReqID(ctx)
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		productsInner, err := p.searchProduct(ctx, tx, searchInput)
@@ -780,7 +806,7 @@ func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) 
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -791,6 +817,8 @@ func (p *ProductStorage) SearchProduct(ctx context.Context, searchInput string) 
 func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 	searchInput string, lastNumber uint64, limit uint64,
 ) ([]*models.ProductInFeed, error) {
+	logger := p.logger.LogReqID(ctx)
+
 	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
 	FROM product
 	WHERE (to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
@@ -803,7 +831,7 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 
 	rowsProducts, err := tx.Query(ctx, SQLSearchProduct, searchInput, lastNumber, limit)
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -831,7 +859,7 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -843,6 +871,8 @@ func (p *ProductStorage) GetSearchProductFeed(ctx context.Context,
 	searchInput string, lastNumber uint64, limit uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
 	var slProduct []*models.ProductInFeed
+
+	logger := p.logger.LogReqID(ctx)
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		slProductInner, err := p.searchProductFeed(ctx,
@@ -868,7 +898,7 @@ func (p *ProductStorage) GetSearchProductFeed(ctx context.Context,
 		return nil
 	})
 	if err != nil {
-		p.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

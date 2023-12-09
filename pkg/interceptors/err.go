@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func ErrConvertInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+func ErrConvertInterceptor(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (interface{}, error) {
 	resp, err := handler(ctx, req)
 

@@ -40,12 +40,12 @@ type ResponseBodyID struct {
 }
 
 type ResponseID struct {
-	Status int            `json:"status"`
+	Status int            `example:"3003" json:"status"`
 	Body   ResponseBodyID `json:"body"`
 }
 
-func NewResponseIDRedirect(ID uint64) *ResponseID {
-	return &ResponseID{Status: statuses.StatusRedirectAfterSuccessful, Body: ResponseBodyID{ID: ID}}
+func NewResponseIDRedirect(id uint64) *ResponseID {
+	return &ResponseID{Status: statuses.StatusRedirectAfterSuccessful, Body: ResponseBodyID{ID: id}}
 }
 
 type ResponseBodyError struct {
