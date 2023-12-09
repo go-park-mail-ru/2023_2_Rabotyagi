@@ -18,11 +18,11 @@ compose-frontend-down:
 # for frontend
 .PHONY: compose-full-up
 compose-full-up: update-env
-	docker compose -f docker-compose.yml up backend postgres pgadmin --build -d
+	docker compose -f docker-compose.yml up postgres backend backend-fs backend-auth pgadmin --build -d
 
 .PHONY: compose-full-down
 compose-full-down:
-	docker compose -f docker-compose.yml down backend postgres pgadmin
+	docker compose -f docker-compose.yml down postgres backend backend-fs backend-auth pgadmin
 
 .PHONY: compose-logs
 compose-logs:

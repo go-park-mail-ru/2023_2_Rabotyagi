@@ -20,6 +20,7 @@ RUN go build -o fake_db ./services/file_service/cmd/fake_db/main.go
 FROM alpine:3.18 as production
 
 WORKDIR /var/file_service
+COPY ./services/file_service/static/images_for_fake_db ./static/images_for_fake_db
 COPY --from=build /var/file_service/main main
 COPY --from=build /var/file_service/fake_db fake_db
 
