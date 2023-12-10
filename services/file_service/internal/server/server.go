@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"net"
 	"net/http"
 	"strings"
@@ -89,8 +90,13 @@ func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error { 
 		return err //nolint:wrapcheck
 	}
 
+	metricManager := metrics.NewMetricManagerGrpc(config.ServiceName)
+
+	grpcAccessInterceptor := interceptors.NewGrpcAccessInterceptor(metricManager)
+
 	server := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(interceptors.AccessInterceptor, interceptors.ErrConvertInterceptor))
+		grpc.ChainUnaryInterceptor(grpcAccessInterceptor.AccessInterceptor, interceptors.ErrConvertInterceptor))
+
 	fileServiceGrpc := usecases.NewFileServiceGrpc(urlPrefixPathFS, fileStorage)
 	fileHandlerGrpc := delivery.NewFileHandlerGrpc(fileServiceGrpc)
 

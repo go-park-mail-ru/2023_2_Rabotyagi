@@ -11,6 +11,8 @@ type IMetricManagerHTTP interface {
 	AddDuration(path, method, status string, duration time.Duration)
 }
 
+var _ IMetricManagerHTTP = (*MetricManagerHTTP)(nil)
+
 type MetricManagerHTTP struct {
 	totalStatuses   *prometheus.CounterVec
 	durationSummary *prometheus.SummaryVec
