@@ -113,6 +113,13 @@ definitions:
       title:
         type: string
     type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PriceHistoryRecord:
+    properties:
+      created_at:
+        type: string
+      price:
+        type: integer
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Product:
     properties:
       available_count:
@@ -140,8 +147,14 @@ definitions:
         type: boolean
       is_active:
         type: boolean
+      premium:
+        type: boolean
       price:
         type: integer
+      price_history:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PriceHistoryRecord'
+        type: array
       safe_deal:
         type: boolean
       saler_id:
@@ -737,6 +750,76 @@ paths:
       summary: update order status
       tags:
       - order
+  /premium/add:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        add premium for product using product id from query and user id from cookies\jwt.
+        This does product premium.
+      parameters:
+      - description: product id
+        in: query
+        name: product_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
+        "222":
+          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: add premium for product
+      tags:
+      - premium
+  /premium/remove:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        remove premium for product using product id from query and user id from cookies\jwt.
+        This does product not premium.
+      parameters:
+      - description: product id
+        in: query
+        name: product_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
+        "222":
+          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: remove premium for product
+      tags:
+      - premium
   /product/activate:
     patch:
       consumes:
