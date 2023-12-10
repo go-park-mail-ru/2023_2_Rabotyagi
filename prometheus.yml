@@ -16,3 +16,13 @@ scrape_configs:
     metrics_path: /api/v1/metrics
     static_configs:
       - targets: [ 'backend:8080' ]
+
+  - job_name: "backend_fs"
+    metrics_path: /api/v1/metrics
+    static_configs:
+      - targets: [ 'backend_fs:8081' ]
+
+  - job_name: "backend_auth"
+    metrics_path: /api/v1/metrics
+    static_configs:
+      - targets: [ 'backend_auth:8082' ]

@@ -6,6 +6,7 @@ import (
 
 type Config struct {
 	ProductionMode         bool
+	MainServiceName        string
 	AllowOrigin            string
 	Schema                 string
 	PortServer             string
@@ -24,6 +25,7 @@ func New() *Config {
 
 	return &Config{
 		ProductionMode:         productionMode,
+		MainServiceName:        config.GetEnvStr(config.EnvServiceName, config.StandardMainServiceName),
 		AllowOrigin:            config.GetEnvStr(config.EnvAllowOrigin, config.StandardAllowOrigin),
 		Schema:                 config.GetEnvStr(config.EnvSchema, config.StandardSchema),
 		PortServer:             config.GetEnvStr(config.EnvPortBackend, config.StandardPort),

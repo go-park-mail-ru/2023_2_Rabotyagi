@@ -44,6 +44,7 @@ services:
       context: ./
       dockerfile: ./services/file_service/Dockerfile
     restart: always
+    container_name: backend_fs
     env_file:
       - services/file_service/.env/.env
     ports:
@@ -59,8 +60,11 @@ services:
       context: ./
       dockerfile: ./services/auth/Dockerfile
     restart: always
+    container_name: backend_auth
     env_file:
       - ./services/auth/.env/.env
+    ports:
+      - 8082:8082
     depends_on:
       - postgres
     volumes:

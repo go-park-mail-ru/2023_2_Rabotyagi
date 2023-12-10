@@ -16,20 +16,22 @@ type MetricManagerHTTP struct {
 	durationSummary *prometheus.SummaryVec
 }
 
-func NewMetricManagerHTTP() *MetricManagerHTTP {
+func NewMetricManagerHTTP(serviceName string) *MetricManagerHTTP {
 	labelTotalStatuses := []string{"path", "method", "status"}
 	totalStatuses := prometheus.NewCounterVec(
 		prometheus.CounterOpts{ //nolint:exhaustruct
-			Name: "http_request_statuses_total",
-			Help: "count_of_all_request_with_status",
+			Namespace: serviceName,
+			Name:      "http_request_statuses_total",
+			Help:      "count_of_all_request_with_status",
 		}, labelTotalStatuses)
 	prometheus.MustRegister(totalStatuses)
 
 	labelDurationSummary := []string{"path", "method", "status"}
 	durationSummary := prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{ //nolint:exhaustruct
-			Name: "http_duration",
-			Help: "duration_of_all_request_with_status",
+			Namespace: serviceName,
+			Name:      "http_duration",
+			Help:      "duration_of_all_request_with_status",
 			Objectives: map[float64]float64{
 				0.5:  0.05,  //nolint:gomnd
 				0.9:  0.01,  //nolint:gomnd

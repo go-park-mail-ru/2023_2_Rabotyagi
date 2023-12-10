@@ -24,6 +24,8 @@ COPY --from=build /var/auth/main main
 RUN mkdir -p /var/log/backend
 
 ENV ENVIRONMENT=development
+ENV SERVICE_NAME=backend_auth
+ENV PORT_AUTH=8082
 ENV ADDRESS_AUTH_GRPC=:8012
 ENV URL_DATA_BASE=postgres://postgres:postgres@postgres:5432/youla?sslmode=disable
 ENV OUTPUT_LOG_PATH=/var/log/backend/logs_auth.json

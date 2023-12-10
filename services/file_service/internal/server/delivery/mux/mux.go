@@ -13,18 +13,22 @@ import (
 )
 
 type ConfigMux struct {
-	allowOrigin    string
-	schema         string
-	portServer     string
-	fileServiceDir string
+	allowOrigin     string
+	schema          string
+	portServer      string
+	fileServiceDir  string
+	fileServiceName string
 }
 
-func NewConfigMux(allowOrigin string, schema string, portServer string, fileServiceDir string) *ConfigMux {
+func NewConfigMux(allowOrigin string,
+	schema string, portServer string, fileServiceDir string, fileServiceName string,
+) *ConfigMux {
 	return &ConfigMux{
-		allowOrigin:    allowOrigin,
-		schema:         schema,
-		portServer:     portServer,
-		fileServiceDir: fileServiceDir,
+		allowOrigin:     allowOrigin,
+		schema:          schema,
+		portServer:      portServer,
+		fileServiceDir:  fileServiceDir,
+		fileServiceName: fileServiceName,
 	}
 }
 
@@ -41,7 +45,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux,
 		middleware.SetupCORS(fileHandler.UploadFileHandler, configMux.allowOrigin, configMux.schema)))
 	router.Handle("/api/v1/metrics", promhttp.Handler())
 
-	metricsManager := metrics.NewMetricManagerHTTP()
+	metricsManager := metrics.NewMetricManagerHTTP(configMux.fileServiceName)
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(middleware.Context(ctx,
 		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger, metricsManager))), logger))

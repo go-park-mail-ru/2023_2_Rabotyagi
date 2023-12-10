@@ -9,6 +9,7 @@ const (
 
 type Config struct {
 	ProductionMode         bool
+	ServiceName            string
 	AddressFileServiceGrpc string
 	Schema                 string
 	AllowOrigin            string
@@ -27,6 +28,7 @@ func New() *Config {
 
 	return &Config{
 		ProductionMode:         productionMode,
+		ServiceName:            config.GetEnvStr(config.EnvServiceName, config.StandardFileServiceName),
 		AddressFileServiceGrpc: config.GetEnvStr(config.EnvAddressFileServiceGrpc, config.StandardAddressFileServiceGrpc),
 		AllowOrigin:            config.GetEnvStr(config.EnvAllowOrigin, config.StandardAllowOrigin),
 		Schema:                 config.GetEnvStr(config.EnvSchema, config.StandardSchema),

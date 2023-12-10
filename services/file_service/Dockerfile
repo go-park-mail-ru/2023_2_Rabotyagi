@@ -27,6 +27,7 @@ RUN mkdir -p /var/log/backend
 RUN mkdir -p static/img
 
 ENV ENVIRONMENT=development
+ENV SERVICE_NAME=backend_fs
 ENV ADDRESS_FS_GRPC=127.0.0.1:8081
 ENV SCHEMA=http://
 ENV ALLOW_ORIGIN=localhost:3000

@@ -17,19 +17,22 @@ import (
 )
 
 type ConfigMux struct {
-	addrOrigin string
-	schema     string
-	portServer string
+	addrOrigin      string
+	schema          string
+	portServer      string
+	mainServiceName string
 }
 
-func NewConfigMux(addrOrigin string, schema string, portServer string) *ConfigMux {
+func NewConfigMux(addrOrigin string, schema string, portServer string, mainServiceName string) *ConfigMux {
 	return &ConfigMux{
-		addrOrigin: addrOrigin,
-		schema:     schema,
-		portServer: portServer,
+		addrOrigin:      addrOrigin,
+		schema:          schema,
+		portServer:      portServer,
+		mainServiceName: mainServiceName,
 	}
 }
 
+//nolint:funlen
 func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.IUserService,
 	productService productdelivery.IProductService, categoryService categorydelivery.ICategoryService,
 	cityService citydelivery.ICityService, authGrpcService auth.SessionMangerClient,
@@ -127,7 +130,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(cityHandler.SearchCityHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/api/v1/metrics", promhttp.Handler())
 
-	metricsManager := metrics.NewMetricManagerHTTP()
+	metricsManager := metrics.NewMetricManagerHTTP(configMux.mainServiceName)
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(middleware.Context(ctx,
 		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger, metricsManager))), logger))

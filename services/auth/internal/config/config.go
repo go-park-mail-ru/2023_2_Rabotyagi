@@ -17,6 +17,8 @@ const (
 
 type Config struct {
 	ProductionMode         bool
+	AuthServiceName        string
+	AuthServicePort        string
 	AddressAuthServiceGrpc string
 	URLDataBase            string
 	OutputLogPath          string
@@ -38,6 +40,8 @@ func New() *Config {
 
 	return &Config{
 		ProductionMode:         productionMode,
+		AuthServiceName:        config.GetEnvStr(config.EnvServiceName, config.StandardAuthServiceName),
+		AuthServicePort:        config.GetEnvStr(config.EnvAuthServicePortHTTP, config.StandardAuthServicePortHTTP),
 		AddressAuthServiceGrpc: config.GetEnvStr(config.EnvAddressAuthServiceGrpc, config.StandardAddressAuthGrpc),
 		URLDataBase:            config.GetEnvStr(config.EnvURLDataBase, config.StandardURLDataBase),
 		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, standardOutputLogPathAuth),
