@@ -25,7 +25,7 @@ var (
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 
-	StrPremiumCoefficient    = "5"
+	StrPremiumCoefficient    = "5" //nolint:gochecknoglobals
 	StrNonPremiumCoefficient = "1"
 	StrSoldByUserCoefficient = "3"
 	StrViewsCoefficient      = "2"
@@ -162,10 +162,9 @@ func (p *ProductStorage) selectIsUserFavouriteProduct(ctx context.Context,
 }
 
 type productAddition struct {
-	favourites   uint64
-	images       []models.Image
-	inFavourite  bool
-	priceHistory []models.PriceHistoryRecord
+	favourites  uint64
+	images      []models.Image
+	inFavourite bool
 }
 
 func (p *ProductStorage) getProductAddition(ctx context.Context,
@@ -188,12 +187,6 @@ func (p *ProductStorage) getProductAddition(ctx context.Context,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	priceHistory, err := p.selectPriceHistory(ctx, tx, productID)
-	if err != nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	innerProductAddition.priceHistory = priceHistory
 	innerProductAddition.images = images
 	innerProductAddition.favourites = favouritesCount
 	innerProductAddition.inFavourite = inFavouriteProduct
@@ -214,7 +207,12 @@ func (p *ProductStorage) getProduct(ctx context.Context,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	product.PriceHistory = productAdditionInner.priceHistory
+	productPriceHistory, err := p.selectPriceHistory(ctx, tx, productID)
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	product.PriceHistory = productPriceHistory
 	product.Images = productAdditionInner.images
 	product.Favourites = productAdditionInner.favourites
 	product.InFavourites = productAdditionInner.inFavourite

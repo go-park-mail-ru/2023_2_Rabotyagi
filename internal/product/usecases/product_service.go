@@ -41,6 +41,7 @@ type IProductStorage interface {
 	) ([]*models.ProductInFeed, error)
 	IBasketStorage
 	IFavouriteStorage
+	IPremiumStorage
 }
 
 type ProductService struct {

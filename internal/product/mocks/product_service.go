@@ -68,6 +68,20 @@ func (mr *MockIProductStorageMockRecorder) AddOrderInBasket(ctx, userID, product
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrderInBasket", reflect.TypeOf((*MockIProductStorage)(nil).AddOrderInBasket), ctx, userID, productID, count)
 }
 
+// AddPremium mocks base method.
+func (m *MockIProductStorage) AddPremium(ctx context.Context, productID, userID uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddPremium", ctx, productID, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddPremium indicates an expected call of AddPremium.
+func (mr *MockIProductStorageMockRecorder) AddPremium(ctx, productID, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPremium", reflect.TypeOf((*MockIProductStorage)(nil).AddPremium), ctx, productID, userID)
+}
+
 // AddProduct mocks base method.
 func (m *MockIProductStorage) AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error) {
 	m.ctrl.T.Helper()
@@ -167,21 +181,6 @@ func (mr *MockIProductStorageMockRecorder) DeleteProduct(ctx, productID, userID 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProduct", reflect.TypeOf((*MockIProductStorage)(nil).DeleteProduct), ctx, productID, userID)
 }
 
-// GetOldProducts mocks base method.
-func (m *MockIProductStorage) GetOldProducts(ctx context.Context, lastProductID, count, userID uint64) ([]*models.ProductInFeed, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOldProducts", ctx, lastProductID, count, userID)
-	ret0, _ := ret[0].([]*models.ProductInFeed)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetOldProducts indicates an expected call of GetOldProducts.
-func (mr *MockIProductStorageMockRecorder) GetOldProducts(ctx, lastProductID, count, userID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOldProducts", reflect.TypeOf((*MockIProductStorage)(nil).GetOldProducts), ctx, lastProductID, count, userID)
-}
-
 // GetOrdersInBasketByUserID mocks base method.
 func (m *MockIProductStorage) GetOrdersInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
 	m.ctrl.T.Helper()
@@ -195,6 +194,21 @@ func (m *MockIProductStorage) GetOrdersInBasketByUserID(ctx context.Context, use
 func (mr *MockIProductStorageMockRecorder) GetOrdersInBasketByUserID(ctx, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersInBasketByUserID", reflect.TypeOf((*MockIProductStorage)(nil).GetOrdersInBasketByUserID), ctx, userID)
+}
+
+// GetPopularProducts mocks base method.
+func (m *MockIProductStorage) GetPopularProducts(ctx context.Context, lastProductID, count, userID uint64) ([]*models.ProductInFeed, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPopularProducts", ctx, lastProductID, count, userID)
+	ret0, _ := ret[0].([]*models.ProductInFeed)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPopularProducts indicates an expected call of GetPopularProducts.
+func (mr *MockIProductStorageMockRecorder) GetPopularProducts(ctx, lastProductID, count, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPopularProducts", reflect.TypeOf((*MockIProductStorage)(nil).GetPopularProducts), ctx, lastProductID, count, userID)
 }
 
 // GetProduct mocks base method.
@@ -255,6 +269,20 @@ func (m *MockIProductStorage) GetUserFavourites(ctx context.Context, userID uint
 func (mr *MockIProductStorageMockRecorder) GetUserFavourites(ctx, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserFavourites", reflect.TypeOf((*MockIProductStorage)(nil).GetUserFavourites), ctx, userID)
+}
+
+// RemovePremium mocks base method.
+func (m *MockIProductStorage) RemovePremium(ctx context.Context, productID, userID uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemovePremium", ctx, productID, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemovePremium indicates an expected call of RemovePremium.
+func (mr *MockIProductStorageMockRecorder) RemovePremium(ctx, productID, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemovePremium", reflect.TypeOf((*MockIProductStorage)(nil).RemovePremium), ctx, productID, userID)
 }
 
 // SearchProduct mocks base method.

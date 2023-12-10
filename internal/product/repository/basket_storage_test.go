@@ -252,18 +252,6 @@ func TestAddOrderInBasket(t *testing.T) {
 						AddRow(uint64(1), uint64(1), "Car", "text", uint64(1212), time.Now(),
 							uint32(6), uint32(4), uint64(6), true, true, true))
 
-				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"url"}).
-						AddRow("safsafddasf"))
-
-				mockPool.ExpectQuery(`SELECT COUNT`).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{`count`}).
-						AddRow(uint64(1)))
-
-				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"id"}).
-						AddRow("1"))
-
 				mockPool.ExpectExec(`INSERT INTO public."order"`).WithArgs(uint64(1), uint64(1), uint32(1)).
 					WillReturnResult(pgxmock.NewResult("INSERT", 1))
 

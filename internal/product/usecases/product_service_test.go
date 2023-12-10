@@ -26,24 +26,30 @@ func NewProductService(ctrl *gomock.Controller,
 ) (*usecases.ProductService, error) {
 	mockProductStorage := mocks.NewMockIProductStorage(ctrl)
 	mockFileService := mocksfileservice.NewMockFileServiceClient(ctrl)
-	mockBasketStrorage := mocks.NewMockIBasketStorage(ctrl)
-	mockFavouriteStrorage := mocks.NewMockIFavouriteStorage(ctrl)
+	mockBasketStorage := mocks.NewMockIBasketStorage(ctrl)
+	mockFavouriteStorage := mocks.NewMockIFavouriteStorage(ctrl)
+	mockPremiumStorage := mocks.NewMockIPremiumStorage(ctrl)
 
 	behaviorProductStorage(mockProductStorage)
 	behaviorFileService(mockFileService)
 
-	basketService, err := usecases.NewBasketService(mockBasketStrorage)
+	basketService, err := usecases.NewBasketService(mockBasketStorage)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected err=%w", err)
 	}
 
-	favouriteService, err := usecases.NewFavouriteService(mockFavouriteStrorage)
+	favouriteService, err := usecases.NewFavouriteService(mockFavouriteStorage)
+	if err != nil {
+		return nil, fmt.Errorf("unexpected err=%w", err)
+	}
+
+	premiumService, err := usecases.NewPremiumService(mockPremiumStorage)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected err=%w", err)
 	}
 
 	productService, err := usecases.NewProductService(mockProductStorage,
-		basketService, favouriteService, mockFileService)
+		basketService, favouriteService, premiumService, mockFileService)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected err=%w", err)
 	}
@@ -374,7 +380,7 @@ func TestGetProductList(t *testing.T) {
 			inputLastProductID: test.ProductID,
 			inputCount:         test.CountProduct,
 			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
-				m.EXPECT().GetOldProducts(baseCtx, test.ProductID, test.CountProduct, test.UserID).Return(
+				m.EXPECT().GetPopularProducts(baseCtx, test.ProductID, test.CountProduct, test.UserID).Return(
 					[]*models.ProductInFeed{
 						{ID: test.ProductID, Title: "Title"}, {ID: test.ProductID + 1, Title: "Title"},
 					}, nil)
@@ -389,7 +395,7 @@ func TestGetProductList(t *testing.T) {
 			inputLastProductID: test.ProductID,
 			inputCount:         test.CountProduct,
 			behaviorProductStorage: func(m *mocks.MockIProductStorage) {
-				m.EXPECT().GetOldProducts(baseCtx, test.ProductID, test.CountProduct, test.UserID).Return(
+				m.EXPECT().GetPopularProducts(baseCtx, test.ProductID, test.CountProduct, test.UserID).Return(
 					nil, testInternalErr)
 			},
 			expectedProductID: nil,
