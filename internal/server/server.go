@@ -21,7 +21,9 @@ import (
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
+
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -41,7 +43,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 
 	grcpConnAuth, err := grpc.Dial(
 		config.AddressAuthServiceGrpc,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -52,10 +54,10 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 
 	grpcConnFileService, err := grpc.Dial(
 		config.AddressFileServiceGrpc,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 	defer grpcConnFileService.Close()
 
@@ -78,32 +80,32 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 
 	productStorage, err := productrepo.NewProductStorage(pool)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	basketService, err := usecases.NewBasketService(productStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	favouriteService, err := usecases.NewFavouriteService(productStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	productService, err := usecases.NewProductService(productStorage, basketService, favouriteService, fileServiceClient)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	userStorage, err := userrepo.NewUserStorage(pool)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	userService, err := userusecases.NewUserService(userStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	categoryStorage, err := categoryrepo.NewCategoryStorage(pool)
