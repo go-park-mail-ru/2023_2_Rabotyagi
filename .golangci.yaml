@@ -145,6 +145,7 @@ linters-settings:
           - github.com/brianvoe/gofakeit/v6
           - google.golang.org/grpc
           - github.com/pashagolub/pgxmock/v3
+          - github.com/prometheus/client_golang/prometheus
         deny:
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package

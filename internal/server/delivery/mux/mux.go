@@ -2,7 +2,6 @@ package mux
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"net/http"
 
 	categorydelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/delivery"
@@ -10,8 +9,11 @@ import (
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
-
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type ConfigMux struct {
@@ -123,10 +125,12 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(cityHandler.GetFullCitiesHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/api/v1/city/search",
 		middleware.SetupCORS(cityHandler.SearchCityHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/api/v1/metrics", promhttp.Handler())
 
+	metricsManager := metrics.NewMetricManagerHTTP()
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(middleware.Context(ctx,
-		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger))), logger))
+		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger, metricsManager))), logger))
 
 	return mux, nil
 }

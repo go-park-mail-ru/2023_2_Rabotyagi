@@ -2,10 +2,13 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
 type WriterWithStatus struct {
@@ -18,7 +21,9 @@ func (w *WriterWithStatus) WriteHeader(statusCode int) {
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
-func AccessLogMiddleware(next http.Handler, logger *my_logger.MyLogger) http.Handler {
+func AccessLogMiddleware(next http.Handler,
+	logger *my_logger.MyLogger, metricsManager metrics.IMetricManagerHTTP,
+) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		writerWithStatus := &WriterWithStatus{ResponseWriter: w, Status: http.StatusOK}
 
@@ -35,8 +40,17 @@ func AccessLogMiddleware(next http.Handler, logger *my_logger.MyLogger) http.Han
 
 		logger := logger.LogReqID(r.Context()) //nolint:contextcheck
 
+		path := r.URL.Path
+		method := r.Method
+		statusStr := strconv.Itoa(status)
+
 		logger.Infof(
-			"path: %s method: %s status: %d duration: %v remoreAddr: %s",
-			r.URL.Path, r.Method, status, duration, r.RemoteAddr)
+			"path: %s method: %s status: %s duration: %v remoreAddr: %s",
+			path, method, statusStr, duration, r.RemoteAddr)
+
+		path = utils.SimplifyPath(path)
+
+		metricsManager.IncreaseTotal(path, method, statusStr)
+		metricsManager.AddDuration(path, method, statusStr, duration)
 	})
 }
