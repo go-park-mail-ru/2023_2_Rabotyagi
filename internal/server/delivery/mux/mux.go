@@ -101,6 +101,11 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	router.Handle("/api/v1/product/remove-from-fav",
 		middleware.SetupCORS(productHandler.DeleteFromFavouritesHandler, configMux.addrOrigin, configMux.schema))
 
+	router.Handle("/api/v1/premium/add",
+		middleware.SetupCORS(productHandler.AddPremiumHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/api/v1/premium/remove",
+		middleware.SetupCORS(productHandler.RemovePremiumHandler, configMux.addrOrigin, configMux.schema))
+
 	router.Handle("/api/v1/order/add",
 		middleware.SetupCORS(productHandler.AddOrderHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/api/v1/order/get_basket",

@@ -339,7 +339,8 @@ func (p *ProductStorage) GetPopularProducts(ctx context.Context,
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
 			tx, count, whereClause, []string{`CASE
-		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
+		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient +
+				`* (SELECT COUNT(*) FROM product p2 
 		WHERE p2.saler_id = product.saler_id)) * ` + StrPremiumCoefficient + `)
 		ELSE ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
 		WHERE p2.saler_id = product.saler_id)) * ` + StrNonPremiumCoefficient + `)
@@ -391,7 +392,8 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
 			tx, count, whereClause, []string{`CASE
-		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
+		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient +
+				`* (SELECT COUNT(*) FROM product p2 
 		WHERE p2.saler_id = product.saler_id)) * ` + StrPremiumCoefficient + `)
 		ELSE ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
 		WHERE p2.saler_id = product.saler_id)) * ` + StrNonPremiumCoefficient + `)
