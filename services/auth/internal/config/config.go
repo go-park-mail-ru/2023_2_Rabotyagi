@@ -6,12 +6,13 @@ import (
 )
 
 const (
-	standardDevelopmentMode = "development"
-	standardProductionMode  = "production"
-	standardOutputLogPath   = "stdout"
-	envEnvironmentMode      = "ENVIRONMENT"
-	envStandardSecret       = "JWT_SECRET"
-	standardSecret          = ""
+	standardDevelopmentMode        = "development"
+	standardProductionMode         = "production"
+	envEnvironmentMode             = "ENVIRONMENT"
+	envStandardSecret              = "JWT_SECRET"
+	standardSecret                 = ""
+	standardOutputLogPathAuth      = "stdout /var/log/backend/logs_auth.json"
+	standardErrorOutputLogPathAuth = "stderr /var/log/backend/err_logs_auth.json"
 )
 
 type Config struct {
@@ -39,7 +40,7 @@ func New() *Config {
 		ProductionMode:         productionMode,
 		AddressAuthServiceGrpc: config.GetEnvStr(config.EnvAddressAuthServiceGrpc, config.StandardAddressAuthGrpc),
 		URLDataBase:            config.GetEnvStr(config.EnvURLDataBase, config.StandardURLDataBase),
-		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, standardOutputLogPath),
-		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, config.StandardErrorOutputLogPath),
+		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, standardOutputLogPathAuth),
+		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, standardErrorOutputLogPathAuth),
 	}
 }

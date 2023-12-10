@@ -3,8 +3,8 @@ package config
 import "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 
 const (
-	standardOutputLogPathFST   = "stdout /var/log/backend/logs_fs.json"
-	standardErrorOutputLogPath = "stderr /var/log/backend/err_logs_fs.json"
+	standardOutputLogPathFS      = "stdout /var/log/backend/logs_fs.json"
+	standardErrorOutputLogPathFS = "stderr /var/log/backend/err_logs_fs.json"
 )
 
 type Config struct {
@@ -33,7 +33,7 @@ func New() *Config {
 		Port:                   config.GetEnvStr(config.EnvFileServicePortHTTP, config.StandardFileServicePortHTTP),
 		PathToRoot:             config.GetEnvStr(config.EnvPathToRoot, config.StandardPathToRoot),
 		FileServiceDir:         config.GetEnvStr(config.EnvFileServiceDir, config.StandardFileServiceDir),
-		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, standardOutputLogPathFST),
-		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, standardErrorOutputLogPath),
+		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, standardOutputLogPathFS),
+		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, standardErrorOutputLogPathFS),
 	}
 }

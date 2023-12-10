@@ -12,7 +12,7 @@ import (
 )
 
 func AccessInterceptor(ctx context.Context, req interface{},
-	_ *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (interface{}, error) {
 	reqID := my_logger.GetRequestIDFromMDCtx(ctx)
 	ctx = my_logger.SetRequestIDToCtx(ctx, reqID)
@@ -34,7 +34,7 @@ func AccessInterceptor(ctx context.Context, req interface{},
 		return nil, fmt.Errorf(myerrors.ErrTemplate, errHandler)
 	}
 
-	logger.Infof("Received request: %v duration: %v", req, duration)
+	logger.Infof("method: %v request: %v duration: %v", info.FullMethod, req, duration)
 
 	return resp, nil
 }
