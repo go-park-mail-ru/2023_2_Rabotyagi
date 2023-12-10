@@ -101,7 +101,7 @@ func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []mo
 
 	for i, urlCorrect := range checkedURLs.Correct {
 		if !urlCorrect {
-			messageUnCorrect += fmt.Sprintf("файл с урлом: %s не найден в хранилище", slImg[i].URL)
+			messageUnCorrect += fmt.Sprintf("файл с урлом: %s не найден в хранилище\n", slImg[i].URL)
 		}
 	}
 

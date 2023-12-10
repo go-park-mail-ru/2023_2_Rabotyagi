@@ -64,7 +64,7 @@ func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error { 
 	}
 
 	go func() {
-		s.httpServer = &http.Server{ //nolint:exhaustruct
+		s.httpServer = &http.Server{ //nolint:exhaustivestruct,exhaustruct
 			Addr:           ":" + config.Port,
 			Handler:        handler,
 			MaxHeaderBytes: http.DefaultMaxHeaderBytes,

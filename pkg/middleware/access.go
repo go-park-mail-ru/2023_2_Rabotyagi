@@ -50,6 +50,10 @@ func AccessLogMiddleware(next http.Handler,
 
 		path = utils.SimplifyPath(path)
 
+		if status == http.StatusNotFound {
+			path = "" // this need for reduce count labels in metrics
+		}
+
 		metricsManager.IncreaseTotal(path, method, statusStr)
 		metricsManager.AddDuration(path, method, statusStr, duration)
 	})

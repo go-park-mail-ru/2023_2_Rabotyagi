@@ -38,6 +38,7 @@ func (g *GrpcAccessInterceptor) AccessInterceptor(ctx context.Context, req inter
 	logger = logger.LogReqID(ctx)
 
 	g.metrics.IncTotal(info.FullMethod)
+	g.metrics.AddDuration(info.FullMethod, duration)
 
 	if errHandler != nil {
 		logger.Errorln(errHandler)
@@ -47,7 +48,6 @@ func (g *GrpcAccessInterceptor) AccessInterceptor(ctx context.Context, req inter
 	}
 
 	logger.Infof("method: %v request: %v duration: %v", info.FullMethod, req, duration)
-	g.metrics.AddDuration(info.FullMethod, duration)
 
 	return resp, nil
 }
