@@ -24,6 +24,11 @@ var (
 		"Получили некорректный формат images внутри объявления")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
+
+	StrPremiumCoefficient    = "5"
+	StrNonPremiumCoefficient = "1"
+	StrSoldByUserCoefficient = "3"
+	StrViewsCoefficient      = "2"
 )
 
 type ProductStorage struct {
@@ -324,7 +329,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	return slProduct, nil
 }
 
-func (p *ProductStorage) GetOldProducts(ctx context.Context,
+func (p *ProductStorage) GetPopularProducts(ctx context.Context,
 	lastProductID uint64, count uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
@@ -335,7 +340,12 @@ func (p *ProductStorage) GetOldProducts(ctx context.Context,
 		whereClause := fmt.Sprintf("id > %d AND is_active = true AND available_count > 0", lastProductID)
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
-			tx, count, whereClause, []string{"created_at"})
+			tx, count, whereClause, []string{`CASE
+		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
+		WHERE p2.saler_id = product.saler_id)) * ` + StrPremiumCoefficient + `)
+		ELSE ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
+		WHERE p2.saler_id = product.saler_id)) * ` + StrNonPremiumCoefficient + `)
+		END`})
 		if err != nil {
 			return err
 		}
@@ -382,7 +392,12 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		}
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
-			tx, count, whereClause, []string{"created_at DESC"})
+			tx, count, whereClause, []string{`CASE
+		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
+		WHERE p2.saler_id = product.saler_id)) * ` + StrPremiumCoefficient + `)
+		ELSE ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
+		WHERE p2.saler_id = product.saler_id)) * ` + StrNonPremiumCoefficient + `)
+		END`})
 
 		if err != nil {
 			return err
