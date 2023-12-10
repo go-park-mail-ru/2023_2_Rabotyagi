@@ -91,7 +91,12 @@ func (s *Server) Run(config *config.Config) error {
 		return err
 	}
 
-	productService, err := usecases.NewProductService(productStorage, basketService, favouriteService, fileServiceClient)
+	premiumService, err := usecases.NewPremiumService(productStorage)
+	if err != nil {
+		return err
+	}
+
+	productService, err := usecases.NewProductService(productStorage, basketService, favouriteService, premiumService, fileServiceClient)
 	if err != nil {
 		return err
 	}

@@ -46,13 +46,14 @@ type IProductStorage interface {
 type ProductService struct {
 	FavouriteService
 	BasketService
+	PremiumService
 	fileServiceClient fileservice.FileServiceClient
 	storage           IProductStorage
 	logger            *my_logger.MyLogger
 }
 
 func NewProductService(productStorage IProductStorage, basketService *BasketService,
-	favouriteService *FavouriteService, fileServiceClient fileservice.FileServiceClient,
+	favouriteService *FavouriteService, premiumService *PremiumService, fileServiceClient fileservice.FileServiceClient,
 ) (*ProductService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
@@ -62,6 +63,7 @@ func NewProductService(productStorage IProductStorage, basketService *BasketServ
 	return &ProductService{
 		FavouriteService:  *favouriteService,
 		BasketService:     *basketService,
+		PremiumService:    *premiumService,
 		fileServiceClient: fileServiceClient,
 		storage:           productStorage,
 		logger:            logger,

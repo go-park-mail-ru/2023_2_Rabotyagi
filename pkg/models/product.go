@@ -26,6 +26,7 @@ type Product struct {
 	SafeDeal       bool                 `json:"safe_deal"       valid:"optional"`
 	InFavourites   bool                 `json:"in_favourites"   valid:"optional"`
 	IsActive       bool                 `json:"is_active"       valid:"optional"`
+	Premium        bool                 `json:"premium" valid:"required"`
 	Images         []Image              `json:"images"`
 	PriceHistory   []PriceHistoryRecord `json:"price_history"`
 	Favourites     uint64               `json:"favourites"      valid:"required"`
