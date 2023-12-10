@@ -24,11 +24,13 @@ var (
 		"Получили некорректный формат images внутри объявления")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
+)
 
+const (
 	StrPremiumCoefficient    = "5" //nolint:gochecknoglobals
-	StrNonPremiumCoefficient = "1"
-	StrSoldByUserCoefficient = "3"
-	StrViewsCoefficient      = "2"
+	StrNonPremiumCoefficient = "1" //nolint:gochecknoglobals
+	StrSoldByUserCoefficient = "3" //nolint:gochecknoglobals
+	StrViewsCoefficient      = "2" //nolint:gochecknoglobals
 )
 
 type ProductStorage struct {
