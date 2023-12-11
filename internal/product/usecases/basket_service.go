@@ -16,6 +16,8 @@ var _ IBasketStorage = (*productrepo.ProductStorage)(nil)
 type IBasketStorage interface {
 	AddOrderInBasket(ctx context.Context, userID uint64, productID uint64, count uint32) (*models.OrderInBasket, error)
 	GetOrdersInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
+	GetOrdersNotInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
+	GetOrdersSoldByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
 	UpdateOrderCount(ctx context.Context, userID uint64, orderID uint64, newCount uint32) error
 	UpdateOrderStatus(ctx context.Context, userID uint64, orderID uint64, newStatus uint8) error
 	BuyFullBasket(ctx context.Context, userID uint64) error
@@ -52,6 +54,33 @@ func (b BasketService) AddOrder(ctx context.Context, r io.Reader, userID uint64)
 
 func (b BasketService) GetOrdersByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
 	orders, err := b.storage.GetOrdersInBasketByUserID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	for _, order := range orders {
+		order.Sanitize()
+	}
+
+	return orders, nil
+}
+
+func (b BasketService) GetOrdersNotInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket,
+	error) {
+	orders, err := b.storage.GetOrdersNotInBasketByUserID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	for _, order := range orders {
+		order.Sanitize()
+	}
+
+	return orders, nil
+}
+
+func (b BasketService) GetOrdersSoldByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
+	orders, err := b.storage.GetOrdersSoldByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
