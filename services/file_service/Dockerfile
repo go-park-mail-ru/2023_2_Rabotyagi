@@ -8,6 +8,7 @@ RUN apk add git
 COPY pkg pkg
 COPY services/file_service/cmd services/file_service/cmd
 COPY services/file_service/internal services/file_service/internal
+COPY services/file_service/static static
 COPY go.mod .
 COPY go.sum .
 
