@@ -22,7 +22,7 @@ func TestDeleteOrder(t *testing.T) {
 	type TestCase struct {
 		name                   string
 		behaviorProductStorage func(m *repository.ProductStorage)
-		ownerID                uint64
+		userID                 uint64
 		orderID                uint64
 	}
 
@@ -38,7 +38,7 @@ func TestDeleteOrder(t *testing.T) {
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},
-			ownerID: 1,
+			userID:  1,
 			orderID: 1,
 		},
 	}
@@ -51,14 +51,14 @@ func TestDeleteOrder(t *testing.T) {
 
 			ctx := context.Background()
 
-			catStorage, err := repository.NewProductStorage(mockPool)
+			basketStorage, err := repository.NewProductStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(catStorage)
+			testCase.behaviorProductStorage(basketStorage)
 
-			err = catStorage.DeleteOrder(ctx, testCase.orderID, testCase.ownerID)
+			err = basketStorage.DeleteOrder(ctx, testCase.orderID, testCase.userID)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -133,7 +133,7 @@ func TestUpdateOrderCount(t *testing.T) {
 	}
 }
 
-func TestUpdateOrderStatus(t *testing.T) {
+func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -222,7 +222,7 @@ func TestUpdateOrderStatus(t *testing.T) {
 	}
 }
 
-func TestAddOrderInBasket(t *testing.T) {
+func TestAddOrderInBasket(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -297,7 +297,7 @@ func TestAddOrderInBasket(t *testing.T) {
 	}
 }
 
-func TestGetOrdersInBasket(t *testing.T) {
+func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -370,7 +370,7 @@ func TestGetOrdersInBasket(t *testing.T) {
 	}
 }
 
-func TestGetOrdersNotInBasket(t *testing.T) {
+func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -443,7 +443,7 @@ func TestGetOrdersNotInBasket(t *testing.T) {
 	}
 }
 
-func TestGetOrdersSold(t *testing.T) {
+func TestGetOrdersSold(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
