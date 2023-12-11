@@ -3,12 +3,13 @@ package config
 import "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/config"
 
 const (
-	standardOutputLogPathFST   = "stdout /var/log/backend/logs_fs.json"
-	standardErrorOutputLogPath = "stderr /var/log/backend/err_logs_fs.json"
+	standardOutputLogPathFS      = "stdout /var/log/backend/logs_fs.json"
+	standardErrorOutputLogPathFS = "stderr /var/log/backend/err_logs_fs.json"
 )
 
 type Config struct {
 	ProductionMode         bool
+	ServiceName            string
 	AddressFileServiceGrpc string
 	Schema                 string
 	AllowOrigin            string
@@ -27,13 +28,14 @@ func New() *Config {
 
 	return &Config{
 		ProductionMode:         productionMode,
+		ServiceName:            config.GetEnvStr(config.EnvServiceName, config.StandardFileServiceName),
 		AddressFileServiceGrpc: config.GetEnvStr(config.EnvAddressFileServiceGrpc, config.StandardAddressFileServiceGrpc),
 		AllowOrigin:            config.GetEnvStr(config.EnvAllowOrigin, config.StandardAllowOrigin),
 		Schema:                 config.GetEnvStr(config.EnvSchema, config.StandardSchema),
 		Port:                   config.GetEnvStr(config.EnvFileServicePortHTTP, config.StandardFileServicePortHTTP),
 		PathToRoot:             config.GetEnvStr(config.EnvPathToRoot, config.StandardPathToRoot),
 		FileServiceDir:         config.GetEnvStr(config.EnvFileServiceDir, config.StandardFileServiceDir),
-		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, standardOutputLogPathFST),
-		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, standardErrorOutputLogPath),
+		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, standardOutputLogPathFS),
+		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, standardErrorOutputLogPathFS),
 	}
 }

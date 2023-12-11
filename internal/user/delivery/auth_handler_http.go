@@ -62,7 +62,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	userWithoutID := new(models.UserWithoutID)
 	if err := decoder.Decode(userWithoutID); err != nil {
 		err = myerrors.NewErrorBadFormatRequest(err.Error())
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -70,7 +70,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	_, err := govalidator.ValidateStruct(userWithoutID)
 	if err != nil {
 		err = myerrors.NewErrorBadContentRequest(err.Error())
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -80,7 +80,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	sessionWithToken, err := a.sessionManagerClient.Create(ctx, &userForCreate)
 	if err != nil {
 		logger.Errorln(err)
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -130,7 +130,7 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	sessionWithToken, err := a.sessionManagerClient.Login(ctx, &userForLogin)
 	if err != nil {
 		logger.Errorln(err)
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -178,7 +178,7 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 			err = responses.ErrCookieNotPresented
 		}
 
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -190,7 +190,7 @@ func (a *AuthHandler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	expiredSession, err := a.sessionManagerClient.Delete(ctx, sessionUser)
 	if err != nil {
 		logger.Errorln(err)
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}

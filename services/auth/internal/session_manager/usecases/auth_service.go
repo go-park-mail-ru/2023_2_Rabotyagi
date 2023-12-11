@@ -4,18 +4,17 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"time"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/repository"
-	"time"
 )
 
-var (
-	ErrWrongCredentials = myerrors.NewErrorBadContentRequest("Некорректный логин или пароль")
-)
+var ErrWrongCredentials = myerrors.NewErrorBadContentRequest("Некорректный логин или пароль")
 
 var _ IAuthStorage = (*repository.AuthStorage)(nil)
 
@@ -39,16 +38,18 @@ func NewAuthService(authStorage IAuthStorage) (*AuthService, error) {
 }
 
 func (a *AuthService) LoginUser(ctx context.Context, email string, password string) (string, error) {
+	logger := a.logger.LogReqID(ctx)
+
 	user, err := a.storage.GetUser(ctx, email)
 	if err != nil {
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	hashPass, err := hex.DecodeString(user.Password)
 	if err != nil {
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -65,7 +66,7 @@ func (a *AuthService) LoginUser(ctx context.Context, email string, password stri
 
 	rawJwt, err := jwt.GenerateJwtToken(&jwtPayload, jwt.GetSecret())
 	if err != nil {
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -74,16 +75,18 @@ func (a *AuthService) LoginUser(ctx context.Context, email string, password stri
 }
 
 func (a *AuthService) AddUser(ctx context.Context, email string, password string) (string, error) {
+	logger := a.logger.LogReqID(ctx)
+
 	password, err := utils.HashPass(password)
 	if err != nil {
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	user, err := a.storage.AddUser(ctx, email, password)
 	if err != nil {
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -96,7 +99,7 @@ func (a *AuthService) AddUser(ctx context.Context, email string, password string
 
 	rawJwt, err := jwt.GenerateJwtToken(&jwtPayload, jwt.GetSecret())
 	if err != nil {
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -105,9 +108,11 @@ func (a *AuthService) AddUser(ctx context.Context, email string, password string
 }
 
 func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error) {
+	logger := a.logger.LogReqID(ctx)
+
 	jwtPayload, err := jwt.NewUserJwtPayload(rawJwt, jwt.GetSecret())
 	if err != nil {
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -116,7 +121,7 @@ func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error)
 
 	newRawJwt, err := jwt.GenerateJwtToken(jwtPayload, jwt.GetSecret())
 	if err != nil {
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -124,7 +129,7 @@ func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error)
 	return newRawJwt, nil
 }
 
-func (a *AuthService) Check(ctx context.Context, rawJwt string) (uint64, error) {
+func (a *AuthService) Check(_ context.Context, rawJwt string) (uint64, error) {
 	userPayload, err := jwt.NewUserJwtPayload(rawJwt, jwt.GetSecret())
 	if err != nil {
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)

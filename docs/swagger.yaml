@@ -248,6 +248,7 @@ definitions:
       body:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBodyID'
       status:
+        example: 3003
         type: integer
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful:
@@ -655,7 +656,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.OrderListResponse'
         "222":
-          description: Error
+          description: Error". Внутри body статус может быть badFormat(4000)
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -826,7 +827,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_product_delivery.ProductListResponse'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
         "222":
           description: Error". Внутри body статус может быть badFormat(4000)
           schema:
@@ -1108,6 +1109,40 @@ paths:
       summary: get products search feed
       tags:
       - product
+  /product/remove-from-fav:
+    delete:
+      consumes:
+      - application/json
+      description: delete product from favs using product id from query and user id
+        form cookie
+      parameters:
+      - description: product id
+        in: query
+        name: product_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
+        "222":
+          description: Error". Внутри body статус может быть badFormat(4000)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: delete product from favs
+      tags:
+      - favourite
   /product/search:
     get:
       description: search top 5 common named/descripted products

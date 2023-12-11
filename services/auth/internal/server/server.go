@@ -8,14 +8,16 @@ import (
 	"strings"
 	"time"
 
-	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/interceptors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/config"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery/mux"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
+	reposhare "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/config"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
+	deliverymux "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/usecases"
 
 	"google.golang.org/grpc"
 )
@@ -23,8 +25,6 @@ import (
 const (
 	pathCertFile = "/etc/ssl/goods-galaxy.ru.crt"
 	pathKeyFile  = "/etc/ssl/goods-galaxy.ru.key"
-
-	urlPrefixPathFS = "img/"
 
 	basicTimeout = 10 * time.Second
 )
@@ -42,37 +42,23 @@ func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error { 
 		return err //nolint:wrapcheck
 	}
 
-	defer logger.Sync() //nolint:errcheck
-
 	baseCtx := context.Background()
 
-	fileStorage, err := repository.NewFileSystemStorage(config.FileServiceDir)
-	if err != nil {
-		return err //nolint:wrapcheck
-	}
-
-	fileServiceHTTP, err := usecases.NewFileServiceHTTP(fileStorage, urlPrefixPathFS)
-	if err != nil {
-		return err //nolint:wrapcheck
-	}
-
-	handler, err := mux.NewMux(baseCtx,
-		mux.NewConfigMux(config.AllowOrigin, config.Schema, config.Port, config.FileServiceDir, config.ServiceName),
-		fileServiceHTTP, logger)
+	handler, err := deliverymux.NewMux(baseCtx, config.AuthServiceName, logger)
 	if err != nil {
 		return err //nolint:wrapcheck
 	}
 
 	go func() {
-		s.httpServer = &http.Server{ //nolint:exhaustivestruct,exhaustruct
-			Addr:           ":" + config.Port,
+		s.httpServer = &http.Server{ //nolint:exhaustruct
+			Addr:           ":" + config.AuthServicePort,
 			Handler:        handler,
 			MaxHeaderBytes: http.DefaultMaxHeaderBytes,
 			ReadTimeout:    basicTimeout,
 			WriteTimeout:   basicTimeout,
 		}
 
-		logger.Infof("starting server http at: %s", config.Port)
+		logger.Infof("starting server http at: %s", config.AuthServicePort)
 
 		var err error
 
@@ -85,26 +71,48 @@ func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error { 
 		chErrHTTP <- err
 	}()
 
-	lis, err := net.Listen("tcp", config.AddressFileServiceGrpc)
+	lis, err := net.Listen("tcp", config.AddressAuthServiceGrpc)
 	if err != nil {
 		return err //nolint:wrapcheck
 	}
 
-	metricManager := metrics.NewMetricManagerGrpc(config.ServiceName)
+	metricManager := metrics.NewMetricManagerGrpc(config.AuthServiceName)
 
 	grpcAccessInterceptor := interceptors.NewGrpcAccessInterceptor(metricManager)
 
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(grpcAccessInterceptor.AccessInterceptor, interceptors.ErrConvertInterceptor))
 
-	fileServiceGrpc := usecases.NewFileServiceGrpc(urlPrefixPathFS, fileStorage)
-	fileHandlerGrpc := delivery.NewFileHandlerGrpc(fileServiceGrpc)
+	pool, err := reposhare.NewPgxPool(baseCtx, config.URLDataBase)
+	if err != nil {
+		return err //nolint:wrapcheck
+	}
 
-	fileservice.RegisterFileServiceServer(server, fileHandlerGrpc)
+	storage, err := repository.NewAuthStorage(pool)
+	if err != nil {
+		return err //nolint:wrapcheck
+	}
 
-	logger.Infof("starting server grpc at: %s", config.AddressFileServiceGrpc)
+	service, err := usecases.NewAuthService(storage)
+	if err != nil {
+		return err //nolint:wrapcheck
+	}
+
+	sessionManager, err := delivery.NewSessionManager(pool, service)
+	if err != nil {
+		return err //nolint:wrapcheck
+	}
+
+	auth.RegisterSessionMangerServer(server, sessionManager)
+
+	chCloseRefreshing := make(chan struct{})
+
+	// don`t want use chCloseRefreshing secret now
+	jwt.StartRefreshingSecret(jwt.TimeTokenLife, chCloseRefreshing)
 
 	s.grpcServer = server
+
+	logger.Infof("starting server at: %s", config.AddressAuthServiceGrpc)
 
 	return server.Serve(lis) //nolint:wrapcheck
 }

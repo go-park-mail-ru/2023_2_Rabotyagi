@@ -21,7 +21,9 @@ import (
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
+
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -36,26 +38,26 @@ type Server struct {
 }
 
 //nolint:funlen
-func (s *Server) Run(config *config.Config) error {
+func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 	baseCtx := context.Background()
 
 	grcpConnAuth, err := grpc.Dial(
 		config.AddressAuthServiceGrpc,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		fmt.Println(err)
 
-		return err
+		return err //nolint:wrapcheck
 	}
 	defer grcpConnAuth.Close()
 
 	grpcConnFileService, err := grpc.Dial(
 		config.AddressFileServiceGrpc,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 	defer grpcConnFileService.Close()
 
@@ -74,63 +76,63 @@ func (s *Server) Run(config *config.Config) error {
 		return err //nolint:wrapcheck
 	}
 
-	defer logger.Sync()
+	defer logger.Sync() //nolint:errcheck
 
 	productStorage, err := productrepo.NewProductStorage(pool)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	basketService, err := usecases.NewBasketService(productStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	favouriteService, err := usecases.NewFavouriteService(productStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	productService, err := usecases.NewProductService(productStorage, basketService, favouriteService, fileServiceClient)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	userStorage, err := userrepo.NewUserStorage(pool)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	userService, err := userusecases.NewUserService(userStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	categoryStorage, err := categoryrepo.NewCategoryStorage(pool)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	categoryService, err := categoryusecases.NewCategoryService(categoryStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	cityStorage, err := cityrepo.NewCityStorage(pool)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	cityService, err := cityusecases.NewCityService(cityStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
-		config.Schema, config.PortServer),
+		config.Schema, config.PortServer, config.MainServiceName),
 		userService, productService, categoryService, cityService, authGrpcService, logger)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	s.httpServer = &http.Server{ //nolint:exhaustruct

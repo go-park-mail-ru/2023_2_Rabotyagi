@@ -50,14 +50,14 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	orderInBasket, err := p.service.AddOrder(ctx, r.Body, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -76,7 +76,7 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 //	@Success    200  {object} OrderListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error"
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /order/get_basket [get]
 func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -90,14 +90,14 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	orders, err := p.service.GetOrdersByUserID(ctx, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -133,14 +133,14 @@ func (p *ProductHandler) UpdateOrderCountHandler(w http.ResponseWriter, r *http.
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	err = p.service.UpdateOrderCount(ctx, r.Body, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -177,14 +177,14 @@ func (p *ProductHandler) UpdateOrderStatusHandler(w http.ResponseWriter, r *http
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	err = p.service.UpdateOrderStatus(ctx, r.Body, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -218,14 +218,14 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	err = p.service.BuyFullBasket(ctx, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -261,21 +261,21 @@ func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Reque
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	orderID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	err = p.service.DeleteOrder(ctx, orderID, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}

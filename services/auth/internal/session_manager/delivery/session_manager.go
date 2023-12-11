@@ -33,7 +33,7 @@ func NewSessionManager(pool *pgxpool.Pool, authService IAuthService) (*SessionMa
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return &SessionManager{
+	return &SessionManager{ //nolint:exhaustruct
 		service: authService,
 		pool:    pool,
 		logger:  logger,

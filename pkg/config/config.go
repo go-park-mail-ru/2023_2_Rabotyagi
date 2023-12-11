@@ -13,6 +13,7 @@ const (
 	StandardOutputLogPath      = "stdout /var/log/backend/logs.json"
 	StandardErrorOutputLogPath = "stderr /var/log/backend/err_logs.json"
 	StandardURLDataBase        = "postgres://postgres:postgres@localhost:5432/youla?sslmode=disable"
+	StandardMainServiceName    = "backend"
 
 	EnvEnvironmentMode    = "ENVIRONMENT"
 	EnvAllowOrigin        = "ALLOW_ORIGIN"
@@ -21,6 +22,7 @@ const (
 	EnvOutputLogPath      = "OUTPUT_LOG_PATH"
 	EnvErrorOutputLogPath = "ERROR_OUTPUT_LOG_PATH"
 	EnvURLDataBase        = "URL_DATA_BASE"
+	EnvServiceName        = "SERVICE_NAME"
 
 	// File service .env
 
@@ -28,6 +30,7 @@ const (
 	StandardFileServiceDir         = "./static/img"
 	StandardAddressFileServiceGrpc = ":8011"
 	StandardFileServicePortHTTP    = "8081"
+	StandardFileServiceName        = "backend_fs"
 
 	EnvPathToRoot             = "PATH_TO_ROOT"
 	EnvFileServiceDir         = "FILE_SERVICE_DIR"
@@ -36,8 +39,12 @@ const (
 
 	// Auth service .env
 
-	StandardAddressAuthGrpc   = ":8012"
+	StandardAddressAuthGrpc     = ":8012"
+	StandardAuthServicePortHTTP = "8082"
+	StandardAuthServiceName     = "backend_auth"
+
 	EnvAddressAuthServiceGrpc = "ADDRESS_AUTH_GRPC"
+	EnvAuthServicePortHTTP    = "PORT_AUTH"
 )
 
 func GetEnvStr(name string, defaultValue string) string {

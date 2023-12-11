@@ -1,5 +1,26 @@
 package statuses
 
+import "context"
+
+type statusInCtx struct{}
+
+var keyStatusCtx = statusInCtx{} //nolint:gochecknoglobals
+
+func FillStatusCtx(ctx context.Context, status int) context.Context {
+	return context.WithValue(ctx, keyStatusCtx, status)
+}
+
+func GetStatusCtx(ctx context.Context, defaultStatus int) int {
+	statusRaw := ctx.Value(keyStatusCtx)
+
+	status, ok := statusRaw.(int)
+	if !ok {
+		return defaultStatus
+	}
+
+	return status
+}
+
 const (
 	// StatusResponseSuccessful uses for indicates successful status of request
 	StatusResponseSuccessful = 2000
@@ -17,4 +38,5 @@ const (
 
 	// StatusInternalServer uses for indicates internal error status in server
 	StatusInternalServer = 5000
+	StatusNotExist       = 5005
 )

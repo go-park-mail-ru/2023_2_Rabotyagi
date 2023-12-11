@@ -1,13 +1,6 @@
 package delivery_test
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/mocks"
 	"image"
 	"image/png"
 	"io"
@@ -15,6 +8,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/mocks"
 
 	"go.uber.org/mock/gomock"
 )
@@ -85,7 +86,7 @@ func TestUploadFile(t *testing.T) {
 				return req
 			}(),
 			behaviorFileServiceHTTP: func(m *mocks.MockIFileServiceHTTP) {
-				m.EXPECT().SaveImage(gomock.Not(nil)).Return("test_url", nil)
+				m.EXPECT().SaveImage(gomock.Any(), gomock.Not(nil)).Return("test_url", nil)
 			},
 			expectedResponse: delivery.NewResponseURLs([]string{"test_url"}),
 		},
@@ -116,7 +117,7 @@ func TestUploadFile(t *testing.T) {
 				return req
 			}(),
 			behaviorFileServiceHTTP: func(m *mocks.MockIFileServiceHTTP) {
-				m.EXPECT().SaveImage(gomock.Not(nil)).Return("", myerrors.NewErrorInternal("Test err"))
+				m.EXPECT().SaveImage(gomock.Any(), gomock.Not(nil)).Return("", myerrors.NewErrorInternal("Test err"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
 		},

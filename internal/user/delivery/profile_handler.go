@@ -2,12 +2,12 @@ package delivery
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"io"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
@@ -68,14 +68,14 @@ func (u *ProfileHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) 
 
 	userID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	user, err := u.service.GetUserWithoutPasswordByID(ctx, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -114,7 +114,7 @@ func (u *ProfileHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *ht
 
 	userID, err := delivery.GetUserID(ctx, r, u.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -128,7 +128,7 @@ func (u *ProfileHandler) PartiallyUpdateUserHandler(w http.ResponseWriter, r *ht
 
 	if err != nil {
 		logger.Errorf("in PartiallyUpdateUserHandler: %+v\n", err)
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}

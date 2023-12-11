@@ -2,26 +2,33 @@ package mux
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type ConfigMux struct {
-	allowOrigin    string
-	schema         string
-	portServer     string
-	fileServiceDir string
+	allowOrigin     string
+	schema          string
+	portServer      string
+	fileServiceDir  string
+	fileServiceName string
 }
 
-func NewConfigMux(allowOrigin string, schema string, portServer string, fileServiceDir string) *ConfigMux {
+func NewConfigMux(allowOrigin string,
+	schema string, portServer string, fileServiceDir string, fileServiceName string,
+) *ConfigMux {
 	return &ConfigMux{
-		allowOrigin:    allowOrigin,
-		schema:         schema,
-		portServer:     portServer,
-		fileServiceDir: fileServiceDir,
+		allowOrigin:     allowOrigin,
+		schema:          schema,
+		portServer:      portServer,
+		fileServiceDir:  fileServiceDir,
+		fileServiceName: fileServiceName,
 	}
 }
 
@@ -36,10 +43,12 @@ func NewMux(ctx context.Context, configMux *ConfigMux,
 	router.Handle("/api/v1/img/", fileHandler.DocFileServerHandler())
 	router.Handle("/api/v1/img/upload", middleware.Context(ctx,
 		middleware.SetupCORS(fileHandler.UploadFileHandler, configMux.allowOrigin, configMux.schema)))
+	router.Handle("/api/v1/metrics", promhttp.Handler())
 
+	metricsManager := metrics.NewMetricManagerHTTP(configMux.fileServiceName)
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(middleware.Context(ctx,
-		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger))), logger))
+		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger, metricsManager))), logger))
 
 	return mux, nil
 }
