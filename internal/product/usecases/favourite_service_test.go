@@ -18,7 +18,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func NewFavoutiteService(ctrl *gomock.Controller,
+func NewFavouriteService(ctrl *gomock.Controller,
 	behaviorFavouriteStorage func(m *mocks.MockIFavouriteStorage),
 ) (*usecases.FavouriteService, error) {
 	_ = my_logger.NewNop()
@@ -85,7 +85,7 @@ func TestGetUserFavourites(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			productService, err := NewFavoutiteService(ctrl, testCase.behaviorFavouriteStorage)
+			productService, err := NewFavouriteService(ctrl, testCase.behaviorFavouriteStorage)
 			if err != nil {
 				t.Fatalf("Failed create productService %+v", err)
 			}
@@ -152,7 +152,7 @@ func TestAddToFavourites(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			productService, err := NewFavoutiteService(ctrl, testCase.behaviorFavouriteStorage)
+			productService, err := NewFavouriteService(ctrl, testCase.behaviorFavouriteStorage)
 			if err != nil {
 				t.Fatalf("Failed create productService %+v", err)
 			}
@@ -209,7 +209,7 @@ func TestDeleteFromFavourites(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			productService, err := NewFavoutiteService(ctrl, testCase.behaviorFavouriteStorage)
+			productService, err := NewFavouriteService(ctrl, testCase.behaviorFavouriteStorage)
 			if err != nil {
 				t.Fatalf("Failed create productService %+v", err)
 			}

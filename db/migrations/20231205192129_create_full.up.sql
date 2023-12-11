@@ -1,6 +1,7 @@
 CREATE SEQUENCE IF NOT EXISTS user_id_seq;
 CREATE SEQUENCE IF NOT EXISTS product_id_seq;
 CREATE SEQUENCE IF NOT EXISTS view_id_seq;
+CREATE SEQUENCE IF NOT EXISTS price_history_id_seq;
 CREATE SEQUENCE IF NOT EXISTS city_id_seq;
 CREATE SEQUENCE IF NOT EXISTS category_id_seq;
 CREATE SEQUENCE IF NOT EXISTS order_id_seq;
@@ -68,6 +69,15 @@ CREATE TABLE IF NOT EXISTS public."view"
     user_id         BIGINT                                               NOT NULL REFERENCES public."user" (id),
     product_id      BIGINT                                               NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE,
     CONSTRAINT uniq_together_product_id_user_id unique (user_id, product_id)
+);
+
+CREATE TABLE IF NOT EXISTS public."price_history"
+(
+    id              BIGINT      DEFAULT NEXTVAL('price_history_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    product_id      BIGINT                                                        NOT NULL REFERENCES public."product" (id) ON DELETE CASCADE,
+    price           BIGINT                   DEFAULT 0                            NOT NULL
+    CONSTRAINT not_negative_price CHECK (price >= 0),
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()                        NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public."order"

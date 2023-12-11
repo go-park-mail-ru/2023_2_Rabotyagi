@@ -26,6 +26,13 @@ var (
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
 
+const (
+	StrPremiumCoefficient    = "5" //nolint:gochecknoglobals
+	StrNonPremiumCoefficient = "1" //nolint:gochecknoglobals
+	StrSoldByUserCoefficient = "3" //nolint:gochecknoglobals
+	StrViewsCoefficient      = "2" //nolint:gochecknoglobals
+)
+
 type ProductStorage struct {
 	pool   pgxpool.IPgxPool
 	logger *my_logger.MyLogger
@@ -202,6 +209,12 @@ func (p *ProductStorage) getProduct(ctx context.Context,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
+	productPriceHistory, err := p.selectPriceHistory(ctx, tx, productID)
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	product.PriceHistory = productPriceHistory
 	product.Images = productAdditionInner.images
 	product.Favourites = productAdditionInner.favourites
 	product.InFavourites = productAdditionInner.inFavourite
@@ -316,7 +329,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	return slProduct, nil
 }
 
-func (p *ProductStorage) GetOldProducts(ctx context.Context,
+func (p *ProductStorage) GetPopularProducts(ctx context.Context,
 	lastProductID uint64, count uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
@@ -327,7 +340,13 @@ func (p *ProductStorage) GetOldProducts(ctx context.Context,
 		whereClause := fmt.Sprintf("id > %d AND is_active = true AND available_count > 0", lastProductID)
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
-			tx, count, whereClause, []string{"created_at"})
+			tx, count, whereClause, []string{`CASE
+		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient +
+				`* (SELECT COUNT(*) FROM product p2 
+		WHERE p2.saler_id = product.saler_id)) * ` + StrPremiumCoefficient + `)
+		ELSE ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
+		WHERE p2.saler_id = product.saler_id)) * ` + StrNonPremiumCoefficient + `)
+		END`})
 		if err != nil {
 			return err
 		}
@@ -374,7 +393,13 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		}
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
-			tx, count, whereClause, []string{"created_at DESC"})
+			tx, count, whereClause, []string{`CASE
+		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient +
+				`* (SELECT COUNT(*) FROM product p2 
+		WHERE p2.saler_id = product.saler_id)) * ` + StrPremiumCoefficient + `)
+		ELSE ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
+		WHERE p2.saler_id = product.saler_id)) * ` + StrNonPremiumCoefficient + `)
+		END`})
 
 		if err != nil {
 			return err
@@ -491,6 +516,11 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 
 		productID = LastProductID
 
+		err = p.addPriceHistoryRecord(ctx, tx, productID, preProduct.Price)
+		if err != nil {
+			return err
+		}
+
 		return err
 	})
 	if err != nil {
@@ -567,6 +597,14 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 			}
 
 			err = p.insertImages(ctx, tx, productID, slImages)
+		}
+
+		price, ok := updateFields["price"]
+		if ok {
+			err = p.addPriceHistoryRecord(ctx, tx, productID, price.(uint64))
+			if err != nil {
+				return err
+			}
 		}
 
 		return err

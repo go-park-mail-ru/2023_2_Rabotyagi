@@ -37,6 +37,7 @@ type IProductService interface {
 	) ([]*models.ProductInFeed, error)
 	IBasketService
 	IFavouriteService
+	IPremiumService
 }
 
 type ProductHandler struct {

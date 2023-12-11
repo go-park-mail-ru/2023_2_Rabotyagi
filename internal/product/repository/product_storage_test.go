@@ -376,6 +376,11 @@ func TestGetProduct(t *testing.T) {
 					WillReturnRows(pgxmock.NewRows([]string{"id"}).
 						AddRow("1"))
 
+				mockPool.ExpectQuery(`SELECT price, created_at FROM public."price_history"`).
+					WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"price", "created_at"}).
+						AddRow(uint64(123123), time.Now()))
+
 				mockPool.ExpectQuery(`SELECT EXISTS`).WithArgs(uint64(1), uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"exists"}).
 						AddRow(false))

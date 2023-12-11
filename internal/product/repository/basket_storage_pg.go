@@ -306,7 +306,7 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
 	orderInBasket := new(models.OrderInBasket)
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		productInner, err := p.getProduct(ctx, tx, productID, userID)
+		productInner, err := p.selectProductByID(ctx, tx, productID)
 		if err != nil {
 			return err
 		}

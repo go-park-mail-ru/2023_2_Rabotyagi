@@ -28,7 +28,7 @@ var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 type IProductStorage interface {
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
-	GetOldProducts(ctx context.Context, lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
+	GetPopularProducts(ctx context.Context, lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
 	GetProductsOfSaler(ctx context.Context, lastProductID uint64,
 		count uint64, userID uint64, isMy bool) ([]*models.ProductInFeed, error)
 	UpdateProduct(ctx context.Context, productID uint64, updateFields map[string]interface{}) error
@@ -41,18 +41,20 @@ type IProductStorage interface {
 	) ([]*models.ProductInFeed, error)
 	IBasketStorage
 	IFavouriteStorage
+	IPremiumStorage
 }
 
 type ProductService struct {
 	FavouriteService
 	BasketService
+	PremiumService
 	fileServiceClient fileservice.FileServiceClient
 	storage           IProductStorage
 	logger            *my_logger.MyLogger
 }
 
 func NewProductService(productStorage IProductStorage, basketService *BasketService,
-	favouriteService *FavouriteService, fileServiceClient fileservice.FileServiceClient,
+	favouriteService *FavouriteService, premiumService *PremiumService, fileServiceClient fileservice.FileServiceClient,
 ) (*ProductService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
@@ -62,6 +64,7 @@ func NewProductService(productStorage IProductStorage, basketService *BasketServ
 	return &ProductService{
 		FavouriteService:  *favouriteService,
 		BasketService:     *basketService,
+		PremiumService:    *premiumService,
 		fileServiceClient: fileServiceClient,
 		storage:           productStorage,
 		logger:            logger,
@@ -147,7 +150,7 @@ func (p *ProductService) GetProduct(ctx context.Context,
 func (p *ProductService) GetProductsList(ctx context.Context,
 	lastProductID uint64, count uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
-	products, err := p.storage.GetOldProducts(ctx, lastProductID, count, userID)
+	products, err := p.storage.GetPopularProducts(ctx, lastProductID, count, userID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

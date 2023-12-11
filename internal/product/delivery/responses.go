@@ -12,6 +12,8 @@ const (
 	ResponseSuccessfulCloseProduct      = "Объявление успешно закрыто"
 	ResponseSuccessfulDeleteProduct     = "Объявление успешно удалено"
 	ResponseSuccessfulActivateProduct   = "Объявление успешно активировано"
+	ResponseSuccessfulAddPremium        = "У объявления успешно акитвирован премиум"
+	ResponseSuccessfullyRemovePremium   = "У объявления успешно отключен премиум"
 )
 
 type ProductResponse struct {
