@@ -42,21 +42,21 @@ func (p *ProductHandler) AddPremiumHandler(w http.ResponseWriter, r *http.Reques
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "product_id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	err = p.service.AddPremium(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -92,21 +92,21 @@ func (p *ProductHandler) RemovePremiumHandler(w http.ResponseWriter, r *http.Req
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "product_id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	err = p.service.RemovePremium(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
