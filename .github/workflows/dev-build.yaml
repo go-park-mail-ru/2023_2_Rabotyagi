@@ -28,7 +28,7 @@ jobs:
               id: meta
               uses: docker/metadata-action@v5
               with:
-                  images: ${{ .env.REGISTRY }}/${{ .env.IMAGE_NAME }}
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
                   tags: |
                     type=raw,value=main-latest-dev
                     
@@ -54,11 +54,12 @@ jobs:
                   registry: ghcr.io
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
+
             - name: Extract Docker metadata
               id: meta
               uses: docker/metadata-action@v5
               with:
-                  images: ${{ .env.REGISTRY }}/${{ .env.IMAGE_NAME }}
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
                   tags: |
                     type=raw,value=auth-latest-dev
 
@@ -67,8 +68,8 @@ jobs:
               id: build
               with:
                   context: .
-                  file: ./services/auth/Dockerfile
                   push: true
+                  file: ./services/auth/Dockerfile
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
 
@@ -89,7 +90,7 @@ jobs:
               id: meta
               uses: docker/metadata-action@v5
               with:
-                  images: ${{ .env.REGISTRY }}/${{ .env.IMAGE_NAME }}
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
                   tags: |
                     type=raw,value=fs-latest-dev
 
