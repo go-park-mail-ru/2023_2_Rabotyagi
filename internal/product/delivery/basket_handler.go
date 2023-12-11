@@ -17,6 +17,8 @@ var _ IBasketService = (*productusecases.BasketService)(nil)
 type IBasketService interface {
 	AddOrder(ctx context.Context, r io.Reader, userID uint64) (*models.OrderInBasket, error)
 	GetOrdersByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
+	GetOrdersNotInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
+	GetOrdersSoldByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
 	UpdateOrderCount(ctx context.Context, r io.Reader, userID uint64) error
 	UpdateOrderStatus(ctx context.Context, r io.Reader, userID uint64) error
 	BuyFullBasket(ctx context.Context, userID uint64) error
@@ -104,6 +106,86 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 	responses.SendResponse(w, logger, NewOrderListResponse(orders))
 	logger.Infof("in GetBasketHandler: get basket of orders: %+v\n", orders)
+}
+
+// GetOrdersNotInBasketHandler godoc
+//
+//	@Summary    get orders not in basket (with status != 0)
+//	@Description  get orders not in basket by user id from cookie\jwt token
+//	@Tags order
+//	@Accept     json
+//	@Produce    json
+//	@Success    200  {object} OrderListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
+//	@Router      /order/get_not_in_basket [get]
+func (p *ProductHandler) GetOrdersNotInBasketHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
+	if err != nil {
+		responses.HandleErr(w, r, logger, err)
+
+		return
+	}
+
+	orders, err := p.service.GetOrdersNotInBasketByUserID(ctx, userID)
+	if err != nil {
+		responses.HandleErr(w, r, logger, err)
+
+		return
+	}
+
+	responses.SendResponse(w, logger, NewOrderListResponse(orders))
+	logger.Infof("in GetOrdersNotInBasketHandler: get orders: %+v\n", orders)
+}
+
+// GetOrdersSoldHandler godoc
+//
+//	@Summary    get orders not in basket sold by user (with status != 0)
+//	@Description  get orders not in basket sold by user id from cookie\jwt token
+//	@Tags order
+//	@Accept     json
+//	@Produce    json
+//	@Success    200  {object} OrderListResponse
+//	@Failure    405  {string} string
+//	@Failure    500  {string} string
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
+//	@Router      /order/sold [get]
+func (p *ProductHandler) GetOrdersSoldHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	ctx := r.Context()
+	logger := p.logger.LogReqID(ctx)
+
+	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
+	if err != nil {
+		responses.HandleErr(w, r, logger, err)
+
+		return
+	}
+
+	orders, err := p.service.GetOrdersSoldByUserID(ctx, userID)
+	if err != nil {
+		responses.HandleErr(w, r, logger, err)
+
+		return
+	}
+
+	responses.SendResponse(w, logger, NewOrderListResponse(orders))
+	logger.Infof("in GetOrdersSoldHandler: get orders: %+v\n", orders)
 }
 
 // UpdateOrderCountHandler godoc
