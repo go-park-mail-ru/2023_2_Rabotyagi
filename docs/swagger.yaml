@@ -683,6 +683,60 @@ paths:
       summary: get basket of orders
       tags:
       - order
+  /order/get_not_in_basket:
+    get:
+      consumes:
+      - application/json
+      description: get orders not in basket by user id from cookie\jwt token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.OrderListResponse'
+        "222":
+          description: Error". Внутри body статус может быть badFormat(4000)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get orders not in basket (with status != 0)
+      tags:
+      - order
+  /order/sold:
+    get:
+      consumes:
+      - application/json
+      description: get orders not in basket sold by user id from cookie\jwt token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.OrderListResponse'
+        "222":
+          description: Error". Внутри body статус может быть badFormat(4000)
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get orders not in basket sold by user (with status != 0)
+      tags:
+      - order
   /order/update_count:
     patch:
       consumes:
