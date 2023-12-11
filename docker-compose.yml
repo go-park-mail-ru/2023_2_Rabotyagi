@@ -26,7 +26,6 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile
-    container_name: backend
     restart: always
     env_file:
       - .env/.env.backend
@@ -44,7 +43,6 @@ services:
       context: ./
       dockerfile: ./services/file_service/Dockerfile
     restart: always
-    container_name: backend_fs
     env_file:
       - services/file_service/.env/.env
     ports:
@@ -60,7 +58,6 @@ services:
       context: ./
       dockerfile: ./services/auth/Dockerfile
     restart: always
-    container_name: backend_auth
     env_file:
       - ./services/auth/.env/.env
     ports:
@@ -121,7 +118,6 @@ services:
       - '9091:9091'
     volumes:
         - grafana-storage:/var/lib/grafana
-
 
 volumes:
   postgres:

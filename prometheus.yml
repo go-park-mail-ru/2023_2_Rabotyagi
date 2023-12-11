@@ -15,14 +15,14 @@ scrape_configs:
   - job_name: "backend"
     metrics_path: /api/v1/metrics
     static_configs:
-      - targets: [ 'backend:8080' ]
+      - targets: [ '2023_2_rabotyagi-backend-1:8080' ]
 
   - job_name: "backend_fs"
     metrics_path: /api/v1/metrics
     static_configs:
-      - targets: [ 'backend_fs:8081' ]
+      - targets: [ '2023_2_rabotyagi-backend-fs-1:8081' ]
 
   - job_name: "backend_auth"
     metrics_path: /api/v1/metrics
     static_configs:
-      - targets: [ 'backend_auth:8082' ]
+      - targets: [ '2023_2_rabotyagi-backend-auth-1:8082' ]
