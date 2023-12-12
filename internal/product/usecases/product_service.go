@@ -28,7 +28,8 @@ var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 type IProductStorage interface {
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
-	GetPopularProducts(ctx context.Context, lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
+	GetPopularProducts(ctx context.Context, lastProductID uint64, count uint64,
+		userID uint64) ([]*models.ProductInFeed, error)
 	GetProductsOfSaler(ctx context.Context, lastProductID uint64,
 		count uint64, userID uint64, isMy bool) ([]*models.ProductInFeed, error)
 	UpdateProduct(ctx context.Context, productID uint64, updateFields map[string]interface{}) error
@@ -92,9 +93,9 @@ func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []mo
 		return ErrCheckedUrlsNil
 	}
 
-	if len(checkedURLs.Correct) != len(slImg) {
+	if len(checkedURLs.GetCorrect()) != len(slImg) {
 		err := fmt.Errorf("%w: of checkedURLs.Correct and slImg %d != %d",
-			ErrDifUrls, len(checkedURLs.Correct), len(slImg))
+			ErrDifUrls, len(checkedURLs.GetCorrect()), len(slImg))
 		logger.Errorln(err)
 
 		return err
@@ -102,7 +103,7 @@ func (p *ProductService) checkCorrectnessUrlsImg(ctx context.Context, slImg []mo
 
 	messageUnCorrect := ""
 
-	for i, urlCorrect := range checkedURLs.Correct {
+	for i, urlCorrect := range checkedURLs.GetCorrect() {
 		if !urlCorrect {
 			messageUnCorrect += fmt.Sprintf("файл с урлом: %s не найден в хранилище\n", slImg[i].URL)
 		}

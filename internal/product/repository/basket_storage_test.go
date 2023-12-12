@@ -199,8 +199,6 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
-
 			ctx := context.Background()
 
 			catStorage, err := repository.NewProductStorage(mockPool)
