@@ -207,7 +207,7 @@ func TestGetBasket(t *testing.T) {
 			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}),
 		},
 		{
-			name:    "test basic work",
+			name:    "test empty",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetOrdersByUserID(gomock.Any(), test.UserID).Return(
@@ -235,6 +235,150 @@ func TestGetBasket(t *testing.T) {
 
 			testCase.request.AddCookie(&test.Cookie)
 			productHandler.GetBasketHandler(w, testCase.request)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestGetNotInBasket(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		behaviorProductService func(m *mocks.MockIProductService)
+		request                *http.Request
+		expectedResponse       any
+	}
+	testCases := [...]TestCase{
+		{
+			name:    "test basic work",
+			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_not_in_basket", nil),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetOrdersNotInBasketByUserID(gomock.Any(), test.UserID).Return(
+					[]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}, nil)
+			},
+			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}),
+		},
+		{
+			name:    "test empty",
+			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_not_in_basket", nil),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetOrdersNotInBasketByUserID(gomock.Any(), test.UserID).Return(
+					[]*models.OrderInBasket{}, nil)
+			},
+			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{}),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			testCase.request.AddCookie(&test.Cookie)
+			productHandler.GetOrdersNotInBasketHandler(w, testCase.request)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			receivedResponse, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
+			}
+
+			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
+			if err != nil {
+				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
+			}
+
+			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestGetSolsOrders(t *testing.T) {
+	t.Parallel()
+
+	_ = my_logger.NewNop()
+
+	type TestCase struct {
+		name                   string
+		behaviorProductService func(m *mocks.MockIProductService)
+		request                *http.Request
+		expectedResponse       any
+	}
+	testCases := [...]TestCase{
+		{
+			name:    "test basic work",
+			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/sold", nil),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetOrdersSoldByUserID(gomock.Any(), test.UserID).Return(
+					[]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}, nil)
+			},
+			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}),
+		},
+		{
+			name:    "test empty",
+			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/sold", nil),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetOrdersSoldByUserID(gomock.Any(), test.UserID).Return(
+					[]*models.OrderInBasket{}, nil)
+			},
+			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{}),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
+			if err != nil {
+				t.Fatalf("UnExpected err=%+v\n", err)
+			}
+
+			w := httptest.NewRecorder()
+
+			testCase.request.AddCookie(&test.Cookie)
+			productHandler.GetOrdersSoldHandler(w, testCase.request)
 
 			resp := w.Result()
 			defer resp.Body.Close()

@@ -197,6 +197,36 @@ func (mr *MockIProductServiceMockRecorder) GetOrdersByUserID(ctx, userID any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersByUserID", reflect.TypeOf((*MockIProductService)(nil).GetOrdersByUserID), ctx, userID)
 }
 
+// GetOrdersNotInBasketByUserID mocks base method.
+func (m *MockIProductService) GetOrdersNotInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersNotInBasketByUserID", ctx, userID)
+	ret0, _ := ret[0].([]*models.OrderInBasket)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersNotInBasketByUserID indicates an expected call of GetOrdersNotInBasketByUserID.
+func (mr *MockIProductServiceMockRecorder) GetOrdersNotInBasketByUserID(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersNotInBasketByUserID", reflect.TypeOf((*MockIProductService)(nil).GetOrdersNotInBasketByUserID), ctx, userID)
+}
+
+// GetOrdersSoldByUserID mocks base method.
+func (m *MockIProductService) GetOrdersSoldByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersSoldByUserID", ctx, userID)
+	ret0, _ := ret[0].([]*models.OrderInBasket)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersSoldByUserID indicates an expected call of GetOrdersSoldByUserID.
+func (mr *MockIProductServiceMockRecorder) GetOrdersSoldByUserID(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersSoldByUserID", reflect.TypeOf((*MockIProductService)(nil).GetOrdersSoldByUserID), ctx, userID)
+}
+
 // GetProduct mocks base method.
 func (m *MockIProductService) GetProduct(ctx context.Context, productID, userID uint64) (*models.Product, error) {
 	m.ctrl.T.Helper()
