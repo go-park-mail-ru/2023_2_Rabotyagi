@@ -1,17 +1,17 @@
 .PHONY: all
-all: update-env compose-full-up go-mod-tidy test swag run
+all: update-env go-mod-tidy test swag compose-full-up
 
 .PHONY: all-without-front
-all: update-env compose-frontend-up go-mod-tidy test swag run
+all-without-front: update-env go-mod-tidy test swag compose-frontend-up
 
 
 # for frontend
 .PHONY: compose-frontend-up
-compose-full-up: update-env
+compose-frontend-up: update-env
 	docker compose -f docker-compose.yml up postgres backend backend-fs backend-auth pgadmin nginx --build -d
 
 .PHONY: compose-frontend-down
-compose-full-down:
+compose-frontend-down:
 	docker compose -f docker-compose.yml down postgres backend backend-fs backend-auth pgadmin nginx
 
 .PHONY: compose-logs
@@ -35,11 +35,11 @@ refill-db-docker: migrate-docker-down fill-db-docker
 
 # dev
 .PHONY: compose-up
-compose-db-up:
+compose-up:
 	docker compose -f docker-compose.yml up -d postgres frontend nginx grafana node-exporter
 
 .PHONY: compose-down
-compose-db-down:
+compose-down:
 	docker compose -f docker-compose.yml down postgres frontend nginx grafana node-exporter
 
 .PHONY: compose-full-up
@@ -75,13 +75,6 @@ test: mkdir-bin
   	 && go tool cover -html=bin/pure_cover.out -o=bin/cover.html \
   	 && go tool cover --func bin/pure_cover.out
 
-.PHONY: build
-build: mkdir-bin
-	go build -o bin/main cmd/app/main.go
-
-.PHONY: run
-run: build
-	sudo ./bin/main
 
 .PHONY: create-migration
 create-migration:
