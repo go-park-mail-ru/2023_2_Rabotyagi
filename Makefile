@@ -1,13 +1,16 @@
 .PHONY: all
-all: update-env compose-up go-mod-tidy test swag run
+all: update-env compose-full-up go-mod-tidy test swag run
+
+.PHONY: all-without-front
+all: update-env compose-frontend-up go-mod-tidy test swag run
 
 
 # for frontend
-.PHONY: compose-full-up
+.PHONY: compose-frontend-up
 compose-full-up: update-env
 	docker compose -f docker-compose.yml up postgres backend backend-fs backend-auth pgadmin nginx --build -d
 
-.PHONY: compose-full-down
+.PHONY: compose-frontend-down
 compose-full-down:
 	docker compose -f docker-compose.yml down postgres backend backend-fs backend-auth pgadmin nginx
 
@@ -33,11 +36,20 @@ refill-db-docker: migrate-docker-down fill-db-docker
 # dev
 .PHONY: compose-up
 compose-db-up:
-	docker compose -f docker-compose.yml up -d
+	docker compose -f docker-compose.yml up -d postgres frontend nginx grafana node-exporter
 
 .PHONY: compose-down
 compose-db-down:
+	docker compose -f docker-compose.yml down postgres frontend nginx grafana node-exporter
+
+.PHONY: compose-full-up
+compose-full-up: update-env
+	docker compose -f docker-compose.yml up --build -d
+
+.PHONY: compose-full-down
+compose-full-down:
 	docker compose -f docker-compose.yml down
+
 
 .PHONY: compose-pull
 compose-pull:
