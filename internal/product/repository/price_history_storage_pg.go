@@ -32,7 +32,8 @@ func (p *ProductStorage) selectPriceHistory(ctx context.Context, tx pgx.Tx,
 
 	SQLSelectPriceHistory := `SELECT price, created_at
 		FROM public."price_history" 
-		WHERE product_id = $1`
+		WHERE product_id = $1
+		ORDER BY created_at ASC`
 
 	productsInFavouritesRows, err := tx.Query(ctx, SQLSelectPriceHistory, productID)
 	if err != nil {
