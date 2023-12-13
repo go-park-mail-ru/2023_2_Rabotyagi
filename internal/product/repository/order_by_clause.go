@@ -3,7 +3,7 @@ package repository
 import "fmt"
 
 func OrderByClauseForProductList(premiumCoefficient, nonPremiumCoefficient,
-	soldByUserCoefficient, viewsCoefficient uint16) string {
+	soldByUserCoefficient, viewsCoefficient uint16) string { //nolint: gofumpt
 	return fmt.Sprintf(`CASE
 		WHEN premium = true THEN ((%d * views + %d * (SELECT COUNT(*) FROM product p2
 		WHERE p2.saler_id = product.saler_id)) * %d)
