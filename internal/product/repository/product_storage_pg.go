@@ -27,10 +27,10 @@ var (
 )
 
 const (
-	StrPremiumCoefficient    = "5" //nolint:gochecknoglobals
-	StrNonPremiumCoefficient = "1" //nolint:gochecknoglobals
-	StrSoldByUserCoefficient = "3" //nolint:gochecknoglobals
-	StrViewsCoefficient      = "2" //nolint:gochecknoglobals
+	PremiumCoefficient    = uint16(5)
+	NonPremiumCoefficient = uint16(1)
+	SoldByUserCoefficient = uint16(3)
+	ViewsCoefficient      = uint16(2)
 )
 
 type ProductStorage struct {
@@ -340,13 +340,8 @@ func (p *ProductStorage) GetPopularProducts(ctx context.Context,
 		whereClause := fmt.Sprintf("id > %d AND is_active = true AND available_count > 0", lastProductID)
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
-			tx, count, whereClause, []string{`CASE
-		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient +
-				`* (SELECT COUNT(*) FROM product p2 
-		WHERE p2.saler_id = product.saler_id)) * ` + StrPremiumCoefficient + `)
-		ELSE ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
-		WHERE p2.saler_id = product.saler_id)) * ` + StrNonPremiumCoefficient + `)
-		END`})
+			tx, count, whereClause, []string{OrderByClauseForProductList(PremiumCoefficient,
+				NonPremiumCoefficient, SoldByUserCoefficient, ViewsCoefficient)})
 		if err != nil {
 			return err
 		}
@@ -393,13 +388,8 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		}
 
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
-			tx, count, whereClause, []string{`CASE
-		WHEN premium = true THEN ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient +
-				`* (SELECT COUNT(*) FROM product p2 
-		WHERE p2.saler_id = product.saler_id)) * ` + StrPremiumCoefficient + `)
-		ELSE ((` + StrViewsCoefficient + ` * views + ` + StrSoldByUserCoefficient + `* (SELECT COUNT(*) FROM product p2 
-		WHERE p2.saler_id = product.saler_id)) * ` + StrNonPremiumCoefficient + `)
-		END`})
+			tx, count, whereClause, []string{OrderByClauseForProductList(PremiumCoefficient,
+				NonPremiumCoefficient, SoldByUserCoefficient, ViewsCoefficient)})
 
 		if err != nil {
 			return err
