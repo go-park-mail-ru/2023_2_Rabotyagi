@@ -149,6 +149,12 @@ definitions:
         type: boolean
       premium:
         type: boolean
+      premium_begin:
+        example: "2014-12-12T14:00:12+07:00"
+        type: string
+      premium_expire:
+        example: "2014-12-12T14:00:12+07:00"
+        type: string
       price:
         type: integer
       price_history:
@@ -188,6 +194,8 @@ definitions:
       in_favourites:
         type: boolean
       is_active:
+        type: boolean
+      premium:
         type: boolean
       price:
         type: integer
@@ -816,6 +824,11 @@ paths:
       - description: product id
         in: query
         name: product_id
+        required: true
+        type: integer
+      - description: period of premium
+        in: query
+        name: period
         required: true
         type: integer
       produces:

@@ -33,7 +33,7 @@ func TestAddPremium(t *testing.T) {
 			name:    "test basic work",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().AddPremium(gomock.Any(), uint64(1), test.UserID)
+				m.EXPECT().AddPremium(gomock.Any(), uint64(1), test.UserID, uint64(1))
 			},
 			expectedResponse: responses.ResponseSuccessful{
 				Status: statuses.StatusResponseSuccessful,
@@ -44,7 +44,7 @@ func TestAddPremium(t *testing.T) {
 			name:    "test error in internal add",
 			queryID: "1",
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().AddPremium(gomock.Any(), uint64(1), test.UserID).Return(
+				m.EXPECT().AddPremium(gomock.Any(), uint64(1), test.UserID, uint64(1)).Return(
 					myerrors.NewErrorInternal("Test Error Internal"))
 			},
 			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
@@ -77,7 +77,7 @@ func TestAddPremium(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/premium/add", nil)
-			utils.AddQueryParamsToRequest(req, map[string]string{"product_id": testCase.queryID})
+			utils.AddQueryParamsToRequest(req, map[string]string{"product_id": testCase.queryID, "period": "1"})
 			req.AddCookie(&test.Cookie)
 			productHandler.AddPremiumHandler(w, req)
 

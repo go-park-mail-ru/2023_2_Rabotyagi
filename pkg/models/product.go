@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"github.com/microcosm-cc/bluemonday"
 	"strings"
 	"time"
@@ -20,15 +21,17 @@ type Product struct {
 	Description    string               `json:"description"     valid:"required, length(1|4000)~Описание должно быть длинной от 1 до 4000 симвволов"` //nolint
 	Price          uint64               `json:"price"           valid:"required"`
 	CreatedAt      time.Time            `json:"created_at"      valid:"required"`
+	PremiumBegin   sql.NullTime         `json:"premium_begin"   swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"optional"`
+	PremiumExpire  sql.NullTime         `json:"premium_expire"  swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"optional"`
 	Views          uint32               `json:"views"           valid:"required"`
 	AvailableCount uint32               `json:"available_count" valid:"required"`
 	Delivery       bool                 `json:"delivery"        valid:"optional"`
 	SafeDeal       bool                 `json:"safe_deal"       valid:"optional"`
 	InFavourites   bool                 `json:"in_favourites"   valid:"optional"`
 	IsActive       bool                 `json:"is_active"       valid:"optional"`
-	Premium        bool                 `json:"premium" valid:"required"`
+	Premium        bool                 `json:"premium"         valid:"required"`
 	Images         []Image              `json:"images"`
-	PriceHistory   []PriceHistoryRecord `json:"price_history"`
+	PriceHistory   []PriceHistoryRecord `json:"price_history"   valid:"optional"`
 	Favourites     uint64               `json:"favourites"      valid:"required"`
 }
 
@@ -64,6 +67,7 @@ type ProductInFeed struct {
 	SafeDeal       bool    `json:"safe_deal"       valid:"optional"`
 	InFavourites   bool    `json:"in_favourites"   valid:"optional"`
 	IsActive       bool    `json:"is_active"       valid:"optional"`
+	Premium        bool    `json:"premium"         valid:"required"`
 	Images         []Image `json:"images"`
 	Favourites     uint64  `json:"favourites"      valid:"required"`
 }

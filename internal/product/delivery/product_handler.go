@@ -20,7 +20,7 @@ import (
 
 var _ IProductService = (*usecases.ProductService)(nil)
 
-type IProductService interface {
+type IProductService interface { //nolint:interfacebloat
 	AddProduct(ctx context.Context, r io.Reader, userID uint64) (productID uint64, err error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
 	GetProductsList(ctx context.Context,
