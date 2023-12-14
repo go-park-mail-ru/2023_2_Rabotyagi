@@ -65,84 +65,88 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		return nil, err
 	}
 
-	router.Handle("/api/v1/signup",
+	router.Handle("/signup",
 		middleware.SetupCORS(authHandler.SignUpHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/signin",
+	router.Handle("/signin",
 		middleware.SetupCORS(authHandler.SignInHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/logout", http.HandlerFunc(authHandler.LogOutHandler))
+	router.Handle("/logout", http.HandlerFunc(authHandler.LogOutHandler))
 
-	router.Handle("/api/v1/profile/get",
+	router.Handle("/profile/get",
 		middleware.SetupCORS(userHandler.GetUserHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/profile/update",
+	router.Handle("/profile/update",
 		middleware.SetupCORS(userHandler.PartiallyUpdateUserHandler, configMux.addrOrigin, configMux.schema))
 
-	router.Handle("/api/v1/product/add",
+	router.Handle("/product/add",
 		middleware.SetupCORS(productHandler.AddProductHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/get",
+	router.Handle("/product/get",
 		middleware.SetupCORS(productHandler.GetProductHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/get_list",
+	router.Handle("/product/get_list",
 		middleware.SetupCORS(productHandler.GetProductListHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/get_list_of_saler",
+	router.Handle("/product/get_list_of_saler",
 		middleware.SetupCORS(productHandler.GetListProductOfSalerHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/get_list_of_another_saler",
+	router.Handle("/product/get_list_of_another_saler",
 		middleware.SetupCORS(productHandler.GetListProductOfAnotherSalerHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/update",
+	router.Handle("/product/update",
 		middleware.SetupCORS(productHandler.UpdateProductHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/close",
+	router.Handle("/product/close",
 		middleware.SetupCORS(productHandler.CloseProductHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/activate",
+	router.Handle("/product/activate",
 		middleware.SetupCORS(productHandler.ActivateProductHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/delete",
+	router.Handle("/product/delete",
 		middleware.SetupCORS(productHandler.DeleteProductHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/search",
+	router.Handle("/product/search",
 		middleware.SetupCORS(productHandler.SearchProductHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/get_search_feed",
+	router.Handle("/product/get_search_feed",
 		middleware.SetupCORS(productHandler.GetSearchProductFeedHandler, configMux.addrOrigin, configMux.schema))
 
-	router.Handle("/api/v1/profile/favourites",
+	router.Handle("/profile/favourites",
 		middleware.SetupCORS(productHandler.GetFavouritesHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/add-to-fav",
+	router.Handle("/product/add-to-fav",
 		middleware.SetupCORS(productHandler.AddToFavouritesHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/product/remove-from-fav",
+	router.Handle("/product/remove-from-fav",
 		middleware.SetupCORS(productHandler.DeleteFromFavouritesHandler, configMux.addrOrigin, configMux.schema))
 
-	router.Handle("/api/v1/premium/add",
+	router.Handle("/premium/add",
 		middleware.SetupCORS(productHandler.AddPremiumHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/premium/remove",
+	router.Handle("/premium/remove",
 		middleware.SetupCORS(productHandler.RemovePremiumHandler, configMux.addrOrigin, configMux.schema))
 
-	router.Handle("/api/v1/order/add",
+	router.Handle("/order/add",
 		middleware.SetupCORS(productHandler.AddOrderHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/order/get_basket",
+	router.Handle("/order/get_basket",
 		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/order/get_not_in_basket",
+	router.Handle("/order/get_not_in_basket",
 		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/order/sold",
+	router.Handle("/order/sold",
 		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/order/update_count",
+	router.Handle("/order/update_count",
 		middleware.SetupCORS(productHandler.UpdateOrderCountHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/order/update_status",
+	router.Handle("/order/update_status",
 		middleware.SetupCORS(productHandler.UpdateOrderStatusHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/order/buy_full_basket",
+	router.Handle("/order/buy_full_basket",
 		middleware.SetupCORS(productHandler.BuyFullBasketHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/order/delete",
+	router.Handle("/order/delete",
 		middleware.SetupCORS(productHandler.DeleteOrderHandler, configMux.addrOrigin, configMux.schema))
 
-	router.Handle("/api/v1/category/get_full",
+	router.Handle("/category/get_full",
 		middleware.SetupCORS(categoryHandler.GetFullCategories, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/category/search",
+	router.Handle("/category/search",
 		middleware.SetupCORS(categoryHandler.SearchCategoryHandler, configMux.addrOrigin, configMux.schema))
 
-	router.Handle("/api/v1/city/get_full",
+	router.Handle("/city/get_full",
 		middleware.SetupCORS(cityHandler.GetFullCitiesHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/city/search",
+	router.Handle("/city/search",
 		middleware.SetupCORS(cityHandler.SearchCityHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/api/v1/metrics", promhttp.Handler())
+	router.Handle("/metrics", promhttp.Handler())
 
 	metricsManager := metrics.NewMetricManagerHTTP(configMux.mainServiceName)
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(middleware.Context(ctx,
-		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger, metricsManager))), logger))
+		middleware.AddReqID(
+			middleware.AccessLogMiddleware(
+				middleware.AddAPIName(router, middleware.APINameV1),
+				logger, metricsManager))),
+		logger))
 
 	return mux, nil
 }

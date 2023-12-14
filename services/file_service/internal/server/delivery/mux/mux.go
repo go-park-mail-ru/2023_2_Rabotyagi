@@ -40,15 +40,19 @@ func NewMux(ctx context.Context, configMux *ConfigMux,
 
 	fileHandler := delivery.NewFileHandlerHTTP(fileServiceHTTP, logger, configMux.fileServiceDir)
 
-	router.Handle("/api/v1/img/", fileHandler.DocFileServerHandler())
-	router.Handle("/api/v1/img/upload", middleware.Context(ctx,
+	router.Handle("/img/", fileHandler.DocFileServerHandler())
+	router.Handle("/img/upload", middleware.Context(ctx,
 		middleware.SetupCORS(fileHandler.UploadFileHandler, configMux.allowOrigin, configMux.schema)))
-	router.Handle("/api/v1/metrics", promhttp.Handler())
+	router.Handle("/metrics", promhttp.Handler())
 
 	metricsManager := metrics.NewMetricManagerHTTP(configMux.fileServiceName)
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(middleware.Context(ctx,
-		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger, metricsManager))), logger))
+		middleware.AddReqID(
+			middleware.AccessLogMiddleware(
+				middleware.AddAPIName(router, middleware.APINameV1),
+				logger, metricsManager))),
+		logger))
 
 	return mux, nil
 }

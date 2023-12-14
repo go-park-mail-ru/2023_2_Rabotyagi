@@ -16,12 +16,16 @@ func NewMux(ctx context.Context, fileServiceName string,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 
-	router.Handle("/api/v1/metrics", promhttp.Handler())
+	router.Handle("/metrics", promhttp.Handler())
 
 	metricsManager := metrics.NewMetricManagerHTTP(fileServiceName)
 	mux := http.NewServeMux()
 	mux.Handle("/", middleware.Panic(middleware.Context(ctx,
-		middleware.AddReqID(middleware.AccessLogMiddleware(router, logger, metricsManager))), logger))
+		middleware.AddReqID(
+			middleware.AccessLogMiddleware(
+				middleware.AddAPIName(router, middleware.APINameV1),
+				logger, metricsManager))),
+		logger))
 
 	return mux, nil
 }

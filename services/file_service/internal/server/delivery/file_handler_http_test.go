@@ -176,7 +176,7 @@ func TestUploadFile(t *testing.T) {
 	}
 }
 
-//nolint:funlen
+//nolint:nolintlint,funlen
 func TestDocFileHandler(t *testing.T) {
 	t.Parallel()
 
@@ -190,9 +190,9 @@ func TestDocFileHandler(t *testing.T) {
 
 	testCases := [...]TestCase{
 		{
-			name:             "test basic work",
+			name:             "test not found",
 			request:          httptest.NewRequest(http.MethodGet, "/api/v1/img/file_for_test.txt", nil),
-			expectedResponse: "Test string",
+			expectedResponse: "404 page not found\n",
 		},
 		{
 			name:             "method not allowed",

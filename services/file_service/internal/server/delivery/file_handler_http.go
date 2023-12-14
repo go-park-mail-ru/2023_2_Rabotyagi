@@ -3,15 +3,16 @@ package delivery
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
-	"google.golang.org/grpc/metadata"
 	"io"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
+
+	"google.golang.org/grpc/metadata"
 )
 
 const (
@@ -194,7 +195,7 @@ func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (f *FileHandlerHTTP) DocFileServerHandler() http.Handler {
-	fileServer := http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(f.fileServiceDir)))
+	fileServer := http.StripPrefix("/img/", http.FileServer(http.Dir(f.fileServiceDir)))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r = r.WithContext(context.WithValue(r.Context(), keyCtxHandler, fileServer))
