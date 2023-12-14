@@ -1,4 +1,5 @@
 ALTER TABLE public."product"
+ADD COLUMN premium_begin TIMESTAMP WITH TIMEZONE DEFAULT NULL
 ADD COLUMN premium_expire TIMESTAMP WITH TIMEZONE DEFAULT NULL;
 
 DROP TRIGGER IF EXISTS premium_expire_check ON public."product";
@@ -9,7 +10,7 @@ CREATE TRIGGER premium_expire_check
 BEGIN
   IF NEW.premium_expire < CURRENT_TIMESTAMP THEN
 UPDATE product
-SET premium = FALSE, premium_expire = NULL
+SET premium = FALSE, premium_expire = NULL, premium_begin = NULL
 WHERE product_id = NEW.product_id;
 END IF;
 END;
