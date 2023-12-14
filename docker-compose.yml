@@ -90,8 +90,6 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
-    ports:
-      - "9090:9090"
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
 #      - '--storage.tsdb.path=/prometheus'
@@ -106,8 +104,6 @@ services:
       - prometheus
     env_file:
       - .env/.env.grafana
-    ports:
-      - '9091:9091'
     volumes:
         - grafana-storage:/var/lib/grafana
 
@@ -125,6 +121,8 @@ services:
       - "3000:80"
       - "8080:80"
       - "8081:80"
+      - "9090:9090"
+      - "9091:9091"
 
 
 volumes:

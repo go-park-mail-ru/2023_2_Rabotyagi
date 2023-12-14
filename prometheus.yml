@@ -5,7 +5,7 @@ scrape_configs:
   - job_name: 'prometheus'
     scrape_interval: 30s
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['prometheus:9090']
 
   - job_name: 'node-exporter'
     metrics_path: /metrics
@@ -15,14 +15,14 @@ scrape_configs:
   - job_name: "backend"
     metrics_path: /api/v1/metrics
     static_configs:
-      - targets: [ '2023_2_rabotyagi-backend-1:8080' ]
+      - targets: [ 'backend:8080' ]
 
   - job_name: "backend_fs"
     metrics_path: /api/v1/metrics
     static_configs:
-      - targets: [ '2023_2_rabotyagi-backend-fs-1:8081' ]
+      - targets: [ 'backend-fs:8081' ]
 
   - job_name: "backend_auth"
     metrics_path: /api/v1/metrics
     static_configs:
-      - targets: [ '2023_2_rabotyagi-backend-auth-1:8082' ]
+      - targets: [ 'backend-auth:8082' ]
