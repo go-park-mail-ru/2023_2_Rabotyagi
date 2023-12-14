@@ -11,6 +11,7 @@ package mocks
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	models "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	gomock "go.uber.org/mock/gomock"
@@ -69,17 +70,17 @@ func (mr *MockIProductStorageMockRecorder) AddOrderInBasket(ctx, userID, product
 }
 
 // AddPremium mocks base method.
-func (m *MockIProductStorage) AddPremium(ctx context.Context, productID, userID uint64) error {
+func (m *MockIProductStorage) AddPremium(ctx context.Context, productID, userID uint64, premiumBegin, premiumExpire time.Time) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddPremium", ctx, productID, userID)
+	ret := m.ctrl.Call(m, "AddPremium", ctx, productID, userID, premiumBegin, premiumExpire)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddPremium indicates an expected call of AddPremium.
-func (mr *MockIProductStorageMockRecorder) AddPremium(ctx, productID, userID any) *gomock.Call {
+func (mr *MockIProductStorageMockRecorder) AddPremium(ctx, productID, userID, premiumBegin, premiumExpire any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPremium", reflect.TypeOf((*MockIProductStorage)(nil).AddPremium), ctx, productID, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPremium", reflect.TypeOf((*MockIProductStorage)(nil).AddPremium), ctx, productID, userID, premiumBegin, premiumExpire)
 }
 
 // AddProduct mocks base method.

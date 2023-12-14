@@ -18,14 +18,14 @@ type Order struct {
 }
 
 type OrderChanges struct {
-	ID     uint64 `json:"id"          valid:"required"`
-	Count  uint32 `json:"count"       valid:"required"`
-	Status uint8  `json:"status"      valid:"required"`
+	ID     uint64 `json:"id"      valid:"required"`
+	Count  uint32 `json:"count"   valid:"required"`
+	Status uint8  `json:"status"  valid:"required"`
 }
 
 type PreOrder struct {
-	ProductID uint64 `json:"product_id"  valid:"required"`
-	Count     uint32 `json:"count"       valid:"required"`
+	ProductID uint64 `json:"product_id" valid:"required"`
+	Count     uint32 `json:"count"      valid:"required"`
 }
 
 type OrderInBasket struct {

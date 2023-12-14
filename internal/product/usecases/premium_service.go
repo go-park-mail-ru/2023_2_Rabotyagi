@@ -14,11 +14,11 @@ var (
 )
 
 const (
-	Week       = 1
-	Month      = 2
-	ThreeMonth = 3
-	HalfYear   = 4
-	Year       = 5
+	Week       = uint64(1)
+	Month      = uint64(2)
+	ThreeMonth = uint64(3)
+	HalfYear   = uint64(4)
+	Year       = uint64(5)
 )
 
 var _ IPremiumStorage = (*productrepo.ProductStorage)(nil)
@@ -34,19 +34,20 @@ type PremiumService struct {
 	logger  *my_logger.MyLogger
 }
 
-func NewPremiumService(PremiumStorage IPremiumStorage) (*PremiumService, error) {
+func NewPremiumService(premiumStorage IPremiumStorage) (*PremiumService, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	return &PremiumService{storage: PremiumStorage, logger: logger}, nil
+	return &PremiumService{storage: premiumStorage, logger: logger}, nil
 }
 
 func (p PremiumService) AddPremium(ctx context.Context, productID uint64,
-	userID uint64, periodCode int) error {
-	premiumBegin := time.Now()
+	userID uint64, periodCode uint64) error {
 	var premiumExpire time.Time
+
+	premiumBegin := time.Now()
 
 	switch periodCode {
 	case Week:

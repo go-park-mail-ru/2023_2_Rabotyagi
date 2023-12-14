@@ -11,6 +11,7 @@ package mocks
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	gomock "go.uber.org/mock/gomock"
 )
@@ -39,17 +40,17 @@ func (m *MockIPremiumStorage) EXPECT() *MockIPremiumStorageMockRecorder {
 }
 
 // AddPremium mocks base method.
-func (m *MockIPremiumStorage) AddPremium(ctx context.Context, productID, userID uint64) error {
+func (m *MockIPremiumStorage) AddPremium(ctx context.Context, productID, userID uint64, premiumBegin, premiumExpire time.Time) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddPremium", ctx, productID, userID)
+	ret := m.ctrl.Call(m, "AddPremium", ctx, productID, userID, premiumBegin, premiumExpire)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddPremium indicates an expected call of AddPremium.
-func (mr *MockIPremiumStorageMockRecorder) AddPremium(ctx, productID, userID any) *gomock.Call {
+func (mr *MockIPremiumStorageMockRecorder) AddPremium(ctx, productID, userID, premiumBegin, premiumExpire any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPremium", reflect.TypeOf((*MockIPremiumStorage)(nil).AddPremium), ctx, productID, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPremium", reflect.TypeOf((*MockIPremiumStorage)(nil).AddPremium), ctx, productID, userID, premiumBegin, premiumExpire)
 }
 
 // RemovePremium mocks base method.

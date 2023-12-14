@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"context"
+	"database/sql"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/pashagolub/pgxmock/v3"
@@ -357,12 +358,14 @@ func TestGetProduct(t *testing.T) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
-       description, price, created_at, views, available_count, city_id,
-       delivery, safe_deal, is_active FROM public."product"`).WithArgs(uint64(1)).
+       description, price, created_at, premium_begin, premium_expire, views, available_count, city_id,
+       delivery, safe_deal, is_active, premium FROM public."product" `).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"saler_id", "category_id", "title", "description", "price",
-						"created_at", "views", "available_count", "city_id", "delivery", "safe_deal", "is_active"}).
+						"created_at", "premium_begin", "premium_expire", "views", "available_count", "city_id", "delivery",
+						"safe_deal", "is_active", "premium"}).
 						AddRow(uint64(1), uint64(1), "Car", "text", uint64(1212), time.Now(),
-							uint32(6), uint32(4), uint64(6), true, true, true))
+							sql.NullTime{Time: time.Time{}, Valid: false}, sql.NullTime{Time: time.Time{}, Valid: false},
+							uint32(6), uint32(4), uint64(6), true, true, true, false))
 
 				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"url"}).

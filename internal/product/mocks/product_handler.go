@@ -70,17 +70,17 @@ func (mr *MockIProductServiceMockRecorder) AddOrder(ctx, r, userID any) *gomock.
 }
 
 // AddPremium mocks base method.
-func (m *MockIProductService) AddPremium(ctx context.Context, productID, userID uint64) error {
+func (m *MockIProductService) AddPremium(ctx context.Context, productID, userID, periodCode uint64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddPremium", ctx, productID, userID)
+	ret := m.ctrl.Call(m, "AddPremium", ctx, productID, userID, periodCode)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddPremium indicates an expected call of AddPremium.
-func (mr *MockIProductServiceMockRecorder) AddPremium(ctx, productID, userID any) *gomock.Call {
+func (mr *MockIProductServiceMockRecorder) AddPremium(ctx, productID, userID, periodCode any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPremium", reflect.TypeOf((*MockIProductService)(nil).AddPremium), ctx, productID, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPremium", reflect.TypeOf((*MockIProductService)(nil).AddPremium), ctx, productID, userID, periodCode)
 }
 
 // AddProduct mocks base method.

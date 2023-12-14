@@ -6,12 +6,14 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/pashagolub/pgxmock/v3"
 	"testing"
+	"time"
 )
 
 func TestAddPremium(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
+	beginPremium := time.Now()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -30,10 +32,9 @@ func TestAddPremium(t *testing.T) {
 			name: "test basic work",
 			behaviorProductStorage: func(m *repository.ProductStorage) {
 				mockPool.ExpectBegin()
-
-				mockPool.ExpectExec(`UPDATE public."product"`).WithArgs(uint64(1), uint64(1)).
+				mockPool.ExpectExec(`UPDATE public."product"`).WithArgs(beginPremium,
+					beginPremium.AddDate(0, 0, 7), uint64(1), uint64(1)).
 					WillReturnResult(pgxmock.NewResult("UPDATE", 1))
-
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},
@@ -57,7 +58,8 @@ func TestAddPremium(t *testing.T) {
 
 			testCase.behaviorProductStorage(catStorage)
 
-			err = catStorage.AddPremium(ctx, testCase.productID, testCase.userID)
+			err = catStorage.AddPremium(ctx, testCase.productID, testCase.userID,
+				beginPremium, beginPremium.AddDate(0, 0, 7))
 			if err != nil {
 				t.Fatal(err)
 			}

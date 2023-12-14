@@ -12,7 +12,7 @@ import (
 var _ IPremiumService = (*productusecases.PremiumService)(nil)
 
 type IPremiumService interface {
-	AddPremium(ctx context.Context, productID uint64, userID uint64) error
+	AddPremium(ctx context.Context, productID uint64, userID uint64, periodCode uint64) error
 	RemovePremium(ctx context.Context, productID uint64, userID uint64) error
 }
 
@@ -25,6 +25,7 @@ type IPremiumService interface {
 //	@Accept      json
 //	@Produce    json
 //	@Param      product_id  query uint64 true  "product id"
+//	@Param      period  query uint64 true  "period of premium"
 //	@Success    200  {object} responses.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -54,7 +55,14 @@ func (p *ProductHandler) AddPremiumHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = p.service.AddPremium(ctx, productID, userID)
+	periodCode, err := utils.ParseUint64FromRequest(r, "period")
+	if err != nil {
+		responses.HandleErr(w, r, logger, err)
+
+		return
+	}
+
+	err = p.service.AddPremium(ctx, productID, userID, periodCode)
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 

@@ -92,15 +92,15 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 	logger := p.logger.LogReqID(ctx)
 
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
-       description, price, created_at, views, available_count, city_id,
-       delivery, safe_deal, is_active FROM public."product" WHERE id=$1`
+       description, price, created_at, premium_begin, premium_expire, views, available_count, city_id,
+       delivery, safe_deal, is_active, premium FROM public."product" WHERE id=$1`
 	product := &models.Product{ID: productID} //nolint:exhaustruct
 
 	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID)
 	if err := productRow.Scan(&product.SalerID, &product.CategoryID,
-		&product.Title, &product.Description, &product.Price, &product.CreatedAt,
-		&product.Views, &product.AvailableCount, &product.CityID, &product.Delivery,
-		&product.SafeDeal, &product.IsActive); err != nil {
+		&product.Title, &product.Description, &product.Price, &product.CreatedAt, &product.PremiumBegin,
+		&product.PremiumExpire, &product.Views, &product.AvailableCount, &product.CityID, &product.Delivery,
+		&product.SafeDeal, &product.IsActive, &product.Premium); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
 		}
@@ -281,7 +281,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	logger := p.logger.LogReqID(ctx)
 
 	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Select("id, title," +
-		"price, city_id, delivery, safe_deal, is_active, available_count").From(`public."product"`).
+		"price, city_id, delivery, safe_deal, is_active, available_count, premium").From(`public."product"`).
 		Where(whereClause).OrderBy(orderByClause...).Limit(limit)
 
 	SQLQuery, args, err := query.ToSql()
@@ -305,7 +305,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 	_, err = pgx.ForEachRow(rowsProducts, []any{
 		&curProduct.ID, &curProduct.Title,
 		&curProduct.Price, &curProduct.CityID,
-		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount,
+		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount, &curProduct.Premium,
 	}, func() error {
 		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
 			ID:             curProduct.ID,
@@ -316,6 +316,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 			SafeDeal:       curProduct.SafeDeal,
 			IsActive:       curProduct.IsActive,
 			AvailableCount: curProduct.AvailableCount,
+			Premium:        curProduct.Premium,
 		})
 
 		return nil
