@@ -2,33 +2,31 @@
 all: update-env go-mod-tidy test swag compose-full-up
 
 .PHONY: all-without-front
-all-without-front: update-env go-mod-tidy test swag compose-frontend-up
+all-without-front: update-env compose-frontend-up
 
 
 # for frontend
 .PHONY: compose-frontend-up
 compose-frontend-up: update-env
-	docker compose -f docker-compose.yml up postgres backend backend-fs backend-auth pgadmin nginx --build -d
+	docker compose -f local-deploy/docker-compose-frontend.yml up --build -d
 
 .PHONY: compose-frontend-down
 compose-frontend-down:
-	docker compose -f docker-compose.yml down postgres backend backend-fs backend-auth pgadmin nginx
+	docker compose -f local-deploy/docker-compose-frontend.yml down
 
-.PHONY: compose-logs
-compose-logs:
-	docker compose -f docker-compose.yml logs
-
+backend=local-deploy-backend-1
 .PHONY: migrate-docker-up
 migrate-docker-up:
-	docker exec -it 2023_2_rabotyagi-backend-1 ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations up
+	docker exec -it ${backend} ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations up
 
 .PHONY: migrate-docker-down
 migrate-docker-down:
-	docker exec -it 2023_2_rabotyagi-backend-1  ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations down
+	docker exec -it ${backend}  ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations down
 
+backend-fs=local-deploy-backend-fs-1
 .PHONY: fill-db-docker
 fill-db-docker: migrate-docker-up
-	docker exec -it 2023_2_rabotyagi-backend-fs-1  ./fake_db postgres://postgres:postgres@postgres:5432/youla?sslmode=disable .
+	docker exec -it ${backend-fs}  ./fake_db postgres://postgres:postgres@postgres:5432/youla?sslmode=disable .
 
 .PHONY: refill-db-docker
 refill-db-docker: migrate-docker-down fill-db-docker

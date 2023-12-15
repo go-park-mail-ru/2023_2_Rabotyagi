@@ -63,6 +63,8 @@ services:
 
   frontend:
     image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
+    ports:
+      - "3000:3000"
     environment:
       - API_URL=localhost
       - MOCK=false

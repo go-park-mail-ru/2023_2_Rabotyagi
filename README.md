@@ -66,15 +66,15 @@ make all-without-front
 
 ### Если нужно накатить миграции
 ```shell
-make migrate-up
+make migrate-docker-up
 ```
 ### Если нужно откатить миграции
 ```shell
-make migrate-down
+make migrate-docker-down
 ```
 ### Если нужно перезаполнить бд
 ```shell
-make refill-db
+make refill-db-docker
 ```
 
 ### Локальная установка тула для миграций
