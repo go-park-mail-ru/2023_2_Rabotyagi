@@ -66,15 +66,15 @@ make all-without-front
 
 ### Если нужно накатить миграции
 ```shell
-make migrate-docker-up
+make migrate-docker-up backend=local-deploy-backend-1
 ```
 ### Если нужно откатить миграции
 ```shell
-make migrate-docker-down
+make migrate-docker-down backend=local-deploy-backend-1
 ```
 ### Если нужно перезаполнить бд
 ```shell
-make refill-db-docker
+make refill-db-docker backend=local-deploy-backend-1 backend-fs=local-deploy-backend-fs-1
 ```
 
 ### Локальная установка тула для миграций
