@@ -14,43 +14,43 @@ type IMetricManagerHTTP interface {
 var _ IMetricManagerHTTP = (*MetricManagerHTTP)(nil)
 
 type MetricManagerHTTP struct {
+	serviceName     string
 	totalStatuses   *prometheus.CounterVec
-	durationSummary *prometheus.SummaryVec
+	durationSummary *prometheus.HistogramVec
 }
 
 func NewMetricManagerHTTP(serviceName string) *MetricManagerHTTP {
-	labelTotalStatuses := []string{"path", "method", "status"}
+	labelTotalStatuses := []string{"service", "path", "method", "status"}
 	totalStatuses := prometheus.NewCounterVec(
 		prometheus.CounterOpts{ //nolint:exhaustruct
-			Namespace: serviceName,
-			Name:      "http_request_statuses_total",
-			Help:      "count_of_all_request_with_status",
+			Name: "http_request_statuses_total",
+			Help: "count_of_all_request_with_status",
 		}, labelTotalStatuses)
 	prometheus.MustRegister(totalStatuses)
 
-	labelDurationSummary := []string{"path", "method", "status"}
-	durationSummary := prometheus.NewSummaryVec(
-		prometheus.SummaryOpts{ //nolint:exhaustruct
-			Namespace: serviceName,
-			Name:      "http_duration",
-			Help:      "duration_of_all_request_with_status",
-			Objectives: map[float64]float64{
-				0.5:  0.05,  //nolint:gomnd
-				0.9:  0.01,  //nolint:gomnd
-				0.99: 0.001, //nolint:gomnd
-			},
+	labelDurationSummary := []string{"service", "path", "method", "status"}
+	buckets := []float64{0.001, 0.1, 1, 2, 5, 10, 100}
+	durationSummary := prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{ //nolint:exhaustruct
+			Name:    "http_duration",
+			Help:    "duration_of_all_request_with_status",
+			Buckets: buckets,
 		},
 		labelDurationSummary,
 	)
 	prometheus.MustRegister(durationSummary)
 
-	return &MetricManagerHTTP{totalStatuses: totalStatuses, durationSummary: durationSummary}
+	return &MetricManagerHTTP{
+		serviceName:     serviceName,
+		totalStatuses:   totalStatuses,
+		durationSummary: durationSummary,
+	}
 }
 
 func (m *MetricManagerHTTP) IncreaseTotal(path, method, status string) {
-	m.totalStatuses.WithLabelValues(path, method, status).Inc()
+	m.totalStatuses.WithLabelValues(m.serviceName, path, method, status).Inc()
 }
 
 func (m *MetricManagerHTTP) AddDuration(path, method, status string, duration time.Duration) {
-	m.durationSummary.WithLabelValues(path, method, status).Observe(duration.Seconds())
+	m.durationSummary.WithLabelValues(m.serviceName, path, method, status).Observe(duration.Seconds())
 }
