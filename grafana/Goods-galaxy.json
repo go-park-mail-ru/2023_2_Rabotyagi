@@ -103,13 +103,18 @@
       "id": 19,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "sortBy": "Max",
+          "sortDesc": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -198,13 +203,18 @@
       "id": 12,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "sortBy": "Max",
+          "sortDesc": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -402,13 +412,16 @@
       "id": 18,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -497,13 +510,18 @@
       "id": 8,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "sortBy": "Last *",
+          "sortDesc": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -784,13 +802,16 @@
       "id": 13,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -879,13 +900,16 @@
       "id": 6,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -987,13 +1011,16 @@
       "id": 5,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -1082,13 +1109,16 @@
       "id": 14,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -1206,20 +1236,53 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "",
+  "refresh": false,
   "schemaVersion": 38,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "backend_fs",
+          "value": "backend_fs"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "service",
+        "options": [
+          {
+            "selected": false,
+            "text": "backend",
+            "value": "backend"
+          },
+          {
+            "selected": true,
+            "text": "backend_fs",
+            "value": "backend_fs"
+          },
+          {
+            "selected": false,
+            "text": "backend_auth",
+            "value": "backend_auth"
+          }
+        ],
+        "query": "backend, backend_fs, backend_auth",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Goods-galaxy",
   "uid": "c1af6f25-7d6a-4594-ac23-6fe22707e7d8",
-  "version": 5,
+  "version": 6,
   "weekStart": ""
 }
