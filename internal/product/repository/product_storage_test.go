@@ -358,14 +358,64 @@ func TestGetProduct(t *testing.T) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
-       description, price, created_at, premium_begin, premium_expire, views, available_count, city_id,
+       description, price, created_at, views, available_count, city_id,
        delivery, safe_deal, is_active, premium FROM public."product" `).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"saler_id", "category_id", "title", "description", "price", //nolint:gofumpt
-						"created_at", "premium_begin", "premium_expire", "views", "available_count", "city_id", "delivery",
+						"created_at", "views", "available_count", "city_id", "delivery",
+						"safe_deal", "is_active", "premium"}).
+						AddRow(uint64(2), uint64(1), "Car", "text", uint64(1212), time.Now(),
+							uint32(6), uint32(4), uint64(6), true, true, true, false))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("safsafddasf"))
+
+				mockPool.ExpectQuery(`SELECT COUNT`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{`count`}).
+						AddRow(uint64(1)))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectQuery(`SELECT price, created_at FROM public."price_history"`).
+					WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"price", "created_at"}).
+						AddRow(uint64(123123), time.Now()))
+
+				mockPool.ExpectQuery(`SELECT EXISTS`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"exists"}).
+						AddRow(false))
+
+				mockPool.ExpectExec(`INSERT INTO public."view"`).WithArgs(uint64(1), uint64(1)).
+					WillReturnResult(pgxmock.NewResult("INSERT", 1))
+
+				mockPool.ExpectExec(`UPDATE public."product"`).WithArgs(uint64(1)).
+					WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			userID:    1,
+			productID: 1,
+		},
+		{
+			name: "test my",
+			behaviorProductStorage: func(m *repository.ProductStorage) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
+       description, price, created_at, views, available_count, city_id,
+       delivery, safe_deal, is_active, premium FROM public."product" `).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"saler_id", "category_id", "title", "description", "price", //nolint:gofumpt
+						"created_at", "views", "available_count", "city_id", "delivery",
 						"safe_deal", "is_active", "premium"}).
 						AddRow(uint64(1), uint64(1), "Car", "text", uint64(1212), time.Now(),
-							sql.NullTime{Time: time.Time{}, Valid: false}, sql.NullTime{Time: time.Time{}, Valid: false},
-							uint32(6), uint32(4), uint64(6), true, true, true, false))
+							uint32(6), uint32(4), uint64(6), true, true, true, true))
+
+				mockPool.ExpectQuery(`SELECT premium_expire FROM public."product"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"premium_expire"}).
+						AddRow(sql.NullTime{Valid: true, Time: time.Now()}))
 
 				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"url"}).
@@ -406,8 +456,6 @@ func TestGetProduct(t *testing.T) {
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
-
 			ctx := context.Background()
 
 			prodStorage, err := repository.NewProductStorage(mockPool)
