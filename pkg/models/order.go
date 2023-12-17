@@ -17,17 +17,20 @@ type Order struct {
 	ClosedAt  sql.NullTime `json:"closed_at"   swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"`
 }
 
+//easyjson:json
 type OrderChanges struct {
 	ID     uint64 `json:"id"      valid:"required"`
 	Count  uint32 `json:"count"   valid:"required"`
 	Status uint8  `json:"status"  valid:"required"`
 }
 
+//easyjson:json
 type PreOrder struct {
 	ProductID uint64 `json:"product_id" valid:"required"`
 	Count     uint32 `json:"count"      valid:"required"`
 }
 
+//easyjson:json
 type OrderInBasket struct {
 	ID             uint64  `json:"id"              valid:"required"`
 	OwnerID        uint64  `json:"owner_id"        valid:"required"`

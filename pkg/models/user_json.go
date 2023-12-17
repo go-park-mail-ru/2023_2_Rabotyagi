@@ -1,11 +1,11 @@
 package models
 
 import (
-	"encoding/json"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"time"
 )
 
+//easyjson:json
 type userJson struct {
 	ID        uint64     `json:"id"`
 	Email     string     `json:"email"`
@@ -27,13 +27,13 @@ func (u *UserWithoutPassword) MarshalJSON() ([]byte, error) {
 		CreatedAt: u.CreatedAt,
 	}
 
-	return json.Marshal(userJs)
+	return userJs.MarshalJSON()
 }
 
 func (u *UserWithoutPassword) UnmarshalJSON(bytes []byte) error {
 	var userJs userJson
 
-	if err := json.Unmarshal(bytes, &userJs); err != nil {
+	if err := userJs.UnmarshalJSON(bytes); err != nil {
 		return err
 	}
 

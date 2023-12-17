@@ -55,6 +55,7 @@ func (u *UserWithoutPassword) Trim() {
 	u.Phone.String = strings.TrimSpace(u.Phone.String)
 }
 
+//easyjson:json
 type UserWithoutID struct {
 	Email    string         `json:"email" valid:"required,email~Некорректный формат email"`
 	Phone    sql.NullString `json:"phone"    valid:"regexp=^(\+){0,1}[0-9\s]*$,length(0|18)~Телефон должен содержать только один + в начале и цифры после,length(1|18)~Длинна номера телефона вместе с плюсом не больше 18 символов"` //nolint

@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -23,10 +22,16 @@ func validateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	decoder := json.NewDecoder(r)
-
 	userWithoutPassword := new(models.UserWithoutPassword)
-	if err := decoder.Decode(userWithoutPassword); err != nil {
+
+	data, err := io.ReadAll(r)
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeUser)
+	}
+
+	if err := userWithoutPassword.UnmarshalJSON(data); err != nil {
 		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeUser)
