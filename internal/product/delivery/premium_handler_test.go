@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-func TestAddPremium(t *testing.T) {
+func TestAddPremium(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -89,7 +89,7 @@ func TestAddPremium(t *testing.T) {
 	}
 }
 
-func TestRemovePremium(t *testing.T) {
+func TestRemovePremium(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

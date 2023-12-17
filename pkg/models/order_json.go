@@ -1,11 +1,11 @@
 package models
 
 import (
-	"encoding/json"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"time"
 )
 
+//easyjson:json
 type orderJson struct {
 	ID        uint64     `json:"id"          valid:"required"`
 	OwnerID   uint64     `json:"owner_id"    valid:"required"`
@@ -29,13 +29,13 @@ func (o *Order) MarshalJSON() ([]byte, error) {
 		ClosedAt:  utils.NullTimeToUnsafe(o.ClosedAt),
 	}
 
-	return json.Marshal(orderJs)
+	return orderJs.MarshalJSON()
 }
 
 func (o *Order) UnmarshalJSON(bytes []byte) error {
 	var orderJs orderJson
 
-	if err := json.Unmarshal(bytes, &orderJs); err != nil {
+	if err := orderJs.UnmarshalJSON(bytes); err != nil {
 		return err
 	}
 

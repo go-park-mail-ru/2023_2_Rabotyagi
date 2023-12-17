@@ -30,8 +30,7 @@ func NewPremiumService(ctrl *gomock.Controller,
 	return PremiumService, nil
 }
 
-//nolint:funlen
-func TestRemovePremium(t *testing.T) {
+func TestRemovePremium(t *testing.T) { //nolint:funlen,dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

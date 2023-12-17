@@ -66,7 +66,7 @@ func (b BasketService) GetOrdersByUserID(ctx context.Context, userID uint64) ([]
 }
 
 func (b BasketService) GetOrdersNotInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket,
-	error) {
+	error) { //nolint:gofumpt
 	orders, err := b.storage.GetOrdersNotInBasketByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)

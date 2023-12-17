@@ -33,7 +33,7 @@ type IFavouriteService interface {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /profile/favourites [get]
-func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -74,7 +74,7 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /product/add-to-fav [post]
-func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -99,7 +99,9 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 	}
 
 	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful))
+
 	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(userID))
+
 	logger.Infof("in AddToFavouritesHandler: add to fav with user id = %+v", userID)
 }
 
@@ -151,6 +153,8 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 	}
 
 	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful))
+
 	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(productID))
+
 	logger.Infof("in DeleteFromFavouritesHandler: del form fav with product id = %+v", productID)
 }

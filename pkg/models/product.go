@@ -38,6 +38,8 @@ type Product struct {
 // PreProduct
 // @Description safe_deal optional
 // @Description delivery optional
+//
+//easyjson:json
 type PreProduct struct {
 	SalerID        uint64  `json:"saler_id"        valid:"required"`
 	CategoryID     uint64  `json:"category_id"     valid:"required"`
@@ -57,6 +59,7 @@ func (p *PreProduct) Trim() {
 	p.Description = strings.TrimFunc(p.Description, unicode.IsSpace)
 }
 
+//easyjson:json
 type ProductInFeed struct {
 	ID             uint64  `json:"id"              valid:"required"`
 	Title          string  `json:"title"           valid:"required, length(1|256)~Заголовок должен быть длинной от 1 до 256 символов"`
@@ -72,6 +75,7 @@ type ProductInFeed struct {
 	Favourites     uint64  `json:"favourites"      valid:"required"`
 }
 
+//easyjson:json
 type ProductID struct {
 	ProductID uint64 `json:"product_id"`
 }

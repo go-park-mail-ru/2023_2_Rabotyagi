@@ -1,14 +1,12 @@
 package usecases
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"io"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -29,16 +27,22 @@ var (
 func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	decoder := json.NewDecoder(r)
 	preProduct := &models.PreProduct{ //nolint:exhaustruct
 		Delivery: false,
 		SafeDeal: false,
 	}
 
-	if err := decoder.Decode(preProduct); err != nil {
+	data, err := io.ReadAll(r)
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreProduct)
+	}
+
+	if err := preProduct.UnmarshalJSON(data); err != nil {
 		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreProduct)
@@ -67,7 +71,7 @@ func ValidatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 			return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		return nil, fmt.Errorf("%w %v", ErrValidatePreProduct, err)
+		return nil, fmt.Errorf("%w %w", ErrValidatePreProduct, err)
 	}
 
 	return preProduct, nil
@@ -76,7 +80,7 @@ func ValidatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	preProduct, err := validatePreProduct(r, userID)
@@ -103,13 +107,19 @@ func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, e
 func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	preOrder := new(models.PreOrder)
-	decoder := json.NewDecoder(r)
 
-	if err := decoder.Decode(preOrder); err != nil {
+	data, err := io.ReadAll(r)
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreOrder)
+	}
+
+	if err := preOrder.UnmarshalJSON(data); err != nil {
 		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreOrder)
@@ -132,9 +142,14 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 	}
 
 	orderChanges := new(models.OrderChanges)
-	decoder := json.NewDecoder(r)
+	data, err := io.ReadAll(r)
+	if err != nil {
+		logger.Errorln(err)
 
-	if err = decoder.Decode(orderChanges); err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeOrderChanges)
+	}
+
+	if err := orderChanges.UnmarshalJSON(data); err != nil {
 		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodeOrderChanges)

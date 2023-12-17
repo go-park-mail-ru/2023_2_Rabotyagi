@@ -1,7 +1,6 @@
 package responses
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
@@ -19,10 +18,15 @@ const (
 	CookieAuthName = "access_token"
 )
 
+type Marshaller interface {
+	MarshalJSON() ([]byte, error)
+}
+
 type ResponseBody struct {
 	Message string `json:"message"`
 }
 
+//easyjson:json
 type ResponseSuccessful struct {
 	Status int          `json:"status"`
 	Body   ResponseBody `json:"body"`
@@ -39,6 +43,7 @@ type ResponseBodyID struct {
 	ID uint64 `json:"id"`
 }
 
+//easyjson:json
 type ResponseID struct {
 	Status int            `example:"3003" json:"status"`
 	Body   ResponseBodyID `json:"body"`
@@ -52,6 +57,7 @@ type ResponseBodyError struct {
 	Error string `json:"error"`
 }
 
+//easyjson:json
 type ErrorResponse struct {
 	Status int               `json:"status"`
 	Body   ResponseBodyError `json:"body"`
@@ -64,8 +70,8 @@ func NewErrResponse(status int, err string) *ErrorResponse {
 	}
 }
 
-func sendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response any) {
-	responseSend, err := json.Marshal(response)
+func sendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response Marshaller) {
+	responseSend, err := response.MarshalJSON()
 	if err != nil {
 		logger.Errorf("in sendResponse: %+v\n", err)
 		http.Error(w, ErrInternalServer, http.StatusInternalServerError)
@@ -80,7 +86,7 @@ func sendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response an
 	}
 }
 
-func SendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response any) {
+func SendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response Marshaller) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	sendResponse(w, logger, response)

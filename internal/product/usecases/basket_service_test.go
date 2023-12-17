@@ -117,8 +117,7 @@ func TestAddOrder(t *testing.T) {
 	}
 }
 
-//nolint:funlen
-func TestGetOrderByUserID(t *testing.T) {
+func TestGetOrderByUserID(t *testing.T) { //nolint:funlen,dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -184,8 +183,7 @@ func TestGetOrderByUserID(t *testing.T) {
 	}
 }
 
-//nolint:funlen
-func TestGetOrderNotInBasketByUserID(t *testing.T) {
+func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:funlen,dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -251,8 +249,7 @@ func TestGetOrderNotInBasketByUserID(t *testing.T) {
 	}
 }
 
-//nolint:funlen
-func TestGetOrderSoldByUserID(t *testing.T) {
+func TestGetOrderSoldByUserID(t *testing.T) { //nolint:funlen,dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -318,8 +315,7 @@ func TestGetOrderSoldByUserID(t *testing.T) {
 	}
 }
 
-//nolint:funlen
-func TestUpdateOrderCount(t *testing.T) {
+func TestUpdateOrderCount(t *testing.T) { //nolint:funlen,dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

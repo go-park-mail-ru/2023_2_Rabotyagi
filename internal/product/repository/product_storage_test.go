@@ -71,7 +71,7 @@ func TestCloseProduct(t *testing.T) {
 	}
 }
 
-func TestActivateProduct(t *testing.T) {
+func TestActivateProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -132,7 +132,7 @@ func TestActivateProduct(t *testing.T) {
 	}
 }
 
-func TestDeleteProduct(t *testing.T) {
+func TestDeleteProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -253,7 +253,7 @@ func TestSearchProduct(t *testing.T) {
 	}
 }
 
-func TestGetSearchProductFeed(t *testing.T) {
+func TestGetSearchProductFeed(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -280,7 +280,7 @@ func TestGetSearchProductFeed(t *testing.T) {
 
 				mockPool.ExpectQuery(`SELECT id, title, price, city_id, 
        delivery, safe_deal, is_active, available_count FROM product`).WithArgs("Ca", uint64(0), uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "title", "price", "city_id",
+					WillReturnRows(pgxmock.NewRows([]string{"id", "title", "price", "city_id", //nolint:gofumpt
 						"delivery", "safe_deal", "is_active", "available_count"}).
 						AddRow(uint64(1), "Car", uint64(1212), uint64(6), true, true, true, uint32(2)))
 
@@ -360,7 +360,7 @@ func TestGetProduct(t *testing.T) {
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
        description, price, created_at, premium_begin, premium_expire, views, available_count, city_id,
        delivery, safe_deal, is_active, premium FROM public."product" `).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"saler_id", "category_id", "title", "description", "price",
+					WillReturnRows(pgxmock.NewRows([]string{"saler_id", "category_id", "title", "description", "price", //nolint:gofumpt
 						"created_at", "premium_begin", "premium_expire", "views", "available_count", "city_id", "delivery",
 						"safe_deal", "is_active", "premium"}).
 						AddRow(uint64(1), uint64(1), "Car", "text", uint64(1212), time.Now(),

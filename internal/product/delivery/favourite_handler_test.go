@@ -18,7 +18,7 @@ import (
 	"testing"
 )
 
-func TestAddToFavourites(t *testing.T) {
+func TestAddToFavourites(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -29,6 +29,7 @@ func TestAddToFavourites(t *testing.T) {
 		request                *http.Request
 		expectedResponse       responses.ResponseID
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
@@ -86,7 +87,7 @@ func TestAddToFavourites(t *testing.T) {
 	}
 }
 
-func TestGetFavourites(t *testing.T) {
+func TestGetFavourites(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -97,6 +98,7 @@ func TestGetFavourites(t *testing.T) {
 		request                *http.Request
 		expectedResponse       *delivery.ProductListResponse
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
@@ -105,7 +107,8 @@ func TestGetFavourites(t *testing.T) {
 				m.EXPECT().GetUserFavourites(gomock.Any(), test.UserID).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "sofa"}, {ID: 2, Title: "laptop"}}, nil)
 			},
-			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{{ID: 1, Title: "sofa"}, {ID: 2, Title: "laptop"}}),
+			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{{ID: 1, Title: "sofa"},
+				{ID: 2, Title: "laptop"}}),
 		},
 		{
 			name:    "test empty",

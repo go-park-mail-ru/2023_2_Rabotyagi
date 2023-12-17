@@ -1,11 +1,11 @@
 package models
 
 import (
-	"encoding/json"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"time"
 )
 
+//easyjson:json
 type productJson struct {
 	ID             uint64               `json:"id"              valid:"required"`
 	SalerID        uint64               `json:"saler_id"        valid:"required"`
@@ -15,8 +15,8 @@ type productJson struct {
 	Description    string               `json:"description"     valid:"required, length(1|4000)~Описание должно быть длинной от 1 до 4000 симвволов"` //nolint
 	Price          uint64               `json:"price"           valid:"required"`
 	CreatedAt      time.Time            `json:"created_at"      valid:"required"`
-	PremiumBegin   *time.Time           `json:"closed_at"       swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"`
-	PremiumExpire  *time.Time           `json:"closed_at"       swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"`
+	PremiumBegin   *time.Time           `json:"premium_begin"   swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"`
+	PremiumExpire  *time.Time           `json:"premium_expire"  swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"`
 	Views          uint32               `json:"views"           valid:"required"`
 	AvailableCount uint32               `json:"available_count" valid:"required"`
 	Delivery       bool                 `json:"delivery"        valid:"optional"`
@@ -53,13 +53,13 @@ func (p *Product) MarshalJSON() ([]byte, error) {
 		PremiumExpire:  utils.NullTimeToUnsafe(p.PremiumExpire),
 	}
 
-	return json.Marshal(productJs)
+	return productJs.MarshalJSON()
 }
 
 func (p *Product) UnmarshalJSON(bytes []byte) error {
 	var productJs productJson
 
-	if err := json.Unmarshal(bytes, &productJs); err != nil {
+	if err := productJs.UnmarshalJSON(bytes); err != nil {
 		return err
 	}
 

@@ -10,7 +10,7 @@ import (
 )
 
 func (p *ProductStorage) addPriceHistoryRecord(ctx context.Context, tx pgx.Tx,
-	productID uint64, price uint64) error {
+	productID uint64, price uint64) error { //nolint:gofumpt
 	logger := p.logger.LogReqID(ctx)
 
 	SQLInsertProduct := `INSERT INTO public."price_history"(product_id, price) VALUES($1, $2)`

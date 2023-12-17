@@ -8,6 +8,7 @@ type ResponseURLBody struct {
 	SlURL []string `json:"urls"` //nolint:tagliatelle
 }
 
+//easyjson:json
 type ResponseURLs struct {
 	Status int             `json:"status"`
 	Body   ResponseURLBody `json:"body"`

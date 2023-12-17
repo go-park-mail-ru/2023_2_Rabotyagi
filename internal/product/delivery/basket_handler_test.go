@@ -18,7 +18,7 @@ import (
 	"testing"
 )
 
-func TestAddOrder(t *testing.T) {
+func TestAddOrder(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -64,7 +64,7 @@ func TestAddOrder(t *testing.T) {
 					"in_favourites": true,
 					"images": [{"url":"img/0b70d1440b896bf84adac5311fcd015a41590cc23fecb2750478a342918a9695"},
 								{"url":"8244c1507a772d2a9377dd95a9ce7d7eba646a62cbb865e597f58807e1"}]}`)),
-					test.UserID).Return(&models.OrderInBasket{
+					test.UserID).Return(&models.OrderInBasket{ //nolint:exhaustruct
 					OwnerID:        67890,
 					SalerID:        54321,
 					ProductID:      98765,
@@ -88,7 +88,7 @@ func TestAddOrder(t *testing.T) {
 			},
 			expectedResponse: &delivery.OrderResponse{
 				Status: statuses.StatusResponseSuccessful,
-				Body: &models.OrderInBasket{
+				Body: &models.OrderInBasket{ //nolint:exhaustruct
 					OwnerID:        67890,
 					SalerID:        54321,
 					ProductID:      98765,
@@ -116,14 +116,14 @@ func TestAddOrder(t *testing.T) {
 			request: httptest.NewRequest(http.MethodPost, "/api/v1/order/add", strings.NewReader(`{"product_id":3, "count":3}`)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().AddOrder(gomock.Any(), io.NopCloser(strings.NewReader(
-					`{"product_id":3, "count":3}`)), test.UserID).Return(&models.OrderInBasket{
+					`{"product_id":3, "count":3}`)), test.UserID).Return(&models.OrderInBasket{ //nolint:exhaustruct
 					ProductID: 3,
 					Count:     3,
 				}, nil)
 			},
 			expectedResponse: &delivery.OrderResponse{
 				Status: statuses.StatusResponseSuccessful,
-				Body: &models.OrderInBasket{
+				Body: &models.OrderInBasket{ //nolint:exhaustruct
 					ProductID: 3,
 					Count:     3,
 				},
