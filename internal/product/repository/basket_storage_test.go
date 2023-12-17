@@ -134,7 +134,7 @@ func TestUpdateOrderCount(t *testing.T) {
 	}
 }
 
-func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen
+func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -196,7 +196,7 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen
 		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases { //nolint:paralleltest
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
@@ -298,7 +298,7 @@ func TestAddOrderInBasket(t *testing.T) { //nolint:funlen
 	}
 }
 
-func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl
+func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl,funlen
 	t.Parallel()
 
 	_ = my_logger.NewNop()

@@ -69,7 +69,7 @@ func TestAddToFavourites(t *testing.T) {
 	}
 }
 
-func TestDeleteFromFavourites(t *testing.T) {
+func TestDeleteFromFavourites(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

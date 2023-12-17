@@ -75,7 +75,7 @@ func NewProductHandler(productService IProductService,
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /product/add [post]
-func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -116,7 +116,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
 //	@Router      /product/get [get]
-func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -397,7 +397,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
 //	@Router      /product/close [patch]
-func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -447,7 +447,7 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
 //	@Router      /product/activate [patch]
-func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -497,7 +497,7 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400)
 //	@Router      /product/delete [delete]
-func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodDelete {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

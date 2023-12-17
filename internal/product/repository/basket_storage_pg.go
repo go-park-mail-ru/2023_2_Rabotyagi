@@ -22,6 +22,7 @@ var (
 		"Товара доступно меньше, чем вы пытаетесь довавить в корзину")
 )
 
+//nolint:dupl
 func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	tx pgx.Tx, userID uint64,
 ) ([]*models.OrderInBasket, error) {
@@ -82,7 +83,7 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 
 	var orders []*models.OrderInBasket
 
-	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error { //nolint:varnamelen
 		ordersInner, err := p.selectOrdersInBasketByUserID(ctx, tx, userID)
 		if err != nil {
 			return err
@@ -116,8 +117,8 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 	return orders, nil
 }
 
-func (p *ProductStorage) selectOrdersNotInBasketByUserID(ctx context.Context,
-	tx pgx.Tx, userID uint64,
+func (p *ProductStorage) selectOrdersNotInBasketByUserID(ctx context.Context, //nolint:dupl
+	tx pgx.Tx, userID uint64, //nolint:varnamelen
 ) ([]*models.OrderInBasket, error) {
 	logger := p.logger.LogReqID(ctx)
 
@@ -210,8 +211,8 @@ func (p *ProductStorage) GetOrdersNotInBasketByUserID(ctx context.Context,
 	return orders, nil
 }
 
-func (p *ProductStorage) selectOrdersSoldByUserID(ctx context.Context,
-	tx pgx.Tx, userID uint64,
+func (p *ProductStorage) selectOrdersSoldByUserID(ctx context.Context, //nolint:dupl
+	tx pgx.Tx, userID uint64, //nolint:varnamelen
 ) ([]*models.OrderInBasket, error) {
 	logger := p.logger.LogReqID(ctx)
 

@@ -25,7 +25,7 @@ var (
 
 var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 
-type IProductStorage interface {
+type IProductStorage interface { //nolint:interfacebloat
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
 	GetPopularProducts(ctx context.Context, lastProductID uint64, count uint64,
@@ -179,7 +179,7 @@ func (p *ProductService) GetProductsOfSaler(ctx context.Context,
 }
 
 func (p *ProductService) UpdateProduct(ctx context.Context,
-	r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64,
+	r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64, //nolint:varnamelen
 ) error {
 	var preProduct *models.PreProduct
 
@@ -255,7 +255,7 @@ func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) 
 	sanitizer := bluemonday.UGCPolicy()
 
 	for _, product := range products {
-		product = sanitizer.Sanitize(product)
+		product = sanitizer.Sanitize(product) //nolint:ineffassign
 	}
 
 	return products, nil

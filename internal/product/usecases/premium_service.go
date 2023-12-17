@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var (
+var ( //nolint:gofumpt
 	ErrPremiumCode = myerrors.NewErrorBadFormatRequest("Ошибка срока подписки на премиум ")
 )
 
@@ -44,7 +44,7 @@ func NewPremiumService(premiumStorage IPremiumStorage) (*PremiumService, error) 
 }
 
 func (p PremiumService) AddPremium(ctx context.Context, productID uint64,
-	userID uint64, periodCode uint64) error {
+	userID uint64, periodCode uint64) error { //nolint:gofumpt
 	var premiumExpire time.Time
 
 	premiumBegin := time.Now()

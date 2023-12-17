@@ -51,7 +51,7 @@ func NewProductStorage(pool pgxpool.IPgxPool) (*ProductStorage, error) {
 }
 
 func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
-	tx pgx.Tx, productID uint64,
+	tx pgx.Tx, productID uint64, //nolint:varnamelen
 ) ([]models.Image, error) {
 	logger := p.logger.LogReqID(ctx)
 
@@ -116,7 +116,7 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 }
 
 func (p *ProductStorage) selectCountFavouritesByProductID(ctx context.Context,
-	tx pgx.Tx,
+	tx pgx.Tx, //nolint:varnamelen
 	productID uint64,
 ) (uint64, error) {
 	logger := p.logger.LogReqID(ctx)
@@ -170,7 +170,7 @@ type productAddition struct {
 }
 
 func (p *ProductStorage) getProductAddition(ctx context.Context,
-	tx pgx.Tx, productID uint64, userID uint64,
+	tx pgx.Tx, productID uint64, userID uint64, //nolint:varnamelen
 ) (*productAddition, error) {
 	innerProductAddition := new(productAddition)
 
@@ -197,7 +197,7 @@ func (p *ProductStorage) getProductAddition(ctx context.Context,
 }
 
 func (p *ProductStorage) getProduct(ctx context.Context,
-	tx pgx.Tx, productID uint64, userID uint64,
+	tx pgx.Tx, productID uint64, userID uint64, //nolint:varnamelen
 ) (*models.Product, error) {
 	product, err := p.selectProductByID(ctx, tx, productID)
 	if err != nil {
@@ -225,7 +225,7 @@ func (p *ProductStorage) getProduct(ctx context.Context,
 func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error) {
 	var product *models.Product
 
-	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error { //nolint:varnamelen
 		productInner, err := p.getProduct(ctx, tx, productID, userID)
 		if err != nil {
 			return err

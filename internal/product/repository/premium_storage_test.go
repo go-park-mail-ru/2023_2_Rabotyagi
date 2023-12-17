@@ -71,7 +71,7 @@ func TestAddPremium(t *testing.T) {
 	}
 }
 
-func TestRemovePremium(t *testing.T) {
+func TestRemovePremium(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

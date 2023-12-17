@@ -663,8 +663,7 @@ func TestUpdateProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
-func TestCloseProduct(t *testing.T) {
+func TestCloseProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -721,8 +720,7 @@ func TestCloseProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
-func TestActivateProduct(t *testing.T) {
+func TestActivateProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -779,8 +777,7 @@ func TestActivateProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
-func TestDeleteProduct(t *testing.T) {
+func TestDeleteProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

@@ -2,11 +2,13 @@ package delivery
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -27,7 +29,7 @@ type CategoryHandler struct {
 func NewCategoryHandler(service ICategoryService) (*CategoryHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return &CategoryHandler{
@@ -81,7 +83,7 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /category/search [get]
-func (c *CategoryHandler) SearchCategoryHandler(w http.ResponseWriter, r *http.Request) {
+func (c *CategoryHandler) SearchCategoryHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

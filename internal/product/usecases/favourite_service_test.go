@@ -102,7 +102,6 @@ func TestGetUserFavourites(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestAddToFavourites(t *testing.T) {
 	t.Parallel()
 
@@ -165,8 +164,7 @@ func TestAddToFavourites(t *testing.T) {
 	}
 }
 
-//nolint:funlen
-func TestDeleteFromFavourites(t *testing.T) {
+func TestDeleteFromFavourites(t *testing.T) { //nolint:funlen,dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

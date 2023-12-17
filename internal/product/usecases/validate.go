@@ -27,7 +27,7 @@ var (
 func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	preProduct := &models.PreProduct{ //nolint:exhaustruct
@@ -71,7 +71,7 @@ func ValidatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 			return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		return nil, fmt.Errorf("%w %v", ErrValidatePreProduct, err)
+		return nil, fmt.Errorf("%w %w", ErrValidatePreProduct, err)
 	}
 
 	return preProduct, nil
@@ -80,7 +80,7 @@ func ValidatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	preProduct, err := validatePreProduct(r, userID)
@@ -107,10 +107,11 @@ func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, e
 func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	preOrder := new(models.PreOrder)
+
 	data, err := io.ReadAll(r)
 	if err != nil {
 		logger.Errorln(err)
