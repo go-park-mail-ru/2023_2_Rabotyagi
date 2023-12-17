@@ -1,18 +1,17 @@
-package delivery
+package delivery_test
 
 import (
 	"database/sql"
-	"encoding/json"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 	"go.uber.org/mock/gomock"
-	"io"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 )
 
@@ -26,7 +25,7 @@ func TestGetFullCategories(t *testing.T) {
 		name             string
 		method           string
 		behavior         func(m *mocks.MockICategoryService)
-		expectedResponse CategoryListResponse
+		expectedResponse delivery.CategoryListResponse
 	}
 
 	testCases := [...]TestCase{
@@ -39,7 +38,7 @@ func TestGetFullCategories(t *testing.T) {
 					{ID: 1, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
 					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}, nil)
 			},
-			expectedResponse: CategoryListResponse{Status: statuses.StatusResponseSuccessful,
+			expectedResponse: delivery.CategoryListResponse{Status: statuses.StatusResponseSuccessful,
 				Body: []*models.Category{{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
 					{ID: 1, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
 					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}},
@@ -49,7 +48,7 @@ func TestGetFullCategories(t *testing.T) {
 			behavior: func(m *mocks.MockICategoryService) {
 				m.EXPECT().GetFullCategories(gomock.Any()).Return([]*models.Category{}, nil)
 			},
-			expectedResponse: CategoryListResponse{
+			expectedResponse: delivery.CategoryListResponse{
 				Status: statuses.StatusResponseSuccessful,
 				Body:   []*models.Category{},
 			},
@@ -67,7 +66,7 @@ func TestGetFullCategories(t *testing.T) {
 						{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
 					}, nil)
 			},
-			expectedResponse: CategoryListResponse{
+			expectedResponse: delivery.CategoryListResponse{
 				Status: statuses.StatusResponseSuccessful,
 				Body: []*models.Category{
 					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
@@ -94,35 +93,20 @@ func TestGetFullCategories(t *testing.T) {
 
 			testCase.behavior(mockServ)
 
-			cityHandler, err := NewCategoryHandler(mockServ)
+			cityHandler, err := delivery.NewCategoryHandler(mockServ)
 			if err != nil {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			req := httptest.NewRequest(testCase.method, "/api/v1/city/get_full", nil)
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/category/get_full", nil)
 
 			w := httptest.NewRecorder()
 
 			cityHandler.GetFullCategories(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse CategoryListResponse
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			if !reflect.DeepEqual(testCase.expectedResponse, resultResponse) {
-				t.Errorf("Wrong Response: got %+v, expected %+v",
-					resultResponse, testCase.expectedResponse)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
@@ -138,7 +122,7 @@ func TestSearchCategoryHandler(t *testing.T) {
 		searchInput      string
 		method           string
 		behavior         func(m *mocks.MockICategoryService)
-		expectedResponse CategoryListResponse
+		expectedResponse delivery.CategoryListResponse
 	}
 
 	testCases := [...]TestCase{
@@ -151,7 +135,7 @@ func TestSearchCategoryHandler(t *testing.T) {
 					{ID: 3, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 2}},
 					{ID: 7, Name: "Cars", ParentID: sql.NullInt64{Valid: true, Int64: 4}}}, nil)
 			},
-			expectedResponse: CategoryListResponse{Status: statuses.StatusResponseSuccessful,
+			expectedResponse: delivery.CategoryListResponse{Status: statuses.StatusResponseSuccessful,
 				Body: []*models.Category{{ID: 3, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 2}},
 					{ID: 7, Name: "Cars", ParentID: sql.NullInt64{Valid: true, Int64: 4}}}},
 		},
@@ -162,7 +146,7 @@ func TestSearchCategoryHandler(t *testing.T) {
 			behavior: func(m *mocks.MockICategoryService) {
 				m.EXPECT().SearchCategory(gomock.Any(), "").Return([]*models.Category{}, nil)
 			},
-			expectedResponse: CategoryListResponse{
+			expectedResponse: delivery.CategoryListResponse{
 				Status: statuses.StatusResponseSuccessful,
 				Body:   []*models.Category{},
 			},
@@ -176,7 +160,7 @@ func TestSearchCategoryHandler(t *testing.T) {
 					{ID: 2, Name: "Собаки", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
 				}, nil)
 			},
-			expectedResponse: CategoryListResponse{
+			expectedResponse: delivery.CategoryListResponse{
 				Status: statuses.StatusResponseSuccessful,
 				Body: []*models.Category{
 					{ID: 1, Name: "Кошки", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
@@ -199,36 +183,20 @@ func TestSearchCategoryHandler(t *testing.T) {
 
 			testCase.behavior(mockServ)
 
-			cityHandler, err := NewCategoryHandler(mockServ)
+			categoryHandler, err := delivery.NewCategoryHandler(mockServ)
 			if err != nil {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			req := httptest.NewRequest(testCase.method, `/api/v1/city/search`, nil)
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/category/search", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"searched": testCase.searchInput})
-
 			w := httptest.NewRecorder()
 
-			cityHandler.SearchCategoryHandler(w, req)
+			categoryHandler.SearchCategoryHandler(w, req)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			var resultResponse CategoryListResponse
-
-			err = json.Unmarshal(receivedResponse, &resultResponse)
-			if err != nil {
-				t.Fatalf("Failed to Unmarshal(receivedResponse): %v", err)
-			}
-
-			err = utils.EqualTest(resultResponse, testCase.expectedResponse)
-			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 		})
 	}
