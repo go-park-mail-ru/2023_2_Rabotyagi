@@ -55,18 +55,6 @@ func easyjsonB0091c22DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlex
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.CreatedAt).UnmarshalJSON(data))
 			}
-		case "premium_begin":
-			if in.IsNull() {
-				in.Skip()
-				out.PremiumBegin = nil
-			} else {
-				if out.PremiumBegin == nil {
-					out.PremiumBegin = new(time.Time)
-				}
-				if data := in.Raw(); in.Ok() {
-					in.AddError((*out.PremiumBegin).UnmarshalJSON(data))
-				}
-			}
 		case "premium_expire":
 			if in.IsNull() {
 				in.Skip()
@@ -194,15 +182,6 @@ func easyjsonB0091c22EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwr
 		const prefix string = ",\"created_at\":"
 		out.RawString(prefix)
 		out.Raw((in.CreatedAt).MarshalJSON())
-	}
-	{
-		const prefix string = ",\"premium_begin\":"
-		out.RawString(prefix)
-		if in.PremiumBegin == nil {
-			out.RawString("null")
-		} else {
-			out.Raw((*in.PremiumBegin).MarshalJSON())
-		}
 	}
 	{
 		const prefix string = ",\"premium_expire\":"

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -92,14 +93,13 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 	logger := p.logger.LogReqID(ctx)
 
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
-       description, price, created_at, premium_begin, premium_expire, views, available_count, city_id,
+       description, price, created_at, views, available_count, city_id,
        delivery, safe_deal, is_active, premium FROM public."product" WHERE id=$1`
 	product := &models.Product{ID: productID} //nolint:exhaustruct
 
 	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID)
 	if err := productRow.Scan(&product.SalerID, &product.CategoryID,
-		&product.Title, &product.Description, &product.Price, &product.CreatedAt, &product.PremiumBegin,
-		&product.PremiumExpire, &product.Views, &product.AvailableCount, &product.CityID, &product.Delivery,
+		&product.Title, &product.Description, &product.Price, &product.CreatedAt, &product.Views, &product.AvailableCount, &product.CityID, &product.Delivery,
 		&product.SafeDeal, &product.IsActive, &product.Premium); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
@@ -196,12 +196,43 @@ func (p *ProductStorage) getProductAddition(ctx context.Context,
 	return innerProductAddition, nil
 }
 
+func (p *ProductStorage) selectPremiumExpireByProductID(ctx context.Context,
+	tx pgx.Tx, //nolint:varnamelen
+	productID uint64,
+) (sql.NullTime, error) {
+	logger := p.logger.LogReqID(ctx)
+
+	var expire sql.NullTime
+
+	SQLPremiumEpire := `SELECT premium_expire FROM public."product" WHERE id=$1`
+
+	expireRow := tx.QueryRow(ctx, SQLPremiumEpire, productID)
+	if err := expireRow.Scan(&expire); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return sql.NullTime{}, nil
+		}
+
+		logger.Errorln(err)
+
+		return sql.NullTime{}, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return expire, nil
+}
+
 func (p *ProductStorage) getProduct(ctx context.Context,
 	tx pgx.Tx, productID uint64, userID uint64, //nolint:varnamelen
 ) (*models.Product, error) {
 	product, err := p.selectProductByID(ctx, tx, productID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	if product.SalerID == userID && product.Premium {
+		product.PremiumExpire, err = p.selectPremiumExpireByProductID(ctx, tx, productID)
+		if err != nil {
+			return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		}
 	}
 
 	productAdditionInner, err := p.getProductAddition(ctx, tx, productID, userID)

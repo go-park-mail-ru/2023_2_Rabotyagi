@@ -15,7 +15,6 @@ type productJson struct {
 	Description    string               `json:"description"     valid:"required, length(1|4000)~Описание должно быть длинной от 1 до 4000 симвволов"` //nolint
 	Price          uint64               `json:"price"           valid:"required"`
 	CreatedAt      time.Time            `json:"created_at"      valid:"required"`
-	PremiumBegin   *time.Time           `json:"premium_begin"   swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"`
 	PremiumExpire  *time.Time           `json:"premium_expire"  swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"`
 	Views          uint32               `json:"views"           valid:"required"`
 	AvailableCount uint32               `json:"available_count" valid:"required"`
@@ -49,7 +48,6 @@ func (p *Product) MarshalJSON() ([]byte, error) {
 		Images:         p.Images,
 		PriceHistory:   p.PriceHistory,
 		Favourites:     p.Favourites,
-		PremiumBegin:   utils.NullTimeToUnsafe(p.PremiumBegin),
 		PremiumExpire:  utils.NullTimeToUnsafe(p.PremiumExpire),
 	}
 
@@ -81,7 +79,6 @@ func (p *Product) UnmarshalJSON(bytes []byte) error {
 	p.Images = productJs.Images
 	p.PriceHistory = productJs.PriceHistory
 	p.Favourites = productJs.Favourites
-	p.PremiumBegin = utils.UnsafeTimeToNull(productJs.PremiumBegin)
 	p.PremiumExpire = utils.UnsafeTimeToNull(productJs.PremiumExpire)
 
 	return nil

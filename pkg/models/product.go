@@ -21,7 +21,6 @@ type Product struct {
 	Description    string               `json:"description"     valid:"required, length(1|4000)~Описание должно быть длинной от 1 до 4000 симвволов"` //nolint
 	Price          uint64               `json:"price"           valid:"required"`
 	CreatedAt      time.Time            `json:"created_at"      valid:"required"`
-	PremiumBegin   sql.NullTime         `json:"premium_begin"   swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"optional"`
 	PremiumExpire  sql.NullTime         `json:"premium_expire"  swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"optional"`
 	Views          uint32               `json:"views"           valid:"required"`
 	AvailableCount uint32               `json:"available_count" valid:"required"`
