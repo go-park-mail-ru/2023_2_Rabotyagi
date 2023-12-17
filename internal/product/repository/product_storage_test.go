@@ -452,7 +452,7 @@ func TestGetProduct(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases { //paralleltest
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
