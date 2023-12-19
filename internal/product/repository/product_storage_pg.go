@@ -890,7 +890,7 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 ) ([]*models.ProductInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
 
-	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count
+	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count, premium
 	FROM product
 	WHERE (to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
 	   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | ')))
@@ -914,7 +914,7 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 	_, err = pgx.ForEachRow(rowsProducts, []any{
 		&curProduct.ID, &curProduct.Title,
 		&curProduct.Price, &curProduct.CityID,
-		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount,
+		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount, &curProduct.Premium,
 	}, func() error {
 		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
 			ID:             curProduct.ID,
@@ -925,6 +925,7 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 			SafeDeal:       curProduct.SafeDeal,
 			IsActive:       curProduct.IsActive,
 			AvailableCount: curProduct.AvailableCount,
+			Premium:        curProduct.Premium,
 		})
 
 		return nil
