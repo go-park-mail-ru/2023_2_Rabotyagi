@@ -1,0 +1,2 @@
+ALTER TABLE public."product"
+ADD COLUMN premium BOOLEAN DEFAULT FALSE NOT NULL;

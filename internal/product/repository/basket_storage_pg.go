@@ -22,6 +22,7 @@ var (
 		"Товара доступно меньше, чем вы пытаетесь довавить в корзину")
 )
 
+//nolint:dupl
 func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	tx pgx.Tx, userID uint64,
 ) ([]*models.OrderInBasket, error) {
@@ -82,8 +83,196 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 
 	var orders []*models.OrderInBasket
 
-	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error { //nolint:varnamelen
 		ordersInner, err := p.selectOrdersInBasketByUserID(ctx, tx, userID)
+		if err != nil {
+			return err
+		}
+
+		for _, order := range ordersInner {
+			images, err := p.selectImagesByProductID(ctx, tx, order.ProductID)
+			if err != nil {
+				return err
+			}
+
+			inFavourites, err := p.selectIsUserFavouriteProduct(ctx, tx, order.ProductID, userID)
+			if err != nil {
+				return err
+			}
+
+			order.Images = images
+			order.InFavourites = inFavourites
+		}
+
+		orders = ordersInner
+
+		return nil
+	})
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return orders, nil
+}
+
+func (p *ProductStorage) selectOrdersNotInBasketByUserID(ctx context.Context, //nolint:dupl
+	tx pgx.Tx, userID uint64, //nolint:varnamelen
+) ([]*models.OrderInBasket, error) {
+	logger := p.logger.LogReqID(ctx)
+
+	var orders []*models.OrderInBasket
+
+	SQLSelectOrdersInBasketByUserID := `SELECT "order".id, "order".owner_id, "order".product_id,
+        "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
+        "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
+    INNER JOIN "product" ON "order".product_id = "product".id WHERE owner_id=$1 AND status<>0;`
+
+	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	curOrder := new(models.OrderInBasket)
+
+	_, err = pgx.ForEachRow(ordersInBasketRows, []any{
+		&curOrder.ID, &curOrder.OwnerID, &curOrder.ProductID,
+		&curOrder.Title, &curOrder.Price, &curOrder.CityID,
+		&curOrder.Count, &curOrder.AvailableCount, &curOrder.Delivery,
+		&curOrder.SafeDeal, &curOrder.SalerID,
+	}, func() error {
+		orders = append(orders, &models.OrderInBasket{ //nolint:exhaustruct
+			ID:             curOrder.ID,
+			OwnerID:        curOrder.OwnerID,
+			ProductID:      curOrder.ProductID,
+			Title:          curOrder.Title,
+			Price:          curOrder.Price,
+			CityID:         curOrder.CityID,
+			Count:          curOrder.Count,
+			AvailableCount: curOrder.AvailableCount,
+			Delivery:       curOrder.Delivery,
+			SafeDeal:       curOrder.SafeDeal,
+			InFavourites:   curOrder.InFavourites,
+			SalerID:        curOrder.SalerID,
+		})
+
+		return nil
+	})
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return orders, nil
+}
+
+func (p *ProductStorage) GetOrdersNotInBasketByUserID(ctx context.Context,
+	userID uint64,
+) ([]*models.OrderInBasket, error) {
+	logger := p.logger.LogReqID(ctx)
+
+	var orders []*models.OrderInBasket
+
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		ordersInner, err := p.selectOrdersNotInBasketByUserID(ctx, tx, userID)
+		if err != nil {
+			return err
+		}
+
+		for _, order := range ordersInner {
+			images, err := p.selectImagesByProductID(ctx, tx, order.ProductID)
+			if err != nil {
+				return err
+			}
+
+			inFavourites, err := p.selectIsUserFavouriteProduct(ctx, tx, order.ProductID, userID)
+			if err != nil {
+				return err
+			}
+
+			order.Images = images
+			order.InFavourites = inFavourites
+		}
+
+		orders = ordersInner
+
+		return nil
+	})
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return orders, nil
+}
+
+func (p *ProductStorage) selectOrdersSoldByUserID(ctx context.Context, //nolint:dupl
+	tx pgx.Tx, userID uint64, //nolint:varnamelen
+) ([]*models.OrderInBasket, error) {
+	logger := p.logger.LogReqID(ctx)
+
+	var orders []*models.OrderInBasket
+
+	SQLSelectOrdersInBasketByUserID := `SELECT "order".id, "order".owner_id, "order".product_id,
+        "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
+        "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
+    INNER JOIN "product" ON "order".product_id = "product".id WHERE saler_id=$1 AND status<>0;`
+
+	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	curOrder := new(models.OrderInBasket)
+
+	_, err = pgx.ForEachRow(ordersInBasketRows, []any{
+		&curOrder.ID, &curOrder.OwnerID, &curOrder.ProductID,
+		&curOrder.Title, &curOrder.Price, &curOrder.CityID,
+		&curOrder.Count, &curOrder.AvailableCount, &curOrder.Delivery,
+		&curOrder.SafeDeal, &curOrder.SalerID,
+	}, func() error {
+		orders = append(orders, &models.OrderInBasket{ //nolint:exhaustruct
+			ID:             curOrder.ID,
+			OwnerID:        curOrder.OwnerID,
+			ProductID:      curOrder.ProductID,
+			Title:          curOrder.Title,
+			Price:          curOrder.Price,
+			CityID:         curOrder.CityID,
+			Count:          curOrder.Count,
+			AvailableCount: curOrder.AvailableCount,
+			Delivery:       curOrder.Delivery,
+			SafeDeal:       curOrder.SafeDeal,
+			InFavourites:   curOrder.InFavourites,
+			SalerID:        curOrder.SalerID,
+		})
+
+		return nil
+	})
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return orders, nil
+}
+
+func (p *ProductStorage) GetOrdersSoldByUserID(ctx context.Context,
+	userID uint64,
+) ([]*models.OrderInBasket, error) {
+	logger := p.logger.LogReqID(ctx)
+
+	var orders []*models.OrderInBasket
+
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		ordersInner, err := p.selectOrdersSoldByUserID(ctx, tx, userID)
 		if err != nil {
 			return err
 		}
@@ -306,7 +495,7 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
 	orderInBasket := new(models.OrderInBasket)
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		productInner, err := p.getProduct(ctx, tx, productID, userID)
+		productInner, err := p.selectProductByID(ctx, tx, productID)
 		if err != nil {
 			return err
 		}

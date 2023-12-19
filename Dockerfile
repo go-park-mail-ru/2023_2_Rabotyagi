@@ -27,6 +27,7 @@ RUN mkdir -p /var/log/backend
 COPY db/migrations db/migrations
 
 ENV ENVIRONMENT=development
+ENV SERVICE_NAME=backend
 ENV SCHEMA=http://
 ENV ALLOW_ORIGIN=localhost:3000
 ENV PORT_BACKEND=8080

@@ -12,8 +12,11 @@ const (
 	ResponseSuccessfulCloseProduct      = "Объявление успешно закрыто"
 	ResponseSuccessfulDeleteProduct     = "Объявление успешно удалено"
 	ResponseSuccessfulActivateProduct   = "Объявление успешно активировано"
+	ResponseSuccessfulAddPremium        = "У объявления успешно акитвирован премиум"
+	ResponseSuccessfullyRemovePremium   = "У объявления успешно отключен премиум"
 )
 
+//easyjson:json
 type ProductResponse struct {
 	Status int             `json:"status"`
 	Body   *models.Product `json:"body"`
@@ -26,6 +29,7 @@ func NewProductResponse(body *models.Product) *ProductResponse {
 	}
 }
 
+//easyjson:json
 type ProductListResponse struct {
 	Status int                     `json:"status"`
 	Body   []*models.ProductInFeed `json:"body"`
@@ -38,6 +42,7 @@ func NewProductListResponse(body []*models.ProductInFeed) *ProductListResponse {
 	}
 }
 
+//easyjson:json
 type ProductInSearchListResponse struct {
 	Status int      `json:"status"`
 	Body   []string `json:"body"`
@@ -50,6 +55,7 @@ func NewProductInSearchListResponse(body []string) *ProductInSearchListResponse 
 	}
 }
 
+//easyjson:json
 type OrderResponse struct {
 	Status int                   `json:"status"`
 	Body   *models.OrderInBasket `json:"body"`
@@ -62,6 +68,7 @@ func NewOrderResponse(body *models.OrderInBasket) *OrderResponse {
 	}
 }
 
+//easyjson:json
 type OrderListResponse struct {
 	Status int                     `json:"status"`
 	Body   []*models.OrderInBasket `json:"body"`

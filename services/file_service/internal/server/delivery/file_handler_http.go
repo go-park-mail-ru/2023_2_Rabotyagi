@@ -3,14 +3,16 @@ package delivery
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"io"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
+
+	"google.golang.org/grpc/metadata"
 )
 
 const (
@@ -37,7 +39,7 @@ var (
 var _ IFileServiceHTTP = (*fileusecases.FileServiceHTTP)(nil)
 
 type IFileServiceHTTP interface {
-	SaveImage(r io.Reader) (string, error)
+	SaveImage(ctx context.Context, r io.Reader) (string, error)
 }
 
 type FileHandlerHTTP struct {
@@ -77,12 +79,13 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	logger := f.logger.LogReqID(r.Context())
+	ctx := r.Context()
+	logger := f.logger.LogReqID(ctx)
 
 	err := r.ParseMultipartForm(MaxSizePhotoBytes)
 	if err != nil {
 		logger.Errorln(err)
-		responses.HandleErr(w, logger, myerrors.NewErrorBadFormatRequest(err.Error()))
+		responses.HandleErr(w, r, logger, myerrors.NewErrorBadFormatRequest(err.Error()))
 
 		return
 	}
@@ -90,14 +93,14 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 	slFiles, ok := r.MultipartForm.File[NameImagesInForm]
 	if !ok {
 		logger.Errorln(err)
-		responses.HandleErr(w, logger, ErrWrongNameMultipart)
+		responses.HandleErr(w, r, logger, ErrWrongNameMultipart)
 
 		return
 	}
 
 	if len(slFiles) > MaxCountPhoto {
 		logger.Errorln(ErrToManyCountFiles)
-		responses.HandleErr(w, logger, ErrToManyCountFiles)
+		responses.HandleErr(w, r, logger, ErrToManyCountFiles)
 
 		return
 	}
@@ -110,7 +113,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 				"файл: %s весит %d Мбайт. %+v\n", file.Filename, file.Size/1024/1024, ErrToBigFile.Error())
 
 			logger.Errorln(err)
-			responses.HandleErr(w, logger, err)
+			responses.HandleErr(w, r, logger, err)
 
 			return
 		}
@@ -124,10 +127,11 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		URLToFile, err := f.fileService.SaveImage(fileBody)
+		metadata.NewOutgoingContext(ctx, metadata.Pairs())
+		URLToFile, err := f.fileService.SaveImage(ctx, fileBody)
 		if err != nil {
 			logger.Errorln(err)
-			responses.HandleErr(w, logger, err)
+			responses.HandleErr(w, r, logger, err)
 
 			return
 		}
@@ -170,7 +174,7 @@ func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Reque
 
 	if r.URL.Path == rootPath {
 		logger.Errorln(ErrForbiddenRootPath)
-		responses.HandleErr(w, logger, ErrForbiddenRootPath)
+		responses.HandleErr(w, r, logger, ErrForbiddenRootPath)
 
 		return
 	}
@@ -191,7 +195,7 @@ func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (f *FileHandlerHTTP) DocFileServerHandler() http.Handler {
-	fileServer := http.StripPrefix("/api/v1/img/", http.FileServer(http.Dir(f.fileServiceDir)))
+	fileServer := http.StripPrefix("/img/", http.FileServer(http.Dir(f.fileServiceDir)))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r = r.WithContext(context.WithValue(r.Context(), keyCtxHandler, fileServer))

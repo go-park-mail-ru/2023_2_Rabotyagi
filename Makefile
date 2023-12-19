@@ -1,56 +1,58 @@
 .PHONY: all
-all: update-env compose-db-up compose-frontend-up go-mod-tidy test swag run
-
-.PHONY: all-down
-all-down: compose-db-down compose-frontend-down
+all: update-env go-mod-tidy test swag compose-full-up
 
 .PHONY: all-without-front
-all-without-front: compose-db-up go-mod-tidy test swag run
+all-without-front: update-env compose-frontend-up
 
+
+# for frontend
 .PHONY: compose-frontend-up
-compose-frontend-up:
-	docker compose -f docker-compose.yml up -d frontend
+compose-frontend-up: update-env
+	docker compose -f local-deploy/docker-compose-frontend.yml up --build -d
 
 .PHONY: compose-frontend-down
 compose-frontend-down:
-	docker compose -f docker-compose.yml down frontend
+	docker compose -f local-deploy/docker-compose-frontend.yml down
 
-# for frontend
-.PHONY: compose-full-up
-compose-full-up: update-env
-	docker compose -f docker-compose.yml up backend postgres pgadmin --build -d
-
-.PHONY: compose-full-down
-compose-full-down:
-	docker compose -f docker-compose.yml down backend postgres pgadmin
-
-.PHONY: compose-logs
-compose-logs:
-	docker compose -f docker-compose.yml logs
-
+backend=local-deploy-backend-1
 .PHONY: migrate-docker-up
 migrate-docker-up:
-	docker exec -it 2023_2_rabotyagi-backend-1 ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations up
+	docker exec -it ${backend} ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations up
 
 .PHONY: migrate-docker-down
 migrate-docker-down:
-	docker exec -it 2023_2_rabotyagi-backend-1  ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations down
+	docker exec -it ${backend}  ./migrate -database postgres://postgres:postgres@postgres:5432/youla?sslmode=disable -path db/migrations down
 
+backend-fs=local-deploy-backend-fs-1
 .PHONY: fill-db-docker
 fill-db-docker: migrate-docker-up
-	docker exec -it 2023_2_rabotyagi-backend-fs-1  ./fake_db postgres://postgres:postgres@postgres:5432/youla?sslmode=disable .
+	docker exec -it ${backend-fs}  ./fake_db postgres://postgres:postgres@postgres:5432/youla?sslmode=disable .
 
 .PHONY: refill-db-docker
 refill-db-docker: migrate-docker-down fill-db-docker
 
 # dev
-.PHONY: compose-db-up
-compose-db-up:
-	docker compose -f docker-compose.yml up -d postgres
+.PHONY: compose-up
+compose-up:
+	docker compose -f docker-compose.yml up -d postgres frontend nginx grafana node-exporter
 
-.PHONY: compose-db-down
-compose-db-down:
-	docker compose -f docker-compose.yml down postgres
+.PHONY: compose-down
+compose-down:
+	docker compose -f docker-compose.yml down postgres frontend nginx grafana node-exporter
+
+.PHONY: compose-full-up
+compose-full-up: update-env
+	docker compose -f docker-compose.yml up --build -d
+
+.PHONY: compose-full-down
+compose-full-down:
+	docker compose -f docker-compose.yml down
+
+
+.PHONY: compose-pull
+compose-pull:
+	docker compose down
+	docker compose pull
 
 .PHONY: swag
 swag:
@@ -67,17 +69,14 @@ mkdir-bin:
 .PHONY: test
 test: mkdir-bin
 	 go test -coverpkg=./... -coverprofile=bin/cover.out ./... \
- 	 && cat bin/cover.out | grep -v "mocks" | grep -v ".pb" > bin/pure_cover.out \
+ 	 && cat bin/cover.out | grep -v "mocks" | grep -v "easyjson" | grep -v ".pb" > bin/pure_cover.out \
   	 && go tool cover -html=bin/pure_cover.out -o=bin/cover.html \
   	 && go tool cover --func bin/pure_cover.out
 
-.PHONY: build
-build: mkdir-bin
-	go build -o bin/main cmd/app/main.go
 
-.PHONY: run
-run: build
-	sudo ./bin/main
+.PHONY: create-migration
+create-migration:
+	migrate create -ext sql -dir ./db/migrations $(name)
 
 .PHONY: migrate-up
 migrate-up:
@@ -102,19 +101,13 @@ refill-db: migrate-down migrate-up fill-db
 logs:
 	cat /var/log/backend/logs.json | jq
 
-.PHONY: compose-pull
-compose-pull:
-	docker compose down
-	docker compose pull
 
 .PHONY: update-env
 update-env:
 	mkdir -p ".env"
 	mkdir -p "services/file_service/.env"
 	mkdir -p "services/auth/.env"
-	cp .env.example/.env.backend .env/.env.backend
-	cp .env.example/.env.pgadmin .env/.env.pgadmin
-	cp .env.example/.env.postgres .env/.env.postgres
+	cp -r .env.example/. .env
 	cp services/file_service/.env.example/.env services/file_service/.env/.env
 	cp services/auth/.env.example/.env services/auth/.env/.env
 

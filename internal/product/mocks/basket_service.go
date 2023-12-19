@@ -97,6 +97,36 @@ func (mr *MockIBasketStorageMockRecorder) GetOrdersInBasketByUserID(ctx, userID 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersInBasketByUserID", reflect.TypeOf((*MockIBasketStorage)(nil).GetOrdersInBasketByUserID), ctx, userID)
 }
 
+// GetOrdersNotInBasketByUserID mocks base method.
+func (m *MockIBasketStorage) GetOrdersNotInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersNotInBasketByUserID", ctx, userID)
+	ret0, _ := ret[0].([]*models.OrderInBasket)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersNotInBasketByUserID indicates an expected call of GetOrdersNotInBasketByUserID.
+func (mr *MockIBasketStorageMockRecorder) GetOrdersNotInBasketByUserID(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersNotInBasketByUserID", reflect.TypeOf((*MockIBasketStorage)(nil).GetOrdersNotInBasketByUserID), ctx, userID)
+}
+
+// GetOrdersSoldByUserID mocks base method.
+func (m *MockIBasketStorage) GetOrdersSoldByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersSoldByUserID", ctx, userID)
+	ret0, _ := ret[0].([]*models.OrderInBasket)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersSoldByUserID indicates an expected call of GetOrdersSoldByUserID.
+func (mr *MockIBasketStorageMockRecorder) GetOrdersSoldByUserID(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersSoldByUserID", reflect.TypeOf((*MockIBasketStorage)(nil).GetOrdersSoldByUserID), ctx, userID)
+}
+
 // UpdateOrderCount mocks base method.
 func (m *MockIBasketStorage) UpdateOrderCount(ctx context.Context, userID, orderID uint64, newCount uint32) error {
 	m.ctrl.T.Helper()

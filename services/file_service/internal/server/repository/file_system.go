@@ -20,7 +20,7 @@ type FileSystemStorage struct {
 func NewFileSystemStorage(baseDir string) (*FileSystemStorage, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, myerrors.NewErrorInternal(err.Error())
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	prevFSStorage := &FileSystemStorage{
@@ -58,7 +58,7 @@ func (f *FileSystemStorage) recover() error {
 }
 
 // Check bool in return slice means file exist if it's true.
-func (f *FileSystemStorage) Check(ctx context.Context, files []string) ([]bool, error) {
+func (f *FileSystemStorage) Check(_ context.Context, files []string) ([]bool, error) {
 	result := make([]bool, len(files))
 
 	for i, filename := range files {
@@ -74,17 +74,19 @@ func (f *FileSystemStorage) Check(ctx context.Context, files []string) ([]bool, 
 	return result, nil
 }
 
-func (f *FileSystemStorage) SaveFile(content []byte, fileName string) error {
+func (f *FileSystemStorage) SaveFile(ctx context.Context, content []byte, fileName string) error {
+	logger := f.logger.LogReqID(ctx)
+
 	file, err := os.Create(f.baseDir + "/" + fileName)
 	if err != nil {
-		f.logger.Infoln(err)
+		logger.Infoln(err)
 
 		return myerrors.NewErrorInternal(err.Error())
 	}
 
 	_, err = file.Write(content)
 	if err != nil {
-		f.logger.Infoln(err)
+		logger.Infoln(err)
 
 		return myerrors.NewErrorInternal(err.Error())
 	}

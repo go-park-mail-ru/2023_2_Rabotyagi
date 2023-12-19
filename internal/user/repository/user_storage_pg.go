@@ -30,7 +30,7 @@ type UserStorage struct {
 func NewUserStorage(pool pgxpool.IPgxPool) (*UserStorage, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	return &UserStorage{

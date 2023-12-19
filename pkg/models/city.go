@@ -4,6 +4,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
+//easyjson:json
 type City struct {
 	ID   uint64 `json:"id"     valid:"required"`
 	Name string `json:"name"   valid:"required, length(1|256)~City name length must be from 1 to 256"` //nolint

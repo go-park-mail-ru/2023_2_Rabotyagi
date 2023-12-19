@@ -35,7 +35,9 @@ func NewAuthStorage(pool pgxpool.IPgxPool) (*AuthStorage, error) {
 	}, nil
 }
 
-func GetLastValSeq(ctx context.Context, tx pgx.Tx, logger *my_logger.MyLogger, nameTable pgx.Identifier) (uint64, error) {
+func GetLastValSeq(ctx context.Context,
+	tx pgx.Tx, logger *my_logger.MyLogger, nameTable pgx.Identifier,
+) (uint64, error) {
 	sanitizedNameTable := nameTable.Sanitize()
 	SQLGetLastValSeq := fmt.Sprintf(`SELECT last_value FROM %s;`, sanitizedNameTable)
 	seqRow := tx.QueryRow(ctx, SQLGetLastValSeq)
@@ -52,6 +54,8 @@ func GetLastValSeq(ctx context.Context, tx pgx.Tx, logger *my_logger.MyLogger, n
 }
 
 func (a *AuthStorage) isEmailBusy(ctx context.Context, tx pgx.Tx, email string) (bool, error) {
+	logger := a.logger.LogReqID(ctx)
+
 	SQLIsEmailBusy := `SELECT id FROM public."user" WHERE email=$1;`
 	userRow := tx.QueryRow(ctx, SQLIsEmailBusy, email)
 
@@ -62,7 +66,7 @@ func (a *AuthStorage) isEmailBusy(ctx context.Context, tx pgx.Tx, email string) 
 			return false, nil
 		}
 
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return false, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -71,6 +75,8 @@ func (a *AuthStorage) isEmailBusy(ctx context.Context, tx pgx.Tx, email string) 
 }
 
 func (a *AuthStorage) getUserByEmail(ctx context.Context, tx pgx.Tx, email string) (*models.User, error) {
+	logger := a.logger.LogReqID(ctx)
+
 	SQLGetUserByEmail := `SELECT id, email, password FROM public."user" WHERE email=$1;`
 	userLine := tx.QueryRow(ctx, SQLGetUserByEmail, email)
 
@@ -79,7 +85,7 @@ func (a *AuthStorage) getUserByEmail(ctx context.Context, tx pgx.Tx, email strin
 	}
 
 	if err := userLine.Scan(&user.ID, &user.Email, &user.Password); err != nil {
-		a.logger.Errorln(err)
+		logger.Errorln(err)
 
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -87,11 +93,11 @@ func (a *AuthStorage) getUserByEmail(ctx context.Context, tx pgx.Tx, email strin
 	return &user, nil
 }
 
-func (u *AuthStorage) GetUser(ctx context.Context, email string) (*models.User, error) {
+func (a *AuthStorage) GetUser(ctx context.Context, email string) (*models.User, error) {
 	var user *models.User
 
-	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		emailBusy, err := u.isEmailBusy(ctx, tx, email)
+	err := pgx.BeginFunc(ctx, a.pool, func(tx pgx.Tx) error {
+		emailBusy, err := a.isEmailBusy(ctx, tx, email)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -100,7 +106,7 @@ func (u *AuthStorage) GetUser(ctx context.Context, email string) (*models.User, 
 			return ErrEmailNotExist
 		}
 
-		user, err = u.getUserByEmail(ctx, tx, email)
+		user, err = a.getUserByEmail(ctx, tx, email)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -115,16 +121,18 @@ func (u *AuthStorage) GetUser(ctx context.Context, email string) (*models.User, 
 	return user, nil
 }
 
-func (u *AuthStorage) createUser(ctx context.Context, tx pgx.Tx, email string, password string) error {
+func (a *AuthStorage) createUser(ctx context.Context, tx pgx.Tx, email string, password string) error {
 	var SQLCreateUser string
 
 	var err error
+
+	logger := a.logger.LogReqID(ctx)
 
 	SQLCreateUser = `INSERT INTO public."user" (email, password) VALUES ($1, $2);`
 	_, err = tx.Exec(ctx, SQLCreateUser, email, password)
 
 	if err != nil {
-		u.logger.Errorf("in createUser: preUser=%+v err=%+v", email, err)
+		logger.Errorf("in createUser: preUser=%+v err=%+v", email, err)
 
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -132,11 +140,11 @@ func (u *AuthStorage) createUser(ctx context.Context, tx pgx.Tx, email string, p
 	return nil
 }
 
-func (u *AuthStorage) AddUser(ctx context.Context, email string, password string) (*models.User, error) {
+func (a *AuthStorage) AddUser(ctx context.Context, email string, password string) (*models.User, error) {
 	user := models.User{} //nolint:exhaustruct
 
-	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
-		emailBusy, err := u.isEmailBusy(ctx, tx, email)
+	err := pgx.BeginFunc(ctx, a.pool, func(tx pgx.Tx) error {
+		emailBusy, err := a.isEmailBusy(ctx, tx, email)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -145,12 +153,12 @@ func (u *AuthStorage) AddUser(ctx context.Context, email string, password string
 			return ErrEmailBusy
 		}
 
-		err = u.createUser(ctx, tx, email, password)
+		err = a.createUser(ctx, tx, email, password)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		id, err := GetLastValSeq(ctx, tx, u.logger, NameSeqUser)
+		id, err := GetLastValSeq(ctx, tx, a.logger, NameSeqUser)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}

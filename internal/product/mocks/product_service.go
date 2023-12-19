@@ -11,6 +11,7 @@ package mocks
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	models "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	gomock "go.uber.org/mock/gomock"
@@ -66,6 +67,20 @@ func (m *MockIProductStorage) AddOrderInBasket(ctx context.Context, userID, prod
 func (mr *MockIProductStorageMockRecorder) AddOrderInBasket(ctx, userID, productID, count any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrderInBasket", reflect.TypeOf((*MockIProductStorage)(nil).AddOrderInBasket), ctx, userID, productID, count)
+}
+
+// AddPremium mocks base method.
+func (m *MockIProductStorage) AddPremium(ctx context.Context, productID, userID uint64, premiumBegin, premiumExpire time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddPremium", ctx, productID, userID, premiumBegin, premiumExpire)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddPremium indicates an expected call of AddPremium.
+func (mr *MockIProductStorageMockRecorder) AddPremium(ctx, productID, userID, premiumBegin, premiumExpire any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPremium", reflect.TypeOf((*MockIProductStorage)(nil).AddPremium), ctx, productID, userID, premiumBegin, premiumExpire)
 }
 
 // AddProduct mocks base method.
@@ -167,21 +182,6 @@ func (mr *MockIProductStorageMockRecorder) DeleteProduct(ctx, productID, userID 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProduct", reflect.TypeOf((*MockIProductStorage)(nil).DeleteProduct), ctx, productID, userID)
 }
 
-// GetOldProducts mocks base method.
-func (m *MockIProductStorage) GetOldProducts(ctx context.Context, lastProductID, count, userID uint64) ([]*models.ProductInFeed, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOldProducts", ctx, lastProductID, count, userID)
-	ret0, _ := ret[0].([]*models.ProductInFeed)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetOldProducts indicates an expected call of GetOldProducts.
-func (mr *MockIProductStorageMockRecorder) GetOldProducts(ctx, lastProductID, count, userID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOldProducts", reflect.TypeOf((*MockIProductStorage)(nil).GetOldProducts), ctx, lastProductID, count, userID)
-}
-
 // GetOrdersInBasketByUserID mocks base method.
 func (m *MockIProductStorage) GetOrdersInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
 	m.ctrl.T.Helper()
@@ -195,6 +195,51 @@ func (m *MockIProductStorage) GetOrdersInBasketByUserID(ctx context.Context, use
 func (mr *MockIProductStorageMockRecorder) GetOrdersInBasketByUserID(ctx, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersInBasketByUserID", reflect.TypeOf((*MockIProductStorage)(nil).GetOrdersInBasketByUserID), ctx, userID)
+}
+
+// GetOrdersNotInBasketByUserID mocks base method.
+func (m *MockIProductStorage) GetOrdersNotInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersNotInBasketByUserID", ctx, userID)
+	ret0, _ := ret[0].([]*models.OrderInBasket)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersNotInBasketByUserID indicates an expected call of GetOrdersNotInBasketByUserID.
+func (mr *MockIProductStorageMockRecorder) GetOrdersNotInBasketByUserID(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersNotInBasketByUserID", reflect.TypeOf((*MockIProductStorage)(nil).GetOrdersNotInBasketByUserID), ctx, userID)
+}
+
+// GetOrdersSoldByUserID mocks base method.
+func (m *MockIProductStorage) GetOrdersSoldByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersSoldByUserID", ctx, userID)
+	ret0, _ := ret[0].([]*models.OrderInBasket)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersSoldByUserID indicates an expected call of GetOrdersSoldByUserID.
+func (mr *MockIProductStorageMockRecorder) GetOrdersSoldByUserID(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersSoldByUserID", reflect.TypeOf((*MockIProductStorage)(nil).GetOrdersSoldByUserID), ctx, userID)
+}
+
+// GetPopularProducts mocks base method.
+func (m *MockIProductStorage) GetPopularProducts(ctx context.Context, lastProductID, count, userID uint64) ([]*models.ProductInFeed, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPopularProducts", ctx, lastProductID, count, userID)
+	ret0, _ := ret[0].([]*models.ProductInFeed)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPopularProducts indicates an expected call of GetPopularProducts.
+func (mr *MockIProductStorageMockRecorder) GetPopularProducts(ctx, lastProductID, count, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPopularProducts", reflect.TypeOf((*MockIProductStorage)(nil).GetPopularProducts), ctx, lastProductID, count, userID)
 }
 
 // GetProduct mocks base method.
@@ -255,6 +300,20 @@ func (m *MockIProductStorage) GetUserFavourites(ctx context.Context, userID uint
 func (mr *MockIProductStorageMockRecorder) GetUserFavourites(ctx, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserFavourites", reflect.TypeOf((*MockIProductStorage)(nil).GetUserFavourites), ctx, userID)
+}
+
+// RemovePremium mocks base method.
+func (m *MockIProductStorage) RemovePremium(ctx context.Context, productID, userID uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemovePremium", ctx, productID, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemovePremium indicates an expected call of RemovePremium.
+func (mr *MockIProductStorageMockRecorder) RemovePremium(ctx, productID, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemovePremium", reflect.TypeOf((*MockIProductStorage)(nil).RemovePremium), ctx, productID, userID)
 }
 
 // SearchProduct mocks base method.

@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16.0-alpine3.18
+    restart: always
+    env_file:
+      - ../.env/.env.postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "youla"]
+      interval: 15s
+      timeout: 30s
+      retries: 5
+      start_period: 15s
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:7.8
+    env_file:
+      - ../.env/.env.pgadmin
+    ports:
+      - "15432:80"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+  backend:
+    build:
+      context: ../
+      dockerfile: ./Dockerfile
+    restart: always
+    env_file:
+      - ../.env/.env.backend
+    depends_on:
+      - postgres
+      - backend-fs
+      - backend-auth
+    volumes:
+      - log:/var/log/backend
+
+  backend-fs:
+    build:
+      context: ../
+      dockerfile: ./services/file_service/Dockerfile
+    restart: always
+    env_file:
+      - ../services/file_service/.env/.env
+    depends_on:
+      - postgres
+    volumes:
+      - imgs:/var/file_service/static/img
+      - log-fs:/var/log/backend
+
+  backend-auth:
+    build:
+      context: ../
+      dockerfile: ./services/auth/Dockerfile
+    restart: always
+    env_file:
+      - .././services/auth/.env/.env
+    depends_on:
+      - postgres
+    volumes:
+      - log-auth:/var/log/backend
+
+  nginx:
+    image: nginx:stable
+    restart: always
+    volumes:
+      - ./nginx-frontend.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:80"
+
+
+volumes:
+  postgres:
+  pgadmin:
+  imgs:
+  log:
+  log-fs:
+  log-auth:
+

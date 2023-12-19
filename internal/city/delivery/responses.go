@@ -5,6 +5,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 )
 
+//easyjson:json
 type CityListResponse struct {
 	Status int            `json:"status"`
 	Body   []*models.City `json:"body"`

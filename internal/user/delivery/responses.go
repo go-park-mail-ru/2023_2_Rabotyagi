@@ -15,6 +15,7 @@ const (
 	ErrUnauthorized = "Вы не авторизованны"
 )
 
+//easyjson:json
 type ProfileResponse struct {
 	Status int                         `json:"status"`
 	Body   *models.UserWithoutPassword `json:"body"`

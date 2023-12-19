@@ -20,7 +20,7 @@ import (
 
 var _ IProductService = (*usecases.ProductService)(nil)
 
-type IProductService interface {
+type IProductService interface { //nolint:interfacebloat
 	AddProduct(ctx context.Context, r io.Reader, userID uint64) (productID uint64, err error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
 	GetProductsList(ctx context.Context,
@@ -37,6 +37,7 @@ type IProductService interface {
 	) ([]*models.ProductInFeed, error)
 	IBasketService
 	IFavouriteService
+	IPremiumService
 }
 
 type ProductHandler struct {
@@ -74,7 +75,7 @@ func NewProductHandler(productService IProductService,
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400), badFormat(4000)
 //	@Router      /product/add [post]
-func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -86,14 +87,14 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	productID, err := p.service.AddProduct(ctx, r.Body, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -115,7 +116,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
 //	@Router      /product/get [get]
-func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -130,7 +131,7 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
 		} else {
-			responses.HandleErr(w, logger, err)
+			responses.HandleErr(w, r, logger, err)
 
 			return
 		}
@@ -138,14 +139,14 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	product, err := p.service.GetProduct(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -180,14 +181,14 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -197,7 +198,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
 		} else {
-			responses.HandleErr(w, logger, err)
+			responses.HandleErr(w, r, logger, err)
 
 			return
 		}
@@ -205,7 +206,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 
 	products, err := p.service.GetProductsList(ctx, lastID, count, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -240,28 +241,28 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	products, err := p.service.GetProductsOfSaler(ctx, lastID, count, userID, true)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -297,28 +298,28 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	salerID, err := utils.ParseUint64FromRequest(r, "saler_id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	products, err := p.service.GetProductsOfSaler(ctx, lastID, count, salerID, false)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -354,14 +355,14 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -373,7 +374,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -396,7 +397,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
 //	@Router      /product/close [patch]
-func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -408,21 +409,21 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	err = p.service.CloseProduct(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -446,7 +447,7 @@ func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Requ
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
 //	@Router      /product/activate [patch]
-func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -458,21 +459,21 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	err = p.service.ActivateProduct(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -496,7 +497,7 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400)
 //	@Router      /product/delete [delete]
-func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodDelete {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -508,21 +509,21 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 
 	userID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	productID, err := utils.ParseUint64FromRequest(r, "id")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	err = p.service.DeleteProduct(ctx, productID, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -595,14 +596,14 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
 	offset, err := utils.ParseUint64FromRequest(r, "offset")
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
@@ -614,7 +615,7 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 		if errors.Is(err, responses.ErrCookieNotPresented) {
 			userID = 0
 		} else {
-			responses.HandleErr(w, logger, err)
+			responses.HandleErr(w, r, logger, err)
 
 			return
 		}
@@ -622,7 +623,7 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 
 	products, err := p.service.GetSearchProductFeed(ctx, searchInput, offset, count, userID)
 	if err != nil {
-		responses.HandleErr(w, logger, err)
+		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
