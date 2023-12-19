@@ -69,6 +69,7 @@ services:
 
   frontend:
     image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
+#    image: frontend-test
     expose:
       - 3000
 

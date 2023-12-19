@@ -23,6 +23,8 @@ var (
 	ErrNoAffectedProductRows      = myerrors.NewErrorBadFormatRequest("Не получилось обновить данные товара")
 	ErrGetUncorrectedFormatImages = myerrors.NewErrorBadFormatRequest(
 		"Получили некорректный формат images внутри объявления")
+	ErrUncorrectedPrice = myerrors.NewErrorInternal(
+		"Получили некорректный тип price")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
@@ -99,7 +101,8 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 
 	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID)
 	if err := productRow.Scan(&product.SalerID, &product.CategoryID,
-		&product.Title, &product.Description, &product.Price, &product.CreatedAt, &product.Views, &product.AvailableCount, &product.CityID, &product.Delivery,
+		&product.Title, &product.Description, &product.Price, &product.CreatedAt,
+		&product.Views, &product.AvailableCount, &product.CityID, &product.Delivery,
 		&product.SafeDeal, &product.IsActive, &product.Premium); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
@@ -594,22 +597,17 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 	logger := p.logger.LogReqID(ctx)
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		var err error
+
 		updateImages, imagesExist := updateFields["images"]
 		if imagesExist {
 			delete(updateFields, "images")
-		}
 
-		err := p.updateProduct(ctx, tx, productID, updateFields)
-		if err != nil {
-			return err
-		}
+			err = p.deleteAllImagesOfProduct(ctx, tx, productID)
+			if err != nil {
+				return err
+			}
 
-		err = p.deleteAllImagesOfProduct(ctx, tx, productID)
-		if err != nil {
-			return err
-		}
-
-		if imagesExist {
 			slImages, ok := updateImages.([]models.Image)
 			if !ok {
 				errMessage := fmt.Errorf("%w product_id=%d", ErrGetUncorrectedFormatImages, productID)
@@ -619,11 +617,24 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 			}
 
 			err = p.insertImages(ctx, tx, productID, slImages)
+			if err != nil {
+				return err
+			}
+		}
+
+		err = p.updateProduct(ctx, tx, productID, updateFields)
+		if err != nil {
+			return err
 		}
 
 		price, ok := updateFields["price"]
 		if ok {
-			err = p.addPriceHistoryRecord(ctx, tx, productID, price.(uint64))
+			priceUint64, ok := price.(uint64)
+			if !ok {
+				return ErrUncorrectedPrice
+			}
+
+			err = p.addPriceHistoryRecord(ctx, tx, productID, priceUint64)
 			if err != nil {
 				return err
 			}
