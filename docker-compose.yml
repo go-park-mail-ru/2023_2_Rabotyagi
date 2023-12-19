@@ -69,14 +69,8 @@ services:
 
   frontend:
     image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
-#    this need sometimes for local start front without nginx. Don`t forget comment after using.
-#    ports:
-#      - "3000:3000"
-    environment:
-      - API_URL=localhost:8080
-      - MOCK=false
-      - SCHEMA=http://
-    entrypoint: npm run dev-linux
+    expose:
+      - 3000
 
   node-exporter:
     image: prom/node-exporter:latest
