@@ -39,13 +39,13 @@ func NewUserStorage(pool pgxpool.IPgxPool) (*UserStorage, error) {
 	}, nil
 }
 
-func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx, id uint64) (*models.UserWithoutPassword, error) { //nolint:lll
+func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx, userID uint64) (*models.UserWithoutPassword, error) { //nolint:lll
 	logger := u.logger.LogReqID(ctx)
 
 	SQLGetUserByID := `SELECT email, phone, name, birthday, avatar, created_at FROM public."user" WHERE id=$1;`
-	userLine := tx.QueryRow(ctx, SQLGetUserByID, id)
+	userLine := tx.QueryRow(ctx, SQLGetUserByID, userID)
 	user := models.UserWithoutPassword{ //nolint:exhaustruct
-		ID: id,
+		ID: userID,
 	}
 
 	if err := userLine.Scan(&user.Email,

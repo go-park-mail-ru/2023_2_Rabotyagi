@@ -154,3 +154,11 @@ linters-settings:
       use-field-name: true
       rules:
         json: snake
+  varnamelen:
+    min-name-length: 3
+    ignore-decls:
+      - t *testing.T
+      - tx pgx.Tx
+      - w http.ResponseWriter
+      - r *http.Request
+      - r io.Reader
