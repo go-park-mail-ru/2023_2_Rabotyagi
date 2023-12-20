@@ -2,14 +2,15 @@ package repository_test
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/pashagolub/pgxmock/v3"
-	"testing"
-	"time"
 )
 
-func TestDeleteOrder(t *testing.T) {
+func TestDeleteOrder(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

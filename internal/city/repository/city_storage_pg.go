@@ -48,7 +48,7 @@ func (c *CityStorage) selectFullCities(ctx context.Context, tx pgx.Tx) ([]*model
 	_, err = pgx.ForEachRow(citiesRows, []any{
 		&curCity.ID, &curCity.Name,
 	}, func() error {
-		cities = append(cities, &models.City{ //nolint:exhaustruct
+		cities = append(cities, &models.City{
 			ID:   curCity.ID,
 			Name: curCity.Name,
 		})

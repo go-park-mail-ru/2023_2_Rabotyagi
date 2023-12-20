@@ -32,7 +32,7 @@ func NewProfileHandler(userService IUserService,
 ) (*ProfileHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	return &ProfileHandler{

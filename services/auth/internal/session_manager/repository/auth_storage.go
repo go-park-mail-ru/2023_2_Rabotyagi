@@ -26,7 +26,7 @@ type AuthStorage struct {
 func NewAuthStorage(pool pgxpool.IPgxPool) (*AuthStorage, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	return &AuthStorage{

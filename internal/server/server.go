@@ -95,7 +95,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 
 	premiumService, err := usecases.NewPremiumService(productStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	productService, err := usecases.NewProductService(productStorage, basketService, favouriteService,
@@ -152,7 +152,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 	logger.Infof("Start server:%s", config.PortServer)
 
 	if config.ProductionMode {
-		return s.httpServer.ListenAndServeTLS(pathCertFile, pathKeyFile)
+		return s.httpServer.ListenAndServeTLS(pathCertFile, pathKeyFile) //nolint:wrapcheck
 	}
 
 	return s.httpServer.ListenAndServe() //nolint:wrapcheck

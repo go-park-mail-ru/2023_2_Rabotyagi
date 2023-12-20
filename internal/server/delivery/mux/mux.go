@@ -42,27 +42,27 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 
 	authHandler, err := userdelivery.NewAuthHandler(authGrpcService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	userHandler, err := userdelivery.NewProfileHandler(userService, authGrpcService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	categoryHandler, err := categorydelivery.NewCategoryHandler(categoryService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	cityHandler, err := citydelivery.NewCityHandler(cityService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	productHandler, err := productdelivery.NewProductHandler(productService, authGrpcService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	router.Handle("/signup",

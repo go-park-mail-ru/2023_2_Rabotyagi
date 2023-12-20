@@ -26,7 +26,7 @@ type AuthHandler struct {
 func NewAuthHandler(sessionManagerClient auth.SessionMangerClient) (*AuthHandler, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	return &AuthHandler{sessionManagerClient: sessionManagerClient, logger: logger}, nil

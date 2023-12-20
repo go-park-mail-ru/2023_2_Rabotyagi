@@ -11,7 +11,7 @@ import (
 	"github.com/pashagolub/pgxmock/v3"
 )
 
-func TestCloseProduct(t *testing.T) {
+func TestCloseProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

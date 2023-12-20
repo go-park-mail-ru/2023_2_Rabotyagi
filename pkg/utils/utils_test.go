@@ -167,6 +167,7 @@ func TestHash256(t *testing.T) {
 	t.Parallel()
 
 	const pass = "48656c6c6f20476f7068657221"
+
 	decoded, err := hex.DecodeString(pass)
 	if err != nil {
 		t.Errorf("Error hashing content: %s", err)

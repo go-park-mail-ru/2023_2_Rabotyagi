@@ -21,6 +21,8 @@ const (
 	keyLen   = 32
 )
 
+var ErrHash256 = myerrors.NewErrorInternal("Ошибка хеширования")
+
 func HashPass(plainPassword string) (string, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
@@ -61,7 +63,7 @@ func Hash256(content []byte) (string, error) {
 
 	_, err := hasher.Write(content)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("%w err is: %s", ErrHash256, err.Error())
 	}
 
 	return hex.EncodeToString(hasher.Sum(nil)), nil

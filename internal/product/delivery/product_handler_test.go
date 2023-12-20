@@ -348,7 +348,7 @@ func TestGetProductList(t *testing.T) {
 						{ID: 8, Title: "Title2"},
 						{ID: 9, Title: "Title2"},
 						{ID: 10, Title: "Title2"},
-					}, nil) //nolint:exhaustruct
+					}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
 				[]*models.ProductInFeed{
@@ -458,7 +458,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 					{ID: 8, Title: "Title2"},
 					{ID: 9, Title: "Title2"},
 					{ID: 10, Title: "Title2"},
-				}), //nolint:exhaustruct
+				}),
 		},
 	}
 
@@ -540,7 +540,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 						{ID: 8, Title: "Title2"},
 						{ID: 9, Title: "Title2"},
 						{ID: 10, Title: "Title2"},
-					}, nil) //nolint:exhaustruct
+					}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
 				[]*models.ProductInFeed{
@@ -554,7 +554,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 					{ID: 8, Title: "Title2"},
 					{ID: 9, Title: "Title2"},
 					{ID: 10, Title: "Title2"},
-				}), //nolint:exhaustruct
+				}),
 		},
 	}
 

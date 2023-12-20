@@ -21,7 +21,6 @@ definitions:
       name:
         type: string
       parent_id:
-        description: nolint
         type: integer
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.City:
@@ -29,7 +28,6 @@ definitions:
       id:
         type: integer
       name:
-        description: nolint
         type: string
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Image:
@@ -206,9 +204,7 @@ definitions:
       avatar:
         $ref: '#/definitions/sql.NullString'
       birthday:
-        allOf:
-        - $ref: '#/definitions/sql.NullTime'
-        description: nolint
+        $ref: '#/definitions/sql.NullTime'
       email:
         type: string
       name:
@@ -1011,7 +1007,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400)
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":

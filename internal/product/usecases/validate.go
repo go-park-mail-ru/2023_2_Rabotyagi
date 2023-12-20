@@ -138,10 +138,11 @@ func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	orderChanges := new(models.OrderChanges)
+
 	data, err := io.ReadAll(r)
 	if err != nil {
 		logger.Errorln(err)
@@ -169,7 +170,7 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	orderChanges, err := validateOrderChanges(r)
@@ -195,7 +196,7 @@ func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
 func ValidateOrderChangesStatus(r io.Reader) (*models.OrderChanges, error) {
 	logger, err := my_logger.Get()
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	orderChanges, err := validateOrderChanges(r)

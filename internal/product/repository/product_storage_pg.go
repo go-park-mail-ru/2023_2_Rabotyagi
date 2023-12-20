@@ -119,7 +119,7 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 }
 
 func (p *ProductStorage) selectCountFavouritesByProductID(ctx context.Context,
-	tx pgx.Tx, //nolint:varnamelen
+	tx pgx.Tx,
 	productID uint64,
 ) (uint64, error) {
 	logger := p.logger.LogReqID(ctx)
@@ -173,7 +173,7 @@ type productAddition struct {
 }
 
 func (p *ProductStorage) getProductAddition(ctx context.Context,
-	tx pgx.Tx, productID uint64, userID uint64, //nolint:varnamelen
+	tx pgx.Tx, productID uint64, userID uint64,
 ) (*productAddition, error) {
 	innerProductAddition := new(productAddition)
 
@@ -526,27 +526,27 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		err := p.insertProduct(ctx, tx, preProduct)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		LastProductID, err := repository.GetLastValSeq(ctx, tx, logger, NameSeqProduct)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		err = p.insertImages(ctx, tx, LastProductID, preProduct.Images)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		productID = LastProductID
 
 		err = p.addPriceHistoryRecord(ctx, tx, productID, preProduct.Price)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		return err
+		return nil
 	})
 	if err != nil {
 		logger.Errorln(err)

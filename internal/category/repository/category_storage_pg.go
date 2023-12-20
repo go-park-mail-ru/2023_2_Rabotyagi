@@ -107,7 +107,7 @@ func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchI
 	_, err = pgx.ForEachRow(categoriesRows, []any{
 		&curCategory.ID, &curCategory.Name, &curCategory.ParentID,
 	}, func() error {
-		categories = append(categories, &models.Category{ //nolint:exhaustruct
+		categories = append(categories, &models.Category{
 			ID:       curCategory.ID,
 			Name:     curCategory.Name,
 			ParentID: curCategory.ParentID,

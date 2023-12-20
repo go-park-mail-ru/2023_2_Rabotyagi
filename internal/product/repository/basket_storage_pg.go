@@ -212,7 +212,7 @@ func (p *ProductStorage) GetOrdersNotInBasketByUserID(ctx context.Context,
 }
 
 func (p *ProductStorage) selectOrdersSoldByUserID(ctx context.Context, //nolint:dupl
-	tx pgx.Tx, userID uint64, //nolint:varnamelen
+	tx pgx.Tx, userID uint64,
 ) ([]*models.OrderInBasket, error) {
 	logger := p.logger.LogReqID(ctx)
 
@@ -497,7 +497,7 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		productInner, err := p.selectProductByID(ctx, tx, productID)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		if productInner.AvailableCount < count {
@@ -506,12 +506,12 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
 
 		err = p.insertOrder(ctx, tx, userID, productID, count)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		idOrder, err := repository.GetLastValSeq(ctx, tx, logger, NameSeqOrder)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		orderInBasket.ID = idOrder
