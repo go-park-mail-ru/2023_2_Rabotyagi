@@ -2,6 +2,10 @@ package delivery_test
 
 import (
 	"database/sql"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
@@ -9,13 +13,10 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
+
 	"go.uber.org/mock/gomock"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
-//nolint:funlen
 func TestGetFullCategories(t *testing.T) {
 	t.Parallel()
 
@@ -133,7 +134,8 @@ func TestSearchCategoryHandler(t *testing.T) {
 			behavior: func(m *mocks.MockICategoryService) {
 				m.EXPECT().SearchCategory(gomock.Any(), "Ca").Return([]*models.Category{
 					{ID: 3, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 2}},
-					{ID: 7, Name: "Cars", ParentID: sql.NullInt64{Valid: true, Int64: 4}}}, nil)
+					{ID: 7, Name: "Cars", ParentID: sql.NullInt64{Valid: true, Int64: 4}},
+				}, nil)
 			},
 			expectedResponse: delivery.CategoryListResponse{Status: statuses.StatusResponseSuccessful,
 				Body: []*models.Category{{ID: 3, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 2}},

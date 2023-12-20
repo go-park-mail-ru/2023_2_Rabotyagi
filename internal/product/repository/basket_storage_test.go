@@ -133,7 +133,7 @@ func TestUpdateOrderCount(t *testing.T) {
 	}
 }
 
-func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
+func TestUpdateOrderStatus(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -195,10 +195,12 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
 		},
 	}
 
-	for _, testCase := range testCases { //nolint:paralleltest
+	for _, testCase := range testCases {
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx := context.Background()
 
 			catStorage, err := repository.NewProductStorage(mockPool)
@@ -220,7 +222,7 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
 	}
 }
 
-func TestAddOrderInBasket(t *testing.T) { //nolint:funlen
+func TestAddOrderInBasket(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -296,7 +298,7 @@ func TestAddOrderInBasket(t *testing.T) { //nolint:funlen
 	}
 }
 
-func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl,funlen
+func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

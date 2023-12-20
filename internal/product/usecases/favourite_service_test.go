@@ -35,7 +35,6 @@ func NewFavouriteService(ctrl *gomock.Controller,
 	return favouriteService, nil
 }
 
-//nolint:funlen
 func TestGetUserFavourites(t *testing.T) {
 	t.Parallel()
 
@@ -164,7 +163,7 @@ func TestAddToFavourites(t *testing.T) {
 	}
 }
 
-func TestDeleteFromFavourites(t *testing.T) { //nolint:funlen,dupl
+func TestDeleteFromFavourites(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

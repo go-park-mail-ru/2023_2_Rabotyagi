@@ -10,7 +10,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
 )
 
-//nolint:funlen
 func TestGenerateJwtToken(t *testing.T) {
 	t.Parallel()
 
@@ -81,7 +80,6 @@ func TestGenerateJwtToken(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestNewUserJwtPayload(t *testing.T) {
 	t.Parallel()
 

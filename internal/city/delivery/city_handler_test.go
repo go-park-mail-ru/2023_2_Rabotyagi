@@ -16,7 +16,6 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-//nolint:funlen
 func TestGetFullCities(t *testing.T) {
 	t.Parallel()
 
@@ -112,7 +111,6 @@ func TestGetFullCities(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestSearchCityHandler(t *testing.T) {
 	t.Parallel()
 

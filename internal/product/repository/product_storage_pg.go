@@ -54,7 +54,7 @@ func NewProductStorage(pool pgxpool.IPgxPool) (*ProductStorage, error) {
 }
 
 func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
-	tx pgx.Tx, productID uint64, //nolint:varnamelen
+	tx pgx.Tx, productID uint64,
 ) ([]models.Image, error) {
 	logger := p.logger.LogReqID(ctx)
 

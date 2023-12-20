@@ -35,7 +35,6 @@ func NewBasketService(ctrl *gomock.Controller,
 	return basketService, nil
 }
 
-//nolint:funlen
 func TestAddOrder(t *testing.T) {
 	t.Parallel()
 
@@ -117,7 +116,7 @@ func TestAddOrder(t *testing.T) {
 	}
 }
 
-func TestGetOrderByUserID(t *testing.T) { //nolint:funlen,dupl
+func TestGetOrderByUserID(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -183,7 +182,7 @@ func TestGetOrderByUserID(t *testing.T) { //nolint:funlen,dupl
 	}
 }
 
-func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:funlen,dupl
+func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -249,7 +248,7 @@ func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:funlen,dupl
 	}
 }
 
-func TestGetOrderSoldByUserID(t *testing.T) { //nolint:funlen,dupl
+func TestGetOrderSoldByUserID(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -315,7 +314,7 @@ func TestGetOrderSoldByUserID(t *testing.T) { //nolint:funlen,dupl
 	}
 }
 
-func TestUpdateOrderCount(t *testing.T) { //nolint:funlen,dupl
+func TestUpdateOrderCount(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -382,7 +381,6 @@ func TestUpdateOrderCount(t *testing.T) { //nolint:funlen,dupl
 	}
 }
 
-//nolint:funlen
 func TestUpdateOrderStatus(t *testing.T) {
 	t.Parallel()
 
@@ -450,7 +448,6 @@ func TestUpdateOrderStatus(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestBuyFullBasket(t *testing.T) {
 	t.Parallel()
 
@@ -504,7 +501,6 @@ func TestBuyFullBasket(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestDeleteOrder(t *testing.T) {
 	t.Parallel()
 

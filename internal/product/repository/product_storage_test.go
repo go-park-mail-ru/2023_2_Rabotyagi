@@ -254,7 +254,7 @@ func TestSearchProduct(t *testing.T) {
 	}
 }
 
-func TestGetSearchProductFeed(t *testing.T) { //nolint:funlen
+func TestGetSearchProductFeed(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -459,10 +459,12 @@ func TestGetProduct(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases { // paralleltest
+	for _, testCase := range testCases {
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx := context.Background()
 
 			prodStorage, err := repository.NewProductStorage(mockPool)

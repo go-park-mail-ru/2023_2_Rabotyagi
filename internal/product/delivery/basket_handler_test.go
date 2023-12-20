@@ -18,7 +18,7 @@ import (
 	"testing"
 )
 
-func TestAddOrder(t *testing.T) { //nolint:funlen
+func TestAddOrder(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -276,7 +276,10 @@ func TestGetNotInBasket(t *testing.T) {
 				m.EXPECT().GetOrdersNotInBasketByUserID(gomock.Any(), test.UserID).Return(
 					[]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}, nil)
 			},
-			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}),
+			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{
+				{ProductID: 1, Title: "sofa"},
+				{ProductID: 2, Title: "laptop"},
+			}),
 		},
 		{
 			name:    "test empty",
@@ -348,7 +351,10 @@ func TestGetSolsOrders(t *testing.T) {
 				m.EXPECT().GetOrdersSoldByUserID(gomock.Any(), test.UserID).Return(
 					[]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}, nil)
 			},
-			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}),
+			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{
+				{ProductID: 1, Title: "sofa"},
+				{ProductID: 2, Title: "laptop"},
+			}),
 		},
 		{
 			name:    "test empty",

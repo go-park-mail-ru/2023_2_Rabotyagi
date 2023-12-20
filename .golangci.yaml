@@ -162,3 +162,13 @@ linters-settings:
       - w http.ResponseWriter
       - r *http.Request
       - r io.Reader
+issues:
+  exclude-rules:
+    - path: _test.go
+      linters:
+        - funlen
+run:
+  skip-dirs:
+    - services/file_service/internal/fake_db
+  skip-files:
+    - services/file_service/cmd/fake_db/main.go

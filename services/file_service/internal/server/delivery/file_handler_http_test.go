@@ -32,7 +32,6 @@ func NewFileHandlerHTTP(ctrl *gomock.Controller,
 	return fileHandler
 }
 
-//nolint:funlen
 func TestUploadFile(t *testing.T) {
 	t.Parallel()
 
@@ -176,7 +175,6 @@ func TestUploadFile(t *testing.T) {
 	}
 }
 
-//nolint:nolintlint,funlen
 func TestDocFileHandler(t *testing.T) {
 	t.Parallel()
 

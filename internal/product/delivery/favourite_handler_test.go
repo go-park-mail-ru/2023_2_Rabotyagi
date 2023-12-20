@@ -18,7 +18,7 @@ import (
 	"testing"
 )
 
-func TestAddToFavourites(t *testing.T) { //nolint:funlen
+func TestAddToFavourites(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -87,7 +87,7 @@ func TestAddToFavourites(t *testing.T) { //nolint:funlen
 	}
 }
 
-func TestGetFavourites(t *testing.T) { //nolint:funlen
+func TestGetFavourites(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()

@@ -83,7 +83,7 @@ func (c *CategoryHandler) GetFullCategories(w http.ResponseWriter, r *http.Reque
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error"
 //	@Router      /category/search [get]
-func (c *CategoryHandler) SearchCategoryHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (c *CategoryHandler) SearchCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

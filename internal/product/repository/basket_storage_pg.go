@@ -83,7 +83,7 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 
 	var orders []*models.OrderInBasket
 
-	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error { //nolint:varnamelen
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		ordersInner, err := p.selectOrdersInBasketByUserID(ctx, tx, userID)
 		if err != nil {
 			return err
@@ -118,7 +118,7 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 }
 
 func (p *ProductStorage) selectOrdersNotInBasketByUserID(ctx context.Context, //nolint:dupl
-	tx pgx.Tx, userID uint64, //nolint:varnamelen
+	tx pgx.Tx, userID uint64,
 ) ([]*models.OrderInBasket, error) {
 	logger := p.logger.LogReqID(ctx)
 

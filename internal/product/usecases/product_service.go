@@ -179,7 +179,7 @@ func (p *ProductService) GetProductsOfSaler(ctx context.Context,
 }
 
 func (p *ProductService) UpdateProduct(ctx context.Context,
-	r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64, //nolint:varnamelen
+	r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64,
 ) error {
 	var preProduct *models.PreProduct
 

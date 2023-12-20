@@ -71,7 +71,7 @@ func NewFileHandlerHTTP(fileService IFileServiceHTTP,
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400), badFormat(4000)"
 //	@Router      /img/upload [post]
-func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
+func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Request) { //nolint:funlen
 	r.Body = http.MaxBytesReader(w, r.Body, MaxSizePhotoBytes*MaxCountPhoto)
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -107,7 +107,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 
 	slURL := make([]string, len(slFiles))
 
-	for i, file := range slFiles {
+	for idxFile, file := range slFiles {
 		if file.Size > MaxSizePhotoBytes {
 			err := myerrors.NewErrorBadContentRequest(
 				"файл: %s весит %d Мбайт. %+v\n", file.Filename, file.Size/1024/1024, ErrToBigFile.Error())
@@ -128,6 +128,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 		}
 
 		metadata.NewOutgoingContext(ctx, metadata.Pairs())
+
 		URLToFile, err := f.fileService.SaveImage(ctx, fileBody)
 		if err != nil {
 			logger.Errorln(err)
@@ -136,7 +137,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		slURL[i] = URLToFile
+		slURL[idxFile] = URLToFile
 	}
 
 	responses.SendResponse(w, logger, NewResponseURLs(slURL))

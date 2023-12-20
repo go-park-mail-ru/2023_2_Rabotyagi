@@ -57,7 +57,6 @@ func NewProductService(ctrl *gomock.Controller,
 	return productService, nil
 }
 
-//nolint:funlen
 func TestAddProduct(t *testing.T) {
 	t.Parallel()
 
@@ -287,7 +286,6 @@ func TestAddProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProduct(t *testing.T) {
 	t.Parallel()
 
@@ -356,7 +354,6 @@ func TestGetProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProductList(t *testing.T) {
 	t.Parallel()
 
@@ -431,7 +428,6 @@ func TestGetProductList(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProductsOfSaler(t *testing.T) {
 	t.Parallel()
 
@@ -521,7 +517,6 @@ func generateString(lenStr int) string {
 	return result
 }
 
-//nolint:funlen
 func TestUpdateProduct(t *testing.T) {
 	t.Parallel()
 
@@ -834,7 +829,6 @@ func TestDeleteProduct(t *testing.T) { //nolint:dupl
 	}
 }
 
-//nolint:funlen
 func TestSearchProduct(t *testing.T) {
 	t.Parallel()
 
@@ -901,7 +895,6 @@ func TestSearchProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestSearchProductFeed(t *testing.T) {
 	t.Parallel()
 

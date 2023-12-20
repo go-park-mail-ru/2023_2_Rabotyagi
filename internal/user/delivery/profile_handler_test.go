@@ -41,7 +41,6 @@ func NewProfileHandler(ctrl *gomock.Controller,
 	return profileHandler, nil
 }
 
-//nolint:funlen
 func TestGetUser(t *testing.T) {
 	t.Parallel()
 
@@ -122,7 +121,6 @@ func TestGetUser(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestPartiallyUpdateUser(t *testing.T) {
 	t.Parallel()
 

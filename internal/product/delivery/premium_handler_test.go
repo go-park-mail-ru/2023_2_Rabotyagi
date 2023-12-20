@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-func TestAddPremium(t *testing.T) { //nolint:funlen
+func TestAddPremium(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()

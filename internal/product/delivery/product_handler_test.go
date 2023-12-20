@@ -46,7 +46,6 @@ func NewProductHandler(ctrl *gomock.Controller,
 	return productHandler, nil
 }
 
-//nolint:funlen
 func TestAddProduct(t *testing.T) {
 	t.Parallel()
 
@@ -221,7 +220,6 @@ func TestAddProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProduct(t *testing.T) {
 	t.Parallel()
 
@@ -301,7 +299,6 @@ func TestGetProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProductList(t *testing.T) {
 	t.Parallel()
 
@@ -398,7 +395,6 @@ func TestGetProductList(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetListProductOfSaler(t *testing.T) {
 	t.Parallel()
 
@@ -495,7 +491,6 @@ func TestGetListProductOfSaler(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetListProductOfAnotherSaler(t *testing.T) {
 	t.Parallel()
 
@@ -597,7 +592,6 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestUpdateProduct(t *testing.T) {
 	t.Parallel()
 
@@ -701,7 +695,8 @@ func TestUpdateProduct(t *testing.T) {
 	}
 }
 
-func TestCloseProduct(t *testing.T) { // nolint:funlen,dupl
+//nolint:dupl
+func TestCloseProduct(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -774,7 +769,8 @@ func TestCloseProduct(t *testing.T) { // nolint:funlen,dupl
 	}
 }
 
-func TestActivateProduct(t *testing.T) { // nolint:funlen,dupl
+//nolint:dupl
+func TestActivateProduct(t *testing.T) {
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -847,7 +843,6 @@ func TestActivateProduct(t *testing.T) { // nolint:funlen,dupl
 	}
 }
 
-// nolint:funlen
 func TestDeleteProduct(t *testing.T) {
 	t.Parallel()
 
@@ -921,7 +916,6 @@ func TestDeleteProduct(t *testing.T) {
 	}
 }
 
-// nolint:funlen
 func TestSearchProduct(t *testing.T) {
 	t.Parallel()
 
@@ -1003,7 +997,6 @@ func TestSearchProduct(t *testing.T) {
 	}
 }
 
-// nolint:funlen
 func TestGetSearchProductFeed(t *testing.T) {
 	t.Parallel()
 
