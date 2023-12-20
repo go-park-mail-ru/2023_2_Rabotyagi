@@ -130,8 +130,9 @@ jobs:
 
     notify-good:
         runs-on: ubuntu-latest
-        if: ${{ always() && needs.build-main.result == 'success' && needs.build-auth.result == 'success' && needs.build-fs.result == 'success' }}
-        needs: [build-main, build-auth, build-fs]
+        if: ${{ always() && needs.build-main.result == 'success' && needs.build-auth.result == 'success'
+          && needs.build-fs.result == 'success' && needs.golangci.result == 'success' && needs.test.result == 'success' }}
+        needs: [build-main, build-auth, build-fs, golangci, test]
         steps:
             - name: send
               uses: appleboy/telegram-action@master
@@ -147,7 +148,7 @@ jobs:
     notify-bad:
         runs-on: ubuntu-latest
         if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
-        needs: [build-main, build-auth, build-fs]
+        needs: [build-main, build-auth, build-fs, golangci, test]
         steps:
             - name: Send Bad Notification
               uses: appleboy/telegram-action@master
