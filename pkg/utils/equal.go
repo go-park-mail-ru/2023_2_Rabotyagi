@@ -43,7 +43,7 @@ func EqualTest(received any, expected any) error {
 
 func EqualError(received error, expected error) error {
 	if !errors.Is(received, expected) {
-		return fmt.Errorf("%w got %+v expected wrapped: %+v", errCompareErrors, received, expected)
+		return fmt.Errorf("%w got %+v expected wrapped: %+v", errCompareErrors, received, expected) //nolint:errorlint
 	}
 
 	return nil

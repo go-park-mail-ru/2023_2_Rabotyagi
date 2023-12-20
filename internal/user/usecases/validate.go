@@ -64,7 +64,7 @@ func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, fmt.Errorf("%w %v", ErrValidateUserWithoutPassword, err)
+		return nil, fmt.Errorf("%w %v", ErrValidateUserWithoutPassword, err) //nolint:errorlint
 	}
 
 	return userWithoutPassword, nil
@@ -94,7 +94,7 @@ func ValidatePartOfUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword
 		if errMessage != "" {
 			logger.Errorln(errMessage)
 
-			return nil, fmt.Errorf("%w %v", ErrValidateUserWithoutPassword, err)
+			return nil, fmt.Errorf("%w %v", ErrValidateUserWithoutPassword, err) //nolint:errorlint
 		}
 	}
 
