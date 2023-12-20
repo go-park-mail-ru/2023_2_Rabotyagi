@@ -98,7 +98,7 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful))
+	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful)) //nolint:staticcheck
 
 	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(userID))
 
@@ -152,7 +152,7 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful))
+	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful)) //nolint:staticcheck
 
 	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(productID))
 

@@ -214,12 +214,12 @@ func TestNullStringToUnsafe(t *testing.T) {
 
 			result := utils.NullStringToUnsafe(nullStr)
 
-			if result == nil {
+			if result != nil {
+				if *result != testCase.validString {
+					t.Errorf("Expected %s, got %s", testCase.validString, *result)
+				}
+			} else {
 				t.Errorf("Expected non-nil result, got nil")
-			}
-
-			if *result != testCase.validString {
-				t.Errorf("Expected %s, got %s", testCase.validString, *result)
 			}
 		})
 	}
@@ -253,12 +253,13 @@ func TestNullTimeToUnsafe(t *testing.T) {
 	nullTime := sql.NullTime{Time: validTime, Valid: true}
 
 	result := utils.NullTimeToUnsafe(nullTime)
-	if result == nil {
-		t.Errorf("Expected non-nil result, got nil")
-	}
 
-	if *result != validTime {
-		t.Errorf("Expected %s, got %s", validTime, *result)
+	if result != nil {
+		if *result != validTime {
+			t.Errorf("Expected %s, got %s", validTime, *result)
+		}
+	} else {
+		t.Errorf("Expected non-nil result, got nil")
 	}
 }
 
@@ -291,12 +292,12 @@ func TestNullInt64ToUnsafeUint(t *testing.T) {
 
 	result := utils.NullInt64ToUnsafeUint(nullInt64)
 
-	if result == nil {
+	if result != nil {
+		if *result != uint64(validInt64) {
+			t.Errorf("Expected %d, got %d", validInt64, *result)
+		}
+	} else {
 		t.Errorf("Expected non-nil result, got nil")
-	}
-
-	if *result != uint64(validInt64) {
-		t.Errorf("Expected %d, got %d", validInt64, *result)
 	}
 }
 

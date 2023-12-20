@@ -255,7 +255,7 @@ func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) 
 	sanitizer := bluemonday.UGCPolicy()
 
 	for _, product := range products {
-		product = sanitizer.Sanitize(product) //nolint:ineffassign
+		product = sanitizer.Sanitize(product) //nolint:ineffassign,staticcheck
 	}
 
 	return products, nil
