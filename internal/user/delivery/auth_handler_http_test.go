@@ -60,7 +60,7 @@ func TestSignUp(t *testing.T) {
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
 				cookieRaw := recorder.Header().Get("Set-Cookie")
 				if !strings.Contains(cookieRaw, test.AccessToken) {
-					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
+					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw) //nolint
 				}
 
 				return nil
@@ -170,7 +170,7 @@ func TestSignIn(t *testing.T) {
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
 				cookieRaw := recorder.Header().Get("Set-Cookie")
 				if !strings.Contains(cookieRaw, test.AccessToken) {
-					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
+					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw) //nolint
 				}
 
 				return nil
@@ -265,7 +265,7 @@ func TestLogOut(t *testing.T) {
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
 				cookieRaw := recorder.Header().Get("Set-Cookie")
 				if !strings.Contains(cookieRaw, "jwt_test_token") {
-					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
+					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw) //nolint
 				}
 
 				return nil

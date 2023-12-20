@@ -74,14 +74,14 @@ func TestAddPremium(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/premium/add", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"product_id": testCase.queryID, "period": "1"})
 			req.AddCookie(&test.Cookie)
-			productHandler.AddPremiumHandler(w, req)
+			productHandler.AddPremiumHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}

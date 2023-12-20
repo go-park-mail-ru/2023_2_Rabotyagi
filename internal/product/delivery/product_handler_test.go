@@ -284,14 +284,14 @@ func TestGetProduct(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.idProduct})
 			req.AddCookie(&test.Cookie)
-			productHandler.GetProductHandler(w, req)
+			productHandler.GetProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -380,14 +380,14 @@ func TestGetProductList(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
 			req.AddCookie(&test.Cookie)
-			productHandler.GetProductListHandler(w, req)
+			productHandler.GetProductListHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -476,14 +476,14 @@ func TestGetListProductOfSaler(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list_of_saler", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
 			req.AddCookie(&test.Cookie)
-			productHandler.GetListProductOfSalerHandler(w, req)
+			productHandler.GetListProductOfSalerHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -577,14 +577,14 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list_of_another_saler", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
 
-			productHandler.GetListProductOfAnotherSalerHandler(w, req)
+			productHandler.GetListProductOfAnotherSalerHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -754,14 +754,14 @@ func TestCloseProduct(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/close", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
 			req.AddCookie(&test.Cookie)
-			productHandler.CloseProductHandler(w, req)
+			productHandler.CloseProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -828,14 +828,14 @@ func TestActivateProduct(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/activate", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
 			req.AddCookie(&test.Cookie)
-			productHandler.ActivateProductHandler(w, req)
+			productHandler.ActivateProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -901,14 +901,14 @@ func TestDeleteProduct(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodDelete, "/api/v1/product/delete", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
 			req.AddCookie(&test.Cookie)
-			productHandler.DeleteProductHandler(w, req)
+			productHandler.DeleteProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -982,14 +982,14 @@ func TestSearchProduct(t *testing.T) {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/search", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"searched": testCase.querySearched})
 			req.AddCookie(&test.Cookie)
-			productHandler.SearchProductHandler(w, req)
+			productHandler.SearchProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -1039,14 +1039,14 @@ func TestGetSearchProductFeed(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_search_feed", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
 			req.AddCookie(&test.Cookie)
-			productHandler.GetSearchProductFeedHandler(w, req)
+			productHandler.GetSearchProductFeedHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}

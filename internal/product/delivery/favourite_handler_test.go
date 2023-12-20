@@ -202,15 +202,15 @@ func TestDeleteFavourite(t *testing.T) {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			request := httptest.NewRequest(http.MethodDelete, "/api/v1/product/remove-from-fav", nil)
 			utils.AddQueryParamsToRequest(request, map[string]string{"product_id": testCase.queryProductID})
 
 			request.AddCookie(&test.Cookie)
-			productHandler.DeleteFromFavouritesHandler(w, request)
+			productHandler.DeleteFromFavouritesHandler(recorder, request)
 
-			resp := w.Result()
+			resp := recorder.Result()
 			defer resp.Body.Close()
 
 			receivedResponse, err := io.ReadAll(resp.Body)

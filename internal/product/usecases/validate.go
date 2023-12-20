@@ -129,7 +129,7 @@ func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, fmt.Errorf("%w %v", ErrValidatePreOrder, err)
+		return nil, fmt.Errorf("%w %v", ErrValidatePreOrder, err) //nolint:errorlint
 	}
 
 	return preOrder, nil
