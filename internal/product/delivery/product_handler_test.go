@@ -14,8 +14,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	mocksauth "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -49,7 +49,7 @@ func NewProductHandler(ctrl *gomock.Controller,
 func TestAddProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -223,7 +223,7 @@ func TestAddProduct(t *testing.T) {
 func TestGetProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -302,7 +302,7 @@ func TestGetProduct(t *testing.T) {
 func TestGetProductList(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -398,7 +398,7 @@ func TestGetProductList(t *testing.T) {
 func TestGetListProductOfSaler(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -494,7 +494,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 func TestGetListProductOfAnotherSaler(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -595,7 +595,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 func TestUpdateProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -699,7 +699,7 @@ func TestUpdateProduct(t *testing.T) {
 func TestCloseProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -773,7 +773,7 @@ func TestCloseProduct(t *testing.T) {
 func TestActivateProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -846,7 +846,7 @@ func TestActivateProduct(t *testing.T) {
 func TestDeleteProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -919,7 +919,7 @@ func TestDeleteProduct(t *testing.T) {
 func TestSearchProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -1000,7 +1000,7 @@ func TestSearchProduct(t *testing.T) {
 func TestGetSearchProductFeed(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string

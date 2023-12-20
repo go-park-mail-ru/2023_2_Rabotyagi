@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
@@ -20,7 +20,7 @@ import (
 func TestGetFullCategories(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name             string
@@ -118,7 +118,7 @@ func TestGetFullCategories(t *testing.T) {
 func TestSearchCategoryHandler(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name             string

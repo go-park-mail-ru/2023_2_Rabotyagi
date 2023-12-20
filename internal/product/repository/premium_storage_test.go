@@ -6,14 +6,14 @@ import (
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/pashagolub/pgxmock/v3"
 )
 
 func TestAddPremium(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 	beginPremium := time.Now()
 
 	mockPool, err := pgxmock.NewPool()

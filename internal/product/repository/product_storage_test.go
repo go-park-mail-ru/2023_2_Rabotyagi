@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/pashagolub/pgxmock/v3"
 )
 
 func TestCloseProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -75,7 +75,7 @@ func TestCloseProduct(t *testing.T) { //nolint:dupl
 func TestActivateProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -136,7 +136,7 @@ func TestActivateProduct(t *testing.T) { //nolint:dupl
 func TestDeleteProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -197,7 +197,7 @@ func TestDeleteProduct(t *testing.T) { //nolint:dupl
 func TestSearchProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -257,7 +257,7 @@ func TestSearchProduct(t *testing.T) {
 func TestGetSearchProductFeed(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -340,7 +340,7 @@ func TestGetSearchProductFeed(t *testing.T) {
 func TestGetProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string

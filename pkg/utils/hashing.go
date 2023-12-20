@@ -6,8 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 
 	"golang.org/x/crypto/argon2"
 )
@@ -24,7 +24,7 @@ const (
 var ErrHash256 = myerrors.NewErrorInternal("Ошибка хеширования")
 
 func HashPass(plainPassword string) (string, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}

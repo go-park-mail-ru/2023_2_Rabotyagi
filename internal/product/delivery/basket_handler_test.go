@@ -5,7 +5,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -21,7 +21,7 @@ import (
 func TestAddOrder(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -188,7 +188,7 @@ func TestAddOrder(t *testing.T) {
 func TestGetBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -196,6 +196,7 @@ func TestGetBasket(t *testing.T) { //nolint:dupl
 		request                *http.Request
 		expectedResponse       any
 	}
+
 	testCases := [...]TestCase{ //nolint:dupl
 		{
 			name:    "test basic work",
@@ -262,7 +263,7 @@ func TestGetBasket(t *testing.T) { //nolint:dupl
 func TestGetNotInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -270,6 +271,7 @@ func TestGetNotInBasket(t *testing.T) { //nolint:dupl
 		request                *http.Request
 		expectedResponse       any
 	}
+
 	testCases := [...]TestCase{ //nolint:dupl
 		{
 			name:    "test basic work",
@@ -337,7 +339,7 @@ func TestGetNotInBasket(t *testing.T) { //nolint:dupl
 func TestGetSolsOrders(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -345,6 +347,7 @@ func TestGetSolsOrders(t *testing.T) { //nolint:dupl
 		request                *http.Request
 		expectedResponse       any
 	}
+
 	testCases := [...]TestCase{ //nolint:dupl
 		{
 			name:    "test basic work",
@@ -412,7 +415,7 @@ func TestGetSolsOrders(t *testing.T) { //nolint:dupl
 func TestUpdateOrderCountBasket(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -477,7 +480,7 @@ func TestUpdateOrderCountBasket(t *testing.T) {
 func TestUpdateOrderStatusBasket(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -542,7 +545,7 @@ func TestUpdateOrderStatusBasket(t *testing.T) {
 func TestBuyFullBasket(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -550,6 +553,7 @@ func TestBuyFullBasket(t *testing.T) {
 		request                *http.Request
 		expectedResponse       any
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
@@ -604,7 +608,7 @@ func TestBuyFullBasket(t *testing.T) {
 func TestDeleteOrderBasket(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -613,6 +617,7 @@ func TestDeleteOrderBasket(t *testing.T) {
 		request                *http.Request
 		expectedResponse       any
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:    "test basic work",

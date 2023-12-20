@@ -3,7 +3,7 @@ package utils_test
 import (
 	"database/sql"
 	"encoding/hex"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"net/http"
 	"net/http/httptest"
@@ -83,7 +83,7 @@ func TestEqualTest(t *testing.T) {
 func TestHashPass(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name          string
@@ -122,12 +122,13 @@ func TestHashPass(t *testing.T) {
 func TestComparePassAndHash(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name          string
 		plainPassword string
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:          "test basic work",
@@ -169,7 +170,7 @@ func TestComparePassAndHash(t *testing.T) {
 func TestHash256(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name         string
@@ -206,18 +207,18 @@ func TestHash256(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestNullStringToUnsafe(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name        string
 		validString string
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:        "test basic work",
@@ -348,7 +349,8 @@ func TestUnsafeUint64ToNullInt(t *testing.T) {
 
 func TestAddQueryParamsToRequest(t *testing.T) {
 	t.Parallel()
-	_ = my_logger.NewNop()
+
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name        string
@@ -356,6 +358,7 @@ func TestAddQueryParamsToRequest(t *testing.T) {
 		params      map[string]string
 		expectedURL string
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
@@ -385,7 +388,7 @@ func TestAddQueryParamsToRequest(t *testing.T) {
 func TestParseUint64FromRequest(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name          string
@@ -424,7 +427,7 @@ func TestParseUint64FromRequest(t *testing.T) {
 func TestParseStringFromRequest(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name          string

@@ -7,8 +7,8 @@ import (
 
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 )
 
 var _ IBasketStorage = (*productrepo.ProductStorage)(nil)
@@ -26,11 +26,11 @@ type IBasketStorage interface {
 
 type BasketService struct {
 	storage IBasketStorage
-	logger  *my_logger.MyLogger
+	logger  *mylogger.MyLogger
 }
 
 func NewBasketService(basketStorage IBasketStorage) (*BasketService, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

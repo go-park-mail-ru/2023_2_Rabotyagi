@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -23,11 +23,11 @@ type ICityService interface {
 
 type CityHandler struct {
 	service ICityService
-	logger  *my_logger.MyLogger
+	logger  *mylogger.MyLogger
 }
 
 func NewCityHandler(service ICityService) (*CityHandler, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"time"
 )
 
@@ -34,11 +34,11 @@ type IPremiumStorage interface {
 
 type PremiumService struct {
 	storage IPremiumStorage
-	logger  *my_logger.MyLogger
+	logger  *mylogger.MyLogger
 }
 
 func NewPremiumService(premiumStorage IPremiumStorage) (*PremiumService, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

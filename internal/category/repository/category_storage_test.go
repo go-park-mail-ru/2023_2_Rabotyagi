@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/pashagolub/pgxmock/v3"
 	"testing"
@@ -14,7 +14,7 @@ import (
 func TestGetFullCategories(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -82,7 +82,7 @@ func TestGetFullCategories(t *testing.T) {
 func TestSearchCategory(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {

@@ -6,13 +6,13 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func NewMux(ctx context.Context, fileServiceName string,
-	logger *my_logger.MyLogger,
+	logger *mylogger.MyLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 

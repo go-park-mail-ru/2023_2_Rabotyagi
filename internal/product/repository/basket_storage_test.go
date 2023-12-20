@@ -6,14 +6,14 @@ import (
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/pashagolub/pgxmock/v3"
 )
 
 func TestDeleteOrder(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -74,7 +74,7 @@ func TestDeleteOrder(t *testing.T) { //nolint:dupl
 func TestUpdateOrderCount(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -137,7 +137,7 @@ func TestUpdateOrderCount(t *testing.T) {
 func TestUpdateOrderStatus(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -226,7 +226,7 @@ func TestUpdateOrderStatus(t *testing.T) {
 func TestAddOrderInBasket(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -302,7 +302,7 @@ func TestAddOrderInBasket(t *testing.T) {
 func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -375,7 +375,7 @@ func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl
 func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -448,7 +448,7 @@ func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
 func TestGetOrdersSold(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {

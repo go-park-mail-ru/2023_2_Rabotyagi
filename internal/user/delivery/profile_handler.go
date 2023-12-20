@@ -9,7 +9,7 @@ import (
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
@@ -24,13 +24,13 @@ type IUserService interface {
 type ProfileHandler struct {
 	sessionManagerClient auth.SessionMangerClient
 	service              IUserService
-	logger               *my_logger.MyLogger
+	logger               *mylogger.MyLogger
 }
 
 func NewProfileHandler(userService IUserService,
 	sessionManagerClient auth.SessionMangerClient,
 ) (*ProfileHandler, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}

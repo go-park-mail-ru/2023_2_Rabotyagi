@@ -6,8 +6,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
@@ -45,11 +45,11 @@ type IFileServiceHTTP interface {
 type FileHandlerHTTP struct {
 	fileServiceDir string
 	fileService    IFileServiceHTTP
-	logger         *my_logger.MyLogger
+	logger         *mylogger.MyLogger
 }
 
 func NewFileHandlerHTTP(fileService IFileServiceHTTP,
-	logger *my_logger.MyLogger, fileServiceDir string,
+	logger *mylogger.MyLogger, fileServiceDir string,
 ) *FileHandlerHTTP {
 	return &FileHandlerHTTP{
 		fileService: fileService, logger: logger,

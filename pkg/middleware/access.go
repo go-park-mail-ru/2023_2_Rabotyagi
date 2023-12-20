@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
@@ -22,7 +22,7 @@ func (w *WriterWithStatus) WriteHeader(statusCode int) {
 }
 
 func AccessLogMiddleware(next http.Handler,
-	logger *my_logger.MyLogger, metricsManager metrics.IMetricManagerHTTP,
+	logger *mylogger.MyLogger, metricsManager metrics.IMetricManagerHTTP,
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		writerWithStatus := &WriterWithStatus{ResponseWriter: w, Status: http.StatusOK}

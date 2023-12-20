@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"io"
 
 	"github.com/asaskevich/govalidator"
@@ -25,7 +25,7 @@ var (
 )
 
 func validatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -78,7 +78,7 @@ func ValidatePreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) 
 }
 
 func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -105,7 +105,7 @@ func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, e
 }
 
 func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -136,7 +136,7 @@ func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 }
 
 func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -168,7 +168,7 @@ func validateOrderChanges(r io.Reader) (*models.OrderChanges, error) {
 }
 
 func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -194,7 +194,7 @@ func ValidateOrderChangesCount(r io.Reader) (*models.OrderChanges, error) {
 }
 
 func ValidateOrderChangesStatus(r io.Reader) (*models.OrderChanges, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}

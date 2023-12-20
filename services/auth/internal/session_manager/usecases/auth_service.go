@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/models"
@@ -25,11 +25,11 @@ type IAuthStorage interface {
 
 type AuthService struct {
 	storage IAuthStorage
-	logger  *my_logger.MyLogger
+	logger  *mylogger.MyLogger
 }
 
 func NewAuthService(authStorage IAuthStorage) (*AuthService, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

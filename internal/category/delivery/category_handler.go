@@ -3,12 +3,12 @@ package delivery
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/usecases"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -23,11 +23,11 @@ type ICategoryService interface {
 
 type CategoryHandler struct {
 	service ICategoryService
-	logger  *my_logger.MyLogger
+	logger  *mylogger.MyLogger
 }
 
 func NewCategoryHandler(service ICategoryService) (*CategoryHandler, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

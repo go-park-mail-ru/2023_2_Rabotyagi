@@ -19,7 +19,7 @@ import (
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 
 	"google.golang.org/grpc"
@@ -70,7 +70,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 		return err //nolint:wrapcheck
 	}
 
-	logger, err := my_logger.New(strings.Split(config.OutputLogPath, " "),
+	logger, err := mylogger.New(strings.Split(config.OutputLogPath, " "),
 		strings.Split(config.ErrorOutputLogPath, " "))
 	if err != nil {
 		return err //nolint:wrapcheck

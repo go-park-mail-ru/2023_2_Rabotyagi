@@ -10,7 +10,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 )
 
@@ -20,11 +20,11 @@ const (
 
 type AuthHandler struct {
 	sessionManagerClient auth.SessionMangerClient
-	logger               *my_logger.MyLogger
+	logger               *mylogger.MyLogger
 }
 
 func NewAuthHandler(sessionManagerClient auth.SessionMangerClient) (*AuthHandler, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}

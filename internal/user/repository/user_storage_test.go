@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/pashagolub/pgxmock/v3"
 	"testing"
 	"time"
@@ -15,7 +15,7 @@ func TestGetUserWithoutPasswordByID(t *testing.T) {
 
 	testTime := time.Now()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -80,7 +80,7 @@ func TestUpdateUser(t *testing.T) {
 
 	testTime := time.Now()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {

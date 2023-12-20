@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 
 	"google.golang.org/grpc/status"
@@ -26,7 +26,7 @@ func trimErrMessage(message string) string {
 // HandleErr this function handle err. If err is myerror.
 // Error then we built this error and client get it, otherwise it is internal error and client shouldn`t get it.
 // Also hear added status in ctx of request
-func HandleErr(w http.ResponseWriter, request *http.Request, logger *my_logger.MyLogger, err error) {
+func HandleErr(w http.ResponseWriter, request *http.Request, logger *mylogger.MyLogger, err error) {
 	myErr := &myerrors.Error{}
 	if errors.As(err, &myErr) && myErr.IsErrorClient() {
 		*request = *request.WithContext(statuses.FillStatusCtx(request.Context(), myErr.Status()))

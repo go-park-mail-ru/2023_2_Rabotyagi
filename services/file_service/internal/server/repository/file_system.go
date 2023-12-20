@@ -6,19 +6,19 @@ import (
 	"os"
 	"sync"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 )
 
 type FileSystemStorage struct {
 	baseDir    string
 	mapFiles   map[string]struct{}
 	muMapFiles *sync.RWMutex
-	logger     *my_logger.MyLogger
+	logger     *mylogger.MyLogger
 }
 
 func NewFileSystemStorage(baseDir string) (*FileSystemStorage, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

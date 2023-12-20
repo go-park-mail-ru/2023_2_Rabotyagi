@@ -8,8 +8,8 @@ import (
 
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 )
 
 var _ IFavouriteStorage = (*productrepo.ProductStorage)(nil)
@@ -22,11 +22,11 @@ type IFavouriteStorage interface {
 
 type FavouriteService struct {
 	storage IFavouriteStorage
-	logger  *my_logger.MyLogger
+	logger  *mylogger.MyLogger
 }
 
 func NewFavouriteService(favouriteStorage IFavouriteStorage) (*FavouriteService, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

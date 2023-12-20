@@ -10,8 +10,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 
@@ -21,7 +21,7 @@ import (
 func NewBasketService(ctrl *gomock.Controller,
 	behaviorBasketStorage func(m *mocks.MockIBasketStorage),
 ) (*usecases.BasketService, error) {
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockBasketService := mocks.NewMockIBasketStorage(ctrl)
 
@@ -38,7 +38,7 @@ func NewBasketService(ctrl *gomock.Controller,
 func TestAddOrder(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -119,7 +119,7 @@ func TestAddOrder(t *testing.T) {
 func TestGetOrderByUserID(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -185,7 +185,7 @@ func TestGetOrderByUserID(t *testing.T) { //nolint:dupl
 func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -251,7 +251,7 @@ func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:dupl
 func TestGetOrderSoldByUserID(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -317,7 +317,7 @@ func TestGetOrderSoldByUserID(t *testing.T) { //nolint:dupl
 func TestUpdateOrderCount(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -384,7 +384,7 @@ func TestUpdateOrderCount(t *testing.T) { //nolint:dupl
 func TestUpdateOrderStatus(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -451,7 +451,7 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:dupl
 func TestBuyFullBasket(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -504,7 +504,7 @@ func TestBuyFullBasket(t *testing.T) {
 func TestDeleteOrder(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")

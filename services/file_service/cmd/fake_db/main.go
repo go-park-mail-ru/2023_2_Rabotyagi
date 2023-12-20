@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/fake_db"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -25,7 +25,7 @@ where first arg is url_db and second path to root where find static/img`)
 	urlDB := os.Args[1]
 	pathRoot := os.Args[2]
 
-	logger, err := my_logger.New([]string{"stdout"}, []string{"stderr"})
+	logger, err := mylogger.New([]string{"stdout"}, []string{"stderr"})
 	if err != nil {
 		fmt.Println(err)
 

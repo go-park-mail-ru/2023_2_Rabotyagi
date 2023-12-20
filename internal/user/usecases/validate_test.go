@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
@@ -16,7 +16,7 @@ import (
 func TestValidateUserWithoutPassword(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                        string
@@ -73,7 +73,7 @@ func TestValidateUserWithoutPassword(t *testing.T) {
 func TestValidatePartOfUserWithoutPassword(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                        string

@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
 )
 
 func TestGenerateJwtToken(t *testing.T) {
 	t.Parallel()
 
-	my_logger.NewNop()
+	mylogger.NewNop()
 
 	type TestCase struct {
 		name                string
@@ -83,7 +83,7 @@ func TestGenerateJwtToken(t *testing.T) {
 func TestNewUserJwtPayload(t *testing.T) {
 	t.Parallel()
 
-	my_logger.NewNop()
+	mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
