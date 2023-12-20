@@ -381,7 +381,7 @@ func TestUpdateOrderCount(t *testing.T) { //nolint:dupl
 	}
 }
 
-func TestUpdateOrderStatus(t *testing.T) {
+func TestUpdateOrderStatus(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()

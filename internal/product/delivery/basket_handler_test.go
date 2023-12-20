@@ -185,7 +185,7 @@ func TestAddOrder(t *testing.T) {
 	}
 }
 
-func TestGetBasket(t *testing.T) {
+func TestGetBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -196,7 +196,7 @@ func TestGetBasket(t *testing.T) {
 		request                *http.Request
 		expectedResponse       any
 	}
-	testCases := [...]TestCase{
+	testCases := [...]TestCase{ //nolint:dupl
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
@@ -219,7 +219,7 @@ func TestGetBasket(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases { //nolint:dupl
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
@@ -259,7 +259,7 @@ func TestGetBasket(t *testing.T) {
 	}
 }
 
-func TestGetNotInBasket(t *testing.T) {
+func TestGetNotInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -270,7 +270,7 @@ func TestGetNotInBasket(t *testing.T) {
 		request                *http.Request
 		expectedResponse       any
 	}
-	testCases := [...]TestCase{
+	testCases := [...]TestCase{ //nolint:dupl
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_not_in_basket", nil),
@@ -294,7 +294,7 @@ func TestGetNotInBasket(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases { //nolint:dupl
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
@@ -334,7 +334,7 @@ func TestGetNotInBasket(t *testing.T) {
 	}
 }
 
-func TestGetSolsOrders(t *testing.T) {
+func TestGetSolsOrders(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = my_logger.NewNop()
@@ -345,7 +345,7 @@ func TestGetSolsOrders(t *testing.T) {
 		request                *http.Request
 		expectedResponse       any
 	}
-	testCases := [...]TestCase{
+	testCases := [...]TestCase{ //nolint:dupl
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/sold", nil),
@@ -369,7 +369,7 @@ func TestGetSolsOrders(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases { //nolint:dupl
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
@@ -434,7 +434,7 @@ func TestUpdateOrderCountBasket(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases { //nolint:dupl
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
@@ -499,7 +499,7 @@ func TestUpdateOrderStatusBasket(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases { //nolint:dupl
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
@@ -561,7 +561,7 @@ func TestBuyFullBasket(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases { //nolint:dupl
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {

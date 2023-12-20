@@ -12,7 +12,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
-//nolint:nolintlint,funlen
+//nolint:dupl
 func TestValidateUserWithoutPassword(t *testing.T) {
 	t.Parallel()
 
@@ -69,7 +69,7 @@ func TestValidateUserWithoutPassword(t *testing.T) {
 	}
 }
 
-//nolint:nolintlint,funlen
+//nolint:dupl
 func TestValidatePartOfUserWithoutPassword(t *testing.T) {
 	t.Parallel()
 

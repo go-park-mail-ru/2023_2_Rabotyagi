@@ -331,7 +331,7 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 //	@Router      /order/delete/ [delete]
-func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodDelete {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

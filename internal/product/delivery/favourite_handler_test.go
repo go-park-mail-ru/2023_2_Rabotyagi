@@ -99,7 +99,7 @@ func TestGetFavourites(t *testing.T) {
 		expectedResponse       *delivery.ProductListResponse
 	}
 
-	testCases := [...]TestCase{
+	testCases := [...]TestCase{ //nolint:dupl
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/profile/favourites", nil),
@@ -107,8 +107,10 @@ func TestGetFavourites(t *testing.T) {
 				m.EXPECT().GetUserFavourites(gomock.Any(), test.UserID).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "sofa"}, {ID: 2, Title: "laptop"}}, nil)
 			},
-			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{{ID: 1, Title: "sofa"},
-				{ID: 2, Title: "laptop"}}),
+			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{
+				{ID: 1, Title: "sofa"},
+				{ID: 2, Title: "laptop"},
+			}),
 		},
 		{
 			name:    "test empty",
