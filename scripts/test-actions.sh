@@ -7,7 +7,7 @@ COVERAGE_PURE=$(echo $COVERAGE | grep -oP '\(statements\)(\s+)(\d+\.\d+)' | grep
 rm cover.out;
 rm pure_cover.out;
 
-if [ $(echo "${COVERAGE_PURE} < 6.00" | bc) -eq 1 ]
+if [ $(echo "${COVERAGE_PURE} < 60.00" | bc) -eq 1 ]
 then
   echo "Coverage is $COVERAGE_PURE less than 60%";
   exit 1;
