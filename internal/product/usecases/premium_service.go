@@ -26,7 +26,6 @@ var _ IPremiumStorage = (*productrepo.ProductStorage)(nil)
 type IPremiumStorage interface {
 	AddPremium(ctx context.Context, productID uint64, userID uint64,
 		premiumBegin time.Time, premiumExpire time.Time) error
-	RemovePremium(ctx context.Context, productID uint64, userID uint64) error
 }
 
 type PremiumService struct {
@@ -65,15 +64,6 @@ func (p PremiumService) AddPremium(ctx context.Context, productID uint64,
 	}
 
 	err := p.storage.AddPremium(ctx, productID, userID, premiumBegin, premiumExpire)
-	if err != nil {
-		return fmt.Errorf(myerrors.ErrTemplate, err)
-	}
-
-	return nil
-}
-
-func (p PremiumService) RemovePremium(ctx context.Context, productID uint64, userID uint64) error {
-	err := p.storage.RemovePremium(ctx, productID, userID)
 	if err != nil {
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}

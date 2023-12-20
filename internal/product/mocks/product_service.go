@@ -302,20 +302,6 @@ func (mr *MockIProductStorageMockRecorder) GetUserFavourites(ctx, userID any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserFavourites", reflect.TypeOf((*MockIProductStorage)(nil).GetUserFavourites), ctx, userID)
 }
 
-// RemovePremium mocks base method.
-func (m *MockIProductStorage) RemovePremium(ctx context.Context, productID, userID uint64) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemovePremium", ctx, productID, userID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// RemovePremium indicates an expected call of RemovePremium.
-func (mr *MockIProductStorageMockRecorder) RemovePremium(ctx, productID, userID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemovePremium", reflect.TypeOf((*MockIProductStorage)(nil).RemovePremium), ctx, productID, userID)
-}
-
 // SearchProduct mocks base method.
 func (m *MockIProductStorage) SearchProduct(ctx context.Context, searchInput string) ([]string, error) {
 	m.ctrl.T.Helper()
