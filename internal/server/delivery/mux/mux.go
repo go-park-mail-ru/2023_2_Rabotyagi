@@ -9,6 +9,7 @@ import (
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
@@ -135,6 +136,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	router.Handle("/city/search",
 		middleware.SetupCORS(cityHandler.SearchCityHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/metrics", promhttp.Handler())
+	router.HandleFunc("/healthcheck", delivery.HealthCheckHandler)
 
 	metricsManager := metrics.NewMetricManagerHTTP(configMux.mainServiceName)
 	mux := http.NewServeMux()
