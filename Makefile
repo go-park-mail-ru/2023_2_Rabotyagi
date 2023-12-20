@@ -77,6 +77,10 @@ test: mkdir-bin
 test-actions:
 	./scripts/test-actions.sh
 
+.PHONY: lint
+lint:
+	golangci-lint run --timeout=3m ./...
+
 .PHONY: create-migration
 create-migration:
 	migrate create -ext sql -dir ./db/migrations $(name)
