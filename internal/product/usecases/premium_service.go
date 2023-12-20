@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var ( //nolint:gofumpt
+var (
 	ErrPremiumCode = myerrors.NewErrorBadFormatRequest("Ошибка срока подписки на премиум ")
 )
 

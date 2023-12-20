@@ -134,11 +134,11 @@ func TestAddOrder(t *testing.T) {
 			request: httptest.NewRequest(http.MethodPost, "/api/v1/order/add", strings.NewReader(`{}`)),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().AddOrder(gomock.Any(), io.NopCloser(strings.NewReader(
-					`{}`)), test.UserID).Return(&models.OrderInBasket{}, nil)
+					`{}`)), test.UserID).Return(&models.OrderInBasket{}, nil) //nolint:exhaustruct
 			},
 			expectedResponse: &delivery.OrderResponse{
 				Status: statuses.StatusResponseSuccessful,
-				Body:   &models.OrderInBasket{},
+				Body:   &models.OrderInBasket{}, //nolint:exhaustruct
 			},
 		},
 	}

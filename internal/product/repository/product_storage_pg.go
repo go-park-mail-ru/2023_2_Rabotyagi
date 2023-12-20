@@ -212,7 +212,7 @@ func (p *ProductStorage) selectPremiumExpireByProductID(ctx context.Context,
 	expireRow := tx.QueryRow(ctx, SQLPremiumEpire, productID)
 	if err := expireRow.Scan(&expire); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return sql.NullTime{}, nil
+			return sql.NullTime{}, nil //nolint:exhaustruct
 		}
 
 		logger.Errorln(err)

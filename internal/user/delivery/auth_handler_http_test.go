@@ -253,7 +253,7 @@ func TestLogOut(t *testing.T) {
 			name: "test basic work",
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),
@@ -276,7 +276,7 @@ func TestLogOut(t *testing.T) {
 			name: "test internal error",
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),

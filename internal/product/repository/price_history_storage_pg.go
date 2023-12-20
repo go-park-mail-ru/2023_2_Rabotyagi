@@ -49,7 +49,7 @@ func (p *ProductStorage) selectPriceHistory(ctx context.Context, tx pgx.Tx,
 	_, err = pgx.ForEachRow(productsInFavouritesRows, []any{
 		&curRecord.Price, &curRecord.CreatedAt,
 	}, func() error {
-		slRecord = append(slRecord, models.PriceHistoryRecord{ //nolint:exhaustruct
+		slRecord = append(slRecord, models.PriceHistoryRecord{
 			Price:     curRecord.Price,
 			CreatedAt: curRecord.CreatedAt,
 		})

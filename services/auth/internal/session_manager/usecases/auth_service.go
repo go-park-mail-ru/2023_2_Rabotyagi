@@ -91,7 +91,7 @@ func (a *AuthService) AddUser(ctx context.Context, email string, password string
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	jwtPayload := jwt.UserJwtPayload{}
+	jwtPayload := jwt.UserJwtPayload{} //nolint:exhaustruct
 
 	jwtPayload.UserID = user.ID
 	jwtPayload.Email = user.Email

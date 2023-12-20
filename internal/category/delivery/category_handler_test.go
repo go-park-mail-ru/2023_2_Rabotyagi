@@ -45,7 +45,8 @@ func TestGetFullCategories(t *testing.T) {
 					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}},
 		},
 		{
-			name: "test empty work",
+			name:   "test empty work",
+			method: http.MethodGet,
 			behavior: func(m *mocks.MockICategoryService) {
 				m.EXPECT().GetFullCategories(gomock.Any()).Return([]*models.Category{}, nil)
 			},
@@ -55,7 +56,8 @@ func TestGetFullCategories(t *testing.T) {
 			},
 		},
 		{
-			name: "test repeated names a lot",
+			name:   "test repeated names a lot",
+			method: http.MethodGet,
 			behavior: func(m *mocks.MockICategoryService) {
 				m.EXPECT().GetFullCategories(gomock.Any()).Return(
 					[]*models.Category{
@@ -155,6 +157,7 @@ func TestSearchCategoryHandler(t *testing.T) {
 		},
 		{
 			name:        "test special symbols query",
+			method:      http.MethodGet,
 			searchInput: "Кошки &&& Собаки",
 			behavior: func(m *mocks.MockICategoryService) {
 				m.EXPECT().SearchCategory(gomock.Any(), "Кошки &&& Собаки").Return([]*models.Category{
@@ -190,7 +193,7 @@ func TestSearchCategoryHandler(t *testing.T) {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			req := httptest.NewRequest(http.MethodGet, "/api/v1/category/search", nil)
+			req := httptest.NewRequest(testCase.method, "/api/v1/category/search", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"searched": testCase.searchInput})
 			w := httptest.NewRecorder()
 

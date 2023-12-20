@@ -140,7 +140,7 @@ func TestPartiallyUpdateUser(t *testing.T) {
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPatch, "/api/v1/profile/update", strings.NewReader(
 					`{"email":"new_email@mail.ru"}`))
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),
@@ -173,7 +173,7 @@ func TestPartiallyUpdateUser(t *testing.T) {
 			name: "test internal error in SessionManagerClient",
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPatch, "/api/v1/profile/update", nil)
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),
@@ -197,7 +197,7 @@ func TestPartiallyUpdateUser(t *testing.T) {
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPut, "/api/v1/profile/update", strings.NewReader(
 					`{"email":"new_email@mail.ru, "name":"test"}`))
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),
