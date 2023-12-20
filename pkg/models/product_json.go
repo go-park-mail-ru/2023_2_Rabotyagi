@@ -12,11 +12,11 @@ type productJSON struct {
 	SalerID        uint64               `json:"saler_id"        valid:"required"`
 	CategoryID     uint64               `json:"category_id"     valid:"required"`
 	CityID         uint64               `json:"city_id"         valid:"required"`
-	Title          string               `json:"title"           valid:"required, length(1|256)~Заголовок должен быть длинной от 1 до 256 символов"`   //nolint
-	Description    string               `json:"description"     valid:"required, length(1|4000)~Описание должно быть длинной от 1 до 4000 симвволов"` //nolint
+	Title          string               `json:"title"           valid:"required, length(1|256)~Заголовок должен быть длинной от 1 до 256 символов"`   ///nolint:nolintlint
+	Description    string               `json:"description"     valid:"required, length(1|4000)~Описание должно быть длинной от 1 до 4000 симвволов"` //nolint:nolintlint
 	Price          uint64               `json:"price"           valid:"required"`
 	CreatedAt      time.Time            `json:"created_at"      valid:"required"`
-	PremiumExpire  *time.Time           `json:"premium_expire"  swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"` //nolint
+	PremiumExpire  *time.Time           `json:"premium_expire"  swaggertype:"string" example:"2014-12-12T14:00:12+07:00"  valid:"required"` //nolint:nolintlint
 	Views          uint32               `json:"views"           valid:"required"`
 	AvailableCount uint32               `json:"available_count" valid:"required"`
 	Delivery       bool                 `json:"delivery"        valid:"optional"`
