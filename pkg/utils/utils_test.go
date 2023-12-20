@@ -169,22 +169,44 @@ func TestComparePassAndHash(t *testing.T) {
 func TestHash256(t *testing.T) {
 	t.Parallel()
 
-	const pass = "48656c6c6f20476f7068657221"
+	_ = my_logger.NewNop()
 
-	decoded, err := hex.DecodeString(pass)
-	if err != nil {
-		t.Errorf("Error hashing content: %s", err)
+	type TestCase struct {
+		name         string
+		pass         string
+		expectedHash string
 	}
 
-	hashedContent, err := utils.Hash256(decoded)
-	if err != nil {
-		t.Errorf("Error hashing content: %s", err)
+	testCases := [...]TestCase{
+		{
+			name:         "basic",
+			pass:         "48656c6c6f20476f7068657221",
+			expectedHash: "be8c5fbcec1ca3f472cba2d613f780ae7c7efbaac657669adcf16a9cc525dd9b",
+		},
 	}
 
-	expectedHash := "be8c5fbcec1ca3f472cba2d613f780ae7c7efbaac657669adcf16a9cc525dd9b"
-	if hashedContent != expectedHash {
-		t.Errorf("Hash does not match. Expected: %s, Got: %s", expectedHash, hashedContent)
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			decoded, err := hex.DecodeString(testCase.pass)
+			if err != nil {
+				t.Errorf("Error hashing content: %s", err)
+			}
+
+			hashedContent, err := utils.Hash256(decoded)
+			if err != nil {
+				t.Errorf("Error hashing content: %s", err)
+			}
+
+			if hashedContent != testCase.expectedHash {
+				t.Errorf("Hash does not match. Expected: %s, Got: %s", testCase.expectedHash, hashedContent)
+			}
+		})
 	}
+
 }
 
 func TestNullStringToUnsafe(t *testing.T) {
