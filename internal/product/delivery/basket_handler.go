@@ -38,9 +38,9 @@ type IBasketService interface {
 //	@Success    200  {object} OrderResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400)/badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400)/badFormat(4000)//nolint:lll
 //	@Router      /order/add [post]
-func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

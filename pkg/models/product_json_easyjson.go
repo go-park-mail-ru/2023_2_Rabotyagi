@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonB0091c22DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlexer.Lexer, out *productJson) {
+func easyjsonB0091c22DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlexer.Lexer, out *productJSON) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -139,7 +139,7 @@ func easyjsonB0091c22DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlex
 		in.Consumed()
 	}
 }
-func easyjsonB0091c22EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwriter.Writer, in productJson) {
+func easyjsonB0091c22EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwriter.Writer, in productJSON) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -268,26 +268,26 @@ func easyjsonB0091c22EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwr
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v productJson) MarshalJSON() ([]byte, error) {
+func (v productJSON) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjsonB0091c22EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v productJson) MarshalEasyJSON(w *jwriter.Writer) {
+func (v productJSON) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjsonB0091c22EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *productJson) UnmarshalJSON(data []byte) error {
+func (v *productJSON) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjsonB0091c22DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *productJson) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *productJSON) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonB0091c22DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(l, v)
 }
 func easyjsonB0091c22DecodeGithubComGoParkMailRu20232RabotyagiPkgModels2(in *jlexer.Lexer, out *PriceHistoryRecord) {

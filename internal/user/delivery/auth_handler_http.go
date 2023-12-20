@@ -45,7 +45,7 @@ func NewAuthHandler(sessionManagerClient auth.SessionMangerClient) (*AuthHandler
 //	@Success    200  {object} responses.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)//nolint:lll
 //	@Router      /signup [post]
 func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -110,7 +110,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Success    200  {object} responses.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)//nolint:lll
 //	@Router      /signin [get]
 func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

@@ -28,9 +28,9 @@ type IPremiumService interface {
 //	@Success    200  {object} responses.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
 //	@Router      /premium/add [patch]
-func (p *ProductHandler) AddPremiumHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) AddPremiumHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

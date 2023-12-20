@@ -9,7 +9,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 )
 
-var MessageErrWrongNumberParam = "Получили некорректный числовой параметр. Он должен быть целым" //nolint:gochecknoglobals
+var MessageErrWrongNumberParam = "Получили некорректный числовой параметр. " + //nolint:gochecknoglobals
+	"Он должен быть целым"
 
 func ParseUint64FromRequest(r *http.Request, paramName string) (uint64, error) {
 	logger, err := my_logger.Get()
