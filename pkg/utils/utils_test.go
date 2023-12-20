@@ -89,6 +89,7 @@ func TestHashPass(t *testing.T) {
 		name          string
 		plainPassword string
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:          "test basic work",
@@ -104,6 +105,8 @@ func TestHashPass(t *testing.T) {
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			hashedPass, err := utils.HashPass(testCase.plainPassword)
 			if err != nil {
 				t.Errorf("Error hashing password: %s", err)
@@ -302,6 +305,8 @@ func TestNullInt64ToUnsafeUint(t *testing.T) {
 }
 
 func TestUnsafeUint64ToNullInt(t *testing.T) {
+	t.Parallel()
+
 	nullInt64 := utils.UnsafeUint64ToNullInt(nil)
 	if nullInt64.Valid {
 		t.Errorf("Expected Valid=false, got Valid=true")
