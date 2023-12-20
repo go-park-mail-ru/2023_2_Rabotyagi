@@ -159,6 +159,8 @@ func TestStartRefreshingSecret(t *testing.T) {
 }
 
 func TestSetSecret(t *testing.T) {
+	t.Parallel()
+
 	secret := []byte("test secret")
 
 	jwt.SetSecret(secret)
