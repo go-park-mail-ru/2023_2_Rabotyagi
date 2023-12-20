@@ -2,10 +2,11 @@ package repository_test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/pashagolub/pgxmock/v3"
-	"testing"
 )
 
 func TestAddToFavourites(t *testing.T) { //nolint:dupl

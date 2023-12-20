@@ -10,7 +10,8 @@ import (
 )
 
 func (p *ProductStorage) addPremium(ctx context.Context, tx pgx.Tx, productID uint64, userID uint64,
-	premiumBegin time.Time, premiumExpire time.Time) error {
+	premiumBegin time.Time, premiumExpire time.Time,
+) error {
 	SQLAddPremium := `UPDATE public."product" 
 SET premium=true, premium_begin=$1, premium_expire=$2 WHERE id=$3 AND saler_id=$4`
 

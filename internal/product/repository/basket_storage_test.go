@@ -250,9 +250,11 @@ func TestAddOrderInBasket(t *testing.T) {
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city_id,
        delivery, safe_deal, is_active, premium FROM public."product" `).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"saler_id", "category_id", "title", "description", "price",
+					WillReturnRows(pgxmock.NewRows([]string{
+						"saler_id", "category_id", "title", "description", "price",
 						"created_at", "views", "available_count", "city_id", "delivery",
-						"safe_deal", "is_active", "premium"}).
+						"safe_deal", "is_active", "premium",
+					}).
 						AddRow(uint64(1), uint64(1), "Car", "text", uint64(1212), time.Now(),
 							uint32(6), uint32(4), uint64(6), true, true, true, false))
 
@@ -325,8 +327,10 @@ func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl
         "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product"`).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "owner_id", "product_id", "title", "price",
-						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id"}).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "owner_id", "product_id", "title", "price",
+						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id",
+					}).
 						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
 							uint64(1), uint32(1), uint32(1), true, true, uint64(1)))
 
@@ -398,8 +402,10 @@ func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
         "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product"`).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "owner_id", "product_id", "title", "price",
-						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id"}).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "owner_id", "product_id", "title", "price",
+						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id",
+					}).
 						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
 							uint64(1), uint32(1), uint32(1), true, true, uint64(1)))
 
@@ -471,8 +477,10 @@ func TestGetOrdersSold(t *testing.T) { //nolint:dupl
         "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product"`).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "owner_id", "product_id", "title", "price",
-						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id"}).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "owner_id", "product_id", "title", "price",
+						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id",
+					}).
 						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
 							uint64(1), uint32(1), uint32(1), true, true, uint64(1)))
 

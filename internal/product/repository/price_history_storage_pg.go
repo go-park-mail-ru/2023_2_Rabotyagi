@@ -14,8 +14,8 @@ func (p *ProductStorage) addPriceHistoryRecord(ctx context.Context, tx pgx.Tx,
 	logger := p.logger.LogReqID(ctx)
 
 	SQLInsertProduct := `INSERT INTO public."price_history"(product_id, price) VALUES($1, $2)`
-	_, err := tx.Exec(ctx, SQLInsertProduct, productID, price)
 
+	_, err := tx.Exec(ctx, SQLInsertProduct, productID, price)
 	if err != nil {
 		logger.Errorln(err)
 

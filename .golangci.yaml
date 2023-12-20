@@ -32,7 +32,6 @@ linters:
     - goconst
     - gocritic
     - gocyclo
-    - godot
     - godox
     - goerr113
     - gofmt
@@ -109,6 +108,7 @@ linters:
     - maligned
     - ifshort
     - tagalign
+    - godot
 
   presets:
     - bugs

@@ -16,7 +16,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/mocks"
-
 	"go.uber.org/mock/gomock"
 )
 

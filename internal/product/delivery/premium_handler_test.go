@@ -2,6 +2,10 @@ package delivery_test
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
@@ -11,9 +15,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 	"go.uber.org/mock/gomock"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestAddPremium(t *testing.T) {

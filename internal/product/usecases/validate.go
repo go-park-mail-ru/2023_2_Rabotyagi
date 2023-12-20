@@ -3,12 +3,12 @@ package usecases
 import (
 	"errors"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"io"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 )
 
 var (

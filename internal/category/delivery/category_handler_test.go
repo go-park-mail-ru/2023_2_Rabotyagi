@@ -13,7 +13,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
-
 	"go.uber.org/mock/gomock"
 )
 
@@ -37,12 +36,17 @@ func TestGetFullCategories(t *testing.T) {
 				m.EXPECT().GetFullCategories(gomock.Any()).Return([]*models.Category{
 					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
 					{ID: 1, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
-					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}, nil)
+					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
+				}, nil)
 			},
-			expectedResponse: delivery.CategoryListResponse{Status: statuses.StatusResponseSuccessful,
-				Body: []*models.Category{{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
+			expectedResponse: delivery.CategoryListResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body: []*models.Category{
+					{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
 					{ID: 1, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
-					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}}},
+					{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
+				},
+			},
 		},
 		{
 			name:   "test empty work",
@@ -139,9 +143,13 @@ func TestSearchCategoryHandler(t *testing.T) {
 					{ID: 7, Name: "Cars", ParentID: sql.NullInt64{Valid: true, Int64: 4}},
 				}, nil)
 			},
-			expectedResponse: delivery.CategoryListResponse{Status: statuses.StatusResponseSuccessful,
-				Body: []*models.Category{{ID: 3, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 2}},
-					{ID: 7, Name: "Cars", ParentID: sql.NullInt64{Valid: true, Int64: 4}}}},
+			expectedResponse: delivery.CategoryListResponse{
+				Status: statuses.StatusResponseSuccessful,
+				Body: []*models.Category{
+					{ID: 3, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 2}},
+					{ID: 7, Name: "Cars", ParentID: sql.NullInt64{Valid: true, Int64: 4}},
+				},
+			},
 		},
 		{
 			name:        "test empty query",

@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/repository"
-
 	"github.com/pashagolub/pgxmock/v3"
 )
 

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+
 	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
@@ -69,7 +70,6 @@ func (u *UserStorage) GetUserWithoutPasswordByID(ctx context.Context, id uint64)
 
 		return err
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -129,7 +129,6 @@ func (u *UserStorage) UpdateUser(ctx context.Context,
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

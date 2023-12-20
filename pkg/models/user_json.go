@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
 //easyjson:json
@@ -17,7 +18,7 @@ type userJSON struct {
 }
 
 func (u *UserWithoutPassword) MarshalJSON() ([]byte, error) {
-	var userJs = userJSON{
+	userJs := userJSON{
 		ID:        u.ID,
 		Email:     u.Email,
 		Phone:     utils.NullStringToUnsafe(u.Phone),

@@ -2,8 +2,9 @@ package models
 
 import (
 	"database/sql"
-	"github.com/microcosm-cc/bluemonday"
 	"time"
+
+	"github.com/microcosm-cc/bluemonday"
 )
 
 type Order struct {

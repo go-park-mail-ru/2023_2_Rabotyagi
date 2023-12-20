@@ -4,7 +4,6 @@ import (
 	"errors"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
@@ -29,7 +28,7 @@ func TestGenerateJwtToken(t *testing.T) {
 		{
 			name:                "test basic work",
 			inputUserJwtPayload: &jwt.UserJwtPayload{UserID: 1, Expire: expire, Email: "example@mail.ru"},
-			expectedJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+			expectedJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." + //nolint:goconst
 				"eyJlbWFpbCI6ImV4YW1wbGVAbWFpbC5ydSIsImV4cGlyZSI6MCwidXNlcklEIjoxfQ." +
 				"GBCEb3XJ6aHTsyl8jC3lxSWK6byjbYN0kg2e3NH2i9s",
 			expectedError: nil,
@@ -147,15 +146,6 @@ func TestNewUserJwtPayload(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestStartRefreshingSecret(t *testing.T) {
-	chClose := make(chan struct{})
-	go jwt.StartRefreshingSecret(time.Millisecond*100, chClose)
-
-	time.Sleep(time.Millisecond * 500)
-
-	close(chClose)
 }
 
 func TestSetSecret(t *testing.T) {

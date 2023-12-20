@@ -3,11 +3,12 @@ package repository_test
 import (
 	"context"
 	"database/sql"
+	"testing"
+	"time"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/pashagolub/pgxmock/v3"
-	"testing"
-	"time"
 )
 
 func TestGetUserWithoutPasswordByID(t *testing.T) {

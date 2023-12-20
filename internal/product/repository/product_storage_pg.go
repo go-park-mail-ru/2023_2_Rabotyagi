@@ -6,13 +6,12 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
-
-	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -425,7 +424,6 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
 			tx, count, whereClause, []string{OrderByClauseForProductList(PremiumCoefficient,
 				NonPremiumCoefficient, SoldByUserCoefficient, ViewsCoefficient)})
-
 		if err != nil {
 			return err
 		}
@@ -505,10 +503,10 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 		category_id, title, description, price,available_count,
 		city_id, delivery, safe_deal) VALUES(
 		$1, $2, $3, $4, $5, $6, $7, $8, $9)`
+
 	_, err := tx.Exec(ctx, SQLInsertProduct, preProduct.SalerID, preProduct.CategoryID,
 		preProduct.Title, preProduct.Description, preProduct.Price, preProduct.AvailableCount,
 		preProduct.CityID, preProduct.Delivery, preProduct.SafeDeal)
-
 	if err != nil {
 		logger.Errorln(err)
 
@@ -795,7 +793,6 @@ func (p *ProductStorage) addView(ctx context.Context, tx pgx.Tx, userID uint64, 
 				   VALUES ($1, $2)`
 
 	_, err := tx.Exec(ctx, SQLAddView, userID, productID)
-
 	if err != nil {
 		logger.Errorln(err)
 
@@ -813,7 +810,6 @@ func (p *ProductStorage) incViews(ctx context.Context, tx pgx.Tx, productID uint
 				   WHERE id=$1`
 
 	_, err := tx.Exec(ctx, SQLAddView, productID)
-
 	if err != nil {
 		logger.Errorln(err)
 
@@ -952,7 +948,6 @@ func (p *ProductStorage) GetSearchProductFeed(ctx context.Context,
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		slProductInner, err := p.searchProductFeed(ctx,
 			tx, searchInput, lastNumber, limit)
-
 		if err != nil {
 			return err
 		}

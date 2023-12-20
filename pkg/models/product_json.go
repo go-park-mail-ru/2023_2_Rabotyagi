@@ -30,7 +30,7 @@ type productJSON struct {
 }
 
 func (p *Product) MarshalJSON() ([]byte, error) {
-	var productJs = productJSON{
+	productJs := productJSON{
 		ID:             p.ID,
 		SalerID:        p.SalerID,
 		CategoryID:     p.CategoryID,

@@ -20,6 +20,6 @@ func CamelToSnakeCase(str string) string {
 
 func SnakeToCamelCase(str string) string {
 	return link.ReplaceAllStringFunc(str, func(s string) string {
-		return strings.ToUpper(strings.Replace(s, "_", "", -1))
+		return strings.ToUpper(strings.ReplaceAll(s, "_", ""))
 	})
 }

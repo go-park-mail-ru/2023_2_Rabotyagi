@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"net"
 	"net/http"
 	"strings"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/interceptors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	reposhare "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/config"
@@ -18,7 +18,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/usecases"
-
 	"google.golang.org/grpc"
 )
 

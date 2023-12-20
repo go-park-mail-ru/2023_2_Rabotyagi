@@ -3,13 +3,14 @@ package utils_test
 import (
 	"database/sql"
 	"encoding/hex"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
 func TestSnakeToCamelCase(t *testing.T) {

@@ -3,12 +3,13 @@ package repository_test
 import (
 	"context"
 	"database/sql"
+	"testing"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/pashagolub/pgxmock/v3"
-	"testing"
 )
 
 func TestGetFullCategories(t *testing.T) {
@@ -43,7 +44,8 @@ func TestGetFullCategories(t *testing.T) {
 			expectedResponse: []*models.Category{
 				{ID: 1, Name: "Animal", ParentID: sql.NullInt64{Valid: false, Int64: 0}},
 				{ID: 2, Name: "Cats", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
-				{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}}},
+				{ID: 3, Name: "Dogs", ParentID: sql.NullInt64{Valid: true, Int64: 1}},
+			},
 		},
 	}
 

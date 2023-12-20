@@ -3,15 +3,14 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"time"
+
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
-	"time"
 )
 
-var (
-	ErrPremiumCode = myerrors.NewErrorBadFormatRequest("Ошибка срока подписки на премиум ")
-)
+var ErrPremiumCode = myerrors.NewErrorBadFormatRequest("Ошибка срока подписки на премиум ")
 
 const (
 	Week       = uint64(1)

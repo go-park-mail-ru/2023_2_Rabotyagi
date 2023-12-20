@@ -3,13 +3,13 @@ package delivery
 import (
 	"encoding/json"
 	"errors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"net/http"
 	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 )
@@ -88,10 +88,11 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().Add(timeTokenLife)
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    responses.CookieAuthName,
-		Value:   sessionWithToken.GetAccessToken(),
-		Expires: expire,
-		Path:    "/",
+		Name:     responses.CookieAuthName,
+		Value:    sessionWithToken.GetAccessToken(),
+		SameSite: http.SameSiteLaxMode,
+		Expires:  expire,
+		Path:     "/",
 	}
 
 	http.SetCookie(w, cookie)
@@ -138,10 +139,11 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().Add(timeTokenLife)
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    responses.CookieAuthName,
-		Value:   sessionWithToken.GetAccessToken(),
-		Expires: expire,
-		Path:    "/",
+		Name:     responses.CookieAuthName,
+		Value:    sessionWithToken.GetAccessToken(),
+		SameSite: http.SameSiteLaxMode,
+		Expires:  expire,
+		Path:     "/",
 	}
 
 	http.SetCookie(w, cookie)

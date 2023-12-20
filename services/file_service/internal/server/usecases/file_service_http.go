@@ -5,11 +5,9 @@ import (
 	"context"
 	"fmt"
 	"image"
+	_ "image/jpeg" // Add jpeg format for image
+	_ "image/png"  // Add png format for image
 	"io"
-	// Add png formats for image
-	_ "image/png"
-	// Add jpeg formats for image
-	_ "image/jpeg"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
