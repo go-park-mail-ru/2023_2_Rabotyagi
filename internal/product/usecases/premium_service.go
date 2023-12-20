@@ -19,6 +19,10 @@ const (
 	ThreeMonth = uint64(3)
 	HalfYear   = uint64(4)
 	Year       = uint64(5)
+
+	DaysInWeek      = 7
+	MonthInSeason   = 3
+	MonthInHalfYear = 6
 )
 
 var _ IPremiumStorage = (*productrepo.ProductStorage)(nil)
@@ -50,13 +54,13 @@ func (p PremiumService) AddPremium(ctx context.Context, productID uint64,
 
 	switch periodCode {
 	case Week:
-		premiumExpire = premiumBegin.AddDate(0, 0, 7)
+		premiumExpire = premiumBegin.AddDate(0, 0, DaysInWeek)
 	case Month:
 		premiumExpire = premiumBegin.AddDate(0, 1, 0)
 	case ThreeMonth:
-		premiumExpire = premiumBegin.AddDate(0, 3, 0)
+		premiumExpire = premiumBegin.AddDate(0, MonthInSeason, 0)
 	case HalfYear:
-		premiumExpire = premiumBegin.AddDate(0, 6, 0)
+		premiumExpire = premiumBegin.AddDate(0, MonthInHalfYear, 0)
 	case Year:
 		premiumExpire = premiumBegin.AddDate(1, 0, 0)
 	default:
