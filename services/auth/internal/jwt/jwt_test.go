@@ -28,7 +28,7 @@ func TestGenerateJwtToken(t *testing.T) {
 		{
 			name:                "test basic work",
 			inputUserJwtPayload: &jwt.UserJwtPayload{UserID: 1, Expire: expire, Email: "example@mail.ru"},
-			expectedJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." + //nolint:goconst
+			expectedJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
 				"eyJlbWFpbCI6ImV4YW1wbGVAbWFpbC5ydSIsImV4cGlyZSI6MCwidXNlcklEIjoxfQ." +
 				"GBCEb3XJ6aHTsyl8jC3lxSWK6byjbYN0kg2e3NH2i9s",
 			expectedError: nil,

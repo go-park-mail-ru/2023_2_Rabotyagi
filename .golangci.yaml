@@ -170,6 +170,7 @@ issues:
     - path: _test.go
       linters:
         - funlen
+        - goconst
 
 run:
   skip-dirs:
