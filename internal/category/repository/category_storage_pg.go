@@ -85,7 +85,9 @@ func (c *CategoryStorage) GetFullCategories(ctx context.Context) ([]*models.Cate
 	return categories, nil
 }
 
-func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchInput string) ([]*models.Category, error) {
+func (c *CategoryStorage) searchCategory(ctx context.Context,
+	tx pgx.Tx, searchInput string,
+) ([]*models.Category, error) {
 	logger := c.logger.LogReqID(ctx)
 
 	SQLSearchCategory := `SELECT category.id, category.name, category.parent_id

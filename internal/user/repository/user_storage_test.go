@@ -37,7 +37,8 @@ func TestGetUserWithoutPasswordByID(t *testing.T) {
 				mockPool.ExpectQuery(`SELECT email, phone, name, birthday, avatar, created_at FROM public."user"`).
 					WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"email", "phone", "name", "birthday", "avatar", "created_at"}).
-						AddRow("test@gmail.com", sql.NullString{String: "88005553535", Valid: true}, sql.NullString{String: "John", Valid: true},
+						AddRow("test@gmail.com", sql.NullString{String: "88005553535", Valid: true},
+							sql.NullString{String: "John", Valid: true},
 							testTime, sql.NullString{String: "afsghga", Valid: true}, testTime))
 
 				mockPool.ExpectCommit()
@@ -99,12 +100,14 @@ func TestUpdateUser(t *testing.T) {
 			behaviorCityStorage: func(m *repository.UserStorage) {
 				mockPool.ExpectBegin()
 
-				mockPool.ExpectExec(`UPDATE public."user"`).WithArgs("Alex", uint64(1)).WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+				mockPool.ExpectExec(`UPDATE public."user"`).WithArgs(
+					"Alex", uint64(1)).WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 				mockPool.ExpectQuery(`SELECT email, phone, name, birthday, avatar, created_at FROM public."user"`).
 					WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"email", "phone", "name", "birthday", "avatar", "created_at"}).
-						AddRow("test@gmail.com", sql.NullString{String: "88005553535", Valid: true}, sql.NullString{String: "John", Valid: true},
+						AddRow("test@gmail.com", sql.NullString{String: "88005553535", Valid: true},
+							sql.NullString{String: "John", Valid: true},
 							testTime, sql.NullString{String: "afsghga", Valid: true}, testTime))
 
 				mockPool.ExpectCommit()

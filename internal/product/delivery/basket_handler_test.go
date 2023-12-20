@@ -204,7 +204,9 @@ func TestGetBasket(t *testing.T) {
 				m.EXPECT().GetOrdersByUserID(gomock.Any(), test.UserID).Return(
 					[]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}, nil)
 			},
-			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}),
+			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{
+				{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"},
+			}),
 		},
 		{
 			name:    "test empty",

@@ -69,7 +69,7 @@ func NewFileHandlerHTTP(fileService IFileServiceHTTP,
 //	@Success    200  {object} ResponseURLs
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400), badFormat(4000)"
+//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400), badFormat(4000)"//nolint:lll
 //	@Router      /img/upload [post]
 func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Request) { //nolint:funlen
 	r.Body = http.MaxBytesReader(w, r.Body, MaxSizePhotoBytes*MaxCountPhoto)
@@ -162,7 +162,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 //	@Failure    405  {string} string
 //	@Failure    404  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400)"
+//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400)"//nolint:lll
 //	@Router      /img/ [get]
 func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

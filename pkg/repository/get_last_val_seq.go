@@ -9,7 +9,9 @@ import (
 )
 
 // GetLastValSeq returns id of last record not at all, because sequence auto increment even if unsuccessful insert in table
-func GetLastValSeq(ctx context.Context, tx pgx.Tx, logger *my_logger.MyLogger, nameTable pgx.Identifier) (uint64, error) {
+func GetLastValSeq(ctx context.Context, tx pgx.Tx,
+	logger *my_logger.MyLogger, nameTable pgx.Identifier,
+) (uint64, error) {
 	sanitizedNameTable := nameTable.Sanitize()
 	SQLGetLastValSeq := fmt.Sprintf(`SELECT last_value FROM %s;`, sanitizedNameTable)
 	seqRow := tx.QueryRow(ctx, SQLGetLastValSeq)

@@ -164,9 +164,13 @@ linters-settings:
       - r io.Reader
 issues:
   exclude-rules:
+    - linters:
+        - lll
+      source: "//.*"
     - path: _test.go
       linters:
         - funlen
+
 run:
   skip-dirs:
     - services/file_service/internal/fake_db
