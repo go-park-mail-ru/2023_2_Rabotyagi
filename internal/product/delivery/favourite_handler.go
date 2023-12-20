@@ -33,7 +33,7 @@ type IFavouriteService interface {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /profile/favourites [get]
-func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -74,7 +74,7 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /product/add-to-fav [post]
-func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
