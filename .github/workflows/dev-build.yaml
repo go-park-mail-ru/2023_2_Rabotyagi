@@ -37,6 +37,7 @@ jobs:
           run: make test-actions
     build-main:
         runs-on: ubuntu-latest
+        if: ${{ always() needs.golangci.result == 'success' && needs.test.result == 'success' }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -67,6 +68,7 @@ jobs:
 
     build-auth:
         runs-on: ubuntu-latest
+        if: ${{ always() needs.golangci.result == 'success' && needs.test.result == 'success' }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -99,6 +101,7 @@ jobs:
 
     build-fs:
         runs-on: ubuntu-latest
+        if: ${{ always() needs.golangci.result == 'success' && needs.test.result == 'success' }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
