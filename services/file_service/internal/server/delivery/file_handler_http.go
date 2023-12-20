@@ -30,7 +30,7 @@ const keyCtxHandler keyCtx = "handler"
 
 var (
 	ErrToBigFile = myerrors.NewErrorBadContentRequest("Максимальный размер фото %d Мбайт",
-		MaxSizePhotoBytes%1024%1024)
+		MaxSizePhotoBytes%1024%1024) //nolint:gomnd
 	ErrToManyCountFiles   = myerrors.NewErrorBadContentRequest("Максимальное количество фото = %d", MaxCountPhoto)
 	ErrForbiddenRootPath  = myerrors.NewErrorBadContentRequest("Нельзя вызывать корневой путь")
 	ErrWrongNameMultipart = myerrors.NewErrorBadFormatRequest("в multipart/form нет нужного имени: %s", NameImagesInForm)
@@ -110,7 +110,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 	for idxFile, file := range slFiles {
 		if file.Size > MaxSizePhotoBytes {
 			err := myerrors.NewErrorBadContentRequest(
-				"файл: %s весит %d Мбайт. %+v\n", file.Filename, file.Size/1024/1024, ErrToBigFile.Error())
+				"файл: %s весит %d Мбайт. %+v\n", file.Filename, file.Size/1024/1024, ErrToBigFile.Error()) //nolint:gomnd
 
 			logger.Errorln(err)
 			responses.HandleErr(w, r, logger, err)

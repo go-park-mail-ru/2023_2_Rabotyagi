@@ -50,13 +50,13 @@ func (p PremiumService) AddPremium(ctx context.Context, productID uint64,
 
 	switch periodCode {
 	case Week:
-		premiumExpire = premiumBegin.AddDate(0, 0, 7)
+		premiumExpire = premiumBegin.AddDate(0, 0, 7) //nolint:gomnd
 	case Month:
 		premiumExpire = premiumBegin.AddDate(0, 1, 0)
 	case ThreeMonth:
-		premiumExpire = premiumBegin.AddDate(0, 3, 0)
+		premiumExpire = premiumBegin.AddDate(0, 3, 0) //nolint:gomnd
 	case HalfYear:
-		premiumExpire = premiumBegin.AddDate(0, 6, 0)
+		premiumExpire = premiumBegin.AddDate(0, 6, 0) //nolint:gomnd
 	case Year:
 		premiumExpire = premiumBegin.AddDate(1, 0, 0)
 	default:
