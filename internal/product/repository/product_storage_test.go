@@ -215,7 +215,7 @@ func TestSearchProduct(t *testing.T) {
 			behaviorProductStorage: func(m *repository.ProductStorage) {
 				mockPool.ExpectBegin()
 
-				mockPool.ExpectQuery(`SELECT title FROM product`).WithArgs("Ca").
+				mockPool.ExpectQuery(`SELECT title`).WithArgs("Ca").
 					WillReturnRows(pgxmock.NewRows([]string{"title"}).
 						AddRow("Car"))
 
@@ -279,10 +279,10 @@ func TestGetSearchProductFeed(t *testing.T) { //nolint:funlen
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT id, title, price, city_id, 
-       delivery, safe_deal, is_active, available_count FROM product`).WithArgs("Ca", uint64(0), uint64(1)).
+       delivery, safe_deal, is_active, available_count, premium FROM product`).WithArgs("Ca", uint64(0), uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"id", "title", "price", "city_id", //nolint:gofumpt
-						"delivery", "safe_deal", "is_active", "available_count"}).
-						AddRow(uint64(1), "Car", uint64(1212), uint64(6), true, true, true, uint32(2)))
+						"delivery", "safe_deal", "is_active", "available_count", "premium"}).
+						AddRow(uint64(1), "Car", uint64(1212), uint64(6), true, true, true, uint32(2), false))
 
 				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"url"}).
