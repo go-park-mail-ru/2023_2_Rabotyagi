@@ -14,12 +14,11 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	mocksauth "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
-
 	"go.uber.org/mock/gomock"
 )
 
@@ -41,11 +40,10 @@ func NewProfileHandler(ctrl *gomock.Controller,
 	return profileHandler, nil
 }
 
-//nolint:funlen
 func TestGetUser(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                string
@@ -122,11 +120,10 @@ func TestGetUser(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestPartiallyUpdateUser(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                         string
@@ -142,7 +139,7 @@ func TestPartiallyUpdateUser(t *testing.T) {
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPatch, "/api/v1/profile/update", strings.NewReader(
 					`{"email":"new_email@mail.ru"}`))
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),
@@ -175,7 +172,7 @@ func TestPartiallyUpdateUser(t *testing.T) {
 			name: "test internal error in SessionManagerClient",
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPatch, "/api/v1/profile/update", nil)
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),
@@ -199,7 +196,7 @@ func TestPartiallyUpdateUser(t *testing.T) {
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPut, "/api/v1/profile/update", strings.NewReader(
 					`{"email":"new_email@mail.ru, "name":"test"}`))
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),

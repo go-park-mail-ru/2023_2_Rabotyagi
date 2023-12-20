@@ -2,13 +2,13 @@ package delivery
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"io"
 	"net/http"
 
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
@@ -38,9 +38,9 @@ type IBasketService interface {
 //	@Success    200  {object} OrderResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400)/badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400)/badFormat(4000)//nolint:lll
 //	@Router      /order/add [post]
-func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -80,7 +80,7 @@ func (p *ProductHandler) AddOrderHandler(w http.ResponseWriter, r *http.Request)
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /order/get_basket [get]
-func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -120,7 +120,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /order/get_not_in_basket [get]
-func (p *ProductHandler) GetOrdersNotInBasketHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) GetOrdersNotInBasketHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -160,7 +160,7 @@ func (p *ProductHandler) GetOrdersNotInBasketHandler(w http.ResponseWriter, r *h
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /order/sold [get]
-func (p *ProductHandler) GetOrdersSoldHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) GetOrdersSoldHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -331,7 +331,7 @@ func (p *ProductHandler) BuyFullBasketHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400)
 //	@Router      /order/delete/ [delete]
-func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Request) {
+func (p *ProductHandler) DeleteOrderHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodDelete {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 

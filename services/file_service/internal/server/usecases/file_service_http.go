@@ -5,14 +5,12 @@ import (
 	"context"
 	"fmt"
 	"image"
+	_ "image/jpeg" // Add jpeg format for image
+	_ "image/png"  // Add png format for image
 	"io"
-	// Add png formats for image
-	_ "image/png"
-	// Add jpeg formats for image
-	_ "image/jpeg"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	fileservicerepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/repository"
 )
 
@@ -30,11 +28,11 @@ type IFileStorageHTTP interface {
 type FileServiceHTTP struct {
 	urlPrefixPath string
 	fileStorage   IFileStorageHTTP
-	logger        *my_logger.MyLogger
+	logger        *mylogger.MyLogger
 }
 
 func NewFileServiceHTTP(fileStorage IFileStorageHTTP, urlPrefixPath string) (*FileServiceHTTP, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

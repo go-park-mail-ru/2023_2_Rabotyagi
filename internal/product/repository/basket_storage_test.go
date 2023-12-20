@@ -2,17 +2,18 @@ package repository_test
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/pashagolub/pgxmock/v3"
 	"testing"
 	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/pashagolub/pgxmock/v3"
 )
 
-func TestDeleteOrder(t *testing.T) {
+func TestDeleteOrder(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -73,7 +74,7 @@ func TestDeleteOrder(t *testing.T) {
 func TestUpdateOrderCount(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -133,19 +134,14 @@ func TestUpdateOrderCount(t *testing.T) {
 	}
 }
 
-func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
+func TestUpdateOrderStatus(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
-
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		ownerID                uint64
 		orderID                uint64
 		newStatus              uint8
@@ -154,7 +150,7 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT status, count FROM public."order"`).WithArgs(uint64(1), uint64(1)).
@@ -173,7 +169,7 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
 		},
 		{
 			name: "test status default not 0",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT status, count FROM public."order"`).WithArgs(uint64(1), uint64(1)).
@@ -195,10 +191,17 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
 		},
 	}
 
-	for _, testCase := range testCases { //nolint:paralleltest
+	for _, testCase := range testCases {
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			ctx := context.Background()
 
 			catStorage, err := repository.NewProductStorage(mockPool)
@@ -206,7 +209,7 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(catStorage)
+			testCase.behaviorProductStorage(catStorage, mockPool)
 
 			err = catStorage.UpdateOrderStatus(ctx, testCase.ownerID, testCase.orderID, testCase.newStatus)
 			if err != nil {
@@ -220,10 +223,10 @@ func TestUpdateOrderStatus(t *testing.T) { //nolint:funlen,tparallel
 	}
 }
 
-func TestAddOrderInBasket(t *testing.T) { //nolint:funlen
+func TestAddOrderInBasket(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -247,9 +250,11 @@ func TestAddOrderInBasket(t *testing.T) { //nolint:funlen
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city_id,
        delivery, safe_deal, is_active, premium FROM public."product" `).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"saler_id", "category_id", "title", "description", "price",
+					WillReturnRows(pgxmock.NewRows([]string{
+						"saler_id", "category_id", "title", "description", "price",
 						"created_at", "views", "available_count", "city_id", "delivery",
-						"safe_deal", "is_active", "premium"}).
+						"safe_deal", "is_active", "premium",
+					}).
 						AddRow(uint64(1), uint64(1), "Car", "text", uint64(1212), time.Now(),
 							uint32(6), uint32(4), uint64(6), true, true, true, false))
 
@@ -296,10 +301,10 @@ func TestAddOrderInBasket(t *testing.T) { //nolint:funlen
 	}
 }
 
-func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl,funlen
+func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -322,8 +327,10 @@ func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl,funlen
         "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product"`).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "owner_id", "product_id", "title", "price",
-						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id"}).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "owner_id", "product_id", "title", "price",
+						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id",
+					}).
 						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
 							uint64(1), uint32(1), uint32(1), true, true, uint64(1)))
 
@@ -372,7 +379,7 @@ func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl,funlen
 func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -395,8 +402,10 @@ func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
         "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product"`).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "owner_id", "product_id", "title", "price",
-						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id"}).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "owner_id", "product_id", "title", "price",
+						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id",
+					}).
 						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
 							uint64(1), uint32(1), uint32(1), true, true, uint64(1)))
 
@@ -445,7 +454,7 @@ func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
 func TestGetOrdersSold(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -468,8 +477,10 @@ func TestGetOrdersSold(t *testing.T) { //nolint:dupl
         "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product"`).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "owner_id", "product_id", "title", "price",
-						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id"}).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "owner_id", "product_id", "title", "price",
+						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id",
+					}).
 						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
 							uint64(1), uint32(1), uint32(1), true, true, uint64(1)))
 

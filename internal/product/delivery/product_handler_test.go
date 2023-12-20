@@ -14,13 +14,12 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	mocksauth "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
-
 	"go.uber.org/mock/gomock"
 )
 
@@ -46,11 +45,10 @@ func NewProductHandler(ctrl *gomock.Controller,
 	return productHandler, nil
 }
 
-//nolint:funlen
 func TestAddProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -221,11 +219,10 @@ func TestAddProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -286,14 +283,14 @@ func TestGetProduct(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.idProduct})
 			req.AddCookie(&test.Cookie)
-			productHandler.GetProductHandler(w, req)
+			productHandler.GetProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -301,11 +298,10 @@ func TestGetProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProductList(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -351,7 +347,7 @@ func TestGetProductList(t *testing.T) {
 						{ID: 8, Title: "Title2"},
 						{ID: 9, Title: "Title2"},
 						{ID: 10, Title: "Title2"},
-					}, nil) //nolint:exhaustruct
+					}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
 				[]*models.ProductInFeed{
@@ -383,14 +379,14 @@ func TestGetProductList(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
 			req.AddCookie(&test.Cookie)
-			productHandler.GetProductListHandler(w, req)
+			productHandler.GetProductListHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -398,11 +394,10 @@ func TestGetProductList(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetListProductOfSaler(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -462,7 +457,7 @@ func TestGetListProductOfSaler(t *testing.T) {
 					{ID: 8, Title: "Title2"},
 					{ID: 9, Title: "Title2"},
 					{ID: 10, Title: "Title2"},
-				}), //nolint:exhaustruct
+				}),
 		},
 	}
 
@@ -480,14 +475,14 @@ func TestGetListProductOfSaler(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list_of_saler", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
 			req.AddCookie(&test.Cookie)
-			productHandler.GetListProductOfSalerHandler(w, req)
+			productHandler.GetListProductOfSalerHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -495,11 +490,10 @@ func TestGetListProductOfSaler(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetListProductOfAnotherSaler(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -545,7 +539,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 						{ID: 8, Title: "Title2"},
 						{ID: 9, Title: "Title2"},
 						{ID: 10, Title: "Title2"},
-					}, nil) //nolint:exhaustruct
+					}, nil)
 			},
 			expectedResponse: delivery.NewProductListResponse(
 				[]*models.ProductInFeed{
@@ -559,7 +553,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 					{ID: 8, Title: "Title2"},
 					{ID: 9, Title: "Title2"},
 					{ID: 10, Title: "Title2"},
-				}), //nolint:exhaustruct
+				}),
 		},
 	}
 
@@ -582,14 +576,14 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_list_of_another_saler", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
 
-			productHandler.GetListProductOfAnotherSalerHandler(w, req)
+			productHandler.GetListProductOfAnotherSalerHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -597,11 +591,10 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestUpdateProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -701,10 +694,11 @@ func TestUpdateProduct(t *testing.T) {
 	}
 }
 
-func TestCloseProduct(t *testing.T) { // nolint:funlen,dupl
+//nolint:dupl
+func TestCloseProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -759,14 +753,14 @@ func TestCloseProduct(t *testing.T) { // nolint:funlen,dupl
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/close", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
 			req.AddCookie(&test.Cookie)
-			productHandler.CloseProductHandler(w, req)
+			productHandler.CloseProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -774,10 +768,11 @@ func TestCloseProduct(t *testing.T) { // nolint:funlen,dupl
 	}
 }
 
-func TestActivateProduct(t *testing.T) { // nolint:funlen,dupl
+//nolint:dupl
+func TestActivateProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -832,14 +827,14 @@ func TestActivateProduct(t *testing.T) { // nolint:funlen,dupl
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPatch, "/api/v1/product/activate", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
 			req.AddCookie(&test.Cookie)
-			productHandler.ActivateProductHandler(w, req)
+			productHandler.ActivateProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -847,11 +842,10 @@ func TestActivateProduct(t *testing.T) { // nolint:funlen,dupl
 	}
 }
 
-// nolint:funlen
 func TestDeleteProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -906,14 +900,14 @@ func TestDeleteProduct(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodDelete, "/api/v1/product/delete", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"id": testCase.queryID})
 			req.AddCookie(&test.Cookie)
-			productHandler.DeleteProductHandler(w, req)
+			productHandler.DeleteProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -921,11 +915,10 @@ func TestDeleteProduct(t *testing.T) {
 	}
 }
 
-// nolint:funlen
 func TestSearchProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -988,14 +981,14 @@ func TestSearchProduct(t *testing.T) {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/search", nil)
 			utils.AddQueryParamsToRequest(req, map[string]string{"searched": testCase.querySearched})
 			req.AddCookie(&test.Cookie)
-			productHandler.SearchProductHandler(w, req)
+			productHandler.SearchProductHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
@@ -1003,11 +996,10 @@ func TestSearchProduct(t *testing.T) {
 	}
 }
 
-// nolint:funlen
 func TestGetSearchProductFeed(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -1046,14 +1038,14 @@ func TestGetSearchProductFeed(t *testing.T) {
 				t.Fatalf("Failed create productHandler %+v", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/product/get_search_feed", nil)
 			utils.AddQueryParamsToRequest(req, testCase.queryParams)
 			req.AddCookie(&test.Cookie)
-			productHandler.GetSearchProductFeedHandler(w, req)
+			productHandler.GetSearchProductFeedHandler(recorder, req)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}

@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

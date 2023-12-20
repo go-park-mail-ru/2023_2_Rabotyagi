@@ -7,15 +7,15 @@ import (
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 )
 
 func GetUserID(ctx context.Context, r *http.Request,
 	sessionManager auth.SessionMangerClient,
 ) (uint64, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/jackc/pgx/v5"
@@ -64,7 +65,7 @@ func (p *ProductStorage) GetUserFavourites(ctx context.Context, userID uint64) (
 
 	var slProduct []*models.ProductInFeed
 
-	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error { //nolint:varnamelen
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		slProductInner, err := p.selectUserFavourites(ctx, tx, userID)
 		if err != nil {
 			return err
@@ -94,7 +95,7 @@ func (p *ProductStorage) GetUserFavourites(ctx context.Context, userID uint64) (
 	return slProduct, nil
 }
 
-func (p *ProductStorage) addToFavourites(ctx context.Context, tx pgx.Tx, //nolint:varnamelen
+func (p *ProductStorage) addToFavourites(ctx context.Context, tx pgx.Tx,
 	userID uint64, productID uint64,
 ) error {
 	logger := p.logger.LogReqID(ctx)
@@ -131,7 +132,7 @@ func (p *ProductStorage) AddToFavourites(ctx context.Context, userID uint64, pro
 	return nil
 }
 
-func (p *ProductStorage) deleteFromFavourites(ctx context.Context, tx pgx.Tx, //nolint:varnamelen
+func (p *ProductStorage) deleteFromFavourites(ctx context.Context, tx pgx.Tx,
 	userID uint64, productID uint64,
 ) error {
 	logger := p.logger.LogReqID(ctx)

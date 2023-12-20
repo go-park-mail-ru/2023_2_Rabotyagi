@@ -3,22 +3,22 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"strings"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/jackc/pgx/v5"
 )
 
 type CategoryStorage struct {
 	pool   pgxpool.IPgxPool
-	logger *my_logger.MyLogger
+	logger *mylogger.MyLogger
 }
 
 func NewCategoryStorage(pool pgxpool.IPgxPool) (*CategoryStorage, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -85,7 +85,9 @@ func (c *CategoryStorage) GetFullCategories(ctx context.Context) ([]*models.Cate
 	return categories, nil
 }
 
-func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchInput string) ([]*models.Category, error) {
+func (c *CategoryStorage) searchCategory(ctx context.Context,
+	tx pgx.Tx, searchInput string,
+) ([]*models.Category, error) {
 	logger := c.logger.LogReqID(ctx)
 
 	SQLSearchCategory := `SELECT category.id, category.name, category.parent_id
@@ -107,7 +109,7 @@ func (c *CategoryStorage) searchCategory(ctx context.Context, tx pgx.Tx, searchI
 	_, err = pgx.ForEachRow(categoriesRows, []any{
 		&curCategory.ID, &curCategory.Name, &curCategory.ParentID,
 	}, func() error {
-		categories = append(categories, &models.Category{ //nolint:exhaustruct
+		categories = append(categories, &models.Category{
 			ID:       curCategory.ID,
 			Name:     curCategory.Name,
 			ParentID: curCategory.ParentID,

@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"io"
 	"net/http"
 	"strconv"
@@ -11,6 +10,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 )
 
 var _ IFavouriteService = (*productusecases.FavouriteService)(nil)
@@ -33,7 +33,7 @@ type IFavouriteService interface {
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /profile/favourites [get]
-func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -74,7 +74,7 @@ func (p *ProductHandler) GetFavouritesHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badFormat(4000)
 //	@Router      /product/add-to-fav [post]
-func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -98,7 +98,7 @@ func (p *ProductHandler) AddToFavouritesHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful))
+	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful)) //nolint:wastedassign,staticcheck
 
 	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(userID))
 
@@ -152,7 +152,7 @@ func (p *ProductHandler) DeleteFromFavouritesHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful))
+	r = r.WithContext(statuses.FillStatusCtx(r.Context(), statuses.StatusRedirectAfterSuccessful)) //nolint:wastedassign,staticcheck
 
 	responses.SendResponse(w, logger, responses.NewResponseIDRedirect(productID))
 

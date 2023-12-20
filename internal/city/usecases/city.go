@@ -3,9 +3,10 @@ package usecases
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 )
 
 type ICityStorage interface {
@@ -15,11 +16,11 @@ type ICityStorage interface {
 
 type CityService struct {
 	storage ICityStorage
-	logger  *my_logger.MyLogger
+	logger  *mylogger.MyLogger
 }
 
 func NewCityService(cityStorage ICityStorage) (*CityService, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

@@ -1,16 +1,18 @@
-package repository
+package repository_test
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/pashagolub/pgxmock/v3"
 	"testing"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/repository"
+	"github.com/pashagolub/pgxmock/v3"
 )
 
 func TestGetUser(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -19,14 +21,14 @@ func TestGetUser(t *testing.T) {
 
 	type TestCase struct {
 		name                string
-		behaviorAuthStorage func(m *AuthStorage)
+		behaviorAuthStorage func(m *repository.AuthStorage)
 		testEmail           string
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorAuthStorage: func(m *AuthStorage) {
+			behaviorAuthStorage: func(m *repository.AuthStorage) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT id FROM public."user"`).WithArgs("test@gmail.com").
@@ -52,7 +54,7 @@ func TestGetUser(t *testing.T) {
 
 			ctx := context.Background()
 
-			catStorage, err := NewAuthStorage(mockPool)
+			catStorage, err := repository.NewAuthStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
@@ -74,7 +76,7 @@ func TestGetUser(t *testing.T) {
 func TestAddUser(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -83,7 +85,7 @@ func TestAddUser(t *testing.T) {
 
 	type TestCase struct {
 		name                string
-		behaviorAuthStorage func(m *AuthStorage)
+		behaviorAuthStorage func(m *repository.AuthStorage)
 		testEmail           string
 		testPassword        string
 	}
@@ -91,7 +93,7 @@ func TestAddUser(t *testing.T) {
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorAuthStorage: func(m *AuthStorage) {
+			behaviorAuthStorage: func(m *repository.AuthStorage) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT id FROM public."user"`).WithArgs("test@gmail.com").
@@ -120,7 +122,7 @@ func TestAddUser(t *testing.T) {
 
 			ctx := context.Background()
 
-			catStorage, err := NewAuthStorage(mockPool)
+			catStorage, err := repository.NewAuthStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}

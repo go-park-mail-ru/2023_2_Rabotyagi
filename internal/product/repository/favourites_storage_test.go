@@ -2,16 +2,17 @@ package repository_test
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/pashagolub/pgxmock/v3"
 	"testing"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/pashagolub/pgxmock/v3"
 )
 
-func TestAddToFavourites(t *testing.T) {
+func TestAddToFavourites(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -72,7 +73,7 @@ func TestAddToFavourites(t *testing.T) {
 func TestDeleteFromFavourites(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {

@@ -21,7 +21,7 @@ func CompareSameType[T comparable](received T, expected T) error {
 	return nil
 }
 
-// EqualTest accept arguments that should be work with json.Marshal
+// EqualTest accept arguments that should be work with json.Marshal.
 func EqualTest(received any, expected any) error {
 	if !reflect.DeepEqual(received, expected) {
 		expectedRaw, err := json.Marshal(expected)
@@ -43,7 +43,7 @@ func EqualTest(received any, expected any) error {
 
 func EqualError(received error, expected error) error {
 	if !errors.Is(received, expected) {
-		return fmt.Errorf("%w got %+v expected wrapped: %+v", errCompareErrors, received, expected)
+		return fmt.Errorf("%w got %+v expected wrapped: %+v", errCompareErrors, received, expected) //nolint:errorlint
 	}
 
 	return nil

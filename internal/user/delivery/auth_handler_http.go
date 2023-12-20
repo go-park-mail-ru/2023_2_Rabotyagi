@@ -3,14 +3,14 @@ package delivery
 import (
 	"encoding/json"
 	"errors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"net/http"
 	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 )
 
@@ -20,13 +20,13 @@ const (
 
 type AuthHandler struct {
 	sessionManagerClient auth.SessionMangerClient
-	logger               *my_logger.MyLogger
+	logger               *mylogger.MyLogger
 }
 
 func NewAuthHandler(sessionManagerClient auth.SessionMangerClient) (*AuthHandler, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	return &AuthHandler{sessionManagerClient: sessionManagerClient, logger: logger}, nil
@@ -45,7 +45,7 @@ func NewAuthHandler(sessionManagerClient auth.SessionMangerClient) (*AuthHandler
 //	@Success    200  {object} responses.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)//nolint:lll
 //	@Router      /signup [post]
 func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -88,10 +88,11 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().Add(timeTokenLife)
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    responses.CookieAuthName,
-		Value:   sessionWithToken.GetAccessToken(),
-		Expires: expire,
-		Path:    "/",
+		Name:     responses.CookieAuthName,
+		Value:    sessionWithToken.GetAccessToken(),
+		SameSite: http.SameSiteLaxMode,
+		Expires:  expire,
+		Path:     "/",
 	}
 
 	http.SetCookie(w, cookie)
@@ -110,7 +111,7 @@ func (a *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 //	@Success    200  {object} responses.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Внутри body статус может быть badContent(4400), badFormat(4000)//nolint:lll
 //	@Router      /signin [get]
 func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -138,10 +139,11 @@ func (a *AuthHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().Add(timeTokenLife)
 
 	cookie := &http.Cookie{ //nolint:exhaustruct
-		Name:    responses.CookieAuthName,
-		Value:   sessionWithToken.GetAccessToken(),
-		Expires: expire,
-		Path:    "/",
+		Name:     responses.CookieAuthName,
+		Value:    sessionWithToken.GetAccessToken(),
+		SameSite: http.SameSiteLaxMode,
+		Expires:  expire,
+		Path:     "/",
 	}
 
 	http.SetCookie(w, cookie)

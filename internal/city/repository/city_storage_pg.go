@@ -3,22 +3,22 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"strings"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/jackc/pgx/v5"
 )
 
 type CityStorage struct {
 	pool   pgxpool.IPgxPool
-	logger *my_logger.MyLogger
+	logger *mylogger.MyLogger
 }
 
 func NewCityStorage(pool pgxpool.IPgxPool) (*CityStorage, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -48,7 +48,7 @@ func (c *CityStorage) selectFullCities(ctx context.Context, tx pgx.Tx) ([]*model
 	_, err = pgx.ForEachRow(citiesRows, []any{
 		&curCity.ID, &curCity.Name,
 	}, func() error {
-		cities = append(cities, &models.City{ //nolint:exhaustruct
+		cities = append(cities, &models.City{
 			ID:   curCity.ID,
 			Name: curCity.Name,
 		})

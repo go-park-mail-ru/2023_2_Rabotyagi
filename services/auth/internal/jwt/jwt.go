@@ -2,11 +2,11 @@ package jwt
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"sync"
 	"time"
 
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -74,8 +74,9 @@ type UserJwtPayload struct {
 	Email  string
 }
 
+//nolint:cyclop
 func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -133,7 +134,7 @@ func (u *UserJwtPayload) getMapClaims() jwt.MapClaims {
 }
 
 func GenerateJwtToken(userToken *UserJwtPayload, secret []byte) (string, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return "", err //nolint:wrapcheck
 	}

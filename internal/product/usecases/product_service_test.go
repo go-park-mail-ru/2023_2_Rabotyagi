@@ -12,11 +12,10 @@ import (
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	mocksfileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
-
 	"go.uber.org/mock/gomock"
 )
 
@@ -57,11 +56,10 @@ func NewProductService(ctrl *gomock.Controller,
 	return productService, nil
 }
 
-//nolint:funlen
 func TestAddProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -287,11 +285,10 @@ func TestAddProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -356,11 +353,10 @@ func TestGetProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProductList(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -431,11 +427,10 @@ func TestGetProductList(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestGetProductsOfSaler(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -521,11 +516,10 @@ func generateString(lenStr int) string {
 	return result
 }
 
-//nolint:funlen
 func TestUpdateProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -666,7 +660,7 @@ func TestUpdateProduct(t *testing.T) {
 func TestCloseProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -723,7 +717,7 @@ func TestCloseProduct(t *testing.T) { //nolint:dupl
 func TestActivateProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -780,7 +774,7 @@ func TestActivateProduct(t *testing.T) { //nolint:dupl
 func TestDeleteProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -834,11 +828,10 @@ func TestDeleteProduct(t *testing.T) { //nolint:dupl
 	}
 }
 
-//nolint:funlen
 func TestSearchProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -901,11 +894,10 @@ func TestSearchProduct(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestSearchProductFeed(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")

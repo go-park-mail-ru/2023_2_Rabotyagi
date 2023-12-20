@@ -6,12 +6,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
-
 	"google.golang.org/grpc/metadata"
 )
 
@@ -30,7 +29,7 @@ const keyCtxHandler keyCtx = "handler"
 
 var (
 	ErrToBigFile = myerrors.NewErrorBadContentRequest("Максимальный размер фото %d Мбайт",
-		MaxSizePhotoBytes%1024%1024)
+		MaxSizePhotoBytes%10204%1024) //nolint:gomnd
 	ErrToManyCountFiles   = myerrors.NewErrorBadContentRequest("Максимальное количество фото = %d", MaxCountPhoto)
 	ErrForbiddenRootPath  = myerrors.NewErrorBadContentRequest("Нельзя вызывать корневой путь")
 	ErrWrongNameMultipart = myerrors.NewErrorBadFormatRequest("в multipart/form нет нужного имени: %s", NameImagesInForm)
@@ -45,11 +44,11 @@ type IFileServiceHTTP interface {
 type FileHandlerHTTP struct {
 	fileServiceDir string
 	fileService    IFileServiceHTTP
-	logger         *my_logger.MyLogger
+	logger         *mylogger.MyLogger
 }
 
 func NewFileHandlerHTTP(fileService IFileServiceHTTP,
-	logger *my_logger.MyLogger, fileServiceDir string,
+	logger *mylogger.MyLogger, fileServiceDir string,
 ) *FileHandlerHTTP {
 	return &FileHandlerHTTP{
 		fileService: fileService, logger: logger,
@@ -69,9 +68,9 @@ func NewFileHandlerHTTP(fileService IFileServiceHTTP,
 //	@Success    200  {object} ResponseURLs
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400), badFormat(4000)"
+//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400), badFormat(4000)"//nolint:lll
 //	@Router      /img/upload [post]
-func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
+func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Request) { //nolint:funlen
 	r.Body = http.MaxBytesReader(w, r.Body, MaxSizePhotoBytes*MaxCountPhoto)
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -107,10 +106,10 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 
 	slURL := make([]string, len(slFiles))
 
-	for i, file := range slFiles {
+	for idxFile, file := range slFiles {
 		if file.Size > MaxSizePhotoBytes {
 			err := myerrors.NewErrorBadContentRequest(
-				"файл: %s весит %d Мбайт. %+v\n", file.Filename, file.Size/1024/1024, ErrToBigFile.Error())
+				"файл: %s весит %d Мбайт. %+v\n", file.Filename, file.Size/1024/1024, ErrToBigFile.Error()) //nolint:gomnd
 
 			logger.Errorln(err)
 			responses.HandleErr(w, r, logger, err)
@@ -128,6 +127,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 		}
 
 		metadata.NewOutgoingContext(ctx, metadata.Pairs())
+
 		URLToFile, err := f.fileService.SaveImage(ctx, fileBody)
 		if err != nil {
 			logger.Errorln(err)
@@ -136,7 +136,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		slURL[i] = URLToFile
+		slURL[idxFile] = URLToFile
 	}
 
 	responses.SendResponse(w, logger, NewResponseURLs(slURL))
@@ -161,7 +161,7 @@ func (f *FileHandlerHTTP) UploadFileHandler(w http.ResponseWriter, r *http.Reque
 //	@Failure    405  {string} string
 //	@Failure    404  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400)"
+//	@Failure    222  {object} responses.ErrorResponse "Тут статус http статус 200. Внутри body статус может быть badContent(4400)"//nolint:lll
 //	@Router      /img/ [get]
 func (f *FileHandlerHTTP) fileServerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

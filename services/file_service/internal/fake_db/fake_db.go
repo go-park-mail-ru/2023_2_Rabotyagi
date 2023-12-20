@@ -2,7 +2,7 @@ package fake_db
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	serverrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/fake_db/repository"
 
@@ -10,7 +10,7 @@ import (
 )
 
 func RunScriptFillDB(URLDataBase string,
-	logger *my_logger.MyLogger, baseCount uint, pathToRoot string,
+	logger *mylogger.MyLogger, baseCount uint, pathToRoot string,
 ) error {
 	prefixURL := "img/"
 	maxNameImg := uint(12)

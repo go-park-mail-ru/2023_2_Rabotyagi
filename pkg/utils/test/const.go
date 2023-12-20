@@ -1,9 +1,10 @@
 package test
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"net/http"
 	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 )
 
 // AccessToken for read only, because async usage.

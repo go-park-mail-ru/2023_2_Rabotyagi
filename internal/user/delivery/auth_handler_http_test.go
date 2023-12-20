@@ -10,12 +10,11 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth/mocks"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
-
 	"go.uber.org/mock/gomock"
 )
 
@@ -34,11 +33,10 @@ func NewAuthHandler(ctrl *gomock.Controller,
 	return authHandler, nil
 }
 
-//nolint:funlen
 func TestSignUp(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                         string
@@ -61,7 +59,7 @@ func TestSignUp(t *testing.T) {
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
 				cookieRaw := recorder.Header().Get("Set-Cookie")
 				if !strings.Contains(cookieRaw, test.AccessToken) {
-					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
+					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw) //nolint
 				}
 
 				return nil
@@ -129,16 +127,16 @@ func TestSignUp(t *testing.T) {
 				t.Fatalf("Failed create authHandler %s", err.Error())
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
-			authHandler.SignUpHandler(w, testCase.request)
+			authHandler.SignUpHandler(recorder, testCase.request)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 
-			err = testCase.checkHeader(w)
+			err = testCase.checkHeader(recorder)
 			if err != nil {
 				t.Fatalf("Wrong Headers %s", err.Error())
 			}
@@ -146,11 +144,10 @@ func TestSignUp(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestSignIn(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                         string
@@ -172,7 +169,7 @@ func TestSignIn(t *testing.T) {
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
 				cookieRaw := recorder.Header().Get("Set-Cookie")
 				if !strings.Contains(cookieRaw, test.AccessToken) {
-					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
+					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw) //nolint
 				}
 
 				return nil
@@ -220,16 +217,16 @@ func TestSignIn(t *testing.T) {
 				t.Fatalf("Failed create authHandler %s", err.Error())
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
-			authHandler.SignInHandler(w, testCase.request)
+			authHandler.SignInHandler(recorder, testCase.request)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 
-			err = testCase.checkHeader(w)
+			err = testCase.checkHeader(recorder)
 			if err != nil {
 				t.Fatalf("Wrong Headers %s", err.Error())
 			}
@@ -237,11 +234,10 @@ func TestSignIn(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestLogOut(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                         string
@@ -256,7 +252,7 @@ func TestLogOut(t *testing.T) {
 			name: "test basic work",
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),
@@ -268,7 +264,7 @@ func TestLogOut(t *testing.T) {
 			checkHeader: func(recorder *httptest.ResponseRecorder) error {
 				cookieRaw := recorder.Header().Get("Set-Cookie")
 				if !strings.Contains(cookieRaw, "jwt_test_token") {
-					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw)
+					return fmt.Errorf("cookie not contain jwt token. Cookie: %s", cookieRaw) //nolint
 				}
 
 				return nil
@@ -279,7 +275,7 @@ func TestLogOut(t *testing.T) {
 			name: "test internal error",
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
-				req.AddCookie(&test.Cookie) //nolint:exhaustruct
+				req.AddCookie(&test.Cookie)
 
 				return req
 			}(),
@@ -329,16 +325,16 @@ func TestLogOut(t *testing.T) {
 				t.Fatalf("Failed create authHandler %s", err.Error())
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
-			authHandler.LogOutHandler(w, testCase.request)
+			authHandler.LogOutHandler(recorder, testCase.request)
 
-			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
+			err = test.CompareHTTPTestResult(recorder, testCase.expectedResponse)
 			if err != nil {
 				t.Fatalf("Failed CompareHTTPTestResult %+v", err)
 			}
 
-			err = testCase.checkHeader(w)
+			err = testCase.checkHeader(recorder)
 			if err != nil {
 				t.Fatalf("Wrong Headers %s", err.Error())
 			}

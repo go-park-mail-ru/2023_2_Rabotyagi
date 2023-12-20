@@ -1,9 +1,10 @@
-package my_logger_test
+package mylogger_test
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"testing"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 )
 
 func TestAddRequestIDToCtx(t *testing.T) {
@@ -11,9 +12,9 @@ func TestAddRequestIDToCtx(t *testing.T) {
 
 	ctx := context.Background()
 
-	ctx = my_logger.AddRequestIDToCtx(ctx)
+	ctx = mylogger.AddRequestIDToCtx(ctx)
 
-	requestID := my_logger.GetRequestIDFromCtx(ctx)
+	requestID := mylogger.GetRequestIDFromCtx(ctx)
 
 	if requestID == "" {
 		t.Error("Failed to add request ID to context")
@@ -25,15 +26,15 @@ func TestGetRequestIDFromCtx(t *testing.T) {
 
 	ctx := context.Background()
 
-	requestID := my_logger.GetRequestIDFromCtx(ctx)
+	requestID := mylogger.GetRequestIDFromCtx(ctx)
 
 	if requestID != "" {
 		t.Error("Unexpected request ID in empty context")
 	}
 
-	ctx = my_logger.AddRequestIDToCtx(ctx)
+	ctx = mylogger.AddRequestIDToCtx(ctx)
 
-	requestID = my_logger.GetRequestIDFromCtx(ctx)
+	requestID = mylogger.GetRequestIDFromCtx(ctx)
 	if requestID == "" {
 		t.Error("Failed to add request ID to context")
 	}

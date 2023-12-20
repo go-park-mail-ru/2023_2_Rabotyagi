@@ -6,13 +6,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
-
 	"github.com/Masterminds/squirrel"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -38,11 +37,11 @@ const (
 
 type ProductStorage struct {
 	pool   pgxpool.IPgxPool
-	logger *my_logger.MyLogger
+	logger *mylogger.MyLogger
 }
 
 func NewProductStorage(pool pgxpool.IPgxPool) (*ProductStorage, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -54,7 +53,7 @@ func NewProductStorage(pool pgxpool.IPgxPool) (*ProductStorage, error) {
 }
 
 func (p *ProductStorage) selectImagesByProductID(ctx context.Context,
-	tx pgx.Tx, productID uint64, //nolint:varnamelen
+	tx pgx.Tx, productID uint64,
 ) ([]models.Image, error) {
 	logger := p.logger.LogReqID(ctx)
 
@@ -119,7 +118,7 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 }
 
 func (p *ProductStorage) selectCountFavouritesByProductID(ctx context.Context,
-	tx pgx.Tx, //nolint:varnamelen
+	tx pgx.Tx,
 	productID uint64,
 ) (uint64, error) {
 	logger := p.logger.LogReqID(ctx)
@@ -173,7 +172,7 @@ type productAddition struct {
 }
 
 func (p *ProductStorage) getProductAddition(ctx context.Context,
-	tx pgx.Tx, productID uint64, userID uint64, //nolint:varnamelen
+	tx pgx.Tx, productID uint64, userID uint64,
 ) (*productAddition, error) {
 	innerProductAddition := new(productAddition)
 
@@ -200,7 +199,7 @@ func (p *ProductStorage) getProductAddition(ctx context.Context,
 }
 
 func (p *ProductStorage) selectPremiumExpireByProductID(ctx context.Context,
-	tx pgx.Tx, //nolint:varnamelen
+	tx pgx.Tx,
 	productID uint64,
 ) (sql.NullTime, error) {
 	logger := p.logger.LogReqID(ctx)
@@ -212,7 +211,7 @@ func (p *ProductStorage) selectPremiumExpireByProductID(ctx context.Context,
 	expireRow := tx.QueryRow(ctx, SQLPremiumEpire, productID)
 	if err := expireRow.Scan(&expire); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return sql.NullTime{}, nil
+			return sql.NullTime{}, nil //nolint:exhaustruct
 		}
 
 		logger.Errorln(err)
@@ -224,7 +223,7 @@ func (p *ProductStorage) selectPremiumExpireByProductID(ctx context.Context,
 }
 
 func (p *ProductStorage) getProduct(ctx context.Context,
-	tx pgx.Tx, productID uint64, userID uint64, //nolint:varnamelen
+	tx pgx.Tx, productID uint64, userID uint64,
 ) (*models.Product, error) {
 	product, err := p.selectProductByID(ctx, tx, productID)
 	if err != nil {
@@ -259,7 +258,7 @@ func (p *ProductStorage) getProduct(ctx context.Context,
 func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error) {
 	var product *models.Product
 
-	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error { //nolint:varnamelen
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		productInner, err := p.getProduct(ctx, tx, productID, userID)
 		if err != nil {
 			return err
@@ -425,7 +424,6 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
 			tx, count, whereClause, []string{OrderByClauseForProductList(PremiumCoefficient,
 				NonPremiumCoefficient, SoldByUserCoefficient, ViewsCoefficient)})
-
 		if err != nil {
 			return err
 		}
@@ -505,10 +503,10 @@ func (p *ProductStorage) insertProduct(ctx context.Context, tx pgx.Tx, preProduc
 		category_id, title, description, price,available_count,
 		city_id, delivery, safe_deal) VALUES(
 		$1, $2, $3, $4, $5, $6, $7, $8, $9)`
+
 	_, err := tx.Exec(ctx, SQLInsertProduct, preProduct.SalerID, preProduct.CategoryID,
 		preProduct.Title, preProduct.Description, preProduct.Price, preProduct.AvailableCount,
 		preProduct.CityID, preProduct.Delivery, preProduct.SafeDeal)
-
 	if err != nil {
 		logger.Errorln(err)
 
@@ -526,27 +524,27 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		err := p.insertProduct(ctx, tx, preProduct)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		LastProductID, err := repository.GetLastValSeq(ctx, tx, logger, NameSeqProduct)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		err = p.insertImages(ctx, tx, LastProductID, preProduct.Images)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
 		productID = LastProductID
 
 		err = p.addPriceHistoryRecord(ctx, tx, productID, preProduct.Price)
 		if err != nil {
-			return err
+			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		return err
+		return nil
 	})
 	if err != nil {
 		logger.Errorln(err)
@@ -795,7 +793,6 @@ func (p *ProductStorage) addView(ctx context.Context, tx pgx.Tx, userID uint64, 
 				   VALUES ($1, $2)`
 
 	_, err := tx.Exec(ctx, SQLAddView, userID, productID)
-
 	if err != nil {
 		logger.Errorln(err)
 
@@ -813,7 +810,6 @@ func (p *ProductStorage) incViews(ctx context.Context, tx pgx.Tx, productID uint
 				   WHERE id=$1`
 
 	_, err := tx.Exec(ctx, SQLAddView, productID)
-
 	if err != nil {
 		logger.Errorln(err)
 
@@ -827,12 +823,15 @@ func (p *ProductStorage) searchProduct(ctx context.Context, tx pgx.Tx, searchInp
 	logger := p.logger.LogReqID(ctx)
 
 	SQLSearchProduct := `SELECT title
-							FROM product
-							WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
-							   AND ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) > 0
-							   AND is_active = true
-							ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
-							LIMIT 5;`
+FROM (
+  SELECT DISTINCT ON (title) title
+  FROM product
+  WHERE to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
+    AND ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) > 0
+    AND is_active = true
+) AS t
+ORDER BY ts_rank(to_tsvector(title), to_tsquery(replace($1 || ':*', ' ', ' | '))) DESC
+LIMIT 5;`
 
 	var products []string
 
@@ -949,7 +948,6 @@ func (p *ProductStorage) GetSearchProductFeed(ctx context.Context,
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		slProductInner, err := p.searchProductFeed(ctx,
 			tx, searchInput, lastNumber, limit)
-
 		if err != nil {
 			return err
 		}

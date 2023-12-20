@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"net"
 	"net/http"
 	"strings"
@@ -10,13 +9,13 @@ import (
 
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/interceptors"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/config"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery/mux"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
-
 	"google.golang.org/grpc"
 )
 
@@ -36,7 +35,7 @@ type Server struct {
 
 // RunFull chErrHTTP - chan from which error can be read if the http server exits with an error
 func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error { //nolint:funlen
-	logger, err := my_logger.New(strings.Split(config.OutputLogPath, " "),
+	logger, err := mylogger.New(strings.Split(config.OutputLogPath, " "),
 		strings.Split(config.ErrorOutputLogPath, " "))
 	if err != nil {
 		return err //nolint:wrapcheck

@@ -3,10 +3,11 @@ package repository
 import (
 	"context"
 	"fmt"
+
 	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/jackc/pgx/v5"
 )
@@ -24,11 +25,11 @@ var (
 
 type UserStorage struct {
 	pool   pgxpool.IPgxPool
-	logger *my_logger.MyLogger
+	logger *mylogger.MyLogger
 }
 
 func NewUserStorage(pool pgxpool.IPgxPool) (*UserStorage, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -39,13 +40,15 @@ func NewUserStorage(pool pgxpool.IPgxPool) (*UserStorage, error) {
 	}, nil
 }
 
-func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context, tx pgx.Tx, id uint64) (*models.UserWithoutPassword, error) { //nolint:lll
+func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context,
+	tx pgx.Tx, userID uint64,
+) (*models.UserWithoutPassword, error) {
 	logger := u.logger.LogReqID(ctx)
 
 	SQLGetUserByID := `SELECT email, phone, name, birthday, avatar, created_at FROM public."user" WHERE id=$1;`
-	userLine := tx.QueryRow(ctx, SQLGetUserByID, id)
+	userLine := tx.QueryRow(ctx, SQLGetUserByID, userID)
 	user := models.UserWithoutPassword{ //nolint:exhaustruct
-		ID: id,
+		ID: userID,
 	}
 
 	if err := userLine.Scan(&user.Email,
@@ -67,7 +70,6 @@ func (u *UserStorage) GetUserWithoutPasswordByID(ctx context.Context, id uint64)
 
 		return err
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -127,7 +129,6 @@ func (u *UserStorage) UpdateUser(ctx context.Context,
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

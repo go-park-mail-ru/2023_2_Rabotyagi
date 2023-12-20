@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson3e56fa40DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlexer.Lexer, out *userJson) {
+func easyjson3e56fa40DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlexer.Lexer, out *userJSON) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -97,7 +97,7 @@ func easyjson3e56fa40DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlex
 		in.Consumed()
 	}
 }
-func easyjson3e56fa40EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwriter.Writer, in userJson) {
+func easyjson3e56fa40EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwriter.Writer, in userJSON) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -156,25 +156,25 @@ func easyjson3e56fa40EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwr
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v userJson) MarshalJSON() ([]byte, error) {
+func (v userJSON) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson3e56fa40EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v userJson) MarshalEasyJSON(w *jwriter.Writer) {
+func (v userJSON) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson3e56fa40EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *userJson) UnmarshalJSON(data []byte) error {
+func (v *userJSON) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson3e56fa40DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *userJson) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *userJSON) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson3e56fa40DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(l, v)
 }

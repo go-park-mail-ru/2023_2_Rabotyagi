@@ -3,8 +3,8 @@ package responses
 import (
 	"net/http"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 )
 
@@ -70,7 +70,7 @@ func NewErrResponse(status int, err string) *ErrorResponse {
 	}
 }
 
-func sendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response Marshaller) {
+func sendResponse(w http.ResponseWriter, logger *mylogger.MyLogger, response Marshaller) {
 	responseSend, err := response.MarshalJSON()
 	if err != nil {
 		logger.Errorf("in sendResponse: %+v\n", err)
@@ -86,7 +86,7 @@ func sendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response Ma
 	}
 }
 
-func SendResponse(w http.ResponseWriter, logger *my_logger.MyLogger, response Marshaller) {
+func SendResponse(w http.ResponseWriter, logger *mylogger.MyLogger, response Marshaller) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	sendResponse(w, logger, response)

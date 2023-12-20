@@ -3,13 +3,14 @@ package utils_test
 import (
 	"database/sql"
 	"encoding/hex"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
 func TestSnakeToCamelCase(t *testing.T) {
@@ -83,12 +84,13 @@ func TestEqualTest(t *testing.T) {
 func TestHashPass(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name          string
 		plainPassword string
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:          "test basic work",
@@ -104,6 +106,8 @@ func TestHashPass(t *testing.T) {
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			hashedPass, err := utils.HashPass(testCase.plainPassword)
 			if err != nil {
 				t.Errorf("Error hashing password: %s", err)
@@ -119,12 +123,13 @@ func TestHashPass(t *testing.T) {
 func TestComparePassAndHash(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name          string
 		plainPassword string
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:          "test basic work",
@@ -166,32 +171,55 @@ func TestComparePassAndHash(t *testing.T) {
 func TestHash256(t *testing.T) {
 	t.Parallel()
 
-	const pass = "48656c6c6f20476f7068657221"
-	decoded, err := hex.DecodeString(pass)
-	if err != nil {
-		t.Errorf("Error hashing content: %s", err)
+	_ = mylogger.NewNop()
+
+	type TestCase struct {
+		name         string
+		pass         string
+		expectedHash string
 	}
 
-	hashedContent, err := utils.Hash256(decoded)
-	if err != nil {
-		t.Errorf("Error hashing content: %s", err)
+	testCases := [...]TestCase{
+		{
+			name:         "basic",
+			pass:         "48656c6c6f20476f7068657221",
+			expectedHash: "be8c5fbcec1ca3f472cba2d613f780ae7c7efbaac657669adcf16a9cc525dd9b",
+		},
 	}
 
-	expectedHash := "be8c5fbcec1ca3f472cba2d613f780ae7c7efbaac657669adcf16a9cc525dd9b"
-	if hashedContent != expectedHash {
-		t.Errorf("Hash does not match. Expected: %s, Got: %s", expectedHash, hashedContent)
+	for _, testCase := range testCases {
+		testCase := testCase
+
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			decoded, err := hex.DecodeString(testCase.pass)
+			if err != nil {
+				t.Errorf("Error hashing content: %s", err)
+			}
+
+			hashedContent, err := utils.Hash256(decoded)
+			if err != nil {
+				t.Errorf("Error hashing content: %s", err)
+			}
+
+			if hashedContent != testCase.expectedHash {
+				t.Errorf("Hash does not match. Expected: %s, Got: %s", testCase.expectedHash, hashedContent)
+			}
+		})
 	}
 }
 
 func TestNullStringToUnsafe(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name        string
 		validString string
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:        "test basic work",
@@ -213,12 +241,12 @@ func TestNullStringToUnsafe(t *testing.T) {
 
 			result := utils.NullStringToUnsafe(nullStr)
 
-			if result == nil {
+			if result != nil {
+				if *result != testCase.validString {
+					t.Errorf("Expected %s, got %s", testCase.validString, *result)
+				}
+			} else {
 				t.Errorf("Expected non-nil result, got nil")
-			}
-
-			if *result != testCase.validString {
-				t.Errorf("Expected %s, got %s", testCase.validString, *result)
 			}
 		})
 	}
@@ -252,12 +280,13 @@ func TestNullTimeToUnsafe(t *testing.T) {
 	nullTime := sql.NullTime{Time: validTime, Valid: true}
 
 	result := utils.NullTimeToUnsafe(nullTime)
-	if result == nil {
-		t.Errorf("Expected non-nil result, got nil")
-	}
 
-	if *result != validTime {
-		t.Errorf("Expected %s, got %s", validTime, *result)
+	if result != nil {
+		if *result != validTime {
+			t.Errorf("Expected %s, got %s", validTime, *result)
+		}
+	} else {
+		t.Errorf("Expected non-nil result, got nil")
 	}
 }
 
@@ -290,16 +319,18 @@ func TestNullInt64ToUnsafeUint(t *testing.T) {
 
 	result := utils.NullInt64ToUnsafeUint(nullInt64)
 
-	if result == nil {
+	if result != nil {
+		if *result != uint64(validInt64) {
+			t.Errorf("Expected %d, got %d", validInt64, *result)
+		}
+	} else {
 		t.Errorf("Expected non-nil result, got nil")
-	}
-
-	if *result != uint64(validInt64) {
-		t.Errorf("Expected %d, got %d", validInt64, *result)
 	}
 }
 
 func TestUnsafeUint64ToNullInt(t *testing.T) {
+	t.Parallel()
+
 	nullInt64 := utils.UnsafeUint64ToNullInt(nil)
 	if nullInt64.Valid {
 		t.Errorf("Expected Valid=false, got Valid=true")
@@ -319,7 +350,8 @@ func TestUnsafeUint64ToNullInt(t *testing.T) {
 
 func TestAddQueryParamsToRequest(t *testing.T) {
 	t.Parallel()
-	_ = my_logger.NewNop()
+
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name        string
@@ -327,6 +359,7 @@ func TestAddQueryParamsToRequest(t *testing.T) {
 		params      map[string]string
 		expectedURL string
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
@@ -356,7 +389,7 @@ func TestAddQueryParamsToRequest(t *testing.T) {
 func TestParseUint64FromRequest(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name          string
@@ -395,7 +428,7 @@ func TestParseUint64FromRequest(t *testing.T) {
 func TestParseStringFromRequest(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name          string

@@ -3,10 +3,10 @@ package delivery
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	fileusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/usecases"
 )
 
@@ -29,7 +29,7 @@ func NewFileHandlerGrpc(fileService IFileServiceGrpc) *FileHandlerGrpc {
 }
 
 func (f *FileHandlerGrpc) Check(ctx context.Context, imgURLs *fileservice.ImgURLs) (*fileservice.CheckedURLs, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

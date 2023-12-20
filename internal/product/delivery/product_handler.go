@@ -11,8 +11,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
@@ -43,13 +43,13 @@ type IProductService interface { //nolint:interfacebloat
 type ProductHandler struct {
 	sessionManagerClient auth.SessionMangerClient
 	service              IProductService
-	logger               *my_logger.MyLogger
+	logger               *mylogger.MyLogger
 }
 
 func NewProductHandler(productService IProductService,
 	sessionManagerClient auth.SessionMangerClient,
 ) (*ProductHandler, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -73,9 +73,9 @@ func NewProductHandler(productService IProductService,
 //	@Success    200  {object} responses.ResponseID
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400), badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400), badFormat(4000)//nolint:lll
 //	@Router      /product/add [post]
-func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -114,9 +114,9 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Success    200  {object} ProductResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
 //	@Router      /product/get [get]
-func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:varnamelen
+func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
 
@@ -167,7 +167,7 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll//nolint:lll
 //	@Router      /product/get_list [get]
 func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -227,7 +227,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
 //	@Router      /product/get_list_of_saler [get]
 func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -284,7 +284,7 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
 //	@Router      /product/get_list_of_another_saler [get]
 func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -340,7 +340,7 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 //	@Success    200  {object} responses.ResponseID
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400), badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400), badFormat(4000)//nolint:lll
 //	@Router      /product/update [patch]
 //	@Router      /product/update [put]
 func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
@@ -395,7 +395,7 @@ func (p *ProductHandler) UpdateProductHandler(w http.ResponseWriter, r *http.Req
 //	@Success    200  {object} responses.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint
 //	@Router      /product/close [patch]
 func (p *ProductHandler) CloseProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodPatch {
@@ -495,8 +495,9 @@ func (p *ProductHandler) ActivateProductHandler(w http.ResponseWriter, r *http.R
 //	@Success    200  {object} responses.ResponseSuccessful
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400)
 //	@Router      /product/delete [delete]
+//
+// @Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badContent(4400)//nolint:lll
 func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Request) { //nolint:dupl
 	if r.Method != http.MethodDelete {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
@@ -543,7 +544,7 @@ func (p *ProductHandler) DeleteProductHandler(w http.ResponseWriter, r *http.Req
 //	@Success    200  {object} ProductInSearchListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
 //	@Router      /product/search [get]
 func (p *ProductHandler) SearchProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -582,7 +583,7 @@ func (p *ProductHandler) SearchProductHandler(w http.ResponseWriter, r *http.Req
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
 //	@Router      /product/get_search_feed [get]
 func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

@@ -3,7 +3,7 @@ package config
 import "os"
 
 const (
-	// Main .env
+	// Main .env.
 
 	StandardDevelopmentMode    = "development"
 	StandardProductionMode     = "production"
@@ -24,7 +24,7 @@ const (
 	EnvURLDataBase        = "URL_DATA_BASE"
 	EnvServiceName        = "SERVICE_NAME"
 
-	// File service .env
+	// File service .env.
 
 	StandardPathToRoot             = "."
 	StandardFileServiceDir         = "./static/img"

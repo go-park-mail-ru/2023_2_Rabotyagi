@@ -39,6 +39,12 @@ services:
       - postgres
       - backend-fs
       - backend-auth
+    healthcheck:
+      test: "curl http://backend:8080/api/v1/healthcheck"
+      interval: 15s
+      timeout: 30s
+      retries: 5
+      start_period: 25s
     volumes:
       - log:/var/log/backend
 
@@ -51,6 +57,12 @@ services:
       - services/file_service/.env/.env
     depends_on:
       - postgres
+    healthcheck:
+      test: "curl http://backend-fs:8080/api/v1/healthcheck"
+      interval: 15s
+      timeout: 30s
+      retries: 5
+      start_period: 25s
     volumes:
       - imgs:/var/file_service/static/img
       - log-fs:/var/log/backend
@@ -62,14 +74,20 @@ services:
     restart: always
     env_file:
       - ./services/auth/.env/.env
+    healthcheck:
+      test: "curl http://backend-auth:8080/api/v1/healthcheck"
+      interval: 15s
+      timeout: 30s
+      retries: 5
+      start_period: 25s
     depends_on:
       - postgres
     volumes:
       - log-auth:/var/log/backend
 
   frontend:
-    image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
-#    image: frontend-test
+#    image: ghcr.io/frontend-park-mail-ru/2023_2_rabotyagi:dev
+    image: frontend-test
     expose:
       - 3000
 

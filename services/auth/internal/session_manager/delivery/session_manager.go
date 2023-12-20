@@ -3,9 +3,10 @@ package delivery
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/session_manager/usecases"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -24,11 +25,11 @@ type SessionManager struct {
 
 	service IAuthService
 	pool    *pgxpool.Pool
-	logger  *my_logger.MyLogger
+	logger  *mylogger.MyLogger
 }
 
 func NewSessionManager(pool *pgxpool.Pool, authService IAuthService) (*SessionManager, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

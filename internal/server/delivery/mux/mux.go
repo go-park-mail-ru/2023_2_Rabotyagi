@@ -9,10 +9,10 @@ import (
 	productdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	userdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -36,33 +36,33 @@ func NewConfigMux(addrOrigin string, schema string, portServer string, mainServi
 func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.IUserService,
 	productService productdelivery.IProductService, categoryService categorydelivery.ICategoryService,
 	cityService citydelivery.ICityService, authGrpcService auth.SessionMangerClient,
-	logger *my_logger.MyLogger,
+	logger *mylogger.MyLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 
 	authHandler, err := userdelivery.NewAuthHandler(authGrpcService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	userHandler, err := userdelivery.NewProfileHandler(userService, authGrpcService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	categoryHandler, err := categorydelivery.NewCategoryHandler(categoryService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	cityHandler, err := citydelivery.NewCityHandler(cityService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	productHandler, err := productdelivery.NewProductHandler(productService, authGrpcService)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	router.Handle("/signup",
@@ -108,8 +108,6 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 
 	router.Handle("/premium/add",
 		middleware.SetupCORS(productHandler.AddPremiumHandler, configMux.addrOrigin, configMux.schema))
-	router.Handle("/premium/remove",
-		middleware.SetupCORS(productHandler.RemovePremiumHandler, configMux.addrOrigin, configMux.schema))
 
 	router.Handle("/order/add",
 		middleware.SetupCORS(productHandler.AddOrderHandler, configMux.addrOrigin, configMux.schema))
@@ -138,6 +136,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	router.Handle("/city/search",
 		middleware.SetupCORS(cityHandler.SearchCityHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/metrics", promhttp.Handler())
+	router.HandleFunc("/healthcheck", delivery.HealthCheckHandler)
 
 	metricsManager := metrics.NewMetricManagerHTTP(configMux.mainServiceName)
 	mux := http.NewServeMux()

@@ -10,10 +10,9 @@ import (
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
-
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -51,13 +50,13 @@ type ProductService struct {
 	PremiumService
 	fileServiceClient fileservice.FileServiceClient
 	storage           IProductStorage
-	logger            *my_logger.MyLogger
+	logger            *mylogger.MyLogger
 }
 
 func NewProductService(productStorage IProductStorage, basketService *BasketService,
 	favouriteService *FavouriteService, premiumService *PremiumService, fileServiceClient fileservice.FileServiceClient,
 ) (*ProductService, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -179,7 +178,7 @@ func (p *ProductService) GetProductsOfSaler(ctx context.Context,
 }
 
 func (p *ProductService) UpdateProduct(ctx context.Context,
-	r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64, //nolint:varnamelen
+	r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64,
 ) error {
 	var preProduct *models.PreProduct
 
@@ -254,8 +253,8 @@ func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) 
 
 	sanitizer := bluemonday.UGCPolicy()
 
-	for _, product := range products {
-		product = sanitizer.Sanitize(product) //nolint:ineffassign
+	for i, product := range products {
+		products[i] = sanitizer.Sanitize(product)
 	}
 
 	return products, nil

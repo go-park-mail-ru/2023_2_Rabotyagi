@@ -20,7 +20,7 @@ func CompareHTTPTestResult(recorder *httptest.ResponseRecorder, expected any) er
 	if expectedStr, ok := expected.(string); ok {
 		receivedStr := string(receivedRespRaw)
 		if expectedStr != receivedStr {
-			return fmt.Errorf("response: got %s, expected %s",
+			return fmt.Errorf("response: got %s, expected %s", //nolint
 				receivedStr, expectedStr)
 		}
 
@@ -33,7 +33,7 @@ func CompareHTTPTestResult(recorder *httptest.ResponseRecorder, expected any) er
 	}
 
 	if !bytes.Equal(receivedRespRaw, expectedResponseRaw) {
-		return fmt.Errorf("response: got %s, expected %s",
+		return fmt.Errorf("response: got %s, expected %s", //nolint
 			string(receivedRespRaw), string(expectedResponseRaw))
 	}
 

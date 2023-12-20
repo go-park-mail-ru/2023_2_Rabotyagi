@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
+	pkgdelivery "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/middleware"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
-
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -34,7 +34,7 @@ func NewConfigMux(allowOrigin string,
 
 func NewMux(ctx context.Context, configMux *ConfigMux,
 	fileServiceHTTP delivery.IFileServiceHTTP,
-	logger *my_logger.MyLogger,
+	logger *mylogger.MyLogger,
 ) (http.Handler, error) {
 	router := http.NewServeMux()
 
@@ -44,6 +44,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux,
 	router.Handle("/img/upload", middleware.Context(ctx,
 		middleware.SetupCORS(fileHandler.UploadFileHandler, configMux.allowOrigin, configMux.schema)))
 	router.Handle("/metrics", promhttp.Handler())
+	router.HandleFunc("/healthcheck", pkgdelivery.HealthCheckHandler)
 
 	metricsManager := metrics.NewMetricManagerHTTP(configMux.fileServiceName)
 	mux := http.NewServeMux()

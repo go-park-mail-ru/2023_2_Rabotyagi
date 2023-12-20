@@ -1,12 +1,13 @@
 package models
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
 //easyjson:json
-type orderJson struct {
+type orderJSON struct {
 	ID        uint64     `json:"id"          valid:"required"`
 	OwnerID   uint64     `json:"owner_id"    valid:"required"`
 	ProductID uint64     `json:"product_id"  valid:"required"`
@@ -18,7 +19,7 @@ type orderJson struct {
 }
 
 func (o *Order) MarshalJSON() ([]byte, error) {
-	var orderJs = orderJson{
+	orderJs := orderJSON{
 		ID:        o.ID,
 		OwnerID:   o.OwnerID,
 		ProductID: o.ProductID,
@@ -33,7 +34,7 @@ func (o *Order) MarshalJSON() ([]byte, error) {
 }
 
 func (o *Order) UnmarshalJSON(bytes []byte) error {
-	var orderJs orderJson
+	var orderJs orderJSON
 
 	if err := orderJs.UnmarshalJSON(bytes); err != nil {
 		return err

@@ -32,7 +32,6 @@ linters:
     - goconst
     - gocritic
     - gocyclo
-    - godot
     - godox
     - goerr113
     - gofmt
@@ -78,7 +77,6 @@ linters:
     - sqlclosecheck
     - staticcheck
     - stylecheck
-    - tagalign
     - tagliatelle
     - tenv
     - testableexamples
@@ -109,6 +107,8 @@ linters:
     - nosnakecase
     - maligned
     - ifshort
+    - tagalign
+    - godot
 
   presets:
     - bugs
@@ -154,3 +154,26 @@ linters-settings:
       use-field-name: true
       rules:
         json: snake
+  varnamelen:
+    min-name-length: 3
+    ignore-decls:
+      - t *testing.T
+      - tx pgx.Tx
+      - w http.ResponseWriter
+      - r *http.Request
+      - r io.Reader
+issues:
+  exclude-rules:
+    - linters:
+        - lll
+      source: "//.*"
+    - path: _test.go
+      linters:
+        - funlen
+        - goconst
+
+run:
+  skip-dirs:
+    - services/file_service/internal/fake_db
+  skip-files:
+    - services/file_service/cmd/fake_db/main.go

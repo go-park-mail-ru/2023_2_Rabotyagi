@@ -3,12 +3,11 @@ package interceptors
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"time"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/metrics"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"google.golang.org/grpc"
 )
 
@@ -23,14 +22,14 @@ func NewGrpcAccessInterceptor(metrics metrics.IMetricManagerGrpc) *GrpcAccessInt
 func (g *GrpcAccessInterceptor) AccessInterceptor(ctx context.Context, req interface{},
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (interface{}, error) {
-	reqID := my_logger.GetRequestIDFromMDCtx(ctx)
-	ctx = my_logger.SetRequestIDToCtx(ctx, reqID)
+	reqID := mylogger.GetRequestIDFromMDCtx(ctx)
+	ctx = mylogger.SetRequestIDToCtx(ctx, reqID)
 
 	start := time.Now()
 	resp, errHandler := handler(ctx, req)
 	duration := time.Since(start)
 
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

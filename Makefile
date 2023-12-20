@@ -68,11 +68,18 @@ mkdir-bin:
 
 .PHONY: test
 test: mkdir-bin
-	 go test -coverpkg=./... -coverprofile=bin/cover.out ./... \
+	 go test --race -coverpkg=./... -coverprofile=bin/cover.out ./... \
  	 && cat bin/cover.out | grep -v "mocks" | grep -v "easyjson" | grep -v ".pb" > bin/pure_cover.out \
   	 && go tool cover -html=bin/pure_cover.out -o=bin/cover.html \
   	 && go tool cover --func bin/pure_cover.out
 
+.PHONY: test-actions
+test-actions:
+	./scripts/test-actions.sh
+
+.PHONY: lint
+lint:
+	golangci-lint run --timeout=3m ./...
 
 .PHONY: create-migration
 create-migration:

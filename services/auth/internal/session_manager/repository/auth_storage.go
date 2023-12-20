@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -20,13 +21,13 @@ var (
 
 type AuthStorage struct {
 	pool   pgxpool.IPgxPool
-	logger *my_logger.MyLogger
+	logger *mylogger.MyLogger
 }
 
 func NewAuthStorage(pool pgxpool.IPgxPool) (*AuthStorage, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	return &AuthStorage{
@@ -36,7 +37,7 @@ func NewAuthStorage(pool pgxpool.IPgxPool) (*AuthStorage, error) {
 }
 
 func GetLastValSeq(ctx context.Context,
-	tx pgx.Tx, logger *my_logger.MyLogger, nameTable pgx.Identifier,
+	tx pgx.Tx, logger *mylogger.MyLogger, nameTable pgx.Identifier,
 ) (uint64, error) {
 	sanitizedNameTable := nameTable.Sanitize()
 	SQLGetLastValSeq := fmt.Sprintf(`SELECT last_value FROM %s;`, sanitizedNameTable)
@@ -113,7 +114,6 @@ func (a *AuthStorage) GetUser(ctx context.Context, email string) (*models.User, 
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

@@ -52,17 +52,3 @@ func (mr *MockIPremiumStorageMockRecorder) AddPremium(ctx, productID, userID, pr
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPremium", reflect.TypeOf((*MockIPremiumStorage)(nil).AddPremium), ctx, productID, userID, premiumBegin, premiumExpire)
 }
-
-// RemovePremium mocks base method.
-func (m *MockIPremiumStorage) RemovePremium(ctx context.Context, productID, userID uint64) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemovePremium", ctx, productID, userID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// RemovePremium indicates an expected call of RemovePremium.
-func (mr *MockIPremiumStorageMockRecorder) RemovePremium(ctx, productID, userID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemovePremium", reflect.TypeOf((*MockIPremiumStorage)(nil).RemovePremium), ctx, productID, userID)
-}

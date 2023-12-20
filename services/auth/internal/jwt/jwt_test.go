@@ -4,17 +4,15 @@ import (
 	"errors"
 	"reflect"
 	"testing"
-	"time"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
 )
 
-//nolint:funlen
 func TestGenerateJwtToken(t *testing.T) {
 	t.Parallel()
 
-	my_logger.NewNop()
+	mylogger.NewNop()
 
 	type TestCase struct {
 		name                string
@@ -81,11 +79,10 @@ func TestGenerateJwtToken(t *testing.T) {
 	}
 }
 
-//nolint:funlen
 func TestNewUserJwtPayload(t *testing.T) {
 	t.Parallel()
 
-	my_logger.NewNop()
+	mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -151,16 +148,9 @@ func TestNewUserJwtPayload(t *testing.T) {
 	}
 }
 
-func TestStartRefreshingSecret(t *testing.T) {
-	chClose := make(chan struct{})
-	go jwt.StartRefreshingSecret(time.Millisecond*100, chClose)
-
-	time.Sleep(time.Millisecond * 500)
-
-	close(chClose)
-}
-
 func TestSetSecret(t *testing.T) {
+	t.Parallel()
+
 	secret := []byte("test secret")
 
 	jwt.SetSecret(secret)

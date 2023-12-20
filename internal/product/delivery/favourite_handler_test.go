@@ -2,26 +2,27 @@ package delivery_test
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
-	"go.uber.org/mock/gomock"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
+	"go.uber.org/mock/gomock"
 )
 
-func TestAddToFavourites(t *testing.T) { //nolint:funlen
+func TestAddToFavourites(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -87,10 +88,10 @@ func TestAddToFavourites(t *testing.T) { //nolint:funlen
 	}
 }
 
-func TestGetFavourites(t *testing.T) { //nolint:funlen
+func TestGetFavourites(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -99,7 +100,7 @@ func TestGetFavourites(t *testing.T) { //nolint:funlen
 		expectedResponse       *delivery.ProductListResponse
 	}
 
-	testCases := [...]TestCase{
+	testCases := [...]TestCase{ //nolint:dupl
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/profile/favourites", nil),
@@ -107,8 +108,10 @@ func TestGetFavourites(t *testing.T) { //nolint:funlen
 				m.EXPECT().GetUserFavourites(gomock.Any(), test.UserID).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "sofa"}, {ID: 2, Title: "laptop"}}, nil)
 			},
-			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{{ID: 1, Title: "sofa"},
-				{ID: 2, Title: "laptop"}}),
+			expectedResponse: delivery.NewProductListResponse([]*models.ProductInFeed{
+				{ID: 1, Title: "sofa"},
+				{ID: 2, Title: "laptop"},
+			}),
 		},
 		{
 			name:    "test empty",
@@ -166,7 +169,7 @@ func TestGetFavourites(t *testing.T) { //nolint:funlen
 func TestDeleteFavourite(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
@@ -174,6 +177,7 @@ func TestDeleteFavourite(t *testing.T) {
 		expectedResponse       responses.ResponseID
 		queryProductID         string
 	}
+
 	testCases := [...]TestCase{
 		{
 			name:           "test basic work",
@@ -202,15 +206,15 @@ func TestDeleteFavourite(t *testing.T) {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			w := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 
 			request := httptest.NewRequest(http.MethodDelete, "/api/v1/product/remove-from-fav", nil)
 			utils.AddQueryParamsToRequest(request, map[string]string{"product_id": testCase.queryProductID})
 
 			request.AddCookie(&test.Cookie)
-			productHandler.DeleteFromFavouritesHandler(w, request)
+			productHandler.DeleteFromFavouritesHandler(recorder, request)
 
-			resp := w.Result()
+			resp := recorder.Result()
 			defer resp.Body.Close()
 
 			receivedResponse, err := io.ReadAll(resp.Body)

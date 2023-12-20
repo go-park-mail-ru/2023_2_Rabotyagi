@@ -3,17 +3,18 @@ package repository_test
 import (
 	"context"
 	"database/sql"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/pashagolub/pgxmock/v3"
 	"testing"
 	"time"
+
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/pashagolub/pgxmock/v3"
 )
 
-func TestCloseProduct(t *testing.T) {
+func TestCloseProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -74,7 +75,7 @@ func TestCloseProduct(t *testing.T) {
 func TestActivateProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -135,7 +136,7 @@ func TestActivateProduct(t *testing.T) { //nolint:dupl
 func TestDeleteProduct(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -196,7 +197,7 @@ func TestDeleteProduct(t *testing.T) { //nolint:dupl
 func TestSearchProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -215,7 +216,7 @@ func TestSearchProduct(t *testing.T) {
 			behaviorProductStorage: func(m *repository.ProductStorage) {
 				mockPool.ExpectBegin()
 
-				mockPool.ExpectQuery(`SELECT title FROM product`).WithArgs("Ca").
+				mockPool.ExpectQuery(`SELECT title`).WithArgs("Ca").
 					WillReturnRows(pgxmock.NewRows([]string{"title"}).
 						AddRow("Car"))
 
@@ -253,10 +254,10 @@ func TestSearchProduct(t *testing.T) {
 	}
 }
 
-func TestGetSearchProductFeed(t *testing.T) { //nolint:funlen
+func TestGetSearchProductFeed(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -279,10 +280,12 @@ func TestGetSearchProductFeed(t *testing.T) { //nolint:funlen
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT id, title, price, city_id, 
-       delivery, safe_deal, is_active, available_count FROM product`).WithArgs("Ca", uint64(0), uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "title", "price", "city_id", //nolint:gofumpt
-						"delivery", "safe_deal", "is_active", "available_count"}).
-						AddRow(uint64(1), "Car", uint64(1212), uint64(6), true, true, true, uint32(2)))
+       delivery, safe_deal, is_active, available_count, premium FROM product`).WithArgs("Ca", uint64(0), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "title", "price", "city_id",
+						"delivery", "safe_deal", "is_active", "available_count", "premium",
+					}).
+						AddRow(uint64(1), "Car", uint64(1212), uint64(6), true, true, true, uint32(2), false))
 
 				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"url"}).
@@ -337,16 +340,11 @@ func TestGetSearchProductFeed(t *testing.T) { //nolint:funlen
 func TestGetProduct(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
-
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		productID              uint64
 		userID                 uint64
 	}
@@ -354,15 +352,17 @@ func TestGetProduct(t *testing.T) {
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city_id,
        delivery, safe_deal, is_active, premium FROM public."product" `).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"saler_id", "category_id", "title",
+					WillReturnRows(pgxmock.NewRows([]string{
+						"saler_id", "category_id", "title",
 						"description", "price", "created_at", "views", "available_count", "city_id",
-						"delivery", "safe_deal", "is_active", "premium"}).
+						"delivery", "safe_deal", "is_active", "premium",
+					}).
 						AddRow(uint64(2), uint64(1), "Car", "text", uint64(1212), time.Now(),
 							uint32(6), uint32(4), uint64(6), true, true, true, false))
 
@@ -401,15 +401,17 @@ func TestGetProduct(t *testing.T) {
 		},
 		{
 			name: "test my",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city_id,
        delivery, safe_deal, is_active, premium FROM public."product" `).WithArgs(uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"saler_id", "category_id", "title",
+					WillReturnRows(pgxmock.NewRows([]string{
+						"saler_id", "category_id", "title",
 						"description", "price", "created_at", "views", "available_count", "city_id",
-						"delivery", "safe_deal", "is_active", "premium"}).
+						"delivery", "safe_deal", "is_active", "premium",
+					}).
 						AddRow(uint64(1), uint64(1), "Car", "text", uint64(1212), time.Now(),
 							uint32(6), uint32(4), uint64(6), true, true, true, true))
 
@@ -452,10 +454,17 @@ func TestGetProduct(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases { //paralleltest
+	for _, testCase := range testCases {
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			ctx := context.Background()
 
 			prodStorage, err := repository.NewProductStorage(mockPool)
@@ -463,7 +472,7 @@ func TestGetProduct(t *testing.T) {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(prodStorage)
+			testCase.behaviorProductStorage(prodStorage, mockPool)
 
 			_, err = prodStorage.GetProduct(ctx, testCase.productID, testCase.userID)
 			if err != nil {

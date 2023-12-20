@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
-
 	"github.com/asaskevich/govalidator"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 )
 
 var (
@@ -17,7 +16,7 @@ var (
 )
 
 func validateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -51,7 +50,7 @@ func validateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 }
 
 func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -64,14 +63,14 @@ func ValidateUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, erro
 	if err != nil {
 		logger.Errorln(err)
 
-		return nil, fmt.Errorf("%w %v", ErrValidateUserWithoutPassword, err)
+		return nil, fmt.Errorf("%w %v", ErrValidateUserWithoutPassword, err) //nolint:errorlint
 	}
 
 	return userWithoutPassword, nil
 }
 
 func ValidatePartOfUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword, error) {
-	logger, err := my_logger.Get()
+	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -94,7 +93,7 @@ func ValidatePartOfUserWithoutPassword(r io.Reader) (*models.UserWithoutPassword
 		if errMessage != "" {
 			logger.Errorln(errMessage)
 
-			return nil, fmt.Errorf("%w %v", ErrValidateUserWithoutPassword, err)
+			return nil, fmt.Errorf("%w %v", ErrValidateUserWithoutPassword, err) //nolint:errorlint
 		}
 	}
 

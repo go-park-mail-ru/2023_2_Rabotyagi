@@ -10,18 +10,17 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
-
 	"go.uber.org/mock/gomock"
 )
 
 func NewFavouriteService(ctrl *gomock.Controller,
 	behaviorFavouriteStorage func(m *mocks.MockIFavouriteStorage),
 ) (*usecases.FavouriteService, error) {
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockFavouriteStorage := mocks.NewMockIFavouriteStorage(ctrl)
 
@@ -35,11 +34,10 @@ func NewFavouriteService(ctrl *gomock.Controller,
 	return favouriteService, nil
 }
 
-//nolint:funlen
 func TestGetUserFavourites(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -105,7 +103,7 @@ func TestGetUserFavourites(t *testing.T) {
 func TestAddToFavourites(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")
@@ -164,10 +162,10 @@ func TestAddToFavourites(t *testing.T) {
 	}
 }
 
-func TestDeleteFromFavourites(t *testing.T) { //nolint:funlen,dupl
+func TestDeleteFromFavourites(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	baseCtx := context.Background()
 	testInternalErr := myerrors.NewErrorInternal("Test error")

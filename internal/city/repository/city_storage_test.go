@@ -2,18 +2,19 @@ package repository_test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/city/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/pashagolub/pgxmock/v3"
-	"testing"
 )
 
 func TestGetFullCity(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {
@@ -42,7 +43,8 @@ func TestGetFullCity(t *testing.T) {
 			expectedResponse: []*models.City{
 				{ID: 1, Name: "Moscow"},
 				{ID: 2, Name: "St. Petersburg"},
-				{ID: 3, Name: "Podolsk"}},
+				{ID: 3, Name: "Podolsk"},
+			},
 		},
 	}
 
@@ -81,7 +83,7 @@ func TestGetFullCity(t *testing.T) {
 func TestSearchCity(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	mockPool, err := pgxmock.NewPool()
 	if err != nil {

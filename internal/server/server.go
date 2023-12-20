@@ -19,9 +19,8 @@ import (
 	userusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/user/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
 	fileservice "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/file_service"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -70,7 +69,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 		return err //nolint:wrapcheck
 	}
 
-	logger, err := my_logger.New(strings.Split(config.OutputLogPath, " "),
+	logger, err := mylogger.New(strings.Split(config.OutputLogPath, " "),
 		strings.Split(config.ErrorOutputLogPath, " "))
 	if err != nil {
 		return err //nolint:wrapcheck
@@ -95,7 +94,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 
 	premiumService, err := usecases.NewPremiumService(productStorage)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	productService, err := usecases.NewProductService(productStorage, basketService, favouriteService,
@@ -152,7 +151,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 	logger.Infof("Start server:%s", config.PortServer)
 
 	if config.ProductionMode {
-		return s.httpServer.ListenAndServeTLS(pathCertFile, pathKeyFile)
+		return s.httpServer.ListenAndServeTLS(pathCertFile, pathKeyFile) //nolint:wrapcheck
 	}
 
 	return s.httpServer.ListenAndServe() //nolint:wrapcheck

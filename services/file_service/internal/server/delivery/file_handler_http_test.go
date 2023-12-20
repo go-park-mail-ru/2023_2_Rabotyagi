@@ -9,14 +9,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/my_logger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/file_service/internal/server/mocks"
-
 	"go.uber.org/mock/gomock"
 )
 
@@ -27,16 +26,15 @@ func NewFileHandlerHTTP(ctrl *gomock.Controller,
 
 	behaviorSessionManagerClient(mockFileServiceHTTP)
 
-	fileHandler := delivery.NewFileHandlerHTTP(mockFileServiceHTTP, my_logger.NewNop(), ".")
+	fileHandler := delivery.NewFileHandlerHTTP(mockFileServiceHTTP, mylogger.NewNop(), ".")
 
 	return fileHandler
 }
 
-//nolint:funlen
 func TestUploadFile(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name                    string
@@ -176,11 +174,10 @@ func TestUploadFile(t *testing.T) {
 	}
 }
 
-//nolint:nolintlint,funlen
 func TestDocFileHandler(t *testing.T) {
 	t.Parallel()
 
-	_ = my_logger.NewNop()
+	_ = mylogger.NewNop()
 
 	type TestCase struct {
 		name             string
