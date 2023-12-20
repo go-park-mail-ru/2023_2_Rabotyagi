@@ -162,3 +162,30 @@ jobs:
                         - ${{ github.repository }}:${{github.ref_name}}
                       Закончился с ❌
                       https://github.com/go-park-mail-ru/2023_2_Rabotyagi/actions/runs/${{github.run_id}}
+
+    deploy:
+      runs-on: ubuntu-latest
+      if: ${{ always() && needs.notify-good.result == 'success' }}
+      needs: [notify-good]
+      steps:
+          - name: Deploy to dev
+            uses: appleboy/ssh-action@v1.0.0
+            with:
+                host: goods-galaxy.ru
+                username: ${{ secrets.BOT_USERNAME }}
+                password: ${{ secrets.BOT_PASSWORD }}
+                script_stop: true
+                script: |
+                    cd /var/share/rabotyagi
+                    docker compose pull backend backend-fs backend-auth
+                    docker compose up -d --force-recreate backend
+                    
+          - name: Notify deploy
+            uses: appleboy/telegram-action@master
+            with:
+                to: ${{ secrets.TELEGRAM_CHAT }}
+                token: ${{ secrets.TELEGRAM_TOKEN }}
+                # format: markdown
+                message: |
+                    Деплой на goods-galaxy состоялся, господа
+                    http://goods-galaxy.ru
