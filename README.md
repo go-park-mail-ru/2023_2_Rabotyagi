@@ -92,3 +92,7 @@ make test
 make swag
 ```
 
+### Сгенерировать easyjson файл
+```shell
+easyjson <file.go>
+```
