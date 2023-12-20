@@ -10,7 +10,6 @@ env:
     IMAGE_NAME: ${{github.repository}}
 jobs:
     golangci:
-      name: lint
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v3
@@ -35,7 +34,8 @@ jobs:
           run: make test-actions
     build-main:
         runs-on: ubuntu-latest
-        if: ${{ always() needs.golangci.result == 'success' && needs.test.result == 'success' }}
+        needs: [golangci, test]
+        if: ${{ always() && needs.golangci.result == 'success' && needs.test.result == 'success' }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -66,7 +66,8 @@ jobs:
 
     build-auth:
         runs-on: ubuntu-latest
-        if: ${{ always() needs.golangci.result == 'success' && needs.test.result == 'success' }}
+        needs: [golangci, test]
+        if: ${{ always() && needs.golangci.result == 'success' && needs.test.result == 'success' }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -98,7 +99,8 @@ jobs:
 
     build-fs:
         runs-on: ubuntu-latest
-        if: ${{ always() needs.golangci.result == 'success' && needs.test.result == 'success' }}
+        needs: [golangci, test]
+        if: ${{ always() && needs.golangci.result == 'success' && needs.test.result == 'success' }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
