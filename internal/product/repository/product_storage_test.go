@@ -342,14 +342,9 @@ func TestGetProduct(t *testing.T) {
 
 	_ = my_logger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		productID              uint64
 		userID                 uint64
 	}
@@ -357,7 +352,7 @@ func TestGetProduct(t *testing.T) {
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
@@ -406,7 +401,7 @@ func TestGetProduct(t *testing.T) {
 		},
 		{
 			name: "test my",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
@@ -465,6 +460,11 @@ func TestGetProduct(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			ctx := context.Background()
 
 			prodStorage, err := repository.NewProductStorage(mockPool)
@@ -472,7 +472,7 @@ func TestGetProduct(t *testing.T) {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(prodStorage)
+			testCase.behaviorProductStorage(prodStorage, mockPool)
 
 			_, err = prodStorage.GetProduct(ctx, testCase.productID, testCase.userID)
 			if err != nil {

@@ -138,14 +138,9 @@ func TestUpdateOrderStatus(t *testing.T) {
 
 	_ = my_logger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		ownerID                uint64
 		orderID                uint64
 		newStatus              uint8
@@ -154,7 +149,7 @@ func TestUpdateOrderStatus(t *testing.T) {
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT status, count FROM public."order"`).WithArgs(uint64(1), uint64(1)).
@@ -173,7 +168,7 @@ func TestUpdateOrderStatus(t *testing.T) {
 		},
 		{
 			name: "test status default not 0",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT status, count FROM public."order"`).WithArgs(uint64(1), uint64(1)).
@@ -201,6 +196,11 @@ func TestUpdateOrderStatus(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			ctx := context.Background()
 
 			catStorage, err := repository.NewProductStorage(mockPool)
@@ -208,7 +208,7 @@ func TestUpdateOrderStatus(t *testing.T) {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(catStorage)
+			testCase.behaviorProductStorage(catStorage, mockPool)
 
 			err = catStorage.UpdateOrderStatus(ctx, testCase.ownerID, testCase.orderID, testCase.newStatus)
 			if err != nil {
