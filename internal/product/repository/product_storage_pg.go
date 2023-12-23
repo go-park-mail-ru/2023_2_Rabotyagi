@@ -538,7 +538,11 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 
 		productID = LastProductID
 
-		err = p.addPriceHistoryRecord(ctx, tx, productID, preProduct.Price)
+		if !preProduct.Price.Valid {
+			return fmt.Errorf(myerrors.ErrTemplate, ErrUncorrectedPrice)
+		}
+
+		err = p.addPriceHistoryRecord(ctx, tx, productID, uint64(preProduct.Price.Int64))
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}

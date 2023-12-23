@@ -1,6 +1,7 @@
 package delivery_test
 
 import (
+	"database/sql"
 	"fmt"
 	"io"
 	"net/http"
@@ -257,13 +258,13 @@ func TestGetProduct(t *testing.T) {
 				m.EXPECT().GetProduct(gomock.Any(), uint64(1), test.UserID).Return(
 					&models.Product{ //nolint:exhaustruct
 						ID: 1, SalerID: 1, CategoryID: 1, CityID: 1,
-						Title: "Title", Description: "desc", Price: 123,
+						Title: "Title", Description: "desc", Price: sql.NullInt64{Valid: true, Int64: 1},
 						CreatedAt: time.Unix(0, 0), Views: 12, AvailableCount: 1, Favourites: 12,
 					}, nil)
 			},
 			expectedResponse: delivery.NewProductResponse(&models.Product{ //nolint:exhaustruct
 				ID: 1, SalerID: 1, CategoryID: 1, CityID: 1,
-				Title: "Title", Description: "desc", Price: 123,
+				Title: "Title", Description: "desc", Price: sql.NullInt64{Valid: true, Int64: 1},
 				CreatedAt: time.Unix(0, 0), Views: 12, AvailableCount: 1, Favourites: 12,
 			}),
 		},

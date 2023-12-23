@@ -2,6 +2,7 @@ package usecases_test
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"io"
 	"strings"
@@ -91,7 +92,7 @@ func TestAddProduct(t *testing.T) {
 					CategoryID:     2,
 					Title:          "adsf",
 					Description:    "description",
-					Price:          123,
+					Price:          sql.NullInt64{Valid: true, Int64: 123},
 					AvailableCount: 1,
 					CityID:         1,
 					Delivery:       false,
@@ -149,7 +150,7 @@ func TestAddProduct(t *testing.T) {
 					CategoryID:     2,
 					Title:          "adsf",
 					Description:    "description",
-					Price:          123,
+					Price:          sql.NullInt64{Valid: true, Int64: 123},
 					AvailableCount: 1,
 					CityID:         1,
 					Delivery:       false,
@@ -182,7 +183,7 @@ func TestAddProduct(t *testing.T) {
 					CategoryID:     2,
 					Title:          "adsf",
 					Description:    "description",
-					Price:          123,
+					Price:          sql.NullInt64{Valid: true, Int64: 123},
 					AvailableCount: 1,
 					CityID:         1,
 					Delivery:       false,

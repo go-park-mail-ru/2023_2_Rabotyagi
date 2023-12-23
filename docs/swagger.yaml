@@ -103,6 +103,7 @@ definitions:
       is_active:
         type: boolean
       price:
+        example: 100
         type: integer
       safe_deal:
         type: boolean
@@ -150,6 +151,7 @@ definitions:
         example: "2014-12-12T14:00:12+07:00"
         type: string
       price:
+        example: 100
         type: integer
       price_history:
         items:

@@ -20,6 +20,7 @@ var (
 	ErrNoAffectedOrderRows     = myerrors.NewErrorBadContentRequest("Не получилось обновить данные заказа")
 	ErrAvailableCountNotEnough = myerrors.NewErrorBadContentRequest(
 		"Товара доступно меньше, чем вы пытаетесь довавить в корзину")
+	ErrNotValidePrice = myerrors.NewErrorInternal("получили не валидную цену")
 )
 
 //nolint:dupl
@@ -514,13 +515,17 @@ func (p *ProductStorage) AddOrderInBasket(ctx context.Context,
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
+		if !productInner.Price.Valid {
+			return fmt.Errorf(myerrors.ErrTemplate, ErrNotValidePrice)
+		}
+
 		orderInBasket.ID = idOrder
 		orderInBasket.OwnerID = userID
 		orderInBasket.ProductID = productID
 		orderInBasket.Count = count
 		orderInBasket.SalerID = productInner.SalerID
 		orderInBasket.Title = productInner.Title
-		orderInBasket.Price = productInner.Price
+		orderInBasket.Price = uint64(productInner.Price.Int64)
 		orderInBasket.CityID = productInner.CityID
 		orderInBasket.AvailableCount = productInner.AvailableCount
 		orderInBasket.Delivery = productInner.Delivery
