@@ -292,7 +292,7 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 	return product, nil
 }
 
-// selectProductsInFeedWithWhereOrderLimit accepts arguments in the appropriate format:
+// selectProductsInFeedWithWhereOrderLimitOffset accepts arguments in the appropriate format:
 //
 // whereClause can be:
 // nil - ignored.
@@ -308,14 +308,14 @@ func (p *ProductStorage) GetProduct(ctx context.Context, productID uint64, userI
 // another cases add ORDER BY expressions to the query
 //
 // limit sets a LIMIT clause on the query.
-func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Context, tx pgx.Tx,
-	limit uint64, whereClause any, orderByClause []string,
+func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimitOffset(ctx context.Context, tx pgx.Tx,
+	limit uint64, whereClause any, orderByClause []string, offset uint64,
 ) ([]*models.ProductInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
 
 	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Select("id, title," +
 		"price, city_id, delivery, safe_deal, is_active, available_count, premium").From(`public."product"`).
-		Where(whereClause).OrderBy(orderByClause...).Limit(limit)
+		Where(whereClause).OrderBy(orderByClause...).Limit(limit).Offset(offset)
 
 	SQLQuery, args, err := query.ToSql()
 	if err != nil {
@@ -364,18 +364,18 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimit(ctx context.Con
 }
 
 func (p *ProductStorage) GetPopularProducts(ctx context.Context,
-	lastProductID uint64, count uint64, userID uint64,
+	offset uint64, count uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
 
 	var slProduct []*models.ProductInFeed
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		whereClause := fmt.Sprintf("id > %d AND is_active = true AND available_count > 0", lastProductID)
+		whereClause := "is_active = true"
 
-		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
+		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimitOffset(ctx,
 			tx, count, whereClause, []string{OrderByClauseForProductList(PremiumCoefficient,
-				NonPremiumCoefficient, SoldByUserCoefficient, ViewsCoefficient)})
+				NonPremiumCoefficient, SoldByUserCoefficient, ViewsCoefficient)}, offset)
 		if err != nil {
 			return err
 		}
@@ -405,7 +405,7 @@ func (p *ProductStorage) GetPopularProducts(ctx context.Context,
 }
 
 func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
-	lastProductID uint64, count uint64, userID uint64, isMy bool,
+	offset uint64, count uint64, userID uint64, isMy bool,
 ) ([]*models.ProductInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
 
@@ -414,16 +414,15 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		var whereClause string
 		if isMy {
-			whereClause = fmt.Sprintf("id > %d AND saler_id = %d", lastProductID, userID)
+			whereClause = fmt.Sprintf("saler_id = %d", userID)
 		} else {
-			template := "id > %d AND saler_id = %d AND is_active = true OR" +
-				"(is_active = false AND available_count = 0)"
-			whereClause = fmt.Sprintf(template, lastProductID, userID)
+			whereClause = fmt.Sprintf("saler_id = %d AND is_active = true OR (is_active = false AND available_count = 0)",
+				userID)
 		}
 
-		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimit(ctx,
+		slProductInner, err := p.selectProductsInFeedWithWhereOrderLimitOffset(ctx,
 			tx, count, whereClause, []string{OrderByClauseForProductList(PremiumCoefficient,
-				NonPremiumCoefficient, SoldByUserCoefficient, ViewsCoefficient)})
+				NonPremiumCoefficient, SoldByUserCoefficient, ViewsCoefficient)}, offset)
 		if err != nil {
 			return err
 		}

@@ -1194,9 +1194,9 @@ paths:
         name: count
         required: true
         type: integer
-      - description: last product id
+      - description: offset of products
         in: query
-        name: last_id
+        name: offset
         required: true
         type: integer
       produces:
@@ -1238,9 +1238,9 @@ paths:
         name: count
         required: true
         type: integer
-      - description: 'last product id '
+      - description: offset of products
         in: query
-        name: last_id
+        name: offset
         required: true
         type: integer
       produces:
