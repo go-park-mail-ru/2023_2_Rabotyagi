@@ -163,6 +163,67 @@ func ValidatePartOfPreProduct(r io.Reader, userID uint64) (*models.PreProduct, e
 	return preProduct, nil
 }
 
+func validateCommentChanges(r io.Reader) (*models.CommentChanges, error) {
+	logger, err := mylogger.Get()
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	commChanges := new(models.CommentChanges)
+
+	data, err := io.ReadAll(r)
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreComment)
+	}
+
+	if err := commChanges.UnmarshalJSON(data); err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, ErrDecodePreProduct)
+	}
+
+	commChanges.Trim()
+
+	_, err = govalidator.ValidateStruct(commChanges)
+	if err != nil {
+		logger.Errorln(err)
+
+		// In this place  return non wrapped error because later it should be use in govalidator.ErrorsByField(err)
+		return commChanges, err //nolint:wrapcheck
+	}
+
+	return commChanges, nil
+}
+
+func ValidateCommentChanges(r io.Reader) (*models.CommentChanges, error) {
+	logger, err := mylogger.Get()
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	commChanges, err := validateCommentChanges(r)
+	if commChanges == nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	if err != nil {
+		validationErrors := govalidator.ErrorsByField(err)
+
+		for field, err := range validationErrors {
+			if err != "non zero value required" {
+				logger.Errorln(err)
+
+				return nil, fmt.Errorf("%w в поле %s ошибка: %s",
+					ErrValidatePreComment, field, err)
+			}
+		}
+	}
+
+	return commChanges, nil
+}
+
 func ValidatePreOrder(r io.Reader) (*models.PreOrder, error) {
 	logger, err := mylogger.Get()
 	if err != nil {

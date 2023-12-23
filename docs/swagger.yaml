@@ -19,6 +19,7 @@ definitions:
       id:
         type: integer
       name:
+        description: nolint
         type: string
       parent_id:
         type: integer
@@ -28,6 +29,13 @@ definitions:
       id:
         type: integer
       name:
+        type: string
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.CommentChanges:
+    properties:
+      rating:
+        type: integer
+      text:
         type: string
     type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Image:
@@ -75,6 +83,17 @@ definitions:
       title:
         type: string
     type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreComment:
+    properties:
+      rating:
+        type: integer
+      recipient_id:
+        type: integer
+      sender_id:
+        type: integer
+      text:
+        type: string
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreOrder:
     properties:
       count:
@@ -94,7 +113,6 @@ definitions:
       delivery:
         type: boolean
       description:
-        description: nolint
         type: string
       images:
         items:
@@ -131,7 +149,6 @@ definitions:
       delivery:
         type: boolean
       description:
-        description: nolint
         type: string
       favourites:
         type: integer
@@ -208,7 +225,9 @@ definitions:
       email:
         type: string
       name:
-        $ref: '#/definitions/sql.NullString'
+        allOf:
+        - $ref: '#/definitions/sql.NullString'
+        description: nolint
       password:
         type: string
       phone:
@@ -230,6 +249,7 @@ definitions:
       id:
         type: integer
       name:
+        description: nolint
         type: string
       phone:
         description: nolint
@@ -473,6 +493,115 @@ paths:
       summary: search city
       tags:
       - city
+  /comment/add:
+    post:
+      consumes:
+      - application/json
+      description: add comment by data
+      parameters:
+      - description: comment data for adding
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreComment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
+        "222":
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
+            badFormat(4000)//nolint:lll
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: add comment
+      tags:
+      - comment
+  /comment/delete:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        delete comment for sender using user id from cookies\jwt.
+        This totally removed comment. Recovery will be impossible
+      parameters:
+      - description: comment id
+        in: query
+        name: comment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
+        "222":
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400)//nolint:lll
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: delete comment
+      tags:
+      - comment
+  /comment/update:
+    patch:
+      consumes:
+      - application/json
+      description: update comment by id
+      parameters:
+      - description: product id
+        in: query
+        name: comment_id
+        required: true
+        type: integer
+      - description: полностью опционален
+        in: body
+        name: commentChanges
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.CommentChanges'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
+        "222":
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
+            badFormat(4000)//nolint:lll
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update comment
+      tags:
+      - comment
   /img/:
     get:
       consumes:
@@ -490,7 +619,7 @@ paths:
       - application/json
       responses:
         "222":
-          description: Тут статус http статус 200. Внутри body статус может быть badContent(4400)
+          description: Тут статус http статус 200. Внутри body статус может быть badContent(4400)"//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "404":
@@ -522,7 +651,7 @@ paths:
             $ref: '#/definitions/delivery.ResponseURLs'
         "222":
           description: Тут статус http статус 200. Внутри body статус может быть badContent(4400),
-            badFormat(4000)
+            badFormat(4000)"//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -581,7 +710,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.OrderResponse'
         "222":
-          description: Error". Внутри body статус может быть badContent(4400)/badFormat(4000)
+          description: Error". Внутри body статус может быть badContent(4400)/badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -832,7 +961,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -902,7 +1031,7 @@ paths:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
         "222":
           description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
-            badFormat(4000)
+            badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -972,7 +1101,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1040,7 +1169,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductResponse'
         "222":
-          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1078,7 +1207,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1122,7 +1251,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1160,7 +1289,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1203,7 +1332,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductListResponse'
         "222":
-          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1268,7 +1397,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductInSearchListResponse'
         "222":
-          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1307,7 +1436,7 @@ paths:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
         "222":
           description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
-            badFormat(4000)
+            badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1345,7 +1474,7 @@ paths:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
         "222":
           description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
-            badFormat(4000)
+            badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1504,7 +1633,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)
+          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":
@@ -1538,7 +1667,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
         "222":
-          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)
+          description: Error". Внутри body статус может быть badContent(4400), badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":

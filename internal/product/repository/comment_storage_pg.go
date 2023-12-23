@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
@@ -11,6 +12,8 @@ import (
 
 var (
 	ErrNoAffectedCommentRows = myerrors.NewErrorBadFormatRequest("Не получилось обновить данные комментария")
+
+	NameSeqComment = pgx.Identifier{"public", "comment_id_seq"} //nolint:gochecknoglobals
 )
 
 func (p *ProductStorage) GetCommentList(ctx context.Context, lastCommentID uint64, count uint64, userID uint64) ([]*models.Comment, error) {
@@ -45,7 +48,7 @@ func (p *ProductStorage) AddComment(ctx context.Context, preComment *models.PreC
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
 
-		lastCommentID, err := repository.GetLastValSeq(ctx, tx, logger, NameSeqProduct)
+		lastCommentID, err := repository.GetLastValSeq(ctx, tx, logger, NameSeqComment)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -93,6 +96,63 @@ func (p *ProductStorage) DeleteComment(ctx context.Context, commentID uint64, se
 		}
 
 		return nil
+	})
+	if err != nil {
+		logger.Errorln(err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) updateComment(ctx context.Context, tx pgx.Tx,
+	userID uint64, commentID uint64, updateFields map[string]interface{},
+) error {
+	if len(updateFields) == 0 {
+		return ErrNoUpdateFields
+	}
+
+	logger := p.logger.LogReqID(ctx)
+
+	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Update(`public."comment"`).
+		Where(squirrel.Eq{"id": commentID, "sender_id": userID}).SetMap(updateFields)
+
+	queryString, args, err := query.ToSql()
+	if err != nil {
+		logger.Errorln(err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	result, err := tx.Exec(ctx, queryString, args...)
+	if err != nil {
+		logger.Errorln(err)
+
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf(myerrors.ErrTemplate, ErrNoAffectedCommentRows)
+	}
+
+	return nil
+}
+
+func (p *ProductStorage) UpdateComment(ctx context.Context, userID uint64, commentID uint64,
+	updateFields map[string]interface{}) error {
+	logger := p.logger.LogReqID(ctx)
+
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		var err error
+
+		err = p.updateComment(ctx, tx, userID, commentID, updateFields)
+		if err != nil {
+			return err
+		}
+
+		return err
 	})
 	if err != nil {
 		logger.Errorln(err)

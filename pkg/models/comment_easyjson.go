@@ -104,3 +104,76 @@ func (v *PreComment) UnmarshalJSON(data []byte) error {
 func (v *PreComment) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonE9abebc9DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(l, v)
 }
+func easyjsonE9abebc9DecodeGithubComGoParkMailRu20232RabotyagiPkgModels1(in *jlexer.Lexer, out *CommentChanges) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "text":
+			out.Text = string(in.String())
+		case "rating":
+			out.Rating = uint8(in.Uint8())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonE9abebc9EncodeGithubComGoParkMailRu20232RabotyagiPkgModels1(out *jwriter.Writer, in CommentChanges) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"text\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Text))
+	}
+	{
+		const prefix string = ",\"rating\":"
+		out.RawString(prefix)
+		out.Uint8(uint8(in.Rating))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v CommentChanges) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonE9abebc9EncodeGithubComGoParkMailRu20232RabotyagiPkgModels1(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v CommentChanges) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonE9abebc9EncodeGithubComGoParkMailRu20232RabotyagiPkgModels1(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *CommentChanges) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonE9abebc9DecodeGithubComGoParkMailRu20232RabotyagiPkgModels1(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *CommentChanges) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonE9abebc9DecodeGithubComGoParkMailRu20232RabotyagiPkgModels1(l, v)
+}

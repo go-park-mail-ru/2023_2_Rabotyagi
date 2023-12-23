@@ -23,6 +23,16 @@ type PreComment struct {
 	Rating      uint8  `json:"rating"       valid:"required,range(1|5)"`
 }
 
+//easyjson:json
+type CommentChanges struct {
+	Text   string `json:"text"         valid:"required, length(1|4000)~Текст должен быть длинной от 1 до 4000 симвволов"` //nolint:nolintlint
+	Rating uint8  `json:"rating"       valid:"required,range(1|5)"`
+}
+
 func (p *PreComment) Trim() {
+	p.Text = strings.TrimFunc(p.Text, unicode.IsSpace)
+}
+
+func (p *CommentChanges) Trim() {
 	p.Text = strings.TrimFunc(p.Text, unicode.IsSpace)
 }
