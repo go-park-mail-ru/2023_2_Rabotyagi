@@ -592,6 +592,7 @@ func (p *ProductStorage) updateProduct(ctx context.Context, tx pgx.Tx,
 	return nil
 }
 
+//nolint:cyclop,funlen
 func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 	updateFields map[string]interface{},
 ) error {
@@ -630,12 +631,16 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 
 		price, ok := updateFields["price"]
 		if ok {
-			priceUint64, ok := price.(uint64)
+			priceSQLNullInt, ok := price.(sql.NullInt64)
 			if !ok {
 				return ErrUncorrectedPrice
 			}
 
-			err = p.addPriceHistoryRecord(ctx, tx, productID, priceUint64)
+			if !priceSQLNullInt.Valid {
+				return ErrNotValidePrice
+			}
+
+			err = p.addPriceHistoryRecord(ctx, tx, productID, uint64(priceSQLNullInt.Int64))
 			if err != nil {
 				return err
 			}
