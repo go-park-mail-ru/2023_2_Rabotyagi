@@ -115,6 +115,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--web.external-url=prometheus'
 
   grafana:
     image: grafana/grafana:10.2.2
@@ -125,6 +126,7 @@ services:
       - .env/.env.grafana
     volumes:
         - grafana-storage:/var/lib/grafana
+        - ./grafana.ini:/etc/grafana/grafana.ini
 
   nginx:
     image: nginx:stable
@@ -134,8 +136,6 @@ services:
     ports:
       - "3000:80"
       - "8080:80"
-      - "9090:9090"
-      - "9091:9091"
 
 
 volumes:
