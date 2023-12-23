@@ -80,3 +80,13 @@ func NewOrderListResponse(body []*models.OrderInBasket) *OrderListResponse {
 		Body:   body,
 	}
 }
+
+//easyjson:json
+type OrderNotInBasketListResponse struct {
+	Status int                        `json:"status"`
+	Body   []*models.OrderNotInBasket `json:"body"`
+}
+
+func NewOrderNotInBasketListResponse(body []*models.OrderNotInBasket) *OrderNotInBasketListResponse {
+	return &OrderNotInBasketListResponse{Status: statuses.StatusResponseSuccessful, Body: body}
+}

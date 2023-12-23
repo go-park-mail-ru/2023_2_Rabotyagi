@@ -48,6 +48,12 @@ type OrderInBasket struct {
 	Images         []Image `json:"images"`
 }
 
+//easyjson:json
+type OrderNotInBasket struct {
+	OrderInBasket
+	Status int `json:"status"`
+}
+
 const (
 	OrderStatusInBasket = iota
 	OrderStatusInProcessing

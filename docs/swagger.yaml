@@ -712,7 +712,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get orders not in basket (with status != 0)
+      summary: get orders not in basket (with status > 0 and < 255)
       tags:
       - order
   /order/sold:
@@ -739,7 +739,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get orders not in basket sold by user (with status != 0)
+      summary: get orders not in basket sold by user (with status > 0 and < 255)
       tags:
       - order
   /order/update_count:
