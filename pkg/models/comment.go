@@ -2,10 +2,11 @@ package models
 
 import (
 	"database/sql"
-	"github.com/microcosm-cc/bluemonday"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/microcosm-cc/bluemonday"
 )
 
 type Comment struct {

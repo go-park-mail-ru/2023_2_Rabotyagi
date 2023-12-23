@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+
 	"github.com/Masterminds/squirrel"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
@@ -16,7 +17,6 @@ var (
 	NameSeqComment = pgx.Identifier{"public", "comment_id_seq"} //nolint:gochecknoglobals
 )
 
-//nolint:dupl
 func (p *ProductStorage) getCommentList(ctx context.Context,
 	tx pgx.Tx, offset uint64, count uint64, userID uint64,
 ) ([]*models.CommentInFeed, error) {
@@ -49,7 +49,7 @@ OFFSET $3;`
 		&curComment.ID, &curComment.SenderName, &curComment.Avatar,
 		&curComment.Text, &curComment.Rating, &curComment.CreatedAt,
 	}, func() error {
-		comments = append(comments, &models.CommentInFeed{ //nolint:exhaustruct
+		comments = append(comments, &models.CommentInFeed{
 			ID:         curComment.ID,
 			SenderName: curComment.SenderName,
 			Avatar:     curComment.Avatar,
@@ -69,20 +69,20 @@ OFFSET $3;`
 	return comments, nil
 }
 
-func (p *ProductStorage) GetCommentList(ctx context.Context, offset uint64, count uint64, userID uint64) ([]*models.CommentInFeed, error) {
+func (p *ProductStorage) GetCommentList(ctx context.Context,
+	offset uint64, count uint64, userID uint64,
+) ([]*models.CommentInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
 
 	var slComments []*models.CommentInFeed
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		slProductInner, err := p.getCommentList(ctx, tx, offset, count, userID)
+		slCommentsInner, err := p.getCommentList(ctx, tx, offset, count, userID)
 		if err != nil {
 			return err
 		}
 
-		for _, comment := range slProductInner {
-			slComments = append(slComments, comment)
-		}
+		slComments = slCommentsInner
 
 		return nil
 	})
@@ -216,18 +216,17 @@ func (p *ProductStorage) updateComment(ctx context.Context, tx pgx.Tx,
 }
 
 func (p *ProductStorage) UpdateComment(ctx context.Context, userID uint64, commentID uint64,
-	updateFields map[string]interface{}) error {
+	updateFields map[string]interface{},
+) error {
 	logger := p.logger.LogReqID(ctx)
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		var err error
-
-		err = p.updateComment(ctx, tx, userID, commentID, updateFields)
-		if err != nil {
-			return err
+		errInner := p.updateComment(ctx, tx, userID, commentID, updateFields)
+		if errInner != nil {
+			return errInner
 		}
 
-		return err
+		return errInner
 	})
 	if err != nil {
 		logger.Errorln(err)

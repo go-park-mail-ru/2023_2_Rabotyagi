@@ -3,12 +3,13 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"io"
+
 	productrepo "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
-	"io"
 )
 
 var _ ICommentStorage = (*productrepo.ProductStorage)(nil)
@@ -35,7 +36,8 @@ func NewCommentService(commentStorage ICommentStorage) (*CommentService, error) 
 }
 
 func (c CommentService) GetCommentList(ctx context.Context, offset uint64, count uint64,
-	userID uint64) ([]*models.CommentInFeed, error) {
+	userID uint64,
+) ([]*models.CommentInFeed, error) {
 	comments, err := c.storage.GetCommentList(ctx, offset, count, userID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
@@ -62,7 +64,7 @@ func (c CommentService) AddComment(ctx context.Context, r io.Reader, userID uint
 	return commentID, nil
 }
 
-func (c CommentService) DeleteComment(ctx context.Context, commentID uint64, senderID uint64) error { //nolint:revive
+func (c CommentService) DeleteComment(ctx context.Context, commentID uint64, senderID uint64) error {
 	err := c.storage.DeleteComment(ctx, commentID, senderID)
 	if err != nil {
 		return fmt.Errorf(myerrors.ErrTemplate, err)

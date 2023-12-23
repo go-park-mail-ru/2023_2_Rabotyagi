@@ -2,14 +2,14 @@ package delivery
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"io"
 	"net/http"
 
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 )
 
 var _ ICommentService = (*productusecases.CommentService)(nil)
@@ -179,7 +179,7 @@ func (p *ProductHandler) UpdateCommentHandler(w http.ResponseWriter, r *http.Req
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll//nolint:lll
-//	@Router      /product/get_list [get]
+//	@Router      /comment/get_list [get]
 func (p *ProductHandler) GetCommentListHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)

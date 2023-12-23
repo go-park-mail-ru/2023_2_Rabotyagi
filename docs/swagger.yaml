@@ -587,6 +587,49 @@ paths:
       summary: delete comment
       tags:
       - comment
+  /comment/get_list:
+    get:
+      consumes:
+      - application/json
+      description: get comment by count and offset and user id
+      parameters:
+      - description: count comments
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: offset of comments
+        in: query
+        name: offset
+        required: true
+        type: integer
+      - description: user
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.CommentListResponse'
+        "222":
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll//nolint:lll
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get comment list
+      tags:
+      - comment
   /comment/update:
     patch:
       consumes:
