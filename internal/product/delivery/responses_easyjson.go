@@ -3,6 +3,7 @@
 package delivery
 
 import (
+	sql "database/sql"
 	json "encoding/json"
 	models "github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	easyjson "github.com/mailru/easyjson"
@@ -528,4 +529,249 @@ func (v *OrderListResponse) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *OrderListResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson559270aeDecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery4(l, v)
+}
+func easyjson559270aeDecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery5(in *jlexer.Lexer, out *CommentListResponse) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "status":
+			out.Status = int(in.Int())
+		case "body":
+			if in.IsNull() {
+				in.Skip()
+				out.Body = nil
+			} else {
+				in.Delim('[')
+				if out.Body == nil {
+					if !in.IsDelim(']') {
+						out.Body = make([]*models.CommentInFeed, 0, 8)
+					} else {
+						out.Body = []*models.CommentInFeed{}
+					}
+				} else {
+					out.Body = (out.Body)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v10 *models.CommentInFeed
+					if in.IsNull() {
+						in.Skip()
+						v10 = nil
+					} else {
+						if v10 == nil {
+							v10 = new(models.CommentInFeed)
+						}
+						easyjson559270aeDecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in, v10)
+					}
+					out.Body = append(out.Body, v10)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson559270aeEncodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery5(out *jwriter.Writer, in CommentListResponse) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"status\":"
+		out.RawString(prefix[1:])
+		out.Int(int(in.Status))
+	}
+	{
+		const prefix string = ",\"body\":"
+		out.RawString(prefix)
+		if in.Body == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v11, v12 := range in.Body {
+				if v11 > 0 {
+					out.RawByte(',')
+				}
+				if v12 == nil {
+					out.RawString("null")
+				} else {
+					easyjson559270aeEncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out, *v12)
+				}
+			}
+			out.RawByte(']')
+		}
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v CommentListResponse) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson559270aeEncodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery5(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v CommentListResponse) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson559270aeEncodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery5(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *CommentListResponse) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson559270aeDecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery5(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *CommentListResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson559270aeDecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery5(l, v)
+}
+func easyjson559270aeDecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlexer.Lexer, out *models.CommentInFeed) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "id":
+			out.ID = uint64(in.Uint64())
+		case "sender_name":
+			out.SenderName = string(in.String())
+		case "avatar":
+			easyjson559270aeDecodeDatabaseSql(in, &out.Avatar)
+		case "text":
+			out.Text = string(in.String())
+		case "rating":
+			out.Rating = uint8(in.Uint8())
+		case "created_at":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.CreatedAt).UnmarshalJSON(data))
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson559270aeEncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwriter.Writer, in models.CommentInFeed) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix[1:])
+		out.Uint64(uint64(in.ID))
+	}
+	{
+		const prefix string = ",\"sender_name\":"
+		out.RawString(prefix)
+		out.String(string(in.SenderName))
+	}
+	{
+		const prefix string = ",\"avatar\":"
+		out.RawString(prefix)
+		easyjson559270aeEncodeDatabaseSql(out, in.Avatar)
+	}
+	{
+		const prefix string = ",\"text\":"
+		out.RawString(prefix)
+		out.String(string(in.Text))
+	}
+	{
+		const prefix string = ",\"rating\":"
+		out.RawString(prefix)
+		out.Uint8(uint8(in.Rating))
+	}
+	{
+		const prefix string = ",\"created_at\":"
+		out.RawString(prefix)
+		out.Raw((in.CreatedAt).MarshalJSON())
+	}
+	out.RawByte('}')
+}
+func easyjson559270aeDecodeDatabaseSql(in *jlexer.Lexer, out *sql.NullString) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "String":
+			out.String = string(in.String())
+		case "Valid":
+			out.Valid = bool(in.Bool())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson559270aeEncodeDatabaseSql(out *jwriter.Writer, in sql.NullString) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"String\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.String))
+	}
+	{
+		const prefix string = ",\"Valid\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.Valid))
+	}
+	out.RawByte('}')
 }

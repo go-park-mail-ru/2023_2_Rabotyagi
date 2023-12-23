@@ -44,6 +44,19 @@ func NewProductListResponse(body []*models.ProductInFeed) *ProductListResponse {
 }
 
 //easyjson:json
+type CommentListResponse struct {
+	Status int                     `json:"status"`
+	Body   []*models.CommentInFeed `json:"body"`
+}
+
+func NewCommentListResponse(body []*models.CommentInFeed) *CommentListResponse {
+	return &CommentListResponse{
+		Status: statuses.StatusResponseSuccessful,
+		Body:   body,
+	}
+}
+
+//easyjson:json
 type ProductInSearchListResponse struct {
 	Status int      `json:"status"`
 	Body   []string `json:"body"`

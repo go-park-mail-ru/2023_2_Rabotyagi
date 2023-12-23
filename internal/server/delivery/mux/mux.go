@@ -132,6 +132,8 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(productHandler.DeleteCommentHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/comment/update",
 		middleware.SetupCORS(productHandler.UpdateCommentHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/comment/get_list",
+		middleware.SetupCORS(productHandler.GetCommentListHandler, configMux.addrOrigin, configMux.schema))
 
 	router.Handle("/category/get_full",
 		middleware.SetupCORS(categoryHandler.GetFullCategories, configMux.addrOrigin, configMux.schema))

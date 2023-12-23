@@ -38,6 +38,21 @@ definitions:
       text:
         type: string
     type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.CommentInFeed:
+    properties:
+      avatar:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      rating:
+        type: integer
+      sender_name:
+        type: string
+      text:
+        type: string
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Image:
     properties:
       url:
@@ -306,6 +321,15 @@ definitions:
       body:
         items:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.City'
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_product_delivery.CommentListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.CommentInFeed'
         type: array
       status:
         type: integer

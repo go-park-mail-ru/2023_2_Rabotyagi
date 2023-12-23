@@ -16,8 +16,83 @@ var (
 	NameSeqComment = pgx.Identifier{"public", "comment_id_seq"} //nolint:gochecknoglobals
 )
 
-func (p *ProductStorage) GetCommentList(ctx context.Context, lastCommentID uint64, count uint64, userID uint64) ([]*models.Comment, error) {
-	return nil, nil
+//nolint:dupl
+func (p *ProductStorage) getCommentList(ctx context.Context,
+	tx pgx.Tx, offset uint64, count uint64, userID uint64,
+) ([]*models.CommentInFeed, error) {
+	logger := p.logger.LogReqID(ctx)
+
+	var comments []*models.CommentInFeed
+
+	SQLGetCommentList := `SELECT c.id AS comment_id,
+       CASE WHEN u.name IS NOT NULL THEN u.name ELSE u.email END,
+       u.avatar,
+       c.text,
+       c.rating,
+       c.created_at
+FROM public."comment" c
+         JOIN public."user" u ON u.id = c.sender_id
+WHERE c.recipient_id = $1
+LIMIT $2
+OFFSET $3;`
+
+	commentsRows, err := tx.Query(ctx, SQLGetCommentList, userID, count, offset)
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	curComment := new(models.CommentInFeed)
+
+	_, err = pgx.ForEachRow(commentsRows, []any{
+		&curComment.ID, &curComment.SenderName, &curComment.Avatar,
+		&curComment.Text, &curComment.Rating, &curComment.CreatedAt,
+	}, func() error {
+		comments = append(comments, &models.CommentInFeed{ //nolint:exhaustruct
+			ID:         curComment.ID,
+			SenderName: curComment.SenderName,
+			Avatar:     curComment.Avatar,
+			Text:       curComment.Text,
+			Rating:     curComment.Rating,
+			CreatedAt:  curComment.CreatedAt,
+		})
+
+		return nil
+	})
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return comments, nil
+}
+
+func (p *ProductStorage) GetCommentList(ctx context.Context, offset uint64, count uint64, userID uint64) ([]*models.CommentInFeed, error) {
+	logger := p.logger.LogReqID(ctx)
+
+	var slComments []*models.CommentInFeed
+
+	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
+		slProductInner, err := p.getCommentList(ctx, tx, offset, count, userID)
+		if err != nil {
+			return err
+		}
+
+		for _, comment := range slProductInner {
+			slComments = append(slComments, comment)
+		}
+
+		return nil
+	})
+	if err != nil {
+		logger.Errorln(err)
+
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return slComments, nil
 }
 
 func (p *ProductStorage) insertComment(ctx context.Context, tx pgx.Tx, preComment *models.PreComment) error {
