@@ -313,7 +313,7 @@ func TestGetProductList(t *testing.T) {
 	testCases := [...]TestCase{
 		{
 			name:        "test basic work",
-			queryParams: map[string]string{"count": "2", "last_id": "1"},
+			queryParams: map[string]string{"count": "2", "offset": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(2), test.UserID).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
@@ -323,7 +323,7 @@ func TestGetProductList(t *testing.T) {
 		},
 		{
 			name:        "test zero work",
-			queryParams: map[string]string{"count": "0", "last_id": "0"},
+			queryParams: map[string]string{"count": "0", "offset": "0"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetProductsList(gomock.Any(), uint64(0), uint64(0), test.UserID).Return(
 					[]*models.ProductInFeed{}, nil)
@@ -333,7 +333,7 @@ func TestGetProductList(t *testing.T) {
 		},
 		{
 			name:        "test a lot of count",
-			queryParams: map[string]string{"count": "10", "last_id": "1"},
+			queryParams: map[string]string{"count": "10", "offset": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetProductsList(gomock.Any(), uint64(1), uint64(10), test.UserID).Return(
 					[]*models.ProductInFeed{
@@ -505,7 +505,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 	testCases := [...]TestCase{
 		{
 			name:        "test basic work",
-			queryParams: map[string]string{"count": "2", "last_id": "1", "saler_id": "1"},
+			queryParams: map[string]string{"count": "2", "offset": "1", "saler_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(2), test.UserID, false).Return(
 					[]*models.ProductInFeed{{ID: 1, Title: "Title"}, {ID: 2, Title: "Title2"}}, nil)
@@ -515,7 +515,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 		},
 		{
 			name:        "test zero work",
-			queryParams: map[string]string{"count": "0", "last_id": "0", "saler_id": "1"},
+			queryParams: map[string]string{"count": "0", "offset": "0", "saler_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(0), uint64(0), test.UserID, false).Return(
 					[]*models.ProductInFeed{}, nil)
@@ -525,7 +525,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 		},
 		{
 			name:        "test a lot of count",
-			queryParams: map[string]string{"count": "10", "last_id": "1", "saler_id": "1"},
+			queryParams: map[string]string{"count": "10", "offset": "1", "saler_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetProductsOfSaler(gomock.Any(), uint64(1), uint64(10), test.UserID, false).Return(
 					[]*models.ProductInFeed{

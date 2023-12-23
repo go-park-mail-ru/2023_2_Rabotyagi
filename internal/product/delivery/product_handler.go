@@ -24,8 +24,8 @@ type IProductService interface { //nolint:interfacebloat
 	AddProduct(ctx context.Context, r io.Reader, userID uint64) (productID uint64, err error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
 	GetProductsList(ctx context.Context,
-		lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
-	GetProductsOfSaler(ctx context.Context, lastProductID uint64,
+		offset uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
+	GetProductsOfSaler(ctx context.Context, offset uint64,
 		count uint64, userID uint64, isMy bool) ([]*models.ProductInFeed, error)
 	UpdateProduct(ctx context.Context, r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64) error
 	CloseProduct(ctx context.Context, productID uint64, userID uint64) error
@@ -163,7 +163,7 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Accept      json
 //	@Produce    json
 //	@Param      count  query uint64 true  "count products"
-//	@Param      last_id  query uint64 true  "last product id"
+//	@Param      offset  query uint64 true  "offset of products"
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -186,7 +186,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
+	offset, err := utils.ParseUint64FromRequest(r, "offset")
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 
@@ -204,7 +204,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		}
 	}
 
-	products, err := p.service.GetProductsList(ctx, lastID, count, userID)
+	products, err := p.service.GetProductsList(ctx, offset, count, userID)
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 
@@ -280,7 +280,7 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 //	@Produce    json
 //	@Param      saler_id  query uint64 true  "saler id"
 //	@Param      count  query uint64 true  "count products"
-//	@Param      last_id  query uint64 true  "last product id "
+//	@Param      offset  query uint64 true  "offset of products"
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -303,7 +303,7 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 		return
 	}
 
-	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
+	offset, err := utils.ParseUint64FromRequest(r, "offset")
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 
@@ -317,7 +317,7 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 		return
 	}
 
-	products, err := p.service.GetProductsOfSaler(ctx, lastID, count, salerID, false)
+	products, err := p.service.GetProductsOfSaler(ctx, offset, count, salerID, false)
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 
