@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS public."comment" CASCADE;
+
+DROP SEQUENCE IF EXISTS comment_id_seq;
