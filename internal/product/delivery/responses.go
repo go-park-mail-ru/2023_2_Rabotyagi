@@ -13,7 +13,7 @@ const (
 	ResponseSuccessfulDeleteProduct     = "Объявление успешно удалено"
 	ResponseSuccessfulActivateProduct   = "Объявление успешно активировано"
 	ResponseSuccessfulAddPremium        = "У объявления успешно акитвирован премиум"
-	ResponseSuccessfullyRemovePremium   = "У объявления успешно отключен премиум"
+	ResponseSuccessfulDeleteComment     = "Комментарий успешно удалено"
 )
 
 //easyjson:json

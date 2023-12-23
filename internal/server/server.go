@@ -97,8 +97,13 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 		return err //nolint:wrapcheck
 	}
 
+	commentService, err := usecases.NewCommentService(productStorage)
+	if err != nil {
+		return err //nolint:wrapcheck
+	}
+
 	productService, err := usecases.NewProductService(productStorage, basketService, favouriteService,
-		premiumService, fileServiceClient)
+		premiumService, commentService, fileServiceClient)
 	if err != nil {
 		return err //nolint:wrapcheck
 	}

@@ -126,6 +126,11 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	router.Handle("/order/delete",
 		middleware.SetupCORS(productHandler.DeleteOrderHandler, configMux.addrOrigin, configMux.schema))
 
+	router.Handle("/comment/add",
+		middleware.SetupCORS(productHandler.AddCommentHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/comment/delete",
+		middleware.SetupCORS(productHandler.DeleteCommentHandler, configMux.addrOrigin, configMux.schema))
+
 	router.Handle("/category/get_full",
 		middleware.SetupCORS(categoryHandler.GetFullCategories, configMux.addrOrigin, configMux.schema))
 	router.Handle("/category/search",
