@@ -22,4 +22,8 @@ const UserID uint64 = 1
 
 const ProductID uint64 = 1
 
+const CommentID uint64 = 1
+
 const CountProduct uint64 = 2
+
+const CountComment uint64 = 2

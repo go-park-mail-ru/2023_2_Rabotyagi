@@ -500,7 +500,7 @@ func TestBuyFullBasket(t *testing.T) {
 	}
 }
 
-func TestDeleteOrder(t *testing.T) {
+func TestDeleteOrder(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = mylogger.NewNop()
