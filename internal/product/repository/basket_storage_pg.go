@@ -22,7 +22,6 @@ var (
 		"Товара доступно меньше, чем вы пытаетесь довавить в корзину")
 )
 
-//nolint:dupl
 func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	tx pgx.Tx, userID uint64,
 ) ([]*models.OrderInBasket, error) {
@@ -76,7 +75,7 @@ func (p *ProductStorage) selectOrdersInBasketByUserID(ctx context.Context,
 	return orders, nil
 }
 
-func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
+func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context, //nolint:dupl
 	userID uint64,
 ) ([]*models.OrderInBasket, error) {
 	logger := p.logger.LogReqID(ctx)
@@ -117,17 +116,17 @@ func (p *ProductStorage) GetOrdersInBasketByUserID(ctx context.Context,
 	return orders, nil
 }
 
-func (p *ProductStorage) selectOrdersNotInBasketByUserID(ctx context.Context, //nolint:dupl
+func (p *ProductStorage) selectOrdersNotInBasketByUserID(ctx context.Context,
 	tx pgx.Tx, userID uint64,
-) ([]*models.OrderInBasket, error) {
+) ([]*models.OrderNotInBasket, error) {
 	logger := p.logger.LogReqID(ctx)
 
-	var orders []*models.OrderInBasket
+	var orders []*models.OrderNotInBasket
 
 	SQLSelectOrdersInBasketByUserID := `SELECT "order".id, "order".owner_id, "order".product_id,
-        "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
+        "product".title, "product".price, "product".city_id, "order".count, "order".status, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
-    INNER JOIN "product" ON "order".product_id = "product".id WHERE owner_id=$1 AND status<>0;`
+    INNER JOIN "product" ON "order".product_id = "product".id WHERE owner_id=$1 AND status > 0 AND status < 255;`
 
 	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
 	if err != nil {
@@ -136,27 +135,30 @@ func (p *ProductStorage) selectOrdersNotInBasketByUserID(ctx context.Context, //
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	curOrder := new(models.OrderInBasket)
+	curOrder := new(models.OrderNotInBasket)
 
 	_, err = pgx.ForEachRow(ordersInBasketRows, []any{
 		&curOrder.ID, &curOrder.OwnerID, &curOrder.ProductID,
 		&curOrder.Title, &curOrder.Price, &curOrder.CityID,
-		&curOrder.Count, &curOrder.AvailableCount, &curOrder.Delivery,
+		&curOrder.Count, &curOrder.Status, &curOrder.AvailableCount, &curOrder.Delivery,
 		&curOrder.SafeDeal, &curOrder.SalerID,
 	}, func() error {
-		orders = append(orders, &models.OrderInBasket{ //nolint:exhaustruct
-			ID:             curOrder.ID,
-			OwnerID:        curOrder.OwnerID,
-			ProductID:      curOrder.ProductID,
-			Title:          curOrder.Title,
-			Price:          curOrder.Price,
-			CityID:         curOrder.CityID,
-			Count:          curOrder.Count,
-			AvailableCount: curOrder.AvailableCount,
-			Delivery:       curOrder.Delivery,
-			SafeDeal:       curOrder.SafeDeal,
-			InFavourites:   curOrder.InFavourites,
-			SalerID:        curOrder.SalerID,
+		orders = append(orders, &models.OrderNotInBasket{
+			OrderInBasket: models.OrderInBasket{ //nolint:exhaustruct
+				ID:             curOrder.ID,
+				OwnerID:        curOrder.OwnerID,
+				ProductID:      curOrder.ProductID,
+				Title:          curOrder.Title,
+				Price:          curOrder.Price,
+				CityID:         curOrder.CityID,
+				Count:          curOrder.Count,
+				AvailableCount: curOrder.AvailableCount,
+				Delivery:       curOrder.Delivery,
+				SafeDeal:       curOrder.SafeDeal,
+				InFavourites:   curOrder.InFavourites,
+				SalerID:        curOrder.SalerID,
+			},
+			Status: curOrder.Status,
 		})
 
 		return nil
@@ -170,12 +172,12 @@ func (p *ProductStorage) selectOrdersNotInBasketByUserID(ctx context.Context, //
 	return orders, nil
 }
 
-func (p *ProductStorage) GetOrdersNotInBasketByUserID(ctx context.Context,
+func (p *ProductStorage) GetOrdersNotInBasketByUserID(ctx context.Context, //nolint:dupl
 	userID uint64,
-) ([]*models.OrderInBasket, error) {
+) ([]*models.OrderNotInBasket, error) {
 	logger := p.logger.LogReqID(ctx)
 
-	var orders []*models.OrderInBasket
+	var orders []*models.OrderNotInBasket
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		ordersInner, err := p.selectOrdersNotInBasketByUserID(ctx, tx, userID)
@@ -211,17 +213,17 @@ func (p *ProductStorage) GetOrdersNotInBasketByUserID(ctx context.Context,
 	return orders, nil
 }
 
-func (p *ProductStorage) selectOrdersSoldByUserID(ctx context.Context, //nolint:dupl
+func (p *ProductStorage) selectOrdersSoldByUserID(ctx context.Context,
 	tx pgx.Tx, userID uint64,
-) ([]*models.OrderInBasket, error) {
+) ([]*models.OrderNotInBasket, error) {
 	logger := p.logger.LogReqID(ctx)
 
-	var orders []*models.OrderInBasket
+	var orders []*models.OrderNotInBasket
 
 	SQLSelectOrdersInBasketByUserID := `SELECT "order".id, "order".owner_id, "order".product_id,
-        "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
+        "product".title, "product".price, "product".city_id, "order".count, "order".status,  "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
-    INNER JOIN "product" ON "order".product_id = "product".id WHERE saler_id=$1 AND status<>0;`
+    INNER JOIN "product" ON "order".product_id = "product".id WHERE saler_id=$1 AND status > 0 AND status < 255;`
 
 	ordersInBasketRows, err := tx.Query(ctx, SQLSelectOrdersInBasketByUserID, userID)
 	if err != nil {
@@ -230,27 +232,30 @@ func (p *ProductStorage) selectOrdersSoldByUserID(ctx context.Context, //nolint:
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	curOrder := new(models.OrderInBasket)
+	curOrder := new(models.OrderNotInBasket)
 
 	_, err = pgx.ForEachRow(ordersInBasketRows, []any{
 		&curOrder.ID, &curOrder.OwnerID, &curOrder.ProductID,
 		&curOrder.Title, &curOrder.Price, &curOrder.CityID,
-		&curOrder.Count, &curOrder.AvailableCount, &curOrder.Delivery,
+		&curOrder.Count, &curOrder.Status, &curOrder.AvailableCount, &curOrder.Delivery,
 		&curOrder.SafeDeal, &curOrder.SalerID,
 	}, func() error {
-		orders = append(orders, &models.OrderInBasket{ //nolint:exhaustruct
-			ID:             curOrder.ID,
-			OwnerID:        curOrder.OwnerID,
-			ProductID:      curOrder.ProductID,
-			Title:          curOrder.Title,
-			Price:          curOrder.Price,
-			CityID:         curOrder.CityID,
-			Count:          curOrder.Count,
-			AvailableCount: curOrder.AvailableCount,
-			Delivery:       curOrder.Delivery,
-			SafeDeal:       curOrder.SafeDeal,
-			InFavourites:   curOrder.InFavourites,
-			SalerID:        curOrder.SalerID,
+		orders = append(orders, &models.OrderNotInBasket{
+			OrderInBasket: models.OrderInBasket{ //nolint:exhaustruct
+				ID:             curOrder.ID,
+				OwnerID:        curOrder.OwnerID,
+				ProductID:      curOrder.ProductID,
+				Title:          curOrder.Title,
+				Price:          curOrder.Price,
+				CityID:         curOrder.CityID,
+				Count:          curOrder.Count,
+				AvailableCount: curOrder.AvailableCount,
+				Delivery:       curOrder.Delivery,
+				SafeDeal:       curOrder.SafeDeal,
+				InFavourites:   curOrder.InFavourites,
+				SalerID:        curOrder.SalerID,
+			},
+			Status: curOrder.Status,
 		})
 
 		return nil
@@ -264,12 +269,12 @@ func (p *ProductStorage) selectOrdersSoldByUserID(ctx context.Context, //nolint:
 	return orders, nil
 }
 
-func (p *ProductStorage) GetOrdersSoldByUserID(ctx context.Context,
+func (p *ProductStorage) GetOrdersSoldByUserID(ctx context.Context, //nolint:dupl
 	userID uint64,
-) ([]*models.OrderInBasket, error) {
+) ([]*models.OrderNotInBasket, error) {
 	logger := p.logger.LogReqID(ctx)
 
-	var orders []*models.OrderInBasket
+	var orders []*models.OrderNotInBasket
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
 		ordersInner, err := p.selectOrdersSoldByUserID(ctx, tx, userID)
