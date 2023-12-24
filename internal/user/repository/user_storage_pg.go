@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
@@ -61,12 +62,39 @@ func (u *UserStorage) getUserWithoutPasswordByID(ctx context.Context,
 	return &user, nil
 }
 
-func (u *UserStorage) GetUserWithoutPasswordByID(ctx context.Context, id uint64) (*models.UserWithoutPassword, error) {
+func (u *UserStorage) getAvgRatingUserByID(ctx context.Context,
+	tx pgx.Tx, userID uint64,
+) (sql.NullFloat64, error) {
+	logger := u.logger.LogReqID(ctx)
+
+	SQLGetAvgRatingUserByID := `SELECT AVG(rating)
+FROM public."comment"
+WHERE recipient_id = $1;`
+	avgRatingLine := tx.QueryRow(ctx, SQLGetAvgRatingUserByID, userID)
+
+	var avgRating sql.NullFloat64
+
+	if err := avgRatingLine.Scan(&avgRating); err != nil {
+		logger.Errorf("error in getAvgRatingUserByID: %+v", err)
+
+		return sql.NullFloat64{}, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return avgRating, nil
+}
+
+func (u *UserStorage) GetUserWithoutPasswordByID(ctx context.Context, id uint64) (*models.UserWithoutPassword, error) { //nolint:varnamelen
 	var user *models.UserWithoutPassword
 
 	err := pgx.BeginFunc(ctx, u.pool, func(tx pgx.Tx) error {
 		userInner, err := u.getUserWithoutPasswordByID(ctx, tx, id)
 		user = userInner
+		if err != nil {
+			return err
+		}
+
+		avgRating, err := u.getAvgRatingUserByID(ctx, tx, id)
+		user.AvgRating = avgRating
 
 		return err
 	})

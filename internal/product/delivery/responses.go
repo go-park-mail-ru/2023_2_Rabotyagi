@@ -103,3 +103,13 @@ type ResponseAPIYoomany struct {
 func (r *ResponseAPIYoomany) IsCorrect() bool {
 	return r.Confirmation.Type == TypeConfirmationPayment
 }
+
+//easyjson:json
+type OrderNotInBasketListResponse struct {
+	Status int                        `json:"status"`
+	Body   []*models.OrderNotInBasket `json:"body"`
+}
+
+func NewOrderNotInBasketListResponse(body []*models.OrderNotInBasket) *OrderNotInBasketListResponse {
+	return &OrderNotInBasketListResponse{Status: statuses.StatusResponseSuccessful, Body: body}
+}

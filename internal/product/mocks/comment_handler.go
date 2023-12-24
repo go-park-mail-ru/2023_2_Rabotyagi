@@ -70,18 +70,18 @@ func (mr *MockICommentServiceMockRecorder) DeleteComment(ctx, commentID, senderI
 }
 
 // GetCommentList mocks base method.
-func (m *MockICommentService) GetCommentList(ctx context.Context, offset, count, userID uint64) ([]*models.CommentInFeed, error) {
+func (m *MockICommentService) GetCommentList(ctx context.Context, offset, count, recipientID, senderID uint64) ([]*models.CommentInFeed, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCommentList", ctx, offset, count, userID)
+	ret := m.ctrl.Call(m, "GetCommentList", ctx, offset, count, recipientID, senderID)
 	ret0, _ := ret[0].([]*models.CommentInFeed)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetCommentList indicates an expected call of GetCommentList.
-func (mr *MockICommentServiceMockRecorder) GetCommentList(ctx, offset, count, userID any) *gomock.Call {
+func (mr *MockICommentServiceMockRecorder) GetCommentList(ctx, offset, count, recipientID, senderID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommentList", reflect.TypeOf((*MockICommentService)(nil).GetCommentList), ctx, offset, count, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommentList", reflect.TypeOf((*MockICommentService)(nil).GetCommentList), ctx, offset, count, recipientID, senderID)
 }
 
 // UpdateComment mocks base method.

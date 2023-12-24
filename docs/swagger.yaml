@@ -48,6 +48,8 @@ definitions:
         type: integer
       rating:
         type: integer
+      sender_id:
+        type: integer
       sender_name:
         type: string
       text:
@@ -254,6 +256,8 @@ definitions:
     properties:
       avatar:
         type: string
+      avg_rating:
+        $ref: '#/definitions/sql.NullFloat64'
       birthday:
         example: "2014-12-12T14:00:12+07:00"
         type: string
@@ -381,6 +385,14 @@ definitions:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.UserWithoutPassword'
       status:
         type: integer
+    type: object
+  sql.NullFloat64:
+    properties:
+      float64:
+        type: number
+      valid:
+        description: Valid is true if Float64 is not NULL
+        type: boolean
     type: object
   sql.NullString:
     properties:
@@ -904,7 +916,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get orders not in basket (with status != 0)
+      summary: get orders not in basket (with status > 0 and < 255)
       tags:
       - order
   /order/sold:
@@ -931,7 +943,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get orders not in basket sold by user (with status != 0)
+      summary: get orders not in basket sold by user (with status > 0 and < 255)
       tags:
       - order
   /order/update_count:

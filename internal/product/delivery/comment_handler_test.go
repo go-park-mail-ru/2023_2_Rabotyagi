@@ -196,15 +196,15 @@ func TestGetCommentList(t *testing.T) {
 			name:        "test basic work",
 			queryParams: map[string]string{"count": "2", "offset": "1", "user_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetCommentList(gomock.Any(), uint64(1), uint64(2), test.UserID).Return(
+				m.EXPECT().GetCommentList(gomock.Any(), uint64(1), uint64(2), test.UserID, uint64(1)).Return(
 					[]*models.CommentInFeed{
 						{
-							ID: 1, SenderName: "Ivan",
+							ID: 1, SenderID: uint64(2), SenderName: "Ivan",
 							Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 							CreatedAt: time.Time{},
 						},
 						{
-							ID: 2, SenderName: "Petr",
+							ID: 2, SenderID: uint64(3), SenderName: "Petr",
 							Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 							CreatedAt: time.Time{},
 						},
@@ -213,12 +213,12 @@ func TestGetCommentList(t *testing.T) {
 			expectedResponse: delivery.NewCommentListResponse(
 				[]*models.CommentInFeed{
 					{
-						ID: 1, SenderName: "Ivan",
+						ID: 1, SenderID: uint64(2), SenderName: "Ivan",
 						Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 						CreatedAt: time.Time{},
 					},
 					{
-						ID: 2, SenderName: "Petr",
+						ID: 2, SenderID: uint64(3), SenderName: "Petr",
 						Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 						CreatedAt: time.Time{},
 					},
@@ -228,7 +228,7 @@ func TestGetCommentList(t *testing.T) {
 			name:        "test zero work",
 			queryParams: map[string]string{"count": "0", "offset": "0", "user_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetCommentList(gomock.Any(), uint64(0), uint64(0), test.UserID).Return(
+				m.EXPECT().GetCommentList(gomock.Any(), uint64(0), uint64(0), test.UserID, uint64(1)).Return(
 					[]*models.CommentInFeed{}, nil)
 			},
 			expectedResponse: delivery.NewCommentListResponse(
@@ -238,29 +238,29 @@ func TestGetCommentList(t *testing.T) {
 			name:        "test a lot of count",
 			queryParams: map[string]string{"count": "5", "offset": "1", "user_id": "1"},
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetCommentList(gomock.Any(), uint64(1), uint64(5), test.UserID).Return(
+				m.EXPECT().GetCommentList(gomock.Any(), uint64(1), uint64(5), test.UserID, uint64(1)).Return(
 					[]*models.CommentInFeed{ //nolint:dupl
 						{
-							ID: 1, SenderName: "Ivan", Avatar: sql.NullString{Valid: false, String: ""},
+							ID: 1, SenderID: uint64(2), SenderName: "Ivan", Avatar: sql.NullString{Valid: false, String: ""},
 							Text: "Good", Rating: uint8(5), CreatedAt: time.Time{},
 						},
 						{
-							ID: 2, SenderName: "Petr",
+							ID: 2, SenderID: uint64(3), SenderName: "Petr",
 							Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 							CreatedAt: time.Time{},
 						},
 						{
-							ID: 3, SenderName: "Petr",
+							ID: 3, SenderID: uint64(4), SenderName: "Petr",
 							Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 							CreatedAt: time.Time{},
 						},
 						{
-							ID: 4, SenderName: "Petr",
+							ID: 4, SenderID: uint64(5), SenderName: "Petr",
 							Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 							CreatedAt: time.Time{},
 						},
 						{
-							ID: 5, SenderName: "Petr",
+							ID: 5, SenderID: uint64(6), SenderName: "Petr",
 							Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 							CreatedAt: time.Time{},
 						},
@@ -269,26 +269,26 @@ func TestGetCommentList(t *testing.T) {
 			expectedResponse: delivery.NewCommentListResponse(
 				[]*models.CommentInFeed{ //nolint:dupl
 					{
-						ID: 1, SenderName: "Ivan", Avatar: sql.NullString{Valid: false, String: ""},
+						ID: 1, SenderID: uint64(2), SenderName: "Ivan", Avatar: sql.NullString{Valid: false, String: ""},
 						Text: "Good", Rating: uint8(5), CreatedAt: time.Time{},
 					},
 					{
-						ID: 2, SenderName: "Petr",
+						ID: 2, SenderID: uint64(3), SenderName: "Petr",
 						Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 						CreatedAt: time.Time{},
 					},
 					{
-						ID: 3, SenderName: "Petr",
+						ID: 3, SenderID: uint64(4), SenderName: "Petr",
 						Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 						CreatedAt: time.Time{},
 					},
 					{
-						ID: 4, SenderName: "Petr",
+						ID: 4, SenderID: uint64(5), SenderName: "Petr",
 						Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 						CreatedAt: time.Time{},
 					},
 					{
-						ID: 5, SenderName: "Petr",
+						ID: 5, SenderID: uint64(6), SenderName: "Petr",
 						Avatar: sql.NullString{Valid: false, String: ""}, Text: "Good", Rating: uint8(5),
 						CreatedAt: time.Time{},
 					},

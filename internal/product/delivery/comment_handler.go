@@ -15,7 +15,8 @@ import (
 var _ ICommentService = (*productusecases.CommentService)(nil)
 
 type ICommentService interface {
-	GetCommentList(ctx context.Context, offset uint64, count uint64, userID uint64) ([]*models.CommentInFeed, error)
+	GetCommentList(ctx context.Context, offset uint64, count uint64, recipientID uint64,
+		senderID uint64) ([]*models.CommentInFeed, error)
 	AddComment(ctx context.Context, r io.Reader, userID uint64) (commentID uint64, err error)
 	DeleteComment(ctx context.Context, commentID uint64, senderID uint64) error
 	UpdateComment(ctx context.Context, r io.Reader, userID uint64, commentID uint64) error
@@ -190,6 +191,13 @@ func (p *ProductHandler) GetCommentListHandler(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 	logger := p.logger.LogReqID(ctx)
 
+	senderID, err := delivery.GetUserID(ctx, r, p.sessionManagerClient)
+	if err != nil {
+		responses.HandleErr(w, r, logger, err)
+
+		return
+	}
+
 	count, err := utils.ParseUint64FromRequest(r, "count")
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
@@ -204,14 +212,14 @@ func (p *ProductHandler) GetCommentListHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	userID, err := utils.ParseUint64FromRequest(r, "user_id")
+	recipientID, err := utils.ParseUint64FromRequest(r, "user_id")
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 
 		return
 	}
 
-	comments, err := p.service.GetCommentList(ctx, offset, count, userID)
+	comments, err := p.service.GetCommentList(ctx, offset, count, recipientID, senderID)
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 

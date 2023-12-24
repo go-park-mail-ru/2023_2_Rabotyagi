@@ -121,9 +121,9 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	router.Handle("/order/get_basket",
 		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/get_not_in_basket",
-		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
+		middleware.SetupCORS(productHandler.GetOrdersNotInBasketHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/sold",
-		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
+		middleware.SetupCORS(productHandler.GetOrdersSoldHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/update_count",
 		middleware.SetupCORS(productHandler.UpdateOrderCountHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/update_status",

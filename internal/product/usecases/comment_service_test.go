@@ -267,13 +267,14 @@ func TestGetCommentList(t *testing.T) {
 		behaviorCommentStorage func(m *mocks.MockICommentStorage)
 		expectedCommentInFeed  []*models.CommentInFeed
 		expectedError          error
+		senderID               uint64
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
 			behaviorCommentStorage: func(m *mocks.MockICommentStorage) {
-				m.EXPECT().GetCommentList(baseCtx, uint64(1), uint64(2), test.UserID).Return(
+				m.EXPECT().GetCommentList(baseCtx, uint64(1), uint64(2), test.UserID, uint64(2)).Return(
 					[]*models.CommentInFeed{
 						{
 							ID: test.CommentID, SenderName: "Ivan", Avatar: sql.NullString{Valid: false, String: ""},
@@ -288,15 +289,17 @@ func TestGetCommentList(t *testing.T) {
 				},
 			},
 			expectedError: nil,
+			senderID:      uint64(2),
 		},
 		{
 			name: "test internal error",
 			behaviorCommentStorage: func(m *mocks.MockICommentStorage) {
-				m.EXPECT().GetCommentList(baseCtx, uint64(1), uint64(2), test.UserID).Return(
+				m.EXPECT().GetCommentList(baseCtx, uint64(1), uint64(2), test.UserID, uint64(2)).Return(
 					nil, testInternalErr)
 			},
 			expectedCommentInFeed: nil,
 			expectedError:         testInternalErr,
+			senderID:              uint64(2),
 		},
 	}
 
@@ -314,7 +317,8 @@ func TestGetCommentList(t *testing.T) {
 				t.Fatalf("Failed create productService %+v", err)
 			}
 
-			ordersInBasket, err := productService.GetCommentList(baseCtx, uint64(1), test.CountComment, test.UserID)
+			ordersInBasket, err := productService.GetCommentList(baseCtx, uint64(1), test.CountComment,
+				test.UserID, testCase.senderID)
 			if errInner := utils.EqualError(err, testCase.expectedError); errInner != nil {
 				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
