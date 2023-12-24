@@ -115,7 +115,7 @@ func TestAddOrder(t *testing.T) {
 	}
 }
 
-func TestGetOrderByUserID(t *testing.T) {
+func TestGetOrderByUserID(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = mylogger.NewNop()
@@ -190,10 +190,10 @@ func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:dupl
 	testInternalErr := myerrors.NewErrorInternal("Test error")
 
 	type TestCase struct {
-		name                     string
-		behaviorBasketStorage    func(m *mocks.MockIBasketStorage)
-		expectedOrderNotInBasket []*models.OrderNotInBasket
-		expectedError            error
+		name                  string
+		behaviorBasketStorage func(m *mocks.MockIBasketStorage)
+		expectedOrderInBasket []*models.OrderInBasket
+		expectedError         error
 	}
 
 	testCases := [...]TestCase{
@@ -201,22 +201,12 @@ func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:dupl
 			name: "test basic work",
 			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {
 				m.EXPECT().GetOrdersNotInBasketByUserID(baseCtx, test.UserID).Return(
-					[]*models.OrderNotInBasket{
-						{
-							OrderInBasket: models.OrderInBasket{ProductID: 1, Title: "sofa"}, //nolint:exhaustruct
-						},
-						{
-							OrderInBasket: models.OrderInBasket{ProductID: 2, Title: "laptop"}, //nolint:exhaustruct
-						},
+					[]*models.OrderInBasket{
+						{ID: 1, ProductID: test.ProductID, Count: 1, AvailableCount: 2, SalerID: 1},
 					}, nil)
 			},
-			expectedOrderNotInBasket: []*models.OrderNotInBasket{
-				{
-					OrderInBasket: models.OrderInBasket{ProductID: 1, Title: "sofa"}, //nolint:exhaustruct
-				},
-				{
-					OrderInBasket: models.OrderInBasket{ProductID: 2, Title: "laptop"}, //nolint:exhaustruct
-				},
+			expectedOrderInBasket: []*models.OrderInBasket{
+				{ID: 1, ProductID: test.ProductID, Count: 1, AvailableCount: 2, SalerID: 1},
 			},
 			expectedError: nil,
 		},
@@ -226,8 +216,8 @@ func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:dupl
 				m.EXPECT().GetOrdersNotInBasketByUserID(baseCtx, test.UserID).Return(
 					nil, testInternalErr)
 			},
-			expectedOrderNotInBasket: nil,
-			expectedError:            testInternalErr,
+			expectedOrderInBasket: nil,
+			expectedError:         testInternalErr,
 		},
 	}
 
@@ -250,7 +240,7 @@ func TestGetOrderNotInBasketByUserID(t *testing.T) { //nolint:dupl
 				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 
-			if err := utils.EqualTest(ordersInBasket, testCase.expectedOrderNotInBasket); err != nil {
+			if err := utils.EqualTest(ordersInBasket, testCase.expectedOrderInBasket); err != nil {
 				t.Fatalf("Failed EqualTest %+v", err)
 			}
 		})
@@ -266,10 +256,10 @@ func TestGetOrderSoldByUserID(t *testing.T) { //nolint:dupl
 	testInternalErr := myerrors.NewErrorInternal("Test error")
 
 	type TestCase struct {
-		name                     string
-		behaviorBasketStorage    func(m *mocks.MockIBasketStorage)
-		expectedOrderNotInBasket []*models.OrderNotInBasket
-		expectedError            error
+		name                  string
+		behaviorBasketStorage func(m *mocks.MockIBasketStorage)
+		expectedOrderInBasket []*models.OrderInBasket
+		expectedError         error
 	}
 
 	testCases := [...]TestCase{
@@ -277,22 +267,12 @@ func TestGetOrderSoldByUserID(t *testing.T) { //nolint:dupl
 			name: "test basic work",
 			behaviorBasketStorage: func(m *mocks.MockIBasketStorage) {
 				m.EXPECT().GetOrdersSoldByUserID(baseCtx, test.UserID).Return(
-					[]*models.OrderNotInBasket{
-						{
-							OrderInBasket: models.OrderInBasket{ProductID: 1, Title: "sofa"}, //nolint:exhaustruct
-						},
-						{
-							OrderInBasket: models.OrderInBasket{ProductID: 2, Title: "laptop"}, //nolint:exhaustruct
-						},
+					[]*models.OrderInBasket{
+						{ID: 1, ProductID: test.ProductID, Count: 1, AvailableCount: 2, SalerID: 1},
 					}, nil)
 			},
-			expectedOrderNotInBasket: []*models.OrderNotInBasket{
-				{
-					OrderInBasket: models.OrderInBasket{ProductID: 1, Title: "sofa"}, //nolint:exhaustruct
-				},
-				{
-					OrderInBasket: models.OrderInBasket{ProductID: 2, Title: "laptop"}, //nolint:exhaustruct
-				},
+			expectedOrderInBasket: []*models.OrderInBasket{
+				{ID: 1, ProductID: test.ProductID, Count: 1, AvailableCount: 2, SalerID: 1},
 			},
 			expectedError: nil,
 		},
@@ -302,8 +282,8 @@ func TestGetOrderSoldByUserID(t *testing.T) { //nolint:dupl
 				m.EXPECT().GetOrdersSoldByUserID(baseCtx, test.UserID).Return(
 					nil, testInternalErr)
 			},
-			expectedOrderNotInBasket: nil,
-			expectedError:            testInternalErr,
+			expectedOrderInBasket: nil,
+			expectedError:         testInternalErr,
 		},
 	}
 
@@ -326,7 +306,7 @@ func TestGetOrderSoldByUserID(t *testing.T) { //nolint:dupl
 				t.Fatalf("Failed EqualError: %+v", errInner)
 			}
 
-			if err := utils.EqualTest(ordersInBasket, testCase.expectedOrderNotInBasket); err != nil {
+			if err := utils.EqualTest(ordersInBasket, testCase.expectedOrderInBasket); err != nil {
 				t.Fatalf("Failed EqualTest %+v", err)
 			}
 		})
@@ -520,7 +500,7 @@ func TestBuyFullBasket(t *testing.T) {
 	}
 }
 
-func TestDeleteOrder(t *testing.T) {
+func TestDeleteOrder(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = mylogger.NewNop()

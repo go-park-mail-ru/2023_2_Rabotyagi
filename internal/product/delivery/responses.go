@@ -13,7 +13,8 @@ const (
 	ResponseSuccessfulDeleteProduct     = "Объявление успешно удалено"
 	ResponseSuccessfulActivateProduct   = "Объявление успешно активировано"
 	ResponseSuccessfulAddPremium        = "У объявления успешно акитвирован премиум"
-	ResponseSuccessfullyRemovePremium   = "У объявления успешно отключен премиум"
+	ResponseSuccessfulDeleteComment     = "Комментарий успешно удалено"
+	ResponseSuccessfulUpdateComment     = "Комментарий успешно изменен"
 )
 
 //easyjson:json
@@ -37,6 +38,19 @@ type ProductListResponse struct {
 
 func NewProductListResponse(body []*models.ProductInFeed) *ProductListResponse {
 	return &ProductListResponse{
+		Status: statuses.StatusResponseSuccessful,
+		Body:   body,
+	}
+}
+
+//easyjson:json
+type CommentListResponse struct {
+	Status int                     `json:"status"`
+	Body   []*models.CommentInFeed `json:"body"`
+}
+
+func NewCommentListResponse(body []*models.CommentInFeed) *CommentListResponse {
+	return &CommentListResponse{
 		Status: statuses.StatusResponseSuccessful,
 		Body:   body,
 	}
@@ -79,14 +93,4 @@ func NewOrderListResponse(body []*models.OrderInBasket) *OrderListResponse {
 		Status: statuses.StatusResponseSuccessful,
 		Body:   body,
 	}
-}
-
-//easyjson:json
-type OrderNotInBasketListResponse struct {
-	Status int                        `json:"status"`
-	Body   []*models.OrderNotInBasket `json:"body"`
-}
-
-func NewOrderNotInBasketListResponse(body []*models.OrderNotInBasket) *OrderNotInBasketListResponse {
-	return &OrderNotInBasketListResponse{Status: statuses.StatusResponseSuccessful, Body: body}
 }

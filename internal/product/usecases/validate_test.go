@@ -1,7 +1,6 @@
 package usecases_test
 
 import (
-	"database/sql"
 	"io"
 	"strings"
 	"testing"
@@ -36,7 +35,7 @@ func TestValidatePreProduct(t *testing.T) {
 			"safe_deal":false, "is_active":true, "images":[{"url":"test_url"}]}`),
 			expectedPreProduct: &models.PreProduct{
 				Description: "description not empty", CityID: 1,
-				CategoryID: 1, Title: "title", Price: sql.NullInt64{Valid: true, Int64: 123},
+				CategoryID: 1, Title: "title", Price: 123,
 				AvailableCount: 1, SalerID: test.UserID,
 				SafeDeal: false, Delivery: false, IsActive: true,
 				Images: []models.Image{{URL: "test_url"}},
@@ -91,8 +90,7 @@ func TestValidatePartOfPreProduct(t *testing.T) {
         "available_count": 5
     }`),
 			expectedPreProduct: &models.PreProduct{ //nolint:exhaustruct
-				Description: "This is a test product", Price: sql.NullInt64{Valid: true, Int64: 10},
-				AvailableCount: 5, SalerID: test.UserID,
+				Description: "This is a test product", Price: 10, AvailableCount: 5, SalerID: test.UserID,
 			},
 			expectedError: nil,
 		},

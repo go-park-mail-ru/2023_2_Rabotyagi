@@ -90,7 +90,7 @@ func (v *PreOrder) UnmarshalJSON(data []byte) error {
 func (v *PreOrder) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(l, v)
 }
-func easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels1(in *jlexer.Lexer, out *OrderNotInBasket) {
+func easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels1(in *jlexer.Lexer, out *OrderInBasket) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -109,8 +109,6 @@ func easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels1(in *jle
 			continue
 		}
 		switch key {
-		case "status":
-			out.Status = int(in.Int())
 		case "id":
 			out.ID = uint64(in.Uint64())
 		case "owner_id":
@@ -168,18 +166,13 @@ func easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels1(in *jle
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels1(out *jwriter.Writer, in OrderNotInBasket) {
+func easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels1(out *jwriter.Writer, in OrderInBasket) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"status\":"
-		out.RawString(prefix[1:])
-		out.Int(int(in.Status))
-	}
-	{
 		const prefix string = ",\"id\":"
-		out.RawString(prefix)
+		out.RawString(prefix[1:])
 		out.Uint64(uint64(in.ID))
 	}
 	{
@@ -257,26 +250,26 @@ func easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels1(out *jw
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v OrderNotInBasket) MarshalJSON() ([]byte, error) {
+func (v OrderInBasket) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v OrderNotInBasket) MarshalEasyJSON(w *jwriter.Writer) {
+func (v OrderInBasket) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *OrderNotInBasket) UnmarshalJSON(data []byte) error {
+func (v *OrderInBasket) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *OrderNotInBasket) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *OrderInBasket) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels1(l, v)
 }
 func easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels2(in *jlexer.Lexer, out *Image) {
@@ -321,189 +314,7 @@ func easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels2(out *jw
 	}
 	out.RawByte('}')
 }
-func easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels3(in *jlexer.Lexer, out *OrderInBasket) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "id":
-			out.ID = uint64(in.Uint64())
-		case "owner_id":
-			out.OwnerID = uint64(in.Uint64())
-		case "saler_id":
-			out.SalerID = uint64(in.Uint64())
-		case "product_id":
-			out.ProductID = uint64(in.Uint64())
-		case "city_id":
-			out.CityID = uint64(in.Uint64())
-		case "title":
-			out.Title = string(in.String())
-		case "price":
-			out.Price = uint64(in.Uint64())
-		case "count":
-			out.Count = uint32(in.Uint32())
-		case "available_count":
-			out.AvailableCount = uint32(in.Uint32())
-		case "delivery":
-			out.Delivery = bool(in.Bool())
-		case "safe_deal":
-			out.SafeDeal = bool(in.Bool())
-		case "in_favourites":
-			out.InFavourites = bool(in.Bool())
-		case "images":
-			if in.IsNull() {
-				in.Skip()
-				out.Images = nil
-			} else {
-				in.Delim('[')
-				if out.Images == nil {
-					if !in.IsDelim(']') {
-						out.Images = make([]Image, 0, 4)
-					} else {
-						out.Images = []Image{}
-					}
-				} else {
-					out.Images = (out.Images)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v4 Image
-					easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels2(in, &v4)
-					out.Images = append(out.Images, v4)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels3(out *jwriter.Writer, in OrderInBasket) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"id\":"
-		out.RawString(prefix[1:])
-		out.Uint64(uint64(in.ID))
-	}
-	{
-		const prefix string = ",\"owner_id\":"
-		out.RawString(prefix)
-		out.Uint64(uint64(in.OwnerID))
-	}
-	{
-		const prefix string = ",\"saler_id\":"
-		out.RawString(prefix)
-		out.Uint64(uint64(in.SalerID))
-	}
-	{
-		const prefix string = ",\"product_id\":"
-		out.RawString(prefix)
-		out.Uint64(uint64(in.ProductID))
-	}
-	{
-		const prefix string = ",\"city_id\":"
-		out.RawString(prefix)
-		out.Uint64(uint64(in.CityID))
-	}
-	{
-		const prefix string = ",\"title\":"
-		out.RawString(prefix)
-		out.String(string(in.Title))
-	}
-	{
-		const prefix string = ",\"price\":"
-		out.RawString(prefix)
-		out.Uint64(uint64(in.Price))
-	}
-	{
-		const prefix string = ",\"count\":"
-		out.RawString(prefix)
-		out.Uint32(uint32(in.Count))
-	}
-	{
-		const prefix string = ",\"available_count\":"
-		out.RawString(prefix)
-		out.Uint32(uint32(in.AvailableCount))
-	}
-	{
-		const prefix string = ",\"delivery\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.Delivery))
-	}
-	{
-		const prefix string = ",\"safe_deal\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.SafeDeal))
-	}
-	{
-		const prefix string = ",\"in_favourites\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.InFavourites))
-	}
-	{
-		const prefix string = ",\"images\":"
-		out.RawString(prefix)
-		if in.Images == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v5, v6 := range in.Images {
-				if v5 > 0 {
-					out.RawByte(',')
-				}
-				easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels2(out, v6)
-			}
-			out.RawByte(']')
-		}
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v OrderInBasket) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels3(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v OrderInBasket) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels3(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *OrderInBasket) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels3(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *OrderInBasket) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels3(l, v)
-}
-func easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels4(in *jlexer.Lexer, out *OrderChanges) {
+func easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels3(in *jlexer.Lexer, out *OrderChanges) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -538,7 +349,7 @@ func easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels4(in *jle
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels4(out *jwriter.Writer, in OrderChanges) {
+func easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels3(out *jwriter.Writer, in OrderChanges) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -563,23 +374,23 @@ func easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels4(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v OrderChanges) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels4(&w, v)
+	easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v OrderChanges) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels4(w, v)
+	easyjson120d1ca2EncodeGithubComGoParkMailRu20232RabotyagiPkgModels3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *OrderChanges) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels4(&r, v)
+	easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *OrderChanges) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels4(l, v)
+	easyjson120d1ca2DecodeGithubComGoParkMailRu20232RabotyagiPkgModels3(l, v)
 }

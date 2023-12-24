@@ -2,7 +2,6 @@ package usecases_test
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"io"
 	"strings"
@@ -29,6 +28,7 @@ func NewProductService(ctrl *gomock.Controller,
 	mockBasketStorage := mocks.NewMockIBasketStorage(ctrl)
 	mockFavouriteStorage := mocks.NewMockIFavouriteStorage(ctrl)
 	mockPremiumStorage := mocks.NewMockIPremiumStorage(ctrl)
+	mockCommentStorage := mocks.NewMockICommentStorage(ctrl)
 
 	behaviorProductStorage(mockProductStorage)
 	behaviorFileService(mockFileService)
@@ -48,8 +48,13 @@ func NewProductService(ctrl *gomock.Controller,
 		return nil, fmt.Errorf("unexpected err=%w", err)
 	}
 
+	commentService, err := usecases.NewCommentService(mockCommentStorage)
+	if err != nil {
+		return nil, fmt.Errorf("unexpected err=%w", err)
+	}
+
 	productService, err := usecases.NewProductService(mockProductStorage,
-		basketService, favouriteService, premiumService, mockFileService)
+		basketService, favouriteService, premiumService, commentService, mockFileService)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected err=%w", err)
 	}
@@ -92,7 +97,7 @@ func TestAddProduct(t *testing.T) {
 					CategoryID:     2,
 					Title:          "adsf",
 					Description:    "description",
-					Price:          sql.NullInt64{Valid: true, Int64: 123},
+					Price:          123,
 					AvailableCount: 1,
 					CityID:         1,
 					Delivery:       false,
@@ -150,7 +155,7 @@ func TestAddProduct(t *testing.T) {
 					CategoryID:     2,
 					Title:          "adsf",
 					Description:    "description",
-					Price:          sql.NullInt64{Valid: true, Int64: 123},
+					Price:          123,
 					AvailableCount: 1,
 					CityID:         1,
 					Delivery:       false,
@@ -183,7 +188,7 @@ func TestAddProduct(t *testing.T) {
 					CategoryID:     2,
 					Title:          "adsf",
 					Description:    "description",
-					Price:          sql.NullInt64{Valid: true, Int64: 123},
+					Price:          123,
 					AvailableCount: 1,
 					CityID:         1,
 					Delivery:       false,

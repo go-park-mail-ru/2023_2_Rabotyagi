@@ -42,19 +42,22 @@ type IProductStorage interface { //nolint:interfacebloat
 	IBasketStorage
 	IFavouriteStorage
 	IPremiumStorage
+	ICommentStorage
 }
 
 type ProductService struct {
 	FavouriteService
 	BasketService
 	PremiumService
+	CommentService
 	fileServiceClient fileservice.FileServiceClient
 	storage           IProductStorage
 	logger            *mylogger.MyLogger
 }
 
 func NewProductService(productStorage IProductStorage, basketService *BasketService,
-	favouriteService *FavouriteService, premiumService *PremiumService, fileServiceClient fileservice.FileServiceClient,
+	favouriteService *FavouriteService, premiumService *PremiumService, commentService *CommentService,
+	fileServiceClient fileservice.FileServiceClient,
 ) (*ProductService, error) {
 	logger, err := mylogger.Get()
 	if err != nil {
@@ -65,6 +68,7 @@ func NewProductService(productStorage IProductStorage, basketService *BasketServ
 		FavouriteService:  *favouriteService,
 		BasketService:     *basketService,
 		PremiumService:    *premiumService,
+		CommentService:    *commentService,
 		fileServiceClient: fileServiceClient,
 		storage:           productStorage,
 		logger:            logger,

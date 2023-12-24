@@ -31,6 +31,28 @@ definitions:
       name:
         type: string
     type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.CommentChanges:
+    properties:
+      rating:
+        type: integer
+      text:
+        type: string
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.CommentInFeed:
+    properties:
+      avatar:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      rating:
+        type: integer
+      sender_name:
+        type: string
+      text:
+        type: string
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.Image:
     properties:
       url:
@@ -76,6 +98,17 @@ definitions:
       title:
         type: string
     type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreComment:
+    properties:
+      rating:
+        type: integer
+      recipient_id:
+        type: integer
+      sender_id:
+        type: integer
+      text:
+        type: string
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreOrder:
     properties:
       count:
@@ -103,7 +136,6 @@ definitions:
       is_active:
         type: boolean
       price:
-        example: 100
         type: integer
       safe_deal:
         type: boolean
@@ -151,7 +183,6 @@ definitions:
         example: "2014-12-12T14:00:12+07:00"
         type: string
       price:
-        example: 100
         type: integer
       price_history:
         items:
@@ -290,6 +321,15 @@ definitions:
       body:
         items:
           $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.City'
+        type: array
+      status:
+        type: integer
+    type: object
+  internal_product_delivery.CommentListResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.CommentInFeed'
         type: array
       status:
         type: integer
@@ -477,6 +517,158 @@ paths:
       summary: search city
       tags:
       - city
+  /comment/add:
+    post:
+      consumes:
+      - application/json
+      description: add comment by data
+      parameters:
+      - description: comment data for adding
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.PreComment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
+        "222":
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
+            badFormat(4000)//nolint:lll
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: add comment
+      tags:
+      - comment
+  /comment/delete:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        delete comment for sender using user id from cookies\jwt.
+        This totally removed comment. Recovery will be impossible
+      parameters:
+      - description: comment id
+        in: query
+        name: comment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
+        "222":
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400)//nolint:lll
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: delete comment
+      tags:
+      - comment
+  /comment/get_list:
+    get:
+      consumes:
+      - application/json
+      description: get comment by count and offset and user id
+      parameters:
+      - description: count comments
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: offset of comments
+        in: query
+        name: offset
+        required: true
+        type: integer
+      - description: user
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_product_delivery.CommentListResponse'
+        "222":
+          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll//nolint:lll
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get comment list
+      tags:
+      - comment
+  /comment/update:
+    patch:
+      consumes:
+      - application/json
+      description: update comment by id
+      parameters:
+      - description: product id
+        in: query
+        name: comment_id
+        required: true
+        type: integer
+      - description: полностью опционален
+        in: body
+        name: commentChanges
+        schema:
+          $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.CommentChanges'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID'
+        "222":
+          description: Error". Это Http ответ 200, внутри body статус может быть badContent(4400),
+            badFormat(4000)//nolint:lll
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: update comment
+      tags:
+      - comment
   /img/:
     get:
       consumes:
@@ -712,7 +904,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get orders not in basket (with status > 0 and < 255)
+      summary: get orders not in basket (with status != 0)
       tags:
       - order
   /order/sold:
@@ -739,7 +931,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: get orders not in basket sold by user (with status > 0 and < 255)
+      summary: get orders not in basket sold by user (with status != 0)
       tags:
       - order
   /order/update_count:

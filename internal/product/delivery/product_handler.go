@@ -38,6 +38,7 @@ type IProductService interface { //nolint:interfacebloat
 	IBasketService
 	IFavouriteService
 	IPremiumService
+	ICommentService
 }
 
 type ProductHandler struct {

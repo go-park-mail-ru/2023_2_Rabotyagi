@@ -538,11 +538,7 @@ func (p *ProductStorage) AddProduct(ctx context.Context, preProduct *models.PreP
 
 		productID = LastProductID
 
-		if !preProduct.Price.Valid {
-			return fmt.Errorf(myerrors.ErrTemplate, ErrUncorrectedPrice)
-		}
-
-		err = p.addPriceHistoryRecord(ctx, tx, productID, uint64(preProduct.Price.Int64))
+		err = p.addPriceHistoryRecord(ctx, tx, productID, preProduct.Price)
 		if err != nil {
 			return fmt.Errorf(myerrors.ErrTemplate, err)
 		}
@@ -592,7 +588,6 @@ func (p *ProductStorage) updateProduct(ctx context.Context, tx pgx.Tx,
 	return nil
 }
 
-//nolint:cyclop,funlen
 func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 	updateFields map[string]interface{},
 ) error {
@@ -631,16 +626,12 @@ func (p *ProductStorage) UpdateProduct(ctx context.Context, productID uint64,
 
 		price, ok := updateFields["price"]
 		if ok {
-			priceSQLNullInt, ok := price.(sql.NullInt64)
+			priceUint64, ok := price.(uint64)
 			if !ok {
 				return ErrUncorrectedPrice
 			}
 
-			if !priceSQLNullInt.Valid {
-				return ErrNotValidePrice
-			}
-
-			err = p.addPriceHistoryRecord(ctx, tx, productID, uint64(priceSQLNullInt.Int64))
+			err = p.addPriceHistoryRecord(ctx, tx, productID, priceUint64)
 			if err != nil {
 				return err
 			}

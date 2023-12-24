@@ -114,9 +114,9 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	router.Handle("/order/get_basket",
 		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/get_not_in_basket",
-		middleware.SetupCORS(productHandler.GetOrdersNotInBasketHandler, configMux.addrOrigin, configMux.schema))
+		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/sold",
-		middleware.SetupCORS(productHandler.GetOrdersSoldHandler, configMux.addrOrigin, configMux.schema))
+		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/update_count",
 		middleware.SetupCORS(productHandler.UpdateOrderCountHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/update_status",
@@ -125,6 +125,15 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(productHandler.BuyFullBasketHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/delete",
 		middleware.SetupCORS(productHandler.DeleteOrderHandler, configMux.addrOrigin, configMux.schema))
+
+	router.Handle("/comment/add",
+		middleware.SetupCORS(productHandler.AddCommentHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/comment/delete",
+		middleware.SetupCORS(productHandler.DeleteCommentHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/comment/update",
+		middleware.SetupCORS(productHandler.UpdateCommentHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/comment/get_list",
+		middleware.SetupCORS(productHandler.GetCommentListHandler, configMux.addrOrigin, configMux.schema))
 
 	router.Handle("/category/get_full",
 		middleware.SetupCORS(categoryHandler.GetFullCategories, configMux.addrOrigin, configMux.schema))
