@@ -37,7 +37,9 @@ func NewProductHandler(ctrl *gomock.Controller,
 	behaviorSessionManagerClientCheck(mockSessionManagerClient)
 	behaviorProductService(mockProductService)
 
-	productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+	productHandler, err := delivery.NewProductHandler("test",
+		"test", "test",
+		mockProductService, mockSessionManagerClient)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected err=%w", err)
 	}
@@ -571,7 +573,8 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 
 			testCase.behaviorProductService(mockProductService)
 
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := delivery.NewProductHandler("test",
+				"test", "test", mockProductService, mockSessionManagerClient)
 			if err != nil {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
@@ -976,7 +979,9 @@ func TestSearchProduct(t *testing.T) {
 
 			testCase.behaviorProductService(mockProductService)
 
-			productHandler, err := delivery.NewProductHandler(mockProductService, mockSessionManagerClient)
+			productHandler, err := delivery.NewProductHandler("test",
+				"test", "test",
+				mockProductService, mockSessionManagerClient)
 			if err != nil {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}

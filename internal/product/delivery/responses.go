@@ -94,3 +94,12 @@ func NewOrderListResponse(body []*models.OrderInBasket) *OrderListResponse {
 		Body:   body,
 	}
 }
+
+//easyjson:json
+type ResponseAPIYoomany struct {
+	Confirmation ConfirmationPayment `json:"confirmation"`
+}
+
+func (r *ResponseAPIYoomany) IsCorrect() bool {
+	return r.Confirmation.Type == TypeConfirmationPayment
+}

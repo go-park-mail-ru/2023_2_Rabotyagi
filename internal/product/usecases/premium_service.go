@@ -46,10 +46,12 @@ func NewPremiumService(premiumStorage IPremiumStorage) (*PremiumService, error) 
 }
 
 func (p PremiumService) AddPremium(ctx context.Context, productID uint64,
-	userID uint64, periodCode uint64) error { //nolint:gofumpt
+	userID uint64, periodCode uint64,
+) error {
 	var premiumExpire time.Time
 
 	premiumBegin := time.Now()
+	logger := p.logger.LogReqID(ctx)
 
 	switch periodCode {
 	case Week:
@@ -63,11 +65,15 @@ func (p PremiumService) AddPremium(ctx context.Context, productID uint64,
 	case Year:
 		premiumExpire = premiumBegin.AddDate(1, 0, 0)
 	default:
+		logger.Error(ErrPremiumCode)
+
 		return fmt.Errorf(myerrors.ErrTemplate, ErrPremiumCode)
 	}
 
 	err := p.storage.AddPremium(ctx, productID, userID, premiumBegin, premiumExpire)
 	if err != nil {
+		logger.Error(err)
+
 		return fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 

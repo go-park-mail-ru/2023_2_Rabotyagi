@@ -17,18 +17,24 @@ import (
 )
 
 type ConfigMux struct {
-	addrOrigin      string
-	schema          string
-	portServer      string
-	mainServiceName string
+	addrOrigin        string
+	schema            string
+	portServer        string
+	mainServiceName   string
+	premiumShopID     string
+	premiumShopSecret string
 }
 
-func NewConfigMux(addrOrigin string, schema string, portServer string, mainServiceName string) *ConfigMux {
+func NewConfigMux(addrOrigin, schema, portServer,
+	mainServiceName, premiumShopID, premiumShopSecret string,
+) *ConfigMux {
 	return &ConfigMux{
-		addrOrigin:      addrOrigin,
-		schema:          schema,
-		portServer:      portServer,
-		mainServiceName: mainServiceName,
+		addrOrigin:        addrOrigin,
+		schema:            schema,
+		portServer:        portServer,
+		mainServiceName:   mainServiceName,
+		premiumShopID:     premiumShopID,
+		premiumShopSecret: premiumShopSecret,
 	}
 }
 
@@ -60,7 +66,8 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		return nil, err //nolint:wrapcheck
 	}
 
-	productHandler, err := productdelivery.NewProductHandler(productService, authGrpcService)
+	productHandler, err := productdelivery.NewProductHandler(configMux.addrOrigin,
+		configMux.premiumShopID, configMux.premiumShopSecret, productService, authGrpcService)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}

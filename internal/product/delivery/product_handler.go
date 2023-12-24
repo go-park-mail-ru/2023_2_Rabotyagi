@@ -42,13 +42,17 @@ type IProductService interface { //nolint:interfacebloat
 }
 
 type ProductHandler struct {
-	sessionManagerClient auth.SessionMangerClient
-	service              IProductService
-	logger               *mylogger.MyLogger
+	frontendURL           string
+	premiumShopID         string
+	premiumShopSecretKey  string
+	mapIdempotencyPayment *MapIdempotencePayment
+	sessionManagerClient  auth.SessionMangerClient
+	service               IProductService
+	logger                *mylogger.MyLogger
 }
 
-func NewProductHandler(productService IProductService,
-	sessionManagerClient auth.SessionMangerClient,
+func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey string,
+	productService IProductService, sessionManagerClient auth.SessionMangerClient,
 ) (*ProductHandler, error) {
 	logger, err := mylogger.Get()
 	if err != nil {
@@ -56,9 +60,13 @@ func NewProductHandler(productService IProductService,
 	}
 
 	return &ProductHandler{
-		service:              productService,
-		logger:               logger,
-		sessionManagerClient: sessionManagerClient,
+		frontendURL:           frontendURL,
+		premiumShopID:         premiumShopID,
+		premiumShopSecretKey:  premiumShopSecretKey,
+		mapIdempotencyPayment: NewMapIdempotence(),
+		service:               productService,
+		logger:                logger,
+		sessionManagerClient:  sessionManagerClient,
 	}, nil
 }
 
