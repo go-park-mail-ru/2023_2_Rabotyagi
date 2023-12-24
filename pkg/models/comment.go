@@ -34,6 +34,7 @@ type CommentChanges struct {
 
 type CommentInFeed struct {
 	ID         uint64         `json:"id"           valid:"required"`
+	SenderID   uint64         `json:"sender_id"    valid:"required"`
 	SenderName string         `json:"sender_name"`
 	Avatar     sql.NullString `json:"avatar"     swaggertype:"string"`
 	Text       string         `json:"text"         valid:"required, length(1|4000)~Текст должен быть длинной от 1 до 4000 симвволов"` //nolint:nolintlint

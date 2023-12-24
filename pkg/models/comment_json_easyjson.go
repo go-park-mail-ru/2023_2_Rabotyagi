@@ -38,6 +38,8 @@ func easyjson1ce9cfbcDecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlex
 		switch key {
 		case "id":
 			out.ID = uint64(in.Uint64())
+		case "sender_id":
+			out.SenderID = uint64(in.Uint64())
 		case "sender_name":
 			out.SenderName = string(in.String())
 		case "avatar":
@@ -76,6 +78,11 @@ func easyjson1ce9cfbcEncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwr
 		const prefix string = ",\"id\":"
 		out.RawString(prefix[1:])
 		out.Uint64(uint64(in.ID))
+	}
+	{
+		const prefix string = ",\"sender_id\":"
+		out.RawString(prefix)
+		out.Uint64(uint64(in.SenderID))
 	}
 	{
 		const prefix string = ",\"sender_name\":"

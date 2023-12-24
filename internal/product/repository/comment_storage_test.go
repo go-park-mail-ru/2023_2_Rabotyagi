@@ -150,7 +150,8 @@ func TestGetCommentList(t *testing.T) {
 	type TestCase struct {
 		name                   string
 		behaviorProductStorage func(m *repository.ProductStorage)
-		userID                 uint64
+		resID                  uint64
+		senderID               uint64
 		offset                 uint64
 		count                  uint64
 	}
@@ -161,22 +162,26 @@ func TestGetCommentList(t *testing.T) {
 			behaviorProductStorage: func(m *repository.ProductStorage) {
 				mockPool.ExpectBegin()
 
-				mockPool.ExpectQuery(`SELECT c.id AS comment_id,
+				mockPool.ExpectQuery(`SELECT c.id AS comment_id, c.sender_id, 
        CASE WHEN u.name IS NOT NULL THEN u.name ELSE u.email END,
        u.avatar,
        c.text,
        c.rating,
        c.created_at
-FROM public."comment" c`).WithArgs(uint64(1), uint64(1), uint64(1)).
-					WillReturnRows(pgxmock.NewRows([]string{"comment_id", "name", "avatar", "text", "rating", "created_at"}).
-						AddRow(uint64(1), "Ivan", sql.NullString{Valid: false, String: ""}, "good", uint8(5), time.Time{}))
+FROM public."comment" c`).WithArgs(uint64(1), uint64(2), uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"comment_id", "sender_id", "name", "avatar",
+						"text", "rating", "created_at",
+					}).
+						AddRow(uint64(1), uint64(2), "Ivan", sql.NullString{Valid: false, String: ""}, "good", uint8(5), time.Time{}))
 
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},
-			userID: 1,
-			offset: 1,
-			count:  1,
+			resID:    1,
+			senderID: 2,
+			offset:   1,
+			count:    1,
 		},
 	}
 
@@ -195,7 +200,7 @@ FROM public."comment" c`).WithArgs(uint64(1), uint64(1), uint64(1)).
 
 			testCase.behaviorProductStorage(commentStorage)
 
-			_, err = commentStorage.GetCommentList(ctx, testCase.offset, testCase.count, testCase.userID)
+			_, err = commentStorage.GetCommentList(ctx, testCase.offset, testCase.count, testCase.resID, testCase.senderID)
 			if err != nil {
 				t.Fatal(err)
 			}

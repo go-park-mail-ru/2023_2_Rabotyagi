@@ -18,13 +18,13 @@ var (
 )
 
 func (p *ProductStorage) getCommentList(ctx context.Context,
-	tx pgx.Tx, offset uint64, count uint64, userID uint64,
+	tx pgx.Tx, offset uint64, count uint64, recipientID uint64, senderID uint64,
 ) ([]*models.CommentInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
 
 	var comments []*models.CommentInFeed
 
-	SQLGetCommentList := `SELECT c.id AS comment_id,
+	SQLGetCommentList := `SELECT c.id AS comment_id, c.sender_id,
        CASE WHEN u.name IS NOT NULL THEN u.name ELSE u.email END,
        u.avatar,
        c.text,
@@ -33,10 +33,11 @@ func (p *ProductStorage) getCommentList(ctx context.Context,
 FROM public."comment" c
          JOIN public."user" u ON u.id = c.sender_id
 WHERE c.recipient_id = $1
-LIMIT $2
-OFFSET $3;`
+ORDER BY (c.sender_id = $2) DESC
+LIMIT $3
+OFFSET $4;`
 
-	commentsRows, err := tx.Query(ctx, SQLGetCommentList, userID, count, offset)
+	commentsRows, err := tx.Query(ctx, SQLGetCommentList, recipientID, senderID, count, offset)
 	if err != nil {
 		logger.Errorln(err)
 
@@ -46,11 +47,12 @@ OFFSET $3;`
 	curComment := new(models.CommentInFeed)
 
 	_, err = pgx.ForEachRow(commentsRows, []any{
-		&curComment.ID, &curComment.SenderName, &curComment.Avatar,
+		&curComment.ID, &curComment.SenderID, &curComment.SenderName, &curComment.Avatar,
 		&curComment.Text, &curComment.Rating, &curComment.CreatedAt,
 	}, func() error {
 		comments = append(comments, &models.CommentInFeed{
 			ID:         curComment.ID,
+			SenderID:   curComment.SenderID,
 			SenderName: curComment.SenderName,
 			Avatar:     curComment.Avatar,
 			Text:       curComment.Text,
@@ -70,14 +72,14 @@ OFFSET $3;`
 }
 
 func (p *ProductStorage) GetCommentList(ctx context.Context,
-	offset uint64, count uint64, userID uint64,
+	offset uint64, count uint64, recipientID uint64, senderID uint64,
 ) ([]*models.CommentInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
 
 	var slComments []*models.CommentInFeed
 
 	err := pgx.BeginFunc(ctx, p.pool, func(tx pgx.Tx) error {
-		slCommentsInner, err := p.getCommentList(ctx, tx, offset, count, userID)
+		slCommentsInner, err := p.getCommentList(ctx, tx, offset, count, recipientID, senderID)
 		if err != nil {
 			return err
 		}

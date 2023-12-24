@@ -9,6 +9,7 @@ import (
 //easyjson:json
 type commentInFeedJSON struct {
 	ID         uint64    `json:"id"           valid:"required"`
+	SenderID   uint64    `json:"sender_id"    valid:"required"`
 	SenderName string    `json:"sender_name"`
 	Avatar     *string   `json:"avatar"     swaggertype:"string"`
 	Text       string    `json:"text"         valid:"required, length(1|4000)~Текст должен быть длинной от 1 до 4000 симвволов"` //nolint:nolintlint
@@ -19,6 +20,7 @@ type commentInFeedJSON struct {
 func (c *CommentInFeed) MarshalJSON() ([]byte, error) {
 	commentJs := commentInFeedJSON{
 		ID:         c.ID,
+		SenderID:   c.SenderID,
 		SenderName: c.SenderName,
 		Avatar:     utils.NullStringToUnsafe(c.Avatar),
 		Text:       c.Text,
@@ -37,6 +39,7 @@ func (c *CommentInFeed) UnmarshalJSON(bytes []byte) error {
 	}
 
 	c.ID = commentJs.ID
+	c.SenderID = commentJs.SenderID
 	c.SenderName = commentJs.SenderName
 	c.Avatar = utils.UnsafeStringToNull(commentJs.Avatar)
 	c.Text = commentJs.Text

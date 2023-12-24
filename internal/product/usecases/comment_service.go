@@ -15,7 +15,8 @@ import (
 var _ ICommentStorage = (*productrepo.ProductStorage)(nil)
 
 type ICommentStorage interface {
-	GetCommentList(ctx context.Context, offset uint64, count uint64, userID uint64) ([]*models.CommentInFeed, error)
+	GetCommentList(ctx context.Context, offset uint64, count uint64, recipientID uint64,
+		senderID uint64) ([]*models.CommentInFeed, error)
 	AddComment(ctx context.Context, preComment *models.PreComment) (uint64, error)
 	DeleteComment(ctx context.Context, commentID uint64, senderID uint64) error
 	UpdateComment(ctx context.Context, userID uint64, commentID uint64, updateFields map[string]interface{}) error
@@ -36,9 +37,9 @@ func NewCommentService(commentStorage ICommentStorage) (*CommentService, error) 
 }
 
 func (c CommentService) GetCommentList(ctx context.Context, offset uint64, count uint64,
-	userID uint64,
+	recipientID uint64, senderID uint64,
 ) ([]*models.CommentInFeed, error) {
-	comments, err := c.storage.GetCommentList(ctx, offset, count, userID)
+	comments, err := c.storage.GetCommentList(ctx, offset, count, recipientID, senderID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

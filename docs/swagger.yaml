@@ -48,6 +48,8 @@ definitions:
         type: integer
       rating:
         type: integer
+      sender_id:
+        type: integer
       sender_name:
         type: string
       text:
