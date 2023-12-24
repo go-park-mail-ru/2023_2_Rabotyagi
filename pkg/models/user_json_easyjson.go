@@ -41,6 +41,16 @@ func easyjson3e56fa40DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlex
 			out.ID = uint64(in.Uint64())
 		case "email":
 			out.Email = string(in.String())
+		case "avg_rating":
+			if in.IsNull() {
+				in.Skip()
+				out.AvgRating = nil
+			} else {
+				if out.AvgRating == nil {
+					out.AvgRating = new(float64)
+				}
+				*out.AvgRating = float64(in.Float64())
+			}
 		case "phone":
 			if in.IsNull() {
 				in.Skip()
@@ -110,6 +120,15 @@ func easyjson3e56fa40EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwr
 		const prefix string = ",\"email\":"
 		out.RawString(prefix)
 		out.String(string(in.Email))
+	}
+	{
+		const prefix string = ",\"avg_rating\":"
+		out.RawString(prefix)
+		if in.AvgRating == nil {
+			out.RawString("null")
+		} else {
+			out.Float64(float64(*in.AvgRating))
+		}
 	}
 	{
 		const prefix string = ",\"phone\":"

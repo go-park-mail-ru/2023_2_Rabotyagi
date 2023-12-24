@@ -42,6 +42,11 @@ func TestGetUserWithoutPasswordByID(t *testing.T) {
 							sql.NullString{String: "John", Valid: true},
 							testTime, sql.NullString{String: "afsghga", Valid: true}, testTime))
 
+				mockPool.ExpectQuery(`SELECT AVG`).
+					WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"avg"}).
+						AddRow(sql.NullFloat64{Valid: false, Float64: 0}))
+
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},

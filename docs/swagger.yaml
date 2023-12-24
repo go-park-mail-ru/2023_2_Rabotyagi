@@ -254,6 +254,8 @@ definitions:
     properties:
       avatar:
         type: string
+      avg_rating:
+        $ref: '#/definitions/sql.NullFloat64'
       birthday:
         example: "2014-12-12T14:00:12+07:00"
         type: string
@@ -381,6 +383,14 @@ definitions:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_models.UserWithoutPassword'
       status:
         type: integer
+    type: object
+  sql.NullFloat64:
+    properties:
+      float64:
+        type: number
+      valid:
+        description: Valid is true if Float64 is not NULL
+        type: boolean
     type: object
   sql.NullString:
     properties:

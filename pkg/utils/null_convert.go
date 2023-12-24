@@ -54,3 +54,21 @@ func UnsafeUint64ToNullInt(unsafeInt64 *uint64) sql.NullInt64 {
 
 	return sql.NullInt64{Int64: int64(*unsafeInt64), Valid: true}
 }
+
+func NullFloat64ToUnsafeFloat(nullFloat64 sql.NullFloat64) *float64 {
+	if nullFloat64.Valid {
+		innerFloat64 := nullFloat64.Float64
+
+		return &(innerFloat64)
+	}
+
+	return nil
+}
+
+func UnsafeFloat64ToNullFloat(unsafeFloat64 *float64) sql.NullFloat64 {
+	if unsafeFloat64 == nil {
+		return sql.NullFloat64{Valid: false} //nolint:exhaustruct
+	}
+
+	return sql.NullFloat64{Float64: *unsafeFloat64, Valid: true}
+}

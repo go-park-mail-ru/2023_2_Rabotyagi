@@ -10,6 +10,7 @@ import (
 type userJSON struct {
 	ID        uint64     `json:"id"`
 	Email     string     `json:"email"`
+	AvgRating *float64   `json:"avg_rating"`
 	Phone     *string    `json:"phone"`
 	Name      *string    `json:"name"`
 	Birthday  *time.Time `json:"birthday"`
@@ -21,6 +22,7 @@ func (u *UserWithoutPassword) MarshalJSON() ([]byte, error) {
 	userJs := userJSON{
 		ID:        u.ID,
 		Email:     u.Email,
+		AvgRating: utils.NullFloat64ToUnsafeFloat(u.AvgRating),
 		Phone:     utils.NullStringToUnsafe(u.Phone),
 		Name:      utils.NullStringToUnsafe(u.Name),
 		Birthday:  utils.NullTimeToUnsafe(u.Birthday),
@@ -40,6 +42,7 @@ func (u *UserWithoutPassword) UnmarshalJSON(bytes []byte) error {
 
 	u.ID = userJs.ID
 	u.Email = userJs.Email
+	u.AvgRating = utils.UnsafeFloat64ToNullFloat(userJs.AvgRating)
 	u.Phone = utils.UnsafeStringToNull(userJs.Phone)
 	u.Name = utils.UnsafeStringToNull(userJs.Name)
 	u.Birthday = utils.UnsafeTimeToNull(userJs.Birthday)
