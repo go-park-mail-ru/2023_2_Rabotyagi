@@ -46,8 +46,10 @@ const (
 	periodRequestAPIYoumany  = time.Second * 11
 )
 
+// parsePayments true in return argument means successful handle payment
+//
 //nolint:funlen
-func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, reader io.Reader) error {
+func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, reader io.Reader) (bool, error) {
 	logger := p.logger.LogReqID(ctx)
 
 	body, err := io.ReadAll(reader)
@@ -55,7 +57,7 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 		err = fmt.Errorf("%w %+v", ErrReadAllAPIYoomany, err) //nolint:errorlint
 		logger.Errorln(err)
 
-		return err
+		return false, err
 	}
 
 	logger.Infof("body:%s", body)
@@ -67,7 +69,7 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 		err = fmt.Errorf("%w %+v", ErrUnmarshallAPIYoomany, err) //nolint:errorlint
 		logger.Errorln(err)
 
-		return err
+		return false, err
 	}
 
 	for _, item := range responseGetPayments.Items {
@@ -76,14 +78,14 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 			case item.Status == StatusPaymentPending:
 				logger.Errorln(ErrPaymentPaindingAPIYoomany)
 
-				return ErrPaymentPaindingAPIYoomany
+				return false, nil
 			case IsStatusPaymentSuccessful(item.Status):
 				if !reflect.DeepEqual(item.Amount, payment.Amount) {
 					err = fmt.Errorf("%w recived.Amount != requested.Amount",
 						ErrValidationPaymentAPIYoomany)
 					logger.Errorln(err)
 
-					return err
+					return false, err
 				}
 
 				err = p.service.AddPremium(ctx,
@@ -92,23 +94,23 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 					err = fmt.Errorf(myerrors.ErrTemplate, err)
 					logger.Errorln(err)
 
-					return err
+					return false, err
 				}
 
 				logger.Infof("Successful addPremium metadata:%+v", payment.Metadata)
 
-				return nil
+				return true, nil
 			default:
 				logger.Errorln(ErrResponseWrongStatusAPIYoomany)
 
-				return fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
+				return false, fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
 			}
 		}
 	}
 
 	logger.Errorln(ErrNotFoundPaymentAPIYoomany)
 
-	return fmt.Errorf(myerrors.ErrTemplate, ErrNotFoundPaymentAPIYoomany)
+	return false, nil
 }
 
 func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
@@ -150,21 +152,24 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 
 				timeStart = time.Now().Add(-10 * time.Second).Format(time.RFC3339)
 
-				err = p.parsePayments(ctx, payment, response.Body)
-				if err != nil {
-					chError <- err
+				isSuccessfully, errPayments := p.parsePayments(ctx, payment, response.Body)
 
-					continue
-				}
-
-				err = response.Body.Close()
-				if err != nil {
+				errBodyClose := response.Body.Close()
+				if errBodyClose != nil {
 					err = fmt.Errorf("%w %+v", ErrClosingResponseBody, err) //nolint:errorlint
 					logger.Errorln(err)
 					chError <- err
 				}
 
-				return
+				if errPayments != nil {
+					chError <- err
+
+					return
+				}
+
+				if errPayments == nil && isSuccessfully {
+					return
+				}
 			}
 		}
 	}()
