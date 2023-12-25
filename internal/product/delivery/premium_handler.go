@@ -36,7 +36,7 @@ var (
 )
 
 const (
-	headerKeyIdempotency     = "Idempotency-Key"
+	headerKeyIdempotency     = "Idempotence-Key"
 	paymentsURLAPIYoomany    = "https://api.yookassa.ru/v3/payments"
 	paramCreatedAtAPIYoomany = "created_at.gte="
 	maxTimeoutAPIYoumany     = time.Minute * 11
@@ -184,10 +184,10 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	logger.Infof("%+v", req)
 	req.Header.Set(headerKeyIdempotency, string(keyIdempotencyPayment))
 	req.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
 	req.Header.Set("Content-Type", "application/json")
+	logger.Infof("%+v", req)
 
 	response, err := p.httpClient.Do(req)
 	if err != nil {
