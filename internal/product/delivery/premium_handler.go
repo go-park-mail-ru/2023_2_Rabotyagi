@@ -123,7 +123,7 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 ) {
 	logger := p.logger.LogReqID(ctx)
 	timer := time.NewTimer(maxTimeoutAPIYoumany)
-	timeStart := time.Now().Format(time.RFC3339)
+	timeStart := time.Now().Add(-100 * time.Second).Format(time.RFC3339)
 
 	go func() {
 		for {
