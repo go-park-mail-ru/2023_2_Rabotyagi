@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
+	"time"
 
 	productusecases "github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
@@ -22,18 +24,129 @@ type IPremiumService interface {
 }
 
 var (
-	ErrMarshallPayment           = myerrors.NewErrorInternal("Ошибка маршалинга платежа")
-	ErrCreationRequestAPIYooMany = myerrors.NewErrorInternal("Ошибка создания запроса к yoomany")
-	ErrRequestAPIYoomany         = myerrors.NewErrorInternal("Ошибка в заросе к yoomany")
-	ErrReadAllAPIYoomany         = myerrors.NewErrorInternal("Ошибка в чтении ответа от yoomany")
-	ErrUnmarshallAPIYoomany      = myerrors.NewErrorInternal("Ошибка в unmarshall от yoomany")
-	ErrResponseAPIYoomany        = myerrors.NewErrorInternal("Ошибка проверки ответа от yoomany")
+	ErrMarshallPayment             = myerrors.NewErrorInternal("Ошибка маршалинга платежа")
+	ErrCreationRequestAPIYooMany   = myerrors.NewErrorInternal("Ошибка создания запроса к yoomany")
+	ErrClosingResponseBody         = myerrors.NewErrorInternal("Ошибка закрытия тела ответа")
+	ErrRequestAPIYoomany           = myerrors.NewErrorInternal("Ошибка в заросе к yoomany")
+	ErrReadAllAPIYoomany           = myerrors.NewErrorInternal("Ошибка в чтении ответа от yoomany")
+	ErrUnmarshallAPIYoomany        = myerrors.NewErrorInternal("Ошибка в unmarshall от yoomany")
+	ErrResponseAPIYoomany          = myerrors.NewErrorInternal("Ошибка проверки ответа от yoomany")
+	ErrDidntWaitPaymentAPIYoomany  = myerrors.NewErrorBadContentRequest("Не дождались оплаты")
+	ErrValidationPaymentAPIYoomany = myerrors.NewErrorInternal("Оплата не прошла валидацию")
 )
 
 const (
-	headerKeyIdempotency  = "Idempotency-Key"
-	yoomanyPaymentsAPIURL = "https://api.yookassa.ru/v3/payments"
+	headerKeyIdempotency     = "Idempotency-Key"
+	paymentsURLAPIYoomany    = "https://api.yookassa.ru/v3/payments"
+	paramCreatedAtAPIYoomany = "created_at.gte="
+	maxTimeoutAPIYoumany     = time.Minute * 11
+	periodRequestAPIYoumany  = time.Second * 11
 )
+
+func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, reader io.Reader) error {
+	logger := p.logger.LogReqID(ctx)
+
+	body, err := io.ReadAll(reader)
+	if err != nil {
+		err = fmt.Errorf("%w %+v", ErrReadAllAPIYoomany, err) //nolint:errorlint
+		logger.Errorln(err)
+
+		return err
+	}
+
+	var responseGetPayments ResponseGetPaymentsAPIYoomany
+
+	err = json.Unmarshal(body, &responseGetPayments)
+	if err != nil {
+		err = fmt.Errorf("%w %+v", ErrUnmarshallAPIYoomany, err) //nolint:errorlint
+		logger.Errorln(err)
+
+		return err
+	}
+
+	for _, item := range responseGetPayments.Items {
+		if reflect.DeepEqual(item.Metadata, payment.Metadata) {
+			switch {
+			case item.Status == StatusPaymentPending:
+				return nil
+			case IsStatusPaymentSuccessful(item.Status):
+				if !reflect.DeepEqual(item.Amount, payment.Amount) {
+					err = fmt.Errorf("%w recived.Amount != requested.Amount",
+						ErrValidationPaymentAPIYoomany)
+					logger.Errorln(err)
+
+					return err
+				}
+
+				err = p.service.AddPremium(ctx,
+					payment.Metadata.ProductID, payment.Metadata.UserID, payment.Metadata.PeriodCode)
+				if err != nil {
+					err = fmt.Errorf(myerrors.ErrTemplate, err)
+					logger.Errorln(err)
+
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
+	payment *Payment, periodRequest time.Duration,
+) {
+	logger := p.logger.LogReqID(ctx)
+	timer := time.NewTimer(maxTimeoutAPIYoumany)
+	timeStart := time.Now().Format(time.RFC3339)
+	first := true
+
+	go func() {
+		for {
+			select {
+			case <-timer.C:
+				err := fmt.Errorf("%w для %+v", ErrDidntWaitPaymentAPIYoomany, payment)
+
+				logger.Errorln(err)
+				chError <- err
+			default:
+				time.Sleep(periodRequest)
+
+				request, err := http.NewRequestWithContext(ctx,
+					http.MethodGet, paymentsURLAPIYoomany+paramCreatedAtAPIYoomany+timeStart, nil)
+				if err != nil {
+					err = fmt.Errorf("%w %+v", ErrCreationRequestAPIYooMany, err) //nolint:errorlint
+					logger.Errorln(err)
+					chError <- err
+				}
+
+				response, err := p.httpClient.Do(request)
+				if err != nil {
+					err = fmt.Errorf("%w %+v", ErrRequestAPIYoomany, err) //nolint:errorlint
+					logger.Errorln(err)
+					chError <- err
+				}
+
+				if !first {
+					timeStart = time.Now().Add(-10 * time.Second).Format(time.RFC3339)
+					first = false
+				}
+
+				err = p.parsePayments(ctx, payment, response.Body)
+				if err != nil {
+					chError <- err
+				}
+
+				err = response.Body.Close()
+				if err != nil {
+					err = fmt.Errorf("%w %+v", ErrClosingResponseBody, err) //nolint:errorlint
+					logger.Errorln(err)
+					chError <- err
+				}
+			}
+		}
+	}()
+}
 
 //nolint:funlen
 func (p *ProductHandler) createPayment(ctx context.Context,
@@ -54,9 +167,11 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
+	logger.Infof("%s", body)
+
 	keyIdempotencyPayment := p.mapIdempotencyPayment.AddPayment(payment.Metadata)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, yoomanyPaymentsAPIURL, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, paymentsURLAPIYoomany, bytes.NewReader(body))
 	if err != nil {
 		err = fmt.Errorf("%w error:%v", ErrCreationRequestAPIYooMany, err.Error())
 		logger.Errorln(err)
@@ -64,16 +179,19 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
+	logger.Infof("%+v", req)
 	req.Header.Set(headerKeyIdempotency, string(keyIdempotencyPayment))
 	req.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
 
-	response, err := http.DefaultClient.Do(req)
+	response, err := p.httpClient.Do(req)
 	if err != nil {
 		err = fmt.Errorf("%w error:%v", ErrRequestAPIYoomany, err.Error())
 		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
+
+	logger.Infof("%+v", response)
 
 	defer response.Body.Close()
 
@@ -85,11 +203,11 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	var responsePayment ResponseAPIYoomany
+	var responsePayment ResponsePostPaymentAPIYoomany
 
 	err = json.Unmarshal(bodyResp, &responsePayment)
 	if err != nil {
-		err = fmt.Errorf("%w error:%v", ErrUnmarshallAPIYoomany, err.Error())
+		err = fmt.Errorf("%w error:%+v response: %s", ErrUnmarshallAPIYoomany, err.Error(), bodyResp)
 		logger.Errorln(err)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
@@ -100,6 +218,12 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
+
+	//nolint:godox
+	// TODO chErr just don`t handle yet
+	chErr := make(chan error)
+	p.waitPayment(ctx, chErr,
+		payment, periodRequestAPIYoumany)
 
 	return responsePayment.Confirmation.ReturnURL, nil
 }
@@ -151,13 +275,6 @@ func (p *ProductHandler) AddPremiumHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	redirectURL, err := p.createPayment(ctx, userID, productID, periodCode)
-	if err != nil {
-		responses.HandleErr(w, r, logger, err)
-
-		return
-	}
-
-	err = p.service.AddPremium(ctx, productID, userID, periodCode)
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 

@@ -96,11 +96,11 @@ func NewOrderListResponse(body []*models.OrderInBasket) *OrderListResponse {
 }
 
 //easyjson:json
-type ResponseAPIYoomany struct {
+type ResponsePostPaymentAPIYoomany struct {
 	Confirmation ConfirmationPayment `json:"confirmation"`
 }
 
-func (r *ResponseAPIYoomany) IsCorrect() bool {
+func (r *ResponsePostPaymentAPIYoomany) IsCorrect() bool {
 	return r.Confirmation.Type == TypeConfirmationPayment
 }
 
@@ -112,4 +112,15 @@ type OrderNotInBasketListResponse struct {
 
 func NewOrderNotInBasketListResponse(body []*models.OrderNotInBasket) *OrderNotInBasketListResponse {
 	return &OrderNotInBasketListResponse{Status: statuses.StatusResponseSuccessful, Body: body}
+}
+
+//easyjson:json
+type ResponseGetPaymentsAPIYoomany struct {
+	Type       string `json:"type"`
+	NextCursor string `json:"next_cursor"`
+	Items      []struct {
+		Status   string          `json:"status"`
+		Amount   AmountPayment   `json:"amount"`
+		Metadata MetadataPayment `json:"metadata"`
+	} `json:"items"`
 }

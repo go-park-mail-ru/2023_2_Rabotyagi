@@ -47,6 +47,7 @@ services:
       start_period: 25s
     volumes:
       - log:/var/log/backend
+      - ./bin/ssl:/etc/ssl
 
   backend-fs:
     build:

@@ -140,7 +140,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
 		config.Schema, config.PortServer, config.MainServiceName,
-		config.PremiumShopID, config.PremiumShopSecret),
+		config.PremiumShopID, config.PremiumShopSecret, pathCertFile),
 		userService, productService, categoryService, cityService, authGrpcService, logger)
 	if err != nil {
 		return err //nolint:wrapcheck

@@ -2,10 +2,13 @@ package delivery
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
@@ -45,13 +48,15 @@ type ProductHandler struct {
 	frontendURL           string
 	premiumShopID         string
 	premiumShopSecretKey  string
+	pathCertFile          string
+	httpClient            *http.Client
 	mapIdempotencyPayment *MapIdempotencePayment
 	sessionManagerClient  auth.SessionMangerClient
 	service               IProductService
 	logger                *mylogger.MyLogger
 }
 
-func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey string,
+func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey, pathCertFile string,
 	productService IProductService, sessionManagerClient auth.SessionMangerClient,
 ) (*ProductHandler, error) {
 	logger, err := mylogger.Get()
@@ -59,10 +64,38 @@ func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey string,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
+	client := &http.Client{} //nolint:exhaustruct
+
+	file, err := os.Open(pathCertFile)
+	if err != nil {
+		logger.Errorln(err)
+
+		client.Transport = http.DefaultTransport
+	} else {
+		caCert, err := io.ReadAll(file)
+		if err != nil {
+			logger.Errorln(err)
+
+			client.Transport = http.DefaultTransport
+		} else {
+			caCertPool := x509.NewCertPool()
+			caCertPool.AppendCertsFromPEM(caCert)
+
+			client.Transport = &http.Transport{ //nolint:exhaustruct
+				TLSClientConfig: &tls.Config{ //nolint:exhaustruct
+					MinVersion: tls.VersionTLS12,
+					RootCAs:    caCertPool,
+				},
+			}
+		}
+	}
+
 	return &ProductHandler{
 		frontendURL:           frontendURL,
 		premiumShopID:         premiumShopID,
 		premiumShopSecretKey:  premiumShopSecretKey,
+		pathCertFile:          pathCertFile,
+		httpClient:            client,
 		mapIdempotencyPayment: NewMapIdempotence(),
 		service:               productService,
 		logger:                logger,

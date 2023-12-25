@@ -296,10 +296,23 @@ definitions:
       id:
         type: integer
     type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBodyRedirect:
+    properties:
+      redirect_url:
+        type: string
+    type: object
   github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseID:
     properties:
       body:
         $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBodyID'
+      status:
+        example: 3003
+        type: integer
+    type: object
+  github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseRedirect:
+    properties:
+      body:
+        $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseBodyRedirect'
       status:
         example: 3003
         type: integer
@@ -1038,7 +1051,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseRedirect'
         "222":
           description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
           schema:
