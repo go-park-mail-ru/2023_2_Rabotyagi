@@ -33,6 +33,8 @@ var (
 	ErrResponseAPIYoomany          = myerrors.NewErrorInternal("Ошибка проверки ответа от yoomany")
 	ErrDidntWaitPaymentAPIYoomany  = myerrors.NewErrorBadContentRequest("Не дождались оплаты")
 	ErrValidationPaymentAPIYoomany = myerrors.NewErrorInternal("Оплата не прошла валидацию")
+	ErrNotFoundPaymentAPIYoomany   = myerrors.NewErrorInternal("Не найден нужный платеж")
+	ErrPaymentPaindingAPIYoomany   = myerrors.NewErrorInternal("Платеж в обработке")
 )
 
 const (
@@ -42,8 +44,6 @@ const (
 	maxTimeoutAPIYoumany     = time.Minute * 11
 	periodRequestAPIYoumany  = time.Second * 11
 )
-
-var NotFoundPayment = myerrors.NewErrorInternal("не найден нужный платеж") //nolint:gochecknoglobals
 
 func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, reader io.Reader) error {
 	logger := p.logger.LogReqID(ctx)
@@ -72,7 +72,9 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 		if reflect.DeepEqual(item.Metadata, payment.Metadata) {
 			switch {
 			case item.Status == StatusPaymentPending:
-				return nil
+				logger.Errorln(ErrPaymentPaindingAPIYoomany)
+
+				return ErrPaymentPaindingAPIYoomany
 			case IsStatusPaymentSuccessful(item.Status):
 				if !reflect.DeepEqual(item.Amount, payment.Amount) {
 					err = fmt.Errorf("%w recived.Amount != requested.Amount",
@@ -98,9 +100,9 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 		}
 	}
 
-	logger.Errorln(NotFoundPayment)
+	logger.Errorln(ErrNotFoundPaymentAPIYoomany)
 
-	return fmt.Errorf(myerrors.ErrTemplate, NotFoundPayment)
+	return fmt.Errorf(myerrors.ErrTemplate, ErrNotFoundPaymentAPIYoomany)
 }
 
 func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
