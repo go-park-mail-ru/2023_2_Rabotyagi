@@ -182,6 +182,7 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 	logger.Infof("%+v", req)
 	req.Header.Set(headerKeyIdempotency, string(keyIdempotencyPayment))
 	req.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
+	req.Header.Set("Content-Type", "application/json")
 
 	response, err := p.httpClient.Do(req)
 	if err != nil {
