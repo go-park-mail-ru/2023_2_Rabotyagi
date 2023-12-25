@@ -28,6 +28,7 @@ func NewProductService(ctrl *gomock.Controller,
 	mockBasketStorage := mocks.NewMockIBasketStorage(ctrl)
 	mockFavouriteStorage := mocks.NewMockIFavouriteStorage(ctrl)
 	mockPremiumStorage := mocks.NewMockIPremiumStorage(ctrl)
+	mockCommentStorage := mocks.NewMockICommentStorage(ctrl)
 
 	behaviorProductStorage(mockProductStorage)
 	behaviorFileService(mockFileService)
@@ -47,8 +48,13 @@ func NewProductService(ctrl *gomock.Controller,
 		return nil, fmt.Errorf("unexpected err=%w", err)
 	}
 
+	commentService, err := usecases.NewCommentService(mockCommentStorage)
+	if err != nil {
+		return nil, fmt.Errorf("unexpected err=%w", err)
+	}
+
 	productService, err := usecases.NewProductService(mockProductStorage,
-		basketService, favouriteService, premiumService, mockFileService)
+		basketService, favouriteService, premiumService, commentService, mockFileService)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected err=%w", err)
 	}

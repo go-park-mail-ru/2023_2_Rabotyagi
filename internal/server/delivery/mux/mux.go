@@ -17,18 +17,26 @@ import (
 )
 
 type ConfigMux struct {
-	addrOrigin      string
-	schema          string
-	portServer      string
-	mainServiceName string
+	addrOrigin        string
+	schema            string
+	portServer        string
+	mainServiceName   string
+	premiumShopID     string
+	premiumShopSecret string
+	pathCertFile      string
 }
 
-func NewConfigMux(addrOrigin string, schema string, portServer string, mainServiceName string) *ConfigMux {
+func NewConfigMux(addrOrigin, schema, portServer,
+	mainServiceName, premiumShopID, premiumShopSecret, pathCertFile string,
+) *ConfigMux {
 	return &ConfigMux{
-		addrOrigin:      addrOrigin,
-		schema:          schema,
-		portServer:      portServer,
-		mainServiceName: mainServiceName,
+		addrOrigin:        addrOrigin,
+		schema:            schema,
+		portServer:        portServer,
+		mainServiceName:   mainServiceName,
+		premiumShopID:     premiumShopID,
+		premiumShopSecret: premiumShopSecret,
+		pathCertFile:      pathCertFile,
 	}
 }
 
@@ -60,7 +68,8 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		return nil, err //nolint:wrapcheck
 	}
 
-	productHandler, err := productdelivery.NewProductHandler(productService, authGrpcService)
+	productHandler, err := productdelivery.NewProductHandler(configMux.addrOrigin,
+		configMux.premiumShopID, configMux.premiumShopSecret, configMux.pathCertFile, productService, authGrpcService)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -114,9 +123,9 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 	router.Handle("/order/get_basket",
 		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/get_not_in_basket",
-		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
+		middleware.SetupCORS(productHandler.GetOrdersNotInBasketHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/sold",
-		middleware.SetupCORS(productHandler.GetBasketHandler, configMux.addrOrigin, configMux.schema))
+		middleware.SetupCORS(productHandler.GetOrdersSoldHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/update_count",
 		middleware.SetupCORS(productHandler.UpdateOrderCountHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/update_status",
@@ -125,6 +134,15 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		middleware.SetupCORS(productHandler.BuyFullBasketHandler, configMux.addrOrigin, configMux.schema))
 	router.Handle("/order/delete",
 		middleware.SetupCORS(productHandler.DeleteOrderHandler, configMux.addrOrigin, configMux.schema))
+
+	router.Handle("/comment/add",
+		middleware.SetupCORS(productHandler.AddCommentHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/comment/delete",
+		middleware.SetupCORS(productHandler.DeleteCommentHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/comment/update",
+		middleware.SetupCORS(productHandler.UpdateCommentHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/comment/get_list",
+		middleware.SetupCORS(productHandler.GetCommentListHandler, configMux.addrOrigin, configMux.schema))
 
 	router.Handle("/category/get_full",
 		middleware.SetupCORS(categoryHandler.GetFullCategories, configMux.addrOrigin, configMux.schema))

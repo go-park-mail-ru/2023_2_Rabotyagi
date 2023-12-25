@@ -129,6 +129,16 @@ func easyjsonB0091c22DecodeGithubComGoParkMailRu20232RabotyagiPkgModels(in *jlex
 			}
 		case "favourites":
 			out.Favourites = uint64(in.Uint64())
+		case "comment_id":
+			if in.IsNull() {
+				in.Skip()
+				out.CommentID = nil
+			} else {
+				if out.CommentID == nil {
+					out.CommentID = new(uint64)
+				}
+				*out.CommentID = uint64(in.Uint64())
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -263,6 +273,15 @@ func easyjsonB0091c22EncodeGithubComGoParkMailRu20232RabotyagiPkgModels(out *jwr
 		const prefix string = ",\"favourites\":"
 		out.RawString(prefix)
 		out.Uint64(uint64(in.Favourites))
+	}
+	{
+		const prefix string = ",\"comment_id\":"
+		out.RawString(prefix)
+		if in.CommentID == nil {
+			out.RawString("null")
+		} else {
+			out.Uint64(uint64(*in.CommentID))
+		}
 	}
 	out.RawByte('}')
 }

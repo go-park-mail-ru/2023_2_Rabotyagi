@@ -2,10 +2,13 @@ package delivery
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/server/delivery"
@@ -24,8 +27,8 @@ type IProductService interface { //nolint:interfacebloat
 	AddProduct(ctx context.Context, r io.Reader, userID uint64) (productID uint64, err error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
 	GetProductsList(ctx context.Context,
-		lastProductID uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
-	GetProductsOfSaler(ctx context.Context, lastProductID uint64,
+		offset uint64, count uint64, userID uint64) ([]*models.ProductInFeed, error)
+	GetProductsOfSaler(ctx context.Context, offset uint64,
 		count uint64, userID uint64, isMy bool) ([]*models.ProductInFeed, error)
 	UpdateProduct(ctx context.Context, r io.Reader, isPartialUpdate bool, productID uint64, userAuthID uint64) error
 	CloseProduct(ctx context.Context, productID uint64, userID uint64) error
@@ -38,26 +41,65 @@ type IProductService interface { //nolint:interfacebloat
 	IBasketService
 	IFavouriteService
 	IPremiumService
+	ICommentService
 }
 
 type ProductHandler struct {
-	sessionManagerClient auth.SessionMangerClient
-	service              IProductService
-	logger               *mylogger.MyLogger
+	frontendPaymentURL    string
+	premiumShopID         string
+	premiumShopSecretKey  string
+	pathCertFile          string
+	httpClient            *http.Client
+	mapIdempotencyPayment *MapIdempotencePayment
+	sessionManagerClient  auth.SessionMangerClient
+	service               IProductService
+	logger                *mylogger.MyLogger
 }
 
-func NewProductHandler(productService IProductService,
-	sessionManagerClient auth.SessionMangerClient,
+func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey, pathCertFile string,
+	productService IProductService, sessionManagerClient auth.SessionMangerClient,
 ) (*ProductHandler, error) {
 	logger, err := mylogger.Get()
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
+	client := &http.Client{} //nolint:exhaustruct
+
+	file, err := os.Open(pathCertFile)
+	if err != nil {
+		logger.Errorln(err)
+
+		client.Transport = http.DefaultTransport
+	} else {
+		caCert, err := io.ReadAll(file)
+		if err != nil {
+			logger.Errorln(err)
+
+			client.Transport = http.DefaultTransport
+		} else {
+			caCertPool := x509.NewCertPool()
+			caCertPool.AppendCertsFromPEM(caCert)
+
+			client.Transport = &http.Transport{ //nolint:exhaustruct
+				TLSClientConfig: &tls.Config{ //nolint:exhaustruct
+					MinVersion: tls.VersionTLS12,
+					RootCAs:    caCertPool,
+				},
+			}
+		}
+	}
+
 	return &ProductHandler{
-		service:              productService,
-		logger:               logger,
-		sessionManagerClient: sessionManagerClient,
+		frontendPaymentURL:    frontendURL,
+		premiumShopID:         premiumShopID,
+		premiumShopSecretKey:  premiumShopSecretKey,
+		pathCertFile:          pathCertFile,
+		httpClient:            client,
+		mapIdempotencyPayment: NewMapIdempotence(),
+		service:               productService,
+		logger:                logger,
+		sessionManagerClient:  sessionManagerClient,
 	}, nil
 }
 
@@ -163,7 +205,7 @@ func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Accept      json
 //	@Produce    json
 //	@Param      count  query uint64 true  "count products"
-//	@Param      last_id  query uint64 true  "last product id"
+//	@Param      offset  query uint64 true  "offset of products"
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -186,7 +228,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
+	offset, err := utils.ParseUint64FromRequest(r, "offset")
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 
@@ -204,7 +246,7 @@ func (p *ProductHandler) GetProductListHandler(w http.ResponseWriter, r *http.Re
 		}
 	}
 
-	products, err := p.service.GetProductsList(ctx, lastID, count, userID)
+	products, err := p.service.GetProductsList(ctx, offset, count, userID)
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 
@@ -280,7 +322,7 @@ func (p *ProductHandler) GetListProductOfSalerHandler(w http.ResponseWriter, r *
 //	@Produce    json
 //	@Param      saler_id  query uint64 true  "saler id"
 //	@Param      count  query uint64 true  "count products"
-//	@Param      last_id  query uint64 true  "last product id "
+//	@Param      offset  query uint64 true  "offset of products"
 //	@Success    200  {object} ProductListResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
@@ -303,7 +345,7 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 		return
 	}
 
-	lastID, err := utils.ParseUint64FromRequest(r, "last_id")
+	offset, err := utils.ParseUint64FromRequest(r, "offset")
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 
@@ -317,7 +359,7 @@ func (p *ProductHandler) GetListProductOfAnotherSalerHandler(w http.ResponseWrit
 		return
 	}
 
-	products, err := p.service.GetProductsOfSaler(ctx, lastID, count, salerID, false)
+	products, err := p.service.GetProductsOfSaler(ctx, offset, count, salerID, false)
 	if err != nil {
 		responses.HandleErr(w, r, logger, err)
 

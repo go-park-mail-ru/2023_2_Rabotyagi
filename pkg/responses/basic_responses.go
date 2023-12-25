@@ -22,6 +22,7 @@ type Marshaller interface {
 	MarshalJSON() ([]byte, error)
 }
 
+//easyjson:json
 type ResponseBody struct {
 	Message string `json:"message"`
 }
@@ -39,6 +40,7 @@ func NewResponseSuccessful(message string) *ResponseSuccessful {
 	}
 }
 
+//easyjson:json
 type ResponseBodyID struct {
 	ID uint64 `json:"id"`
 }
@@ -53,6 +55,25 @@ func NewResponseIDRedirect(id uint64) *ResponseID {
 	return &ResponseID{Status: statuses.StatusRedirectAfterSuccessful, Body: ResponseBodyID{ID: id}}
 }
 
+//easyjson:json
+type ResponseBodyRedirect struct {
+	RedirectURL string `json:"redirect_url"`
+}
+
+//easyjson:json
+type ResponseRedirect struct {
+	Status int                  `example:"3003" json:"status"`
+	Body   ResponseBodyRedirect `json:"body"`
+}
+
+func NewResponseRedirect(redirectURL string) *ResponseRedirect {
+	return &ResponseRedirect{
+		Status: statuses.StatusRedirectAfterSuccessful,
+		Body:   ResponseBodyRedirect{RedirectURL: redirectURL},
+	}
+}
+
+//easyjson:json
 type ResponseBodyError struct {
 	Error string `json:"error"`
 }

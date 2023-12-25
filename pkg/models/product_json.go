@@ -27,6 +27,7 @@ type productJSON struct {
 	Images         []Image              `json:"images"`
 	PriceHistory   []PriceHistoryRecord `json:"price_history"`
 	Favourites     uint64               `json:"favourites"      valid:"required"`
+	CommentID      *uint64              `json:"comment_id"  swaggertype:"integer" example:"10"  valid:"optional"` //nolint:nolintlint
 }
 
 func (p *Product) MarshalJSON() ([]byte, error) {
@@ -50,6 +51,7 @@ func (p *Product) MarshalJSON() ([]byte, error) {
 		PriceHistory:   p.PriceHistory,
 		Favourites:     p.Favourites,
 		PremiumExpire:  utils.NullTimeToUnsafe(p.PremiumExpire),
+		CommentID:      utils.NullInt64ToUnsafeUint(p.CommentID),
 	}
 
 	return productJs.MarshalJSON()
@@ -81,6 +83,7 @@ func (p *Product) UnmarshalJSON(bytes []byte) error {
 	p.PriceHistory = productJs.PriceHistory
 	p.Favourites = productJs.Favourites
 	p.PremiumExpire = utils.UnsafeTimeToNull(productJs.PremiumExpire)
+	p.CommentID = utils.UnsafeUint64ToNullInt(productJs.CommentID)
 
 	return nil
 }

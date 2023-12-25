@@ -301,7 +301,7 @@ func TestAddOrderInBasket(t *testing.T) {
 	}
 }
 
-func TestGetOrdersInBasket(t *testing.T) { //nolint:dupl
+func TestGetOrdersInBasket(t *testing.T) {
 	t.Parallel()
 
 	_ = mylogger.NewNop()
@@ -399,19 +399,20 @@ func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
-        "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
-        "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
-    INNER JOIN "product"`).WithArgs(uint64(1)).
+        "product".title, "product".price, "product".city_id, "order".count, "order".status,
+		"product".available_count, "product".delivery, "product".safe_deal, "product".saler_id 
+		FROM public."order" INNER JOIN "product" ON "order".product_id = "product".id
+		WHERE owner_id=\$1 AND status > 0 AND status < 255`).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{
 						"id", "owner_id", "product_id", "title", "price",
-						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id",
+						"city_id", "count", "status", "available_count", "delivery", "safe_deal", "saler_id",
 					}).
 						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
-							uint64(1), uint32(1), uint32(1), true, true, uint64(1)))
+							uint64(1), uint32(1), 1, uint32(1), true, true, uint64(1)))
 
 				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"url"}).
-						AddRow("safsafddasf"))
+						AddRow("testurl"))
 
 				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"id"}).
@@ -474,15 +475,15 @@ func TestGetOrdersSold(t *testing.T) { //nolint:dupl
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
-        "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
+        "product".title, "product".price, "product".city_id, "order".count, "order".status, "product".available_count,
         "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
     INNER JOIN "product"`).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{
 						"id", "owner_id", "product_id", "title", "price",
-						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id",
+						"city_id", "count", "status", "available_count", "delivery", "safe_deal", "saler_id",
 					}).
 						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
-							uint64(1), uint32(1), uint32(1), true, true, uint64(1)))
+							uint64(1), uint32(1), 1, uint32(1), true, true, uint64(1)))
 
 				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"url"}).

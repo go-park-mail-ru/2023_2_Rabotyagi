@@ -135,7 +135,7 @@ jobs:
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
 
-    notify-good:
+    notify-build-good:
         runs-on: ubuntu-latest
         if: ${{ always() && needs.build-main.result == 'success' && needs.build-auth.result == 'success'
           && needs.build-fs.result == 'success' && needs.golangci.result == 'success' && needs.test.result == 'success' }}
@@ -147,12 +147,12 @@ jobs:
                   to: ${{ secrets.TELEGRAM_CHAT }}
                   token: ${{ secrets.TELEGRAM_TOKEN }}
                   message: |
-                      Билд образа
+                      Билд dev образа
                         - ${{ github.repository }}:${{github.ref_name}}
                       Закончился с ✅
                       https://github.com/go-park-mail-ru/2023_2_Rabotyagi/commit/${{github.sha}}
     
-    notify-bad:
+    notify-build-bad:
         runs-on: ubuntu-latest
         if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
         needs: [build-main, build-auth, build-fs, golangci, test]
@@ -163,7 +163,52 @@ jobs:
                   to: ${{ secrets.TELEGRAM_CHAT }}
                   token: ${{ secrets.TELEGRAM_TOKEN }}
                   message: |
-                      Билд образа
+                      Билд dev образа
                         - ${{ github.repository }}:${{github.ref_name}}
                       Закончился с ❌
                       https://github.com/go-park-mail-ru/2023_2_Rabotyagi/actions/runs/${{github.run_id}}
+
+    deploy:
+      runs-on: ubuntu-latest
+      if: ${{ always() && needs.notify-build-good.result == 'success' }}
+      needs: [notify-build-good]
+      steps:
+          - name: Deploy to dev
+            uses: appleboy/ssh-action@v1.0.0
+            with:
+                host: goods-galaxy.ru
+                username: ${{ secrets.BOT_USERNAME }}
+                password: ${{ secrets.BOT_PASSWORD }}
+                script_stop: true
+                script: |
+                    cd /var/share/rabotyagi-dev
+                    docker compose pull backend backend-fs backend-auth
+                    docker compose up -d --force-recreate backend backend-fs backend-auth
+
+    notify-deploy-good:
+        runs-on: ubuntu-latest
+        if: ${{ always() && needs.deploy.result == 'success' }}
+        needs: [deploy]
+        steps:
+            - name: Send Bad Notification
+              uses: appleboy/telegram-action@master
+              with:
+                  to: ${{ secrets.TELEGRAM_CHAT }}
+                  token: ${{ secrets.TELEGRAM_TOKEN }}
+                  message: |
+                      Деплой на dev.goods-galaxy состоялся, господа
+                      http://dev.goods-galaxy.ru
+
+    notify-deploy-bad:
+        runs-on: ubuntu-latest
+        if: ${{ always() && needs.deploy.result == 'failure' }}
+        needs: [deploy]
+        steps:
+            - name: Send Bad Notification
+              uses: appleboy/telegram-action@master
+              with:
+                  to: ${{ secrets.TELEGRAM_CHAT }}
+                  token: ${{ secrets.TELEGRAM_TOKEN }}
+                  message: |
+                      Деплой на dev.goods-galaxy кринжанул и вышел в окно, товарищи
+                      http://dev.goods-galaxy.ru

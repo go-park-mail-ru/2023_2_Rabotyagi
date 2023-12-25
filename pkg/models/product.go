@@ -33,6 +33,7 @@ type Product struct {
 	Images         []Image              `json:"images"`
 	PriceHistory   []PriceHistoryRecord `json:"price_history"   valid:"optional"`
 	Favourites     uint64               `json:"favourites"      valid:"required"`
+	CommentID      sql.NullInt64        `json:"comment_id"  swaggertype:"integer" example:"10"  valid:"optional"` //nolint:nolintlint
 }
 
 // PreProduct

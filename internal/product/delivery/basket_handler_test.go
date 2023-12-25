@@ -11,6 +11,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
@@ -186,10 +187,11 @@ func TestAddOrder(t *testing.T) {
 	}
 }
 
-func TestGetBasket(t *testing.T) { //nolint:dupl
+func TestGetBasket(t *testing.T) {
 	t.Parallel()
 
 	_ = mylogger.NewNop()
+	errInternal := myerrors.NewErrorInternal("")
 
 	type TestCase struct {
 		name                   string
@@ -198,7 +200,7 @@ func TestGetBasket(t *testing.T) { //nolint:dupl
 		expectedResponse       any
 	}
 
-	testCases := [...]TestCase{ //nolint:dupl
+	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
@@ -211,6 +213,13 @@ func TestGetBasket(t *testing.T) { //nolint:dupl
 			}),
 		},
 		{
+			name:                   "test method wrong",
+			request:                httptest.NewRequest(http.MethodDelete, "/api/v1/order/get_basket", nil),
+			behaviorProductService: func(m *mocks.MockIProductService) {},
+			expectedResponse: `Method not allowed
+`,
+		},
+		{
 			name:    "test empty",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
@@ -219,9 +228,18 @@ func TestGetBasket(t *testing.T) { //nolint:dupl
 			},
 			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{}),
 		},
+		{
+			name:    "test internal error",
+			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetOrdersByUserID(gomock.Any(), test.UserID).Return(
+					nil, errInternal)
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
 	}
 
-	for _, testCase := range testCases { //nolint:dupl
+	for _, testCase := range testCases {
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
@@ -240,20 +258,7 @@ func TestGetBasket(t *testing.T) { //nolint:dupl
 			testCase.request.AddCookie(&test.Cookie)
 			productHandler.GetBasketHandler(w, testCase.request)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
-			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
-			if err != nil {
-				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
-			}
-
-			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -273,17 +278,28 @@ func TestGetNotInBasket(t *testing.T) { //nolint:dupl
 		expectedResponse       any
 	}
 
-	testCases := [...]TestCase{ //nolint:dupl
+	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_not_in_basket", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetOrdersNotInBasketByUserID(gomock.Any(), test.UserID).Return(
-					[]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}, nil)
+					[]*models.OrderNotInBasket{
+						{
+							OrderInBasket: models.OrderInBasket{ProductID: 1, Title: "sofa"}, //nolint:exhaustruct
+						},
+						{
+							OrderInBasket: models.OrderInBasket{ProductID: 2, Title: "laptop"}, //nolint:exhaustruct
+						},
+					}, nil)
 			},
-			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{
-				{ProductID: 1, Title: "sofa"},
-				{ProductID: 2, Title: "laptop"},
+			expectedResponse: delivery.NewOrderNotInBasketListResponse([]*models.OrderNotInBasket{
+				{
+					OrderInBasket: models.OrderInBasket{ProductID: 1, Title: "sofa"}, //nolint:exhaustruct
+				},
+				{
+					OrderInBasket: models.OrderInBasket{ProductID: 2, Title: "laptop"}, //nolint:exhaustruct
+				},
 			}),
 		},
 		{
@@ -291,9 +307,9 @@ func TestGetNotInBasket(t *testing.T) { //nolint:dupl
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_not_in_basket", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetOrdersNotInBasketByUserID(gomock.Any(), test.UserID).Return(
-					[]*models.OrderInBasket{}, nil)
+					[]*models.OrderNotInBasket{}, nil)
 			},
-			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{}),
+			expectedResponse: delivery.NewOrderNotInBasketListResponse([]*models.OrderNotInBasket{}),
 		},
 	}
 
@@ -349,27 +365,38 @@ func TestGetSolsOrders(t *testing.T) { //nolint:dupl
 		expectedResponse       any
 	}
 
-	testCases := [...]TestCase{ //nolint:dupl
+	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/sold", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().GetOrdersSoldByUserID(gomock.Any(), test.UserID).Return(
-					[]*models.OrderInBasket{{ProductID: 1, Title: "sofa"}, {ProductID: 2, Title: "laptop"}}, nil)
+				m.EXPECT().GetOrdersSoldByUserID(gomock.Any(), test.UserID).Return([]*models.OrderNotInBasket{
+					{
+						OrderInBasket: models.OrderInBasket{ProductID: 1, Title: "sofa"}, //nolint:exhaustruct
+					},
+					{
+						OrderInBasket: models.OrderInBasket{ProductID: 2, Title: "laptop"}, //nolint:exhaustruct
+					},
+				}, nil)
 			},
-			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{
-				{ProductID: 1, Title: "sofa"},
-				{ProductID: 2, Title: "laptop"},
-			}),
+			expectedResponse: delivery.NewOrderNotInBasketListResponse(
+				[]*models.OrderNotInBasket{
+					{
+						OrderInBasket: models.OrderInBasket{ProductID: 1, Title: "sofa"}, //nolint:exhaustruct
+					},
+					{
+						OrderInBasket: models.OrderInBasket{ProductID: 2, Title: "laptop"}, //nolint:exhaustruct
+					},
+				}),
 		},
 		{
 			name:    "test empty",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/sold", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
 				m.EXPECT().GetOrdersSoldByUserID(gomock.Any(), test.UserID).Return(
-					[]*models.OrderInBasket{}, nil)
+					[]*models.OrderNotInBasket{}, nil)
 			},
-			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{}),
+			expectedResponse: delivery.NewOrderNotInBasketListResponse([]*models.OrderNotInBasket{}),
 		},
 	}
 

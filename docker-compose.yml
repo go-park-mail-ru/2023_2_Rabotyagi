@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready", "-d", "youla" ]
+      test: "pg_isready -u postgres -d youla"
       interval: 15s
       timeout: 30s
       retries: 5
@@ -47,6 +47,7 @@ services:
       start_period: 25s
     volumes:
       - log:/var/log/backend
+      - ./bin/ssl:/etc/ssl
 
   backend-fs:
     build:
@@ -115,6 +116,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--web.external-url=prometheus'
 
   grafana:
     image: grafana/grafana:10.2.2
@@ -125,6 +127,7 @@ services:
       - .env/.env.grafana
     volumes:
         - grafana-storage:/var/lib/grafana
+        - ./grafana.ini:/etc/grafana/grafana.ini
 
   nginx:
     image: nginx:stable
@@ -134,8 +137,6 @@ services:
     ports:
       - "3000:80"
       - "8080:80"
-      - "9090:9090"
-      - "9091:9091"
 
 
 volumes:

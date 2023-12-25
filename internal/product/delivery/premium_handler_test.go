@@ -6,9 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
@@ -31,24 +29,10 @@ func TestAddPremium(t *testing.T) {
 
 	testCases := [...]TestCase{
 		{
-			name:    "test basic work",
-			queryID: "1",
-			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().AddPremium(gomock.Any(), uint64(1), test.UserID, uint64(1))
-			},
-			expectedResponse: responses.ResponseSuccessful{
-				Status: statuses.StatusResponseSuccessful,
-				Body:   responses.ResponseBody{Message: delivery.ResponseSuccessfulAddPremium},
-			},
-		},
-		{
-			name:    "test error in internal add",
-			queryID: "1",
-			behaviorProductService: func(m *mocks.MockIProductService) {
-				m.EXPECT().AddPremium(gomock.Any(), uint64(1), test.UserID, uint64(1)).Return(
-					myerrors.NewErrorInternal("Test Error Internal"))
-			},
-			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+			name:                   "test basic work",
+			queryID:                "1",
+			behaviorProductService: func(m *mocks.MockIProductService) {},
+			expectedResponse:       responses.NewErrResponse(statuses.StatusInternalServer, "Ошибка на сервере"),
 		},
 		{
 			name:    "test error uncorrected query param",

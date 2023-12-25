@@ -8,6 +8,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.25.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgx/v5 v5.5.0
+	github.com/mailru/easyjson v0.7.7
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/pashagolub/pgxmock/v3 v3.2.0
 	github.com/prometheus/client_golang v1.17.0
@@ -30,7 +31,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
-	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/prometheus/client_model v0.4.1-0.20230718164431-9a2bf3000d16 // indirect
 	github.com/prometheus/common v0.44.0 // indirect

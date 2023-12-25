@@ -27,7 +27,7 @@ var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 type IProductStorage interface { //nolint:interfacebloat
 	AddProduct(ctx context.Context, preProduct *models.PreProduct) (uint64, error)
 	GetProduct(ctx context.Context, productID uint64, userID uint64) (*models.Product, error)
-	GetPopularProducts(ctx context.Context, lastProductID uint64, count uint64,
+	GetPopularProducts(ctx context.Context, offset uint64, count uint64,
 		userID uint64) ([]*models.ProductInFeed, error)
 	GetProductsOfSaler(ctx context.Context, lastProductID uint64,
 		count uint64, userID uint64, isMy bool) ([]*models.ProductInFeed, error)
@@ -42,19 +42,22 @@ type IProductStorage interface { //nolint:interfacebloat
 	IBasketStorage
 	IFavouriteStorage
 	IPremiumStorage
+	ICommentStorage
 }
 
 type ProductService struct {
 	FavouriteService
 	BasketService
 	PremiumService
+	CommentService
 	fileServiceClient fileservice.FileServiceClient
 	storage           IProductStorage
 	logger            *mylogger.MyLogger
 }
 
 func NewProductService(productStorage IProductStorage, basketService *BasketService,
-	favouriteService *FavouriteService, premiumService *PremiumService, fileServiceClient fileservice.FileServiceClient,
+	favouriteService *FavouriteService, premiumService *PremiumService, commentService *CommentService,
+	fileServiceClient fileservice.FileServiceClient,
 ) (*ProductService, error) {
 	logger, err := mylogger.Get()
 	if err != nil {
@@ -65,6 +68,7 @@ func NewProductService(productStorage IProductStorage, basketService *BasketServ
 		FavouriteService:  *favouriteService,
 		BasketService:     *basketService,
 		PremiumService:    *premiumService,
+		CommentService:    *commentService,
 		fileServiceClient: fileServiceClient,
 		storage:           productStorage,
 		logger:            logger,
@@ -148,9 +152,9 @@ func (p *ProductService) GetProduct(ctx context.Context,
 }
 
 func (p *ProductService) GetProductsList(ctx context.Context,
-	lastProductID uint64, count uint64, userID uint64,
+	offset uint64, count uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
-	products, err := p.storage.GetPopularProducts(ctx, lastProductID, count, userID)
+	products, err := p.storage.GetPopularProducts(ctx, offset, count, userID)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -163,9 +167,9 @@ func (p *ProductService) GetProductsList(ctx context.Context,
 }
 
 func (p *ProductService) GetProductsOfSaler(ctx context.Context,
-	lastProductID uint64, count uint64, userID uint64, isMy bool,
+	offset uint64, count uint64, userID uint64, isMy bool,
 ) ([]*models.ProductInFeed, error) {
-	products, err := p.storage.GetProductsOfSaler(ctx, lastProductID, count, userID, isMy)
+	products, err := p.storage.GetProductsOfSaler(ctx, offset, count, userID, isMy)
 	if err != nil {
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

@@ -17,8 +17,8 @@ var _ IBasketService = (*productusecases.BasketService)(nil)
 type IBasketService interface {
 	AddOrder(ctx context.Context, r io.Reader, userID uint64) (*models.OrderInBasket, error)
 	GetOrdersByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
-	GetOrdersNotInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
-	GetOrdersSoldByUserID(ctx context.Context, userID uint64) ([]*models.OrderInBasket, error)
+	GetOrdersNotInBasketByUserID(ctx context.Context, userID uint64) ([]*models.OrderNotInBasket, error)
+	GetOrdersSoldByUserID(ctx context.Context, userID uint64) ([]*models.OrderNotInBasket, error)
 	UpdateOrderCount(ctx context.Context, r io.Reader, userID uint64) error
 	UpdateOrderStatus(ctx context.Context, r io.Reader, userID uint64) error
 	BuyFullBasket(ctx context.Context, userID uint64) error
@@ -110,7 +110,7 @@ func (p *ProductHandler) GetBasketHandler(w http.ResponseWriter, r *http.Request
 
 // GetOrdersNotInBasketHandler godoc
 //
-//	@Summary    get orders not in basket (with status != 0)
+//	@Summary    get orders not in basket (with status > 0 and < 255)
 //	@Description  get orders not in basket by user id from cookie\jwt token
 //	@Tags order
 //	@Accept     json
@@ -144,13 +144,13 @@ func (p *ProductHandler) GetOrdersNotInBasketHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	responses.SendResponse(w, logger, NewOrderListResponse(orders))
+	responses.SendResponse(w, logger, NewOrderNotInBasketListResponse(orders))
 	logger.Infof("in GetOrdersNotInBasketHandler: get orders: %+v\n", orders)
 }
 
 // GetOrdersSoldHandler godoc
 //
-//	@Summary    get orders not in basket sold by user (with status != 0)
+//	@Summary    get orders not in basket sold by user (with status > 0 and < 255)
 //	@Description  get orders not in basket sold by user id from cookie\jwt token
 //	@Tags order
 //	@Accept     json
@@ -184,7 +184,7 @@ func (p *ProductHandler) GetOrdersSoldHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	responses.SendResponse(w, logger, NewOrderListResponse(orders))
+	responses.SendResponse(w, logger, NewOrderNotInBasketListResponse(orders))
 	logger.Infof("in GetOrdersSoldHandler: get orders: %+v\n", orders)
 }
 
