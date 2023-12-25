@@ -11,6 +11,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
@@ -190,6 +191,7 @@ func TestGetBasket(t *testing.T) {
 	t.Parallel()
 
 	_ = mylogger.NewNop()
+	errInternal := myerrors.NewErrorInternal("")
 
 	type TestCase struct {
 		name                   string
@@ -198,7 +200,7 @@ func TestGetBasket(t *testing.T) {
 		expectedResponse       any
 	}
 
-	testCases := [...]TestCase{ //nolint:dupl
+	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
@@ -211,6 +213,13 @@ func TestGetBasket(t *testing.T) {
 			}),
 		},
 		{
+			name:                   "test method wrong",
+			request:                httptest.NewRequest(http.MethodDelete, "/api/v1/order/get_basket", nil),
+			behaviorProductService: func(m *mocks.MockIProductService) {},
+			expectedResponse: `Method not allowed
+`,
+		},
+		{
 			name:    "test empty",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
 			behaviorProductService: func(m *mocks.MockIProductService) {
@@ -219,9 +228,18 @@ func TestGetBasket(t *testing.T) {
 			},
 			expectedResponse: delivery.NewOrderListResponse([]*models.OrderInBasket{}),
 		},
+		{
+			name:    "test internal error",
+			request: httptest.NewRequest(http.MethodGet, "/api/v1/order/get_basket", nil),
+			behaviorProductService: func(m *mocks.MockIProductService) {
+				m.EXPECT().GetOrdersByUserID(gomock.Any(), test.UserID).Return(
+					nil, errInternal)
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
 	}
 
-	for _, testCase := range testCases { //nolint:dupl
+	for _, testCase := range testCases {
 		testCase := testCase
 
 		t.Run(testCase.name, func(t *testing.T) {
@@ -240,20 +258,7 @@ func TestGetBasket(t *testing.T) {
 			testCase.request.AddCookie(&test.Cookie)
 			productHandler.GetBasketHandler(w, testCase.request)
 
-			resp := w.Result()
-			defer resp.Body.Close()
-
-			receivedResponse, err := io.ReadAll(resp.Body)
-			if err != nil {
-				t.Fatalf("Failed to ReadAll resp.Body: %v", err)
-			}
-
-			expectedResponseRaw, err := json.Marshal(testCase.expectedResponse)
-			if err != nil {
-				t.Fatalf("Failed to json.Marshal testCase.expectedResponse: %v", err)
-			}
-
-			err = utils.EqualTest(receivedResponse, expectedResponseRaw)
+			err = test.CompareHTTPTestResult(w, testCase.expectedResponse)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -261,7 +266,7 @@ func TestGetBasket(t *testing.T) {
 	}
 }
 
-func TestGetNotInBasket(t *testing.T) {
+func TestGetNotInBasket(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = mylogger.NewNop()
@@ -348,7 +353,7 @@ func TestGetNotInBasket(t *testing.T) {
 	}
 }
 
-func TestGetSolsOrders(t *testing.T) {
+func TestGetSolsOrders(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = mylogger.NewNop()

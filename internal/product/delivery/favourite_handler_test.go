@@ -100,7 +100,7 @@ func TestGetFavourites(t *testing.T) {
 		expectedResponse       *delivery.ProductListResponse
 	}
 
-	testCases := [...]TestCase{ //nolint:dupl
+	testCases := [...]TestCase{
 		{
 			name:    "test basic work",
 			request: httptest.NewRequest(http.MethodGet, "/api/v1/profile/favourites", nil),
