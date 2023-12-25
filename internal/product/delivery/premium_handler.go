@@ -150,8 +150,6 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 					chError <- err
 				}
 
-				timeStart = time.Now().Add(-10 * time.Second).Format(time.RFC3339)
-
 				isSuccessfully, errPayments := p.parsePayments(ctx, payment, response.Body)
 
 				errBodyClose := response.Body.Close()
