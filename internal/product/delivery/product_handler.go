@@ -45,7 +45,7 @@ type IProductService interface { //nolint:interfacebloat
 }
 
 type ProductHandler struct {
-	frontendURL           string
+	frontendPaymentURL    string
 	premiumShopID         string
 	premiumShopSecretKey  string
 	pathCertFile          string
@@ -91,7 +91,7 @@ func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey, pathCer
 	}
 
 	return &ProductHandler{
-		frontendURL:           frontendURL,
+		frontendPaymentURL:    frontendURL,
 		premiumShopID:         premiumShopID,
 		premiumShopSecretKey:  premiumShopSecretKey,
 		pathCertFile:          pathCertFile,

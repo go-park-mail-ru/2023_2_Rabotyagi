@@ -48,22 +48,22 @@ func NewAmountPayment(value uint64) AmountPayment {
 const TypeConfirmationPayment = "redirect"
 
 //easyjson:json
-type ConfirmationPayment struct {
+type ConfirmationReturnPayment struct {
 	Type      string `json:"type"`
 	ReturnURL string `json:"return_url"`
 }
 
-func NewConfirmationPayment(returnURL string) ConfirmationPayment {
-	return ConfirmationPayment{Type: TypeConfirmationPayment, ReturnURL: returnURL}
+func NewConfirmationReturnPayment(returnURL string) ConfirmationReturnPayment {
+	return ConfirmationReturnPayment{Type: TypeConfirmationPayment, ReturnURL: returnURL}
 }
 
 //easyjson:json
 type Payment struct {
-	Amount       AmountPayment       `json:"amount"`
-	Capture      bool                `json:"capture"`
-	Confirmation ConfirmationPayment `json:"confirmation"`
-	Description  string              `json:"description"`
-	Metadata     *MetadataPayment    `json:"metadata"`
+	Amount       AmountPayment             `json:"amount"`
+	Capture      bool                      `json:"capture"`
+	Confirmation ConfirmationReturnPayment `json:"confirmation"`
+	Description  string                    `json:"description"`
+	Metadata     *MetadataPayment          `json:"metadata"`
 }
 
 func NewPayment(ctx context.Context, frontendURL string, metadata *MetadataPayment) (*Payment, error) {
@@ -80,7 +80,7 @@ func NewPayment(ctx context.Context, frontendURL string, metadata *MetadataPayme
 	return &Payment{
 		Amount:       NewAmountPayment(amount),
 		Capture:      true,
-		Confirmation: NewConfirmationPayment(frontendURL + pathRedirectURLPremium),
+		Confirmation: NewConfirmationReturnPayment(frontendURL + pathRedirectURLPremium),
 		Description:  description,
 		Metadata:     metadata,
 	}, nil

@@ -154,7 +154,7 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 ) (string, error) {
 	logger := p.logger.LogReqID(ctx)
 
-	payment, err := NewPayment(ctx, p.frontendURL, NewMetadataPayment(userID, productID, periodCode))
+	payment, err := NewPayment(ctx, p.frontendPaymentURL, NewMetadataPayment(userID, productID, periodCode))
 	if err != nil {
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
@@ -225,7 +225,7 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 	p.waitPayment(ctx, chErr,
 		payment, periodRequestAPIYoumany)
 
-	return responsePayment.Confirmation.ReturnURL, nil
+	return responsePayment.Confirmation.ConfirmationURL, nil
 }
 
 // AddPremiumHandler godoc

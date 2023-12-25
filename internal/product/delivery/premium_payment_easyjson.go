@@ -203,7 +203,7 @@ func (v *MetadataPayment) UnmarshalJSON(data []byte) error {
 func (v *MetadataPayment) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonAb7eef52DecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery1(l, v)
 }
-func easyjsonAb7eef52DecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery2(in *jlexer.Lexer, out *ConfirmationPayment) {
+func easyjsonAb7eef52DecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery2(in *jlexer.Lexer, out *ConfirmationReturnPayment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -236,7 +236,7 @@ func easyjsonAb7eef52DecodeGithubComGoParkMailRu20232RabotyagiInternalProductDel
 		in.Consumed()
 	}
 }
-func easyjsonAb7eef52EncodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery2(out *jwriter.Writer, in ConfirmationPayment) {
+func easyjsonAb7eef52EncodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery2(out *jwriter.Writer, in ConfirmationReturnPayment) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -254,26 +254,26 @@ func easyjsonAb7eef52EncodeGithubComGoParkMailRu20232RabotyagiInternalProductDel
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v ConfirmationPayment) MarshalJSON() ([]byte, error) {
+func (v ConfirmationReturnPayment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjsonAb7eef52EncodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v ConfirmationPayment) MarshalEasyJSON(w *jwriter.Writer) {
+func (v ConfirmationReturnPayment) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjsonAb7eef52EncodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *ConfirmationPayment) UnmarshalJSON(data []byte) error {
+func (v *ConfirmationReturnPayment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjsonAb7eef52DecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *ConfirmationPayment) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *ConfirmationReturnPayment) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonAb7eef52DecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery2(l, v)
 }
 func easyjsonAb7eef52DecodeGithubComGoParkMailRu20232RabotyagiInternalProductDelivery3(in *jlexer.Lexer, out *AmountPayment) {

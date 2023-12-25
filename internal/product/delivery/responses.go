@@ -96,6 +96,12 @@ func NewOrderListResponse(body []*models.OrderInBasket) *OrderListResponse {
 }
 
 //easyjson:json
+type ConfirmationPayment struct {
+	Type            string `json:"type"`
+	ConfirmationURL string `json:"confirmation_url"`
+}
+
+//easyjson:json
 type ResponsePostPaymentAPIYoomany struct {
 	Confirmation ConfirmationPayment `json:"confirmation"`
 }
