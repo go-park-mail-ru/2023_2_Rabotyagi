@@ -211,6 +211,8 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 
 	var responsePayment ResponsePostPaymentAPIYoomany
 
+	logger.Infof("%s", bodyResp)
+
 	err = json.Unmarshal(bodyResp, &responsePayment)
 	if err != nil {
 		err = fmt.Errorf("%w error:%+v response: %s", ErrUnmarshallAPIYoomany, err.Error(), bodyResp)
