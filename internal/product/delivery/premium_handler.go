@@ -48,7 +48,7 @@ const (
 
 // parsePayments true in return argument means successful handle payment
 //
-//nolint:funlen
+//nolint:funlen,cyclop
 func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, reader io.Reader) (bool, error) {
 	logger := p.logger.LogReqID(ctx)
 
@@ -73,7 +73,11 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 	}
 
 	for _, item := range responseGetPayments.Items {
-		if reflect.DeepEqual(item.Metadata, payment.Metadata) {
+		logger.Infof("%+v\n%+v", item, payment)
+
+		if item.Metadata.UserID == payment.Metadata.UserID &&
+			item.Metadata.ProductID == payment.Metadata.ProductID &&
+			item.Metadata.PeriodCode == payment.Metadata.PeriodCode {
 			switch {
 			case item.Status == StatusPaymentPending:
 				logger.Errorln(ErrPaymentPaindingAPIYoomany)
