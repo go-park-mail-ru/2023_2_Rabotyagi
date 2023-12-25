@@ -3,7 +3,6 @@ package delivery
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
@@ -41,8 +40,8 @@ type AmountPayment struct {
 	Currency string `json:"currency"`
 }
 
-func NewAmountPayment(value uint64) AmountPayment {
-	return AmountPayment{Currency: currencyAmountPayment, Value: strconv.FormatUint(value, 10)}
+func NewAmountPayment(value string) AmountPayment {
+	return AmountPayment{Currency: currencyAmountPayment, Value: value}
 }
 
 const TypeConfirmationPayment = "redirect"

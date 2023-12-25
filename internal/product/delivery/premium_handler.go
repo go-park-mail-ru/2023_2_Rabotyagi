@@ -127,7 +127,6 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 
 	go func() {
 		for {
-			logger.Infof("iteration cycle")
 			select {
 			case <-timer.C:
 				err := fmt.Errorf("%w для %+v", ErrDidntWaitPaymentAPIYoomany, payment)

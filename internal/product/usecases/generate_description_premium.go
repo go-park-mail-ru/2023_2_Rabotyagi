@@ -15,11 +15,11 @@ const (
 	DescriptionHalfYear   = "Платное продвижение объявления на 6 месяцев"
 	DescriptionYear       = "Платное продвижение объявления на 1 год"
 
-	AmountWeek       = 100
-	AmountMonth      = 300
-	AmountThreeMonth = 800
-	AmountHalfYear   = 1200
-	AmountYear       = 1500
+	AmountWeek       = "100.00"
+	AmountMonth      = "300.00"
+	AmountThreeMonth = "800.00"
+	AmountHalfYear   = "1200.00"
+	AmountYear       = "1500.00"
 )
 
 func GenerateDescriptionByPeriodCode(ctx context.Context, periodCode uint64) (string, error) {
@@ -48,10 +48,10 @@ func GenerateDescriptionByPeriodCode(ctx context.Context, periodCode uint64) (st
 	}
 }
 
-func GenerateAmountByPeriodCode(ctx context.Context, periodCode uint64) (uint64, error) {
+func GenerateAmountByPeriodCode(ctx context.Context, periodCode uint64) (string, error) {
 	logger, err := mylogger.Get()
 	if err != nil {
-		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
 	logger = logger.LogReqID(ctx)
@@ -70,6 +70,6 @@ func GenerateAmountByPeriodCode(ctx context.Context, periodCode uint64) (uint64,
 	default:
 		logger.Errorln(ErrPremiumCode)
 
-		return 0, fmt.Errorf(myerrors.ErrTemplate, ErrPremiumCode)
+		return "", fmt.Errorf(myerrors.ErrTemplate, ErrPremiumCode)
 	}
 }
