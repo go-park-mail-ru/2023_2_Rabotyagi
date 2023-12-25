@@ -98,6 +98,8 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 		}
 	}
 
+	logger.Errorln(NotFoundPayment)
+
 	return fmt.Errorf(myerrors.ErrTemplate, NotFoundPayment)
 }
 
