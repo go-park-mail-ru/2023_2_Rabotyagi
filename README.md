@@ -20,10 +20,20 @@ https://www.figma.com/file/YLSZ9uY9gVn6bMDJchrEzD?node-id=23:2127&mode=design#56
 ### Приложение
 https://goods-galaxy.ru/
 
+### Метрики
+https://goods-galaxy.ru/grafana/
+
+Логин: ```guest```
+Пароль: ```guest```
+
+### Приложение dev стенд
+https://dev.goods-galaxy.ru/
+
 ### Документация
 [Посмотреть здесь](docs/swagger.yaml)
 
-## Локальное поднятие бека, бд, pgadmin вместе
+## Команды для разработки
+### Локальное поднятие бека, бд, pgadmin вместе
 1. Запускаем  все
 ```shell
 make compose-full-up
