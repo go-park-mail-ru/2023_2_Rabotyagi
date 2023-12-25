@@ -200,6 +200,8 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 
 	keyIdempotencyPayment := p.mapIdempotencyPayment.AddPayment(payment.Metadata)
 
+	logger.Info("after AddPayment")
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, paymentsURLAPIYoomany, bytes.NewReader(body))
 	if err != nil {
 		err = fmt.Errorf("%w error:%v", ErrCreationRequestAPIYooMany, err.Error())

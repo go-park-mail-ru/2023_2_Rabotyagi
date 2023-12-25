@@ -16,6 +16,8 @@ type Config struct {
 	Port                   string
 	PathToRoot             string
 	FileServiceDir         string
+	PathCertFile           string
+	PathKeyFile            string
 	OutputLogPath          string
 	ErrorOutputLogPath     string
 }
@@ -35,6 +37,8 @@ func New() *Config {
 		Port:                   config.GetEnvStr(config.EnvFileServicePortHTTP, config.StandardFileServicePortHTTP),
 		PathToRoot:             config.GetEnvStr(config.EnvPathToRoot, config.StandardPathToRoot),
 		FileServiceDir:         config.GetEnvStr(config.EnvFileServiceDir, config.StandardFileServiceDir),
+		PathCertFile:           config.GetEnvStr(config.EnvPathCertFile, config.StandardPathCertFile),
+		PathKeyFile:            config.GetEnvStr(config.EnvPathKeyFile, config.StandardPathKeyFile),
 		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, standardOutputLogPathFS),
 		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, standardErrorOutputLogPathFS),
 	}

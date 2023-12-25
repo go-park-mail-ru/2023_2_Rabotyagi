@@ -12,10 +12,10 @@ const (
 )
 
 func generateString() string {
-	randInt := rand.Int() //nolint:gosec
 	resultString := ""
 
 	for len(resultString) < maxLenKeyIdempotencyPayment {
+		randInt := rand.Int() //nolint:gosec
 		resultString += strconv.Itoa(randInt)
 	}
 

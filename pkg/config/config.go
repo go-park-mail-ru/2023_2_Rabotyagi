@@ -7,6 +7,8 @@ const (
 
 	StandardDevelopmentMode    = "development"
 	StandardProductionMode     = "production"
+	StandardPathCertFile       = "/etc/ssl/goods-galaxy.ru.crt"
+	StandardPathKeyFile        = "/etc/ssl/goods-galaxy.ru.key"
 	StandardAllowOrigin        = "localhost:3000"
 	StandardSchema             = "http://"
 	StandardPort               = "8080"
@@ -16,6 +18,8 @@ const (
 	StandardMainServiceName    = "backend"
 
 	EnvEnvironmentMode    = "ENVIRONMENT"
+	EnvPathCertFile       = "PATH_CERT_FILE"
+	EnvPathKeyFile        = "PATH_KEY_FILE"
 	EnvAllowOrigin        = "ALLOW_ORIGIN"
 	EnvSchema             = "SCHEMA"
 	EnvPortBackend        = "PORT_BACKEND"

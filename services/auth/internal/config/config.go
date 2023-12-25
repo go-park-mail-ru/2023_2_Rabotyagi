@@ -23,6 +23,8 @@ type Config struct {
 	URLDataBase            string
 	OutputLogPath          string
 	ErrorOutputLogPath     string
+	PathCertFile           string
+	PathKeyFile            string
 }
 
 func New() *Config {
@@ -44,6 +46,8 @@ func New() *Config {
 		AuthServicePort:        config.GetEnvStr(config.EnvAuthServicePortHTTP, config.StandardAuthServicePortHTTP),
 		AddressAuthServiceGrpc: config.GetEnvStr(config.EnvAddressAuthServiceGrpc, config.StandardAddressAuthGrpc),
 		URLDataBase:            config.GetEnvStr(config.EnvURLDataBase, config.StandardURLDataBase),
+		PathCertFile:           config.GetEnvStr(config.EnvPathCertFile, config.StandardPathCertFile),
+		PathKeyFile:            config.GetEnvStr(config.EnvPathKeyFile, config.StandardPathKeyFile),
 		OutputLogPath:          config.GetEnvStr(config.EnvOutputLogPath, standardOutputLogPathAuth),
 		ErrorOutputLogPath:     config.GetEnvStr(config.EnvErrorOutputLogPath, standardErrorOutputLogPathAuth),
 	}
