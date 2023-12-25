@@ -38,7 +38,7 @@ func easyjsonAb7eef52DecodeGithubComGoParkMailRu20232RabotyagiInternalProductDel
 		switch key {
 		case "amount":
 			(out.Amount).UnmarshalEasyJSON(in)
-		case "Capture":
+		case "capture":
 			out.Capture = bool(in.Bool())
 		case "confirmation":
 			(out.Confirmation).UnmarshalEasyJSON(in)
@@ -74,7 +74,7 @@ func easyjsonAb7eef52EncodeGithubComGoParkMailRu20232RabotyagiInternalProductDel
 		(in.Amount).MarshalEasyJSON(out)
 	}
 	{
-		const prefix string = ",\"Capture\":"
+		const prefix string = ",\"capture\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.Capture))
 	}

@@ -59,8 +59,8 @@ func NewConfirmationPayment(returnURL string) ConfirmationPayment {
 
 //easyjson:json
 type Payment struct {
-	Amount       AmountPayment `json:"amount"`
-	Capture      bool
+	Amount       AmountPayment       `json:"amount"`
+	Capture      bool                `json:"capture"`
 	Confirmation ConfirmationPayment `json:"confirmation"`
 	Description  string              `json:"description"`
 	Metadata     *MetadataPayment    `json:"metadata"`
