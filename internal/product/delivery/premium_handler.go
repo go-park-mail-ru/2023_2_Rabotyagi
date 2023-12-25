@@ -43,6 +43,8 @@ const (
 	periodRequestAPIYoumany  = time.Second * 11
 )
 
+var NotFoundPayment = myerrors.NewErrorInternal("не найден нужный платеж") //nolint:gochecknoglobals
+
 func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, reader io.Reader) error {
 	logger := p.logger.LogReqID(ctx)
 
@@ -88,11 +90,15 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 
 					return err
 				}
+
+				logger.Infof("Successful addPremium metadata:%+v", payment.Metadata)
+
+				return nil
 			}
 		}
 	}
 
-	return nil
+	return fmt.Errorf(myerrors.ErrTemplate, NotFoundPayment)
 }
 
 func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
@@ -141,6 +147,8 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 				err = p.parsePayments(ctx, payment, response.Body)
 				if err != nil {
 					chError <- err
+
+					continue
 				}
 
 				err = response.Body.Close()
@@ -149,6 +157,8 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 					logger.Errorln(err)
 					chError <- err
 				}
+
+				return
 			}
 		}
 	}()
