@@ -54,7 +54,7 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 		return err
 	}
 
-	logger.Infof("req:%s", body)
+	logger.Debugf("body:%s", body)
 
 	var responseGetPayments ResponseGetPaymentsAPIYoomany
 
@@ -117,7 +117,8 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 				request, err := http.NewRequestWithContext(ctx,
 					http.MethodGet, fmt.Sprintf("%s?%s%s", paymentsURLAPIYoomany, paramCreatedAtAPIYoomany, timeStart), nil)
 
-				logger.Infof("req:%+v", request)
+				request.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
+				logger.Debugf("req:%+v", request)
 
 				if err != nil {
 					err = fmt.Errorf("%w %+v", ErrCreationRequestAPIYooMany, err) //nolint:errorlint
@@ -172,7 +173,7 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	logger.Infof("%s", body)
+	logger.Debugf("%s", body)
 
 	keyIdempotencyPayment := p.mapIdempotencyPayment.AddPayment(payment.Metadata)
 
@@ -187,7 +188,7 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 	req.Header.Set(headerKeyIdempotency, string(keyIdempotencyPayment))
 	req.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
 	req.Header.Set("Content-Type", "application/json")
-	logger.Infof("%+v", req)
+	logger.Debugf("%+v", req)
 
 	response, err := p.httpClient.Do(req)
 	if err != nil {
@@ -197,7 +198,7 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	logger.Infof("%+v", response)
+	logger.Debugf("%+v", response)
 
 	defer response.Body.Close()
 
@@ -211,7 +212,7 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 
 	var responsePayment ResponsePostPaymentAPIYoomany
 
-	logger.Infof("%s", bodyResp)
+	logger.Debugf("%s", bodyResp)
 
 	err = json.Unmarshal(bodyResp, &responsePayment)
 	if err != nil {
@@ -223,8 +224,8 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 
 	if !responsePayment.IsCorrect() {
 		logger.Errorln(ErrResponseAPIYoomany)
-		logger.Infof("response Confirmation %+v", responsePayment.Confirmation)
-		logger.Infof("expected Confirmation %+v", payment.Confirmation)
+		logger.Debugf("response Confirmation %+v", responsePayment.Confirmation)
+		logger.Debugf("expected Confirmation %+v", payment.Confirmation)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}

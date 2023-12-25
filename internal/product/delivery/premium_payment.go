@@ -80,7 +80,7 @@ func NewPayment(ctx context.Context, frontendURL string, metadata *MetadataPayme
 	return &Payment{
 		Amount:       NewAmountPayment(amount),
 		Capture:      true,
-		Confirmation: NewConfirmationReturnPayment(frontendURL + pathRedirectURLPremium),
+		Confirmation: NewConfirmationReturnPayment("https://" + frontendURL + pathRedirectURLPremium),
 		Description:  description,
 		Metadata:     metadata,
 	}, nil
