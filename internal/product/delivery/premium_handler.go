@@ -85,8 +85,9 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 				return false, nil
 			case IsStatusPaymentSuccessful(item.Status):
 				if !reflect.DeepEqual(item.Amount, payment.Amount) {
-					err = fmt.Errorf("%w recived.Amount != requested.Amount",
-						ErrValidationPaymentAPIYoomany)
+					err = fmt.Errorf("%w received: %+v != requested: %+v",
+						ErrValidationPaymentAPIYoomany, item.Amount, payment.Amount)
+
 					logger.Errorln(err)
 
 					return false, err
