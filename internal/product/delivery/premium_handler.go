@@ -115,7 +115,7 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 				time.Sleep(periodRequest)
 
 				request, err := http.NewRequestWithContext(ctx,
-					http.MethodGet, paymentsURLAPIYoomany+paramCreatedAtAPIYoomany+timeStart, nil)
+					http.MethodGet, fmt.Sprintf("%s?%s%s", paymentsURLAPIYoomany, paramCreatedAtAPIYoomany, timeStart), nil)
 
 				logger.Infof("req:%+v", request)
 
