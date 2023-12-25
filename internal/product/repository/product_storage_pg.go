@@ -24,6 +24,7 @@ var (
 		"Получили некорректный формат images внутри объявления")
 	ErrUncorrectedPrice = myerrors.NewErrorInternal(
 		"Получили некорректный тип price")
+	ErrScanCommentID = myerrors.NewErrorInternal("Ошибка сканирования comment_id")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
@@ -222,6 +223,30 @@ func (p *ProductStorage) selectPremiumExpireByProductID(ctx context.Context,
 	return expire, nil
 }
 
+func (p *ProductStorage) selectCommentID(ctx context.Context,
+	tx pgx.Tx, userID uint64, salerID uint64,
+) (sql.NullInt64, error) {
+	logger := p.logger.LogReqID(ctx)
+
+	var commentID uint64
+
+	SQLSelectCommentID := `SELECT id FROM public."comment" WHERE sender_id=$1 AND recipient_id=$2`
+
+	commentIDRow := tx.QueryRow(ctx, SQLSelectCommentID, userID, salerID)
+	if err := commentIDRow.Scan(&commentID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return sql.NullInt64{Valid: false, Int64: 0}, nil
+		}
+
+		err = fmt.Errorf("%w %v", ErrScanCommentID, err) //nolint:errorlint
+		logger.Errorln(err)
+
+		return sql.NullInt64{Valid: false, Int64: 0}, err
+	}
+
+	return sql.NullInt64{Valid: true, Int64: int64(commentID)}, nil
+}
+
 func (p *ProductStorage) getProduct(ctx context.Context,
 	tx pgx.Tx, productID uint64, userID uint64,
 ) (*models.Product, error) {
@@ -247,10 +272,16 @@ func (p *ProductStorage) getProduct(ctx context.Context,
 		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
+	productCommentID, err := p.selectCommentID(ctx, tx, userID, product.SalerID)
+	if err != nil {
+		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
 	product.PriceHistory = productPriceHistory
 	product.Images = productAdditionInner.images
 	product.Favourites = productAdditionInner.favourites
 	product.InFavourites = productAdditionInner.inFavourite
+	product.CommentID = productCommentID
 
 	return product, nil
 }

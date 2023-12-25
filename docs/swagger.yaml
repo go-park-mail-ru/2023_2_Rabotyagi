@@ -161,6 +161,9 @@ definitions:
         type: integer
       city_id:
         type: integer
+      comment_id:
+        example: 10
+        type: integer
       created_at:
         type: string
       delivery:

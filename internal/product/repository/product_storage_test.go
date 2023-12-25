@@ -383,6 +383,9 @@ func TestGetProduct(t *testing.T) {
 					WillReturnRows(pgxmock.NewRows([]string{"price", "created_at"}).
 						AddRow(uint64(123123), time.Now()))
 
+				mockPool.ExpectQuery(`SELECT id FROM public."comment" WHERE sender_id=\$1 AND recipient_id=\$2`).
+					WithArgs(uint64(1), uint64(2)).WillReturnRows(pgxmock.NewRows([]string{"id"}).AddRow(uint64(1)))
+
 				mockPool.ExpectQuery(`SELECT EXISTS`).WithArgs(uint64(1), uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"exists"}).
 						AddRow(false))
@@ -435,6 +438,9 @@ func TestGetProduct(t *testing.T) {
 					WithArgs(uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"price", "created_at"}).
 						AddRow(uint64(123123), time.Now()))
+
+				mockPool.ExpectQuery(`SELECT id FROM public."comment" WHERE sender_id=\$1 AND recipient_id=\$2`).
+					WithArgs(uint64(1), uint64(1)).WillReturnRows(pgxmock.NewRows([]string{"id"}))
 
 				mockPool.ExpectQuery(`SELECT EXISTS`).WithArgs(uint64(1), uint64(1)).
 					WillReturnRows(pgxmock.NewRows([]string{"exists"}).
