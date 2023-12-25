@@ -24,17 +24,18 @@ type IPremiumService interface {
 }
 
 var (
-	ErrMarshallPayment             = myerrors.NewErrorInternal("Ошибка маршалинга платежа")
-	ErrCreationRequestAPIYooMany   = myerrors.NewErrorInternal("Ошибка создания запроса к yoomany")
-	ErrClosingResponseBody         = myerrors.NewErrorInternal("Ошибка закрытия тела ответа")
-	ErrRequestAPIYoomany           = myerrors.NewErrorInternal("Ошибка в заросе к yoomany")
-	ErrReadAllAPIYoomany           = myerrors.NewErrorInternal("Ошибка в чтении ответа от yoomany")
-	ErrUnmarshallAPIYoomany        = myerrors.NewErrorInternal("Ошибка в unmarshall от yoomany")
-	ErrResponseAPIYoomany          = myerrors.NewErrorInternal("Ошибка проверки ответа от yoomany")
-	ErrDidntWaitPaymentAPIYoomany  = myerrors.NewErrorBadContentRequest("Не дождались оплаты")
-	ErrValidationPaymentAPIYoomany = myerrors.NewErrorInternal("Оплата не прошла валидацию")
-	ErrNotFoundPaymentAPIYoomany   = myerrors.NewErrorInternal("Не найден нужный платеж")
-	ErrPaymentPaindingAPIYoomany   = myerrors.NewErrorInternal("Платеж в обработке")
+	ErrMarshallPayment               = myerrors.NewErrorInternal("Ошибка маршалинга платежа")
+	ErrCreationRequestAPIYooMany     = myerrors.NewErrorInternal("Ошибка создания запроса к yoomany")
+	ErrClosingResponseBody           = myerrors.NewErrorInternal("Ошибка закрытия тела ответа")
+	ErrRequestAPIYoomany             = myerrors.NewErrorInternal("Ошибка в заросе к yoomany")
+	ErrReadAllAPIYoomany             = myerrors.NewErrorInternal("Ошибка в чтении ответа от yoomany")
+	ErrUnmarshallAPIYoomany          = myerrors.NewErrorInternal("Ошибка в unmarshall от yoomany")
+	ErrResponseAPIYoomany            = myerrors.NewErrorInternal("Ошибка проверки ответа от yoomany")
+	ErrResponseWrongStatusAPIYoomany = myerrors.NewErrorBadContentRequest("Ошибка оплаты платежа от yoomany")
+	ErrDidntWaitPaymentAPIYoomany    = myerrors.NewErrorBadContentRequest("Не дождались оплаты")
+	ErrValidationPaymentAPIYoomany   = myerrors.NewErrorInternal("Оплата не прошла валидацию")
+	ErrNotFoundPaymentAPIYoomany     = myerrors.NewErrorInternal("Не найден нужный платеж")
+	ErrPaymentPaindingAPIYoomany     = myerrors.NewErrorInternal("Платеж в обработке")
 )
 
 const (
@@ -45,6 +46,7 @@ const (
 	periodRequestAPIYoumany  = time.Second * 11
 )
 
+//nolint:funlen
 func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, reader io.Reader) error {
 	logger := p.logger.LogReqID(ctx)
 
@@ -96,6 +98,10 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 				logger.Infof("Successful addPremium metadata:%+v", payment.Metadata)
 
 				return nil
+			default:
+				logger.Errorln(ErrResponseWrongStatusAPIYoomany)
+
+				return fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
 			}
 		}
 	}
@@ -111,10 +117,10 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 	logger := p.logger.LogReqID(ctx)
 	timer := time.NewTimer(maxTimeoutAPIYoumany)
 	timeStart := time.Now().Format(time.RFC3339)
-	first := true
 
 	go func() {
 		for {
+			logger.Infof("iteration cycle")
 			select {
 			case <-timer.C:
 				err := fmt.Errorf("%w для %+v", ErrDidntWaitPaymentAPIYoomany, payment)
@@ -126,15 +132,14 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 
 				request, err := http.NewRequestWithContext(ctx,
 					http.MethodGet, fmt.Sprintf("%s?%s%s", paymentsURLAPIYoomany, paramCreatedAtAPIYoomany, timeStart), nil)
-
-				request.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
-				logger.Infof("req:%+v", request)
-
 				if err != nil {
 					err = fmt.Errorf("%w %+v", ErrCreationRequestAPIYooMany, err) //nolint:errorlint
 					logger.Errorln(err)
 					chError <- err
 				}
+
+				request.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
+				logger.Infof("req:%+v", request)
 
 				response, err := p.httpClient.Do(request)
 				if err != nil {
@@ -143,10 +148,7 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 					chError <- err
 				}
 
-				if !first {
-					timeStart = time.Now().Add(-10 * time.Second).Format(time.RFC3339)
-					first = false
-				}
+				timeStart = time.Now().Add(-10 * time.Second).Format(time.RFC3339)
 
 				err = p.parsePayments(ctx, payment, response.Body)
 				if err != nil {
