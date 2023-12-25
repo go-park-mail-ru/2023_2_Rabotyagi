@@ -54,6 +54,8 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 		return err
 	}
 
+	logger.Infof("req:%s", body)
+
 	var responseGetPayments ResponseGetPaymentsAPIYoomany
 
 	err = json.Unmarshal(body, &responseGetPayments)
@@ -114,6 +116,9 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 
 				request, err := http.NewRequestWithContext(ctx,
 					http.MethodGet, paymentsURLAPIYoomany+paramCreatedAtAPIYoomany+timeStart, nil)
+
+				logger.Infof("req:%+v", request)
+
 				if err != nil {
 					err = fmt.Errorf("%w %+v", ErrCreationRequestAPIYooMany, err) //nolint:errorlint
 					logger.Errorln(err)
@@ -216,6 +221,8 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 
 	if !responsePayment.IsCorrect() {
 		logger.Errorln(ErrResponseAPIYoomany)
+		logger.Infof("response Confirmation %+v", responsePayment.Confirmation)
+		logger.Infof("expected Confirmation %+v", payment.Confirmation)
 
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
