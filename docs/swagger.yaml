@@ -1071,11 +1071,16 @@ paths:
       tags:
       - premium
   /premium/check:
-    patch:
+    get:
       consumes:
       - application/json
-      description: check status of premium using product id from query and user id
-        from cookies\jwt.
+      description: |-
+        check status of premium using product id from query and user id from cookies\jwt.
+        premium_status = 0 not premium
+        premium_status = 1 pending
+        premium_status = 2 waiting_for_capture
+        premium_status = 3 succeeded
+        premium_status = 4 canceled
       parameters:
       - description: product id
         in: query

@@ -357,6 +357,13 @@ func (p *ProductHandler) AddPremiumHandler(w http.ResponseWriter, r *http.Reques
 //
 //	@Summary     check status of premium
 //	@Description  check status of premium using product id from query and user id from cookies\jwt.
+//	@Description  premium_status = 0 not premium
+//
+// @Description premium_status = 1 pending
+// @Description premium_status = 2 waiting_for_capture
+// @Description premium_status = 3 succeeded
+// @Description premium_status = 4 canceled
+//
 //	@Tags premium
 //	@Accept      json
 //	@Produce    json
@@ -365,7 +372,7 @@ func (p *ProductHandler) AddPremiumHandler(w http.ResponseWriter, r *http.Reques
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
 //	@Failure    222  {object} responses.ErrorResponse "Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
-//	@Router      /premium/check [patch]
+//	@Router      /premium/check [get]
 func (p *ProductHandler) CheckPremiumStatus(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, `Method not allowed`, http.StatusMethodNotAllowed)
