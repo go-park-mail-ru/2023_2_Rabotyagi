@@ -20,7 +20,7 @@ var (
 
 func (p *ProductStorage) UpdateStatusPremium(ctx context.Context, status uint8, productID uint64, userID uint64) error {
 	SQLAddPremium := `UPDATE public."product" 
-SET premium_status=$1 WHERE id=$4 AND saler_id=$5`
+SET premium_status=$1 WHERE id=$2 AND saler_id=$3`
 
 	result, err := p.pool.Exec(ctx, SQLAddPremium, statuses.IntStatusPremiumSucceeded, productID, userID)
 	if err != nil {
