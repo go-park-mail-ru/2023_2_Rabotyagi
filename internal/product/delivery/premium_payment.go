@@ -10,17 +10,6 @@ import (
 
 const pathRedirectURLPremium = "/profile/products"
 
-const (
-	StatusPaymentPending   = "pending"
-	StatusPaymentWaiting   = "waiting_for_capture"
-	StatusPaymentSucceeded = "succeeded"
-	StatusPaymentCanceled  = "canceled"
-)
-
-func IsStatusPaymentSuccessful(status string) bool {
-	return status == StatusPaymentWaiting || status == StatusPaymentSucceeded
-}
-
 //easyjson:json
 type MetadataPayment struct {
 	UserID     uint64 `json:"user_id"`

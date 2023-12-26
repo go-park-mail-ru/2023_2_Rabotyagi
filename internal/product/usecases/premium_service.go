@@ -29,11 +29,31 @@ var _ IPremiumStorage = (*productrepo.ProductStorage)(nil)
 type IPremiumStorage interface {
 	AddPremium(ctx context.Context, productID uint64, userID uint64,
 		premiumBegin time.Time, premiumExpire time.Time) error
+	CheckPremiumStatus(ctx context.Context, productID uint64, userID uint64) (uint8, error)
+	UpdateStatusPremium(ctx context.Context, status uint8, productID uint64, userID uint64) error
 }
 
 type PremiumService struct {
 	storage IPremiumStorage
 	logger  *mylogger.MyLogger
+}
+
+func (p PremiumService) UpdateStatusPremium(ctx context.Context, status uint8, productID uint64, userID uint64) error {
+	err := p.storage.UpdateStatusPremium(ctx, status, productID, userID)
+	if err != nil {
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return nil
+}
+
+func (p PremiumService) CheckPremiumStatus(ctx context.Context, productID uint64, userID uint64) (uint8, error) {
+	status, err := p.storage.CheckPremiumStatus(ctx, productID, userID)
+	if err != nil {
+		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	return status, nil
 }
 
 func NewPremiumService(premiumStorage IPremiumStorage) (*PremiumService, error) {
