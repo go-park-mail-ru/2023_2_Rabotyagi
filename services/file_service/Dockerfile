@@ -2,9 +2,6 @@ FROM golang:1.21.1-alpine3.18 as build
 
 WORKDIR /var/file_service
 
-RUN apk update
-RUN apk add git
-
 COPY pkg pkg
 COPY services/file_service/cmd services/file_service/cmd
 COPY services/file_service/internal services/file_service/internal
@@ -13,7 +10,6 @@ COPY go.mod .
 COPY go.sum .
 
 RUN go mod tidy
-RUN go mod download
 RUN go build -o main ./services/file_service/cmd/app/main.go
 RUN go build -o fake_db ./services/file_service/cmd/fake_db/main.go
 
@@ -30,12 +26,14 @@ RUN mkdir -p static/img
 
 ENV ENVIRONMENT=development
 ENV SERVICE_NAME=backend_fs
-ENV ADDRESS_FS_GRPC=127.0.0.1:8081
+ENV ADDRESS_FS_GRPC=:8081
 ENV SCHEMA=http://
 ENV ALLOW_ORIGIN=localhost:3000
-ENV PORT_BACKEND=8080
+ENV PORT_FS=8081
 ENV PATH_TO_ROOT=/var/file_service
 ENV FILE_SERVICE_DIR=/var/file_service/static/img
+ENV PATH_CERT_FILE=/etc/ssl/goods-galaxy.ru.crt
+ENV PATH_KEY_FILE=/etc/ssl/goods-galaxy.ru.key
 ENV OUTPUT_LOG_PATH=/var/log/backend/logs_fs.json
 ENV ERROR_OUTPUT_LOG_PATH=/var/log/backend/err_logs_fs.json
 
