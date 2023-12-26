@@ -20,9 +20,6 @@ import (
 )
 
 const (
-	pathCertFile = "/etc/ssl/goods-galaxy.ru.crt"
-	pathKeyFile  = "/etc/ssl/goods-galaxy.ru.key"
-
 	urlPrefixPathFS = "img/"
 
 	basicTimeout = 10 * time.Second
@@ -76,7 +73,7 @@ func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error { 
 		var err error
 
 		if config.ProductionMode {
-			err = s.httpServer.ListenAndServeTLS(pathCertFile, pathKeyFile)
+			err = s.httpServer.ListenAndServeTLS(config.PathCertFile, config.PathKeyFile)
 		} else {
 			err = s.httpServer.ListenAndServe()
 		}

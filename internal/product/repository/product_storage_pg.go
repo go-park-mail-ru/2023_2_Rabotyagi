@@ -12,6 +12,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/pgxpool"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -24,7 +25,8 @@ var (
 		"Получили некорректный формат images внутри объявления")
 	ErrUncorrectedPrice = myerrors.NewErrorInternal(
 		"Получили некорректный тип price")
-	ErrScanCommentID = myerrors.NewErrorInternal("Ошибка сканирования comment_id")
+	ErrScanCommentID     = myerrors.NewErrorInternal("Ошибка сканирования comment_id")
+	ErrGetDeletedProduct = myerrors.NewErrorBadContentRequest("Этот товар был удален продавцом")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
@@ -94,16 +96,18 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 ) (*models.Product, error) {
 	logger := p.logger.LogReqID(ctx)
 
+	var premiumStatus uint8
+
 	SQLSelectProduct := `SELECT saler_id, category_id, title,
        description, price, created_at, views, available_count, city_id,
-       delivery, safe_deal, is_active, premium FROM public."product" WHERE id=$1`
+       delivery, safe_deal, is_active, premium_status FROM public."product" WHERE id=$1`
 	product := &models.Product{ID: productID} //nolint:exhaustruct
 
 	productRow := tx.QueryRow(ctx, SQLSelectProduct, productID)
 	if err := productRow.Scan(&product.SalerID, &product.CategoryID,
 		&product.Title, &product.Description, &product.Price, &product.CreatedAt,
 		&product.Views, &product.AvailableCount, &product.CityID, &product.Delivery,
-		&product.SafeDeal, &product.IsActive, &product.Premium); err != nil {
+		&product.SafeDeal, &product.IsActive, &premiumStatus); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrProductNotFound)
 		}
@@ -114,6 +118,7 @@ func (p *ProductStorage) selectProductByID(ctx context.Context,
 	}
 
 	product.ID = productID
+	product.Premium = statuses.IsIntStatusPremiumSuccessful(premiumStatus)
 
 	return product, nil
 }
@@ -252,7 +257,7 @@ func (p *ProductStorage) getProduct(ctx context.Context,
 ) (*models.Product, error) {
 	product, err := p.selectProductByID(ctx, tx, productID)
 	if err != nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		return nil, ErrGetDeletedProduct
 	}
 
 	if product.SalerID == userID && product.Premium {
@@ -345,7 +350,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimitOffset(ctx conte
 	logger := p.logger.LogReqID(ctx)
 
 	query := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).Select("id, title," +
-		"price, city_id, delivery, safe_deal, is_active, available_count, premium").From(`public."product"`).
+		"price, city_id, delivery, safe_deal, is_active, available_count, premium_status").From(`public."product"`).
 		Where(whereClause).OrderBy(orderByClause...).Limit(limit).Offset(offset)
 
 	SQLQuery, args, err := query.ToSql()
@@ -366,10 +371,12 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimitOffset(ctx conte
 
 	var slProduct []*models.ProductInFeed
 
+	var premiumStatus uint8
+
 	_, err = pgx.ForEachRow(rowsProducts, []any{
 		&curProduct.ID, &curProduct.Title,
 		&curProduct.Price, &curProduct.CityID,
-		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount, &curProduct.Premium,
+		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount, &premiumStatus,
 	}, func() error {
 		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
 			ID:             curProduct.ID,
@@ -380,7 +387,7 @@ func (p *ProductStorage) selectProductsInFeedWithWhereOrderLimitOffset(ctx conte
 			SafeDeal:       curProduct.SafeDeal,
 			IsActive:       curProduct.IsActive,
 			AvailableCount: curProduct.AvailableCount,
-			Premium:        curProduct.Premium,
+			Premium:        statuses.IsIntStatusPremiumSuccessful(premiumStatus),
 		})
 
 		return nil
@@ -447,7 +454,7 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		if isMy {
 			whereClause = fmt.Sprintf("saler_id = %d", userID)
 		} else {
-			whereClause = fmt.Sprintf("saler_id = %d AND is_active = true OR (is_active = false AND available_count = 0)",
+			whereClause = fmt.Sprintf("saler_id = %d AND is_active = true",
 				userID)
 		}
 
@@ -919,7 +926,9 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 ) ([]*models.ProductInFeed, error) {
 	logger := p.logger.LogReqID(ctx)
 
-	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count, premium
+	var premiumStatus uint8
+
+	SQLSearchProduct := `SELECT id, title, price, city_id, delivery, safe_deal, is_active, available_count, premium_status
 	FROM product
 	WHERE (to_tsvector(title) @@ to_tsquery(replace($1 || ':*', ' ', ' | '))
 	   OR to_tsvector(description) @@ to_tsquery(replace($1 || ':*', ' ', ' | ')))
@@ -943,7 +952,7 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 	_, err = pgx.ForEachRow(rowsProducts, []any{
 		&curProduct.ID, &curProduct.Title,
 		&curProduct.Price, &curProduct.CityID,
-		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount, &curProduct.Premium,
+		&curProduct.Delivery, &curProduct.SafeDeal, &curProduct.IsActive, &curProduct.AvailableCount, &premiumStatus,
 	}, func() error {
 		slProduct = append(slProduct, &models.ProductInFeed{ //nolint:exhaustruct
 			ID:             curProduct.ID,
@@ -954,7 +963,7 @@ func (p *ProductStorage) searchProductFeed(ctx context.Context, tx pgx.Tx,
 			SafeDeal:       curProduct.SafeDeal,
 			IsActive:       curProduct.IsActive,
 			AvailableCount: curProduct.AvailableCount,
-			Premium:        curProduct.Premium,
+			Premium:        statuses.IsIntStatusPremiumSuccessful(premiumStatus),
 		})
 
 		return nil

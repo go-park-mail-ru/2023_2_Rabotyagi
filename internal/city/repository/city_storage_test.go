@@ -16,21 +16,41 @@ func TestGetFullCity(t *testing.T) {
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                    string
-		behaviorCategoryStorage func(m *repository.CityStorage)
+		behaviorCategoryStorage func(m *repository.CityStorage, mockPool pgxmock.PgxPoolIface)
 		expectedResponse        any
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorCategoryStorage: func(m *repository.CityStorage) {
+			behaviorCategoryStorage: func(m *repository.CityStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+				mockPool.ExpectQuery(`SELECT "city".id,"city".name FROM public."city"`).
+					WillReturnRows(pgxmock.NewRows([]string{"id", "name"}).
+						AddRow(uint64(1), "Moscow"))
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			expectedResponse: []*models.City{
+				{ID: 1, Name: "Moscow"},
+			},
+		},
+		{
+			name: "test empty",
+			behaviorCategoryStorage: func(m *repository.CityStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+				mockPool.ExpectQuery(`SELECT "city".id,"city".name FROM public."city"`).
+					WillReturnRows(pgxmock.NewRows([]string{}))
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			expectedResponse: []*models.City(nil),
+		},
+		{
+			name: "test more data",
+			behaviorCategoryStorage: func(m *repository.CityStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 				mockPool.ExpectQuery(`SELECT "city".id,"city".name FROM public."city"`).
 					WillReturnRows(pgxmock.NewRows([]string{"id", "name"}).
@@ -56,12 +76,17 @@ func TestGetFullCity(t *testing.T) {
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			catStorage, err := repository.NewCityStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorCategoryStorage(catStorage)
+			testCase.behaviorCategoryStorage(catStorage, mockPool)
 
 			response, err := catStorage.GetFullCities(ctx)
 			if err != nil {
@@ -85,14 +110,9 @@ func TestSearchCity(t *testing.T) {
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                string
-		behaviorCityStorage func(m *repository.CityStorage)
+		behaviorCityStorage func(m *repository.CityStorage, mockPool pgxmock.PgxPoolIface)
 		expectedResponse    any
 		searchInput         string
 	}
@@ -100,7 +120,7 @@ func TestSearchCity(t *testing.T) {
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorCityStorage: func(m *repository.CityStorage) {
+			behaviorCityStorage: func(m *repository.CityStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 				mockPool.ExpectQuery(`SELECT city.id, city.name FROM public."city"`).
 					WithArgs("%mos%").
@@ -114,6 +134,39 @@ func TestSearchCity(t *testing.T) {
 			},
 			searchInput: "Mos",
 		},
+		{
+			name: "test empty",
+			behaviorCityStorage: func(m *repository.CityStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+				mockPool.ExpectQuery(`SELECT city.id, city.name FROM public."city"`).
+					WithArgs("%mos%").
+					WillReturnRows(pgxmock.NewRows([]string{}))
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			expectedResponse: []*models.City(nil),
+			searchInput:      "Mos",
+		},
+		{
+			name: "test more data",
+			behaviorCityStorage: func(m *repository.CityStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+				mockPool.ExpectQuery(`SELECT city.id, city.name FROM public."city"`).
+					WithArgs("%m%").
+					WillReturnRows(pgxmock.NewRows([]string{"id", "name"}).
+						AddRow(uint64(1), "Moscow").
+						AddRow(uint64(2), "Manchester").
+						AddRow(uint64(3), "Miami"))
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			expectedResponse: []*models.City{
+				{ID: 1, Name: "Moscow"},
+				{ID: 2, Name: "Manchester"},
+				{ID: 3, Name: "Miami"},
+			},
+			searchInput: "M",
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -124,12 +177,17 @@ func TestSearchCity(t *testing.T) {
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			cityStorage, err := repository.NewCityStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorCityStorage(cityStorage)
+			testCase.behaviorCityStorage(cityStorage, mockPool)
 
 			response, err := cityStorage.SearchCity(ctx, testCase.searchInput)
 			if err != nil {

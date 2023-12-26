@@ -23,6 +23,8 @@ type Config struct {
 	AddressAuthServiceGrpc string
 	PremiumShopID          string
 	PremiumShopSecret      string
+	PathCertFile           string
+	PathKeyFile            string
 	OutputLogPath          string
 	ErrorOutputLogPath     string
 }
@@ -36,6 +38,8 @@ func New() *Config {
 	return &Config{
 		ProductionMode:         productionMode,
 		MainServiceName:        config.GetEnvStr(config.EnvServiceName, config.StandardMainServiceName),
+		PathCertFile:           config.GetEnvStr(config.EnvPathCertFile, config.StandardPathCertFile),
+		PathKeyFile:            config.GetEnvStr(config.EnvPathKeyFile, config.StandardPathKeyFile),
 		AllowOrigin:            config.GetEnvStr(config.EnvAllowOrigin, config.StandardAllowOrigin),
 		Schema:                 config.GetEnvStr(config.EnvSchema, config.StandardSchema),
 		PortServer:             config.GetEnvStr(config.EnvPortBackend, config.StandardPort),

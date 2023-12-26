@@ -117,6 +117,8 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 
 	router.Handle("/premium/add",
 		middleware.SetupCORS(productHandler.AddPremiumHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/premium/check",
+		middleware.SetupCORS(productHandler.CheckPremiumStatus, configMux.addrOrigin, configMux.schema))
 
 	router.Handle("/order/add",
 		middleware.SetupCORS(productHandler.AddOrderHandler, configMux.addrOrigin, configMux.schema))
