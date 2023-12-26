@@ -17,21 +17,16 @@ func TestAddComment(t *testing.T) {
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		preComment             *models.PreComment
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectExec(`INSERT INTO public."comment"`).WithArgs(uint64(2),
@@ -47,6 +42,24 @@ func TestAddComment(t *testing.T) {
 			},
 			preComment: &models.PreComment{SenderID: uint64(1), RecipientID: uint64(2), Rating: uint8(5), Text: "good"},
 		},
+		{
+			name: "test 0 rows affected",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectExec(`INSERT INTO public."comment"`).WithArgs(uint64(2),
+					uint64(1), "", uint8(5)).
+					WillReturnResult(pgxmock.NewResult("INSERT", 0))
+
+				mockPool.ExpectQuery(`SELECT last_value FROM "public"."comment_id_seq";`).
+					WillReturnRows(pgxmock.NewRows([]string{"last_value"}).
+						AddRow(uint64(1)))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			preComment: &models.PreComment{SenderID: uint64(1), RecipientID: uint64(2), Rating: 5, Text: ""},
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -57,12 +70,17 @@ func TestAddComment(t *testing.T) {
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			catStorage, err := repository.NewProductStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(catStorage)
+			testCase.behaviorProductStorage(catStorage, mockPool)
 
 			_, err = catStorage.AddComment(ctx, testCase.preComment)
 			if err != nil {
@@ -142,14 +160,9 @@ func TestGetCommentList(t *testing.T) {
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		resID                  uint64
 		senderID               uint64
 		offset                 uint64
@@ -159,7 +172,7 @@ func TestGetCommentList(t *testing.T) {
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT c.id AS comment_id, c.sender_id, 
@@ -183,6 +196,34 @@ FROM public."comment" c`).WithArgs(uint64(1), uint64(2), uint64(1), uint64(1)).
 			offset:   1,
 			count:    1,
 		},
+		{
+			name: "test more rows",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT c.id AS comment_id, c.sender_id, 
+       CASE WHEN u.name IS NOT NULL THEN u.name ELSE u.email END,
+       u.avatar,
+       c.text,
+       c.rating,
+       c.created_at
+FROM public."comment" c`).WithArgs(uint64(1), uint64(2), uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"comment_id", "sender_id", "name", "avatar",
+						"text", "rating", "created_at",
+					}).
+						AddRow(uint64(1), uint64(2), "Ivan", sql.NullString{Valid: false, String: ""}, "good", uint8(5), time.Time{}).
+						AddRow(uint64(2), uint64(3), "Petr", sql.NullString{Valid: false, String: ""}, "bad", uint8(2), time.Time{}).
+						AddRow(uint64(3), uint64(4), "Mark", sql.NullString{Valid: false, String: ""}, "not bad", uint8(3), time.Time{}))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			resID:    1,
+			senderID: 2,
+			offset:   1,
+			count:    1,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -193,12 +234,17 @@ FROM public."comment" c`).WithArgs(uint64(1), uint64(2), uint64(1), uint64(1)).
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			commentStorage, err := repository.NewProductStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(commentStorage)
+			testCase.behaviorProductStorage(commentStorage, mockPool)
 
 			_, err = commentStorage.GetCommentList(ctx, testCase.offset, testCase.count, testCase.resID, testCase.senderID)
 			if err != nil {
