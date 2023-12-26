@@ -25,7 +25,8 @@ var (
 		"Получили некорректный формат images внутри объявления")
 	ErrUncorrectedPrice = myerrors.NewErrorInternal(
 		"Получили некорректный тип price")
-	ErrScanCommentID = myerrors.NewErrorInternal("Ошибка сканирования comment_id")
+	ErrScanCommentID     = myerrors.NewErrorInternal("Ошибка сканирования comment_id")
+	ErrGetDeletedProduct = myerrors.NewErrorBadContentRequest("Этот товар был удален продавцом")
 
 	NameSeqProduct = pgx.Identifier{"public", "product_id_seq"} //nolint:gochecknoglobals
 )
@@ -256,7 +257,7 @@ func (p *ProductStorage) getProduct(ctx context.Context,
 ) (*models.Product, error) {
 	product, err := p.selectProductByID(ctx, tx, productID)
 	if err != nil {
-		return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		return nil, ErrGetDeletedProduct
 	}
 
 	if product.SalerID == userID && product.Premium {
