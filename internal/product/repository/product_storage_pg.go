@@ -447,7 +447,7 @@ func (p *ProductStorage) GetProductsOfSaler(ctx context.Context,
 		if isMy {
 			whereClause = fmt.Sprintf("saler_id = %d", userID)
 		} else {
-			whereClause = fmt.Sprintf("saler_id = %d AND is_active = true OR (is_active = false AND available_count = 0)",
+			whereClause = fmt.Sprintf("saler_id = %d AND is_active = true",
 				userID)
 		}
 
