@@ -50,7 +50,9 @@ const (
 // parsePayments. True in return argument means successful handle payment
 //
 //nolint:funlen,cyclop
-func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, reader io.Reader) (bool, error) {
+func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment,
+	reader io.Reader, previousStatus string,
+) (bool, string, error) {
 	logger := p.logger.LogReqID(ctx)
 
 	body, err := io.ReadAll(reader)
@@ -58,7 +60,7 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 		err = fmt.Errorf("%w %+v", ErrReadAllAPIYoomany, err) //nolint:errorlint
 		logger.Errorln(err)
 
-		return false, err
+		return false, previousStatus, err
 	}
 
 	logger.Infof("body:%s", body)
@@ -70,7 +72,7 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 		err = fmt.Errorf("%w %+v", ErrUnmarshallAPIYoomany, err) //nolint:errorlint
 		logger.Errorln(err)
 
-		return false, err
+		return false, previousStatus, err
 	}
 
 	for _, item := range responseGetPayments.Items {
@@ -80,16 +82,18 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 			item.Metadata.ProductID == payment.Metadata.ProductID &&
 			item.Metadata.PeriodCode == payment.Metadata.PeriodCode {
 			switch {
-			case item.Status == statuses.StatusPaymentPending:
-				return false, nil
-			case statuses.IsStatusPaymentSuccessful(item.Status):
+			case previousStatus != item.Status && item.Status == statuses.StatusPaymentPending:
+				previousStatus = statuses.StatusPaymentPending
+
+				return false, previousStatus, nil
+			case previousStatus != item.Status && statuses.IsStatusPaymentSuccessful(item.Status):
 				if !reflect.DeepEqual(item.Amount, payment.Amount) {
 					err = fmt.Errorf("%w received: %+v != requested: %+v",
 						ErrValidationPaymentAPIYoomany, item.Amount, payment.Amount)
 
 					logger.Errorln(err)
 
-					return false, err
+					return false, previousStatus, err
 				}
 
 				err = p.service.AddPremium(ctx,
@@ -98,24 +102,28 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 					err = fmt.Errorf(myerrors.ErrTemplate, err)
 					logger.Errorln(err)
 
-					return false, err
+					return false, previousStatus, err
 				}
 
 				logger.Infof("Successful addPremium metadata:%+v", payment.Metadata)
 
-				return true, nil
-			case item.Status == statuses.StatusPaymentCanceled:
+				previousStatus = statuses.StatusPaymentSucceeded
+
+				return true, previousStatus, nil
+			case previousStatus != item.Status && item.Status == statuses.StatusPaymentCanceled:
 				err := p.service.UpdateStatusPremium(ctx, statuses.IntStatusPremiumCanceled,
 					item.Metadata.ProductID, item.Metadata.UserID)
 				if err != nil {
-					return false, fmt.Errorf(myerrors.ErrTemplate, err)
+					return false, previousStatus, fmt.Errorf(myerrors.ErrTemplate, err)
 				}
 
-				return false, nil
+				previousStatus = statuses.StatusPaymentCanceled
+
+				return false, previousStatus, nil
 			default:
 				logger.Errorln(ErrResponseWrongStatusAPIYoomany)
 
-				return false, fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
+				return false, previousStatus, fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
 			}
 		}
 	}
@@ -123,7 +131,7 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment, re
 	logger.Infof("not found payment with productID=%d userID=%d periodCode=%d",
 		payment.Metadata.ProductID, payment.Metadata.UserID, payment.Metadata.PeriodCode)
 
-	return false, nil
+	return false, previousStatus, nil
 }
 
 func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
@@ -134,6 +142,8 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 	timeStart := time.Now().Add(-100 * time.Second).Format(time.RFC3339)
 
 	go func() {
+		previousStatus := ""
+
 		for {
 			select {
 			case <-timer.C:
@@ -162,7 +172,9 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 					chError <- err
 				}
 
-				isSuccessfully, errPayments := p.parsePayments(ctx, payment, response.Body)
+				isSuccessfully, previousStatusReturn, errPayments := p.parsePayments(ctx, payment, response.Body, previousStatus)
+
+				previousStatus = previousStatusReturn
 
 				errBodyClose := response.Body.Close()
 				if errBodyClose != nil {
