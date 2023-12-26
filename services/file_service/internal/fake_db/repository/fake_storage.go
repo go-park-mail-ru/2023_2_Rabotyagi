@@ -178,7 +178,7 @@ func (f *FakeStorage) InsertProducts(ctx context.Context,
 	slProduct := [][]any{}
 	columns := []string{
 		"saler_id", "category_id", "city_id", "title", "description", "price",
-		"available_count", "delivery", "safe_deal", "views", "premium",
+		"available_count", "delivery", "safe_deal", "views",
 	}
 
 	f.Logger.Infof("start filling users")
@@ -194,7 +194,7 @@ func (f *FakeStorage) InsertProducts(ctx context.Context,
 			[]any{
 				preProduct.SalerID, preProduct.CategoryID, preProduct.CityID, preProduct.Title,
 				preProduct.Description, preProduct.Price, preProduct.AvailableCount,
-				preProduct.Delivery, preProduct.SafeDeal, preProduct.Views, preProduct.Premium,
+				preProduct.Delivery, preProduct.SafeDeal, preProduct.Views,
 			},
 		)
 	}

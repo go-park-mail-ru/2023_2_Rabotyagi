@@ -106,3 +106,8 @@ make swag
 ```shell
 easyjson <file.go>
 ```
+
+### Сгенерировать mock файл
+```shell
+mockgen --source=<filename> --destination=<filename> --package=mocks
+```
