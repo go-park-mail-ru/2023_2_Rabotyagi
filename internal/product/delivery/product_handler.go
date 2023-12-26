@@ -156,7 +156,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Success    200  {object} ProductResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
+//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть, badContent(4400), badFormat(4000)//nolint:lll
 //	@Router      /product/get [get]
 func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
