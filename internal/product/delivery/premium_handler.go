@@ -43,8 +43,8 @@ const (
 	headerKeyIdempotency     = "Idempotence-Key"
 	paymentsURLAPIYoomany    = "https://api.yookassa.ru/v3/payments"
 	paramCreatedAtAPIYoomany = "created_at.gte="
-	maxTimeoutAPIYoumany     = time.Minute * 11
-	periodRequestAPIYoumany  = time.Second * 11
+	maxTimeoutAPIYoumany     = time.Minute * 20
+	periodRequestAPIYoumany  = time.Second * 30
 )
 
 // parsePayments. True in return argument means successful handle payment
