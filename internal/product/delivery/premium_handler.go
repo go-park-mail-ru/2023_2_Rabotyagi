@@ -87,10 +87,7 @@ func (p *ProductHandler) handlePayments(ctx context.Context,
 			}
 
 			mapPreviousStatus[item.Metadata] = statuses.ConvertToIntStatus(item.Status)
-
 			logger.Infof("Successful addPremium metadata:%+v", item.Metadata)
-
-			return nil
 		case previousStatus != statuses.ConvertToIntStatus(item.Status) && (item.Status == statuses.StatusPaymentCanceled ||
 			item.Status == statuses.StatusPaymentPending):
 			err := p.service.UpdateStatusPremium(ctx, statuses.ConvertToIntStatus(item.Status),
@@ -100,8 +97,7 @@ func (p *ProductHandler) handlePayments(ctx context.Context,
 			}
 
 			mapPreviousStatus[item.Metadata] = statuses.ConvertToIntStatus(item.Status)
-
-			return nil
+			logger.Infof("Successful update status to:%v metadata:%+v", item.Status, item.Metadata)
 		default:
 			logger.Errorln(ErrResponseWrongStatusAPIYoomany)
 
