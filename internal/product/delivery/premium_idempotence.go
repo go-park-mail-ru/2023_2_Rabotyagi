@@ -1,8 +1,7 @@
 package delivery
 
 import (
-	"math/rand"
-	"strconv"
+	"fmt"
 	"sync"
 )
 
@@ -15,8 +14,9 @@ func generateString() string {
 	resultString := ""
 
 	for len(resultString) < maxLenKeyIdempotencyPayment {
-		randInt := rand.Int() //nolint:gosec
-		resultString += strconv.Itoa(randInt)
+		a := new(int8)
+
+		resultString += fmt.Sprintf("%v", a)
 	}
 
 	return resultString[:maxLenKeyIdempotencyPayment]
