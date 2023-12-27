@@ -43,8 +43,9 @@ const (
 	periodRequestAPIYoumany  = time.Second * 30
 )
 
-// parsePayments. True in return argument means successful handle payment
-func (p *ProductHandler) parsePayments(ctx context.Context,
+//nolint:funlen,cyclop
+func (p *ProductHandler) handlePayments(ctx context.Context,
+	mapPreviousStatus map[MetadataPayment]uint8,
 	reader io.Reader,
 ) error {
 	logger := p.logger.LogReqID(ctx)
@@ -72,32 +73,37 @@ func (p *ProductHandler) parsePayments(ctx context.Context,
 	for _, item := range responseGetPayments.Items {
 		logger.Infof("item:%+v\n", item)
 
-		switch {
-		case statuses.IsStatusPaymentSuccessful(item.Status):
-			err = p.service.AddPremium(ctx,
-				item.Metadata.ProductID, item.Metadata.UserID, item.Metadata.PeriodCode)
-			if err != nil {
-				err = fmt.Errorf(myerrors.ErrTemplate, err)
-				logger.Errorln(err)
+		previousStatus := mapPreviousStatus[item.Metadata]
 
-				return err
+		if previousStatus != statuses.ConvertToIntStatus(item.Status) {
+			switch {
+			case statuses.IsStatusPaymentSuccessful(item.Status):
+				err = p.service.AddPremium(ctx,
+					item.Metadata.ProductID, item.Metadata.UserID, item.Metadata.PeriodCode)
+				if err != nil {
+					err = fmt.Errorf(myerrors.ErrTemplate, err)
+					logger.Errorln(err)
+
+					return err
+				}
+
+				mapPreviousStatus[item.Metadata] = statuses.ConvertToIntStatus(item.Status)
+				logger.Infof("Successful addPremium metadata:%+v", item.Metadata)
+			case item.Status == statuses.StatusPaymentCanceled ||
+				item.Status == statuses.StatusPaymentPending:
+				err := p.service.UpdateStatusPremium(ctx, statuses.ConvertToIntStatus(item.Status),
+					item.Metadata.ProductID, item.Metadata.UserID)
+				if err != nil {
+					return fmt.Errorf(myerrors.ErrTemplate, err)
+				}
+
+				mapPreviousStatus[item.Metadata] = statuses.ConvertToIntStatus(item.Status)
+				logger.Infof("Successful update status to:%v metadata:%+v", item.Status, item.Metadata)
+			default:
+				logger.Errorln(ErrResponseWrongStatusAPIYoomany)
+
+				return fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
 			}
-
-			logger.Infof("Successful addPremium metadata:%+v", item.Metadata)
-
-			return nil
-		case item.Status == statuses.StatusPaymentCanceled || item.Status == statuses.StatusPaymentPending:
-			err := p.service.UpdateStatusPremium(ctx, statuses.ConvertToIntStatus(item.Status),
-				item.Metadata.ProductID, item.Metadata.UserID)
-			if err != nil {
-				return fmt.Errorf(myerrors.ErrTemplate, err)
-			}
-
-			return nil
-		default:
-			logger.Errorln(ErrResponseWrongStatusAPIYoomany)
-
-			return fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
 		}
 	}
 
@@ -109,17 +115,17 @@ func (p *ProductHandler) waitPayments(ctx context.Context,
 ) {
 	logger := p.logger.LogReqID(ctx)
 
-	var timeRequestRFC string
+	timeRequestRFC := time.Now().Format(time.RFC3339)
 
 	go func() {
+		mapPreviousStatus := make(map[MetadataPayment]uint8)
+
 		for {
 			select {
 			case <-chClose:
 				logger.Infof("успешно отключили ожидание платежей")
 			default:
 				time.Sleep(periodRequest)
-
-				timeBeforeRequestRFC := time.Now().Format(time.RFC3339)
 
 				request, err := http.NewRequestWithContext(ctx,
 					http.MethodGet,
@@ -131,8 +137,6 @@ func (p *ProductHandler) waitPayments(ctx context.Context,
 					logger.Errorln(err)
 				}
 
-				timeRequestRFC = timeBeforeRequestRFC
-
 				request.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
 				logger.Infof("req:%+v", request)
 
@@ -142,7 +146,7 @@ func (p *ProductHandler) waitPayments(ctx context.Context,
 					logger.Errorln(err)
 				}
 
-				errPayments := p.parsePayments(ctx, response.Body)
+				errPayments := p.handlePayments(ctx, mapPreviousStatus, response.Body)
 				if errPayments != nil {
 					logger.Errorf("error parse payments with req: %+v\n error is: %+v", request, errPayments)
 				}
