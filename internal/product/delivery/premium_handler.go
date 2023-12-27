@@ -87,7 +87,7 @@ func (p *ProductHandler) parsePayments(ctx context.Context,
 
 			return nil
 		case item.Status == statuses.StatusPaymentCanceled || item.Status == statuses.StatusPaymentPending:
-			err := p.service.UpdateStatusPremium(ctx, statuses.IntStatusPremiumCanceled,
+			err := p.service.UpdateStatusPremium(ctx, statuses.ConvertToIntStatus(item.Status),
 				item.Metadata.ProductID, item.Metadata.UserID)
 			if err != nil {
 				return fmt.Errorf(myerrors.ErrTemplate, err)

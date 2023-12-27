@@ -23,3 +23,18 @@ func IsStatusPaymentSuccessful(status string) bool {
 func IsIntStatusPremiumSuccessful(status uint8) bool {
 	return status == IntStatusPremiumWaiting || status == IntStatusPremiumSucceeded
 }
+
+func ConvertToIntStatus(status string) uint8 {
+	switch {
+	case status == StatusPaymentPending:
+		return IntStatusPremiumPending
+	case status == StatusPaymentWaiting:
+		return IntStatusPremiumWaiting
+	case status == StatusPaymentSucceeded:
+		return IntStatusPremiumSucceeded
+	case status == StatusPaymentCanceled:
+		return IntStatusPremiumCanceled
+	default:
+		return IntStatusPremiumNot
+	}
+}
