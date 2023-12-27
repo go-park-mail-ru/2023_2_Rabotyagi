@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"crypto/rand"
 	"fmt"
 	"sync"
 	"time"
@@ -15,12 +16,19 @@ const (
 	TimeTokenLife = 24 * time.Hour
 )
 
+var ErrGenerateSecret = myerrors.NewErrorInternal("Не получилось сгенерить секрет")
+
 var (
 	globalSecret []byte       //nolint:gochecknoglobals
 	rwMu         sync.RWMutex //nolint:gochecknoglobals
 )
 
-func StartRefreshingSecret(period time.Duration, chClose <-chan struct{}) {
+func StartRefreshingSecret(period time.Duration, chClose <-chan struct{}) error {
+	logger, err := mylogger.Get()
+	if err != nil {
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
 	go func() {
 		for {
 			select {
@@ -28,10 +36,16 @@ func StartRefreshingSecret(period time.Duration, chClose <-chan struct{}) {
 				return
 			default:
 				time.Sleep(period)
-				refreshSecret()
+
+				err = refreshSecret()
+				if err != nil {
+					logger.Errorln(err)
+				}
 			}
 		}
 	}()
+
+	return nil
 }
 
 func SetSecret(secret []byte) {
@@ -40,26 +54,44 @@ func SetSecret(secret []byte) {
 	rwMu.Unlock()
 }
 
-func refreshSecret() {
+func refreshSecret() error {
 	rwMu.Lock()
 	globalSecret = make([]byte, lenSecret)
+
+	logger, err := mylogger.Get()
+	if err != nil {
+		return fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	_, err = rand.Read(globalSecret)
+	if err != nil {
+		err = fmt.Errorf("%w %v", ErrGenerateSecret, err) //nolint:errorlint
+		logger.Errorln(err)
+
+		return err
+	}
 	rwMu.Unlock()
+
+	return nil
 }
 
 // GetSecret return secret for jwt if it exists
 // and additionally generate secret if not exist
-func GetSecret() []byte {
+func GetSecret() ([]byte, error) {
 	var result []byte
 
 	if globalSecret == nil {
-		refreshSecret()
+		err := refreshSecret()
+		if err != nil {
+			return nil, fmt.Errorf(myerrors.ErrTemplate, err)
+		}
 	}
 
 	rwMu.RLock()
 	result = globalSecret
 	rwMu.RUnlock()
 
-	return result
+	return result, nil
 }
 
 var (
@@ -71,10 +103,8 @@ var (
 type UserJwtPayload struct {
 	UserID uint64
 	Expire int64
-	Email  string
 }
 
-//nolint:cyclop
 func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) {
 	logger, err := mylogger.Get()
 	if err != nil {
@@ -99,9 +129,8 @@ func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) {
 	if claims, ok := tokenDuplicity.Claims.(jwt.MapClaims); ok && tokenDuplicity.Valid {
 		interfaceUserID, ok1 := claims["userID"]
 		interfaceExpire, ok2 := claims["expire"]
-		interfaceEmail, ok3 := claims["email"]
 
-		if !(ok1 && ok2 && ok3) {
+		if !(ok1 && ok2) {
 			logger.Errorf("error with claims: %+v", claims)
 
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
@@ -109,15 +138,14 @@ func NewUserJwtPayload(rawJwt string, secret []byte) (*UserJwtPayload, error) {
 
 		userID, ok1 := interfaceUserID.(float64)
 		expire, ok2 := interfaceExpire.(float64)
-		email, ok3 := interfaceEmail.(string)
 
-		if !(ok1 && ok2 && ok3) {
+		if !(ok1 && ok2) {
 			logger.Errorf("error with casting claims: %+v", claims)
 
 			return nil, fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
 		}
 
-		return &UserJwtPayload{UserID: uint64(userID), Expire: int64(expire), Email: email}, nil
+		return &UserJwtPayload{UserID: uint64(userID), Expire: int64(expire)}, nil
 	}
 
 	return nil, fmt.Errorf(myerrors.ErrTemplate, ErrInvalidToken)
@@ -128,7 +156,6 @@ func (u *UserJwtPayload) getMapClaims() jwt.MapClaims {
 
 	result["userID"] = u.UserID
 	result["expire"] = u.Expire
-	result["email"] = u.Email
 
 	return result
 }
