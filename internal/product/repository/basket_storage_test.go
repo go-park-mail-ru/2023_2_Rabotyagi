@@ -2,14 +2,14 @@ package repository_test
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
-	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"testing"
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/pashagolub/pgxmock/v3"
 )
 
