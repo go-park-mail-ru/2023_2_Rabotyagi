@@ -109,7 +109,7 @@ func (p *ProductHandler) waitPayments(ctx context.Context,
 ) {
 	logger := p.logger.LogReqID(ctx)
 
-	var timeStartRFC string
+	var timeRequestRFC string
 
 	go func() {
 		for {
@@ -119,17 +119,19 @@ func (p *ProductHandler) waitPayments(ctx context.Context,
 			default:
 				time.Sleep(periodRequest)
 
-				timeStartRFC = time.Now().Format(time.RFC3339)
+				timeBeforeRequestRFC := time.Now().Format(time.RFC3339)
 
 				request, err := http.NewRequestWithContext(ctx,
 					http.MethodGet,
-					fmt.Sprintf("%s?%s%s", paymentsURLAPIYoomany, paramCreatedAtAPIYoomany, timeStartRFC),
+					fmt.Sprintf("%s?%s%s", paymentsURLAPIYoomany, paramCreatedAtAPIYoomany, timeRequestRFC),
 					nil,
 				)
 				if err != nil {
 					err = fmt.Errorf("%w %+v", ErrCreationRequestAPIYooMany, err) //nolint:errorlint
 					logger.Errorln(err)
 				}
+
+				timeRequestRFC = timeBeforeRequestRFC
 
 				request.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
 				logger.Infof("req:%+v", request)
