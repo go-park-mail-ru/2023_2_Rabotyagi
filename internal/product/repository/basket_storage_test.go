@@ -13,7 +13,7 @@ import (
 	"github.com/pashagolub/pgxmock/v3"
 )
 
-func TestDeleteOrder(t *testing.T) {
+func TestDeleteOrder(t *testing.T) { //nolint:dupl
 	t.Parallel()
 
 	_ = mylogger.NewNop()
