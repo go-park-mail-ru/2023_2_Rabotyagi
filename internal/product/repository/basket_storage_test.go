@@ -6,32 +6,30 @@ import (
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/repository"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/pashagolub/pgxmock/v3"
 )
 
-func TestDeleteOrder(t *testing.T) { //nolint:dupl
+func TestDeleteOrder(t *testing.T) {
 	t.Parallel()
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		userID                 uint64
 		orderID                uint64
+		expectedError          error
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectExec(`DELETE FROM public."order"`).WithArgs(uint64(1), uint64(1)).
@@ -40,8 +38,24 @@ func TestDeleteOrder(t *testing.T) { //nolint:dupl
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},
-			userID:  1,
-			orderID: 1,
+			userID:        1,
+			orderID:       1,
+			expectedError: nil,
+		},
+		{
+			name: "test no affected rows",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectExec(`DELETE FROM public."order"`).WithArgs(uint64(1), uint64(1)).
+					WillReturnResult(pgxmock.NewResult("DELETE", 0))
+
+				mockPool.ExpectRollback()
+				mockPool.ExpectRollback()
+			},
+			userID:        1,
+			orderID:       1,
+			expectedError: repository.ErrNoAffectedOrderRows,
 		},
 	}
 
@@ -53,20 +67,27 @@ func TestDeleteOrder(t *testing.T) { //nolint:dupl
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			basketStorage, err := repository.NewProductStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(basketStorage)
+			testCase.behaviorProductStorage(basketStorage, mockPool)
 
-			err = basketStorage.DeleteOrder(ctx, testCase.orderID, testCase.userID)
-			if err != nil {
-				t.Fatal(err)
-			}
+			errActual := basketStorage.DeleteOrder(ctx, testCase.orderID, testCase.userID)
 
 			if err := mockPool.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+
+			err = utils.EqualError(errActual, testCase.expectedError)
+			if err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
@@ -77,23 +98,19 @@ func TestUpdateOrderCount(t *testing.T) {
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		ownerID                uint64
 		orderID                uint64
 		newCount               uint32
+		expectedError          error
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectExec(`UPDATE public."order"`).WithArgs(uint32(4), uint64(1), uint64(1)).
@@ -102,9 +119,26 @@ func TestUpdateOrderCount(t *testing.T) {
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},
-			ownerID:  1,
-			orderID:  1,
-			newCount: 4,
+			ownerID:       1,
+			orderID:       1,
+			newCount:      4,
+			expectedError: nil,
+		},
+		{
+			name: "test no affected rows",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectExec(`UPDATE public."order"`).WithArgs(uint32(4), uint64(1), uint64(1)).
+					WillReturnResult(pgxmock.NewResult("UPDATE", 0))
+
+				mockPool.ExpectRollback()
+				mockPool.ExpectRollback()
+			},
+			ownerID:       1,
+			orderID:       1,
+			newCount:      4,
+			expectedError: repository.ErrNoAffectedOrderRows,
 		},
 	}
 
@@ -116,20 +150,30 @@ func TestUpdateOrderCount(t *testing.T) {
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			catStorage, err := repository.NewProductStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(catStorage)
+			testCase.behaviorProductStorage(catStorage, mockPool)
 
-			err = catStorage.UpdateOrderCount(ctx, testCase.ownerID, testCase.orderID, testCase.newCount)
+			errActual := catStorage.UpdateOrderCount(ctx, testCase.ownerID, testCase.orderID, testCase.newCount)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			if err := mockPool.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+
+			err = utils.EqualError(errActual, testCase.expectedError)
+			if err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
@@ -146,6 +190,7 @@ func TestUpdateOrderStatus(t *testing.T) {
 		ownerID                uint64
 		orderID                uint64
 		newStatus              uint8
+		expectedError          error
 	}
 
 	testCases := [...]TestCase{
@@ -164,9 +209,10 @@ func TestUpdateOrderStatus(t *testing.T) {
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},
-			ownerID:   1,
-			orderID:   1,
-			newStatus: 2,
+			ownerID:       1,
+			orderID:       1,
+			newStatus:     2,
+			expectedError: nil,
 		},
 		{
 			name: "test status default not 0",
@@ -186,9 +232,53 @@ func TestUpdateOrderStatus(t *testing.T) {
 				mockPool.ExpectCommit()
 				mockPool.ExpectRollback()
 			},
-			ownerID:   1,
-			orderID:   1,
-			newStatus: 2,
+			ownerID:       1,
+			orderID:       1,
+			newStatus:     2,
+			expectedError: nil,
+		},
+		{
+			name: "test status default not 0",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT status, count FROM public."order"`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"status", "count"}).
+						AddRow(uint8(0), uint32(1)))
+
+				mockPool.ExpectExec(`UPDATE public."product"`).WithArgs(uint32(1), uint64(1)).
+					WillReturnResult(pgxmock.NewResult("UPDATE", 0))
+
+				mockPool.ExpectRollback()
+				mockPool.ExpectRollback()
+			},
+			ownerID:       1,
+			orderID:       1,
+			newStatus:     2,
+			expectedError: repository.ErrNoAffectedOrderRows,
+		},
+		{
+			name: "test status default not 0",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT status, count FROM public."order"`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"status", "count"}).
+						AddRow(uint8(0), uint32(1)))
+
+				mockPool.ExpectExec(`UPDATE public."product"`).WithArgs(uint32(1), uint64(1)).
+					WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+				mockPool.ExpectExec(`UPDATE public."order"`).WithArgs(uint8(2), uint64(1)).
+					WillReturnResult(pgxmock.NewResult("UPDATE", 0))
+
+				mockPool.ExpectRollback()
+				mockPool.ExpectRollback()
+			},
+			ownerID:       1,
+			orderID:       1,
+			newStatus:     2,
+			expectedError: repository.ErrNoAffectedOrderRows,
 		},
 	}
 
@@ -212,13 +302,18 @@ func TestUpdateOrderStatus(t *testing.T) {
 
 			testCase.behaviorProductStorage(catStorage, mockPool)
 
-			err = catStorage.UpdateOrderStatus(ctx, testCase.ownerID, testCase.orderID, testCase.newStatus)
+			errActual := catStorage.UpdateOrderStatus(ctx, testCase.ownerID, testCase.orderID, testCase.newStatus)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			if err := mockPool.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+
+			err = utils.EqualError(errActual, testCase.expectedError)
+			if err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
@@ -229,23 +324,19 @@ func TestAddOrderInBasket(t *testing.T) {
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		userID                 uint64
 		productID              uint64
 		count                  uint32
+		expectedResponse       *models.OrderInBasket
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT saler_id, category_id, title,
@@ -272,6 +363,20 @@ func TestAddOrderInBasket(t *testing.T) {
 			userID:    1,
 			productID: 1,
 			count:     1,
+			expectedResponse: &models.OrderInBasket{ //nolint:exhaustruct
+				ID:             1,
+				OwnerID:        1,
+				SalerID:        1,
+				ProductID:      1,
+				CityID:         6,
+				Title:          "Car",
+				Price:          1212,
+				Count:          1,
+				AvailableCount: 4,
+				Delivery:       true,
+				SafeDeal:       true,
+				InFavourites:   false,
+			},
 		},
 	}
 
@@ -283,20 +388,30 @@ func TestAddOrderInBasket(t *testing.T) {
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			catStorage, err := repository.NewProductStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(catStorage)
+			testCase.behaviorProductStorage(catStorage, mockPool)
 
-			_, err = catStorage.AddOrderInBasket(ctx, testCase.userID, testCase.productID, testCase.count)
+			response, err := catStorage.AddOrderInBasket(ctx, testCase.userID, testCase.productID, testCase.count)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			if err := mockPool.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+
+			err = utils.EqualTest(response, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
