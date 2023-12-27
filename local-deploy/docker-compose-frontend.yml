@@ -72,7 +72,6 @@ services:
     restart: always
     depends_on:
       - backend
-      - frontend
     volumes:
       - ./nginx-frontend.conf:/etc/nginx/nginx.conf
     ports:
