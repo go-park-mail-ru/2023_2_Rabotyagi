@@ -680,5 +680,4 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 	}
 
 	responses.SendResponse(w, logger, NewProductListResponse(products))
-	logger.Infof("in GetProductListHandler: get product list: %+v", products)
 }
