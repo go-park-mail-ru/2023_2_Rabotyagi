@@ -109,7 +109,7 @@ func (p *ProductHandler) waitPayments(ctx context.Context,
 ) {
 	logger := p.logger.LogReqID(ctx)
 
-	var timeRequestRFC string
+	timeRequestRFC := time.Now().Format(time.RFC3339)
 
 	go func() {
 		for {
