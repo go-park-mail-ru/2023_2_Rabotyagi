@@ -37,19 +37,17 @@ func NewMapIdempotence() *MapIdempotencePayment {
 }
 
 func (m *MapIdempotencePayment) AddPayment(metadata *MetadataPayment) KeyIdempotencyPayment {
-	m.mu.RLock()
+	m.mu.Lock()
 
 	keyIdempotencyPayment, ok := m.mapIdempotence[*metadata]
 	if ok {
 		return keyIdempotencyPayment
 	}
 
-	m.mu.RUnlock()
-
 	keyIdempotencyPayment = KeyIdempotencyPayment(generateString())
 
-	m.mu.Lock()
 	m.mapIdempotence[*metadata] = keyIdempotencyPayment
+
 	m.mu.Unlock()
 
 	return keyIdempotencyPayment

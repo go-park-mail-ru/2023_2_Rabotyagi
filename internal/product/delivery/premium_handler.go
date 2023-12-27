@@ -176,7 +176,7 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 		return "", fmt.Errorf(myerrors.ErrTemplate, err)
 	}
 
-	logger.Infof("%s", body)
+	logger.Infof("payment:%s", body)
 
 	keyIdempotencyPayment := p.mapIdempotencyPayment.AddPayment(payment.Metadata)
 
