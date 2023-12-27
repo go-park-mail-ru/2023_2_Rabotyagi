@@ -75,33 +75,35 @@ func (p *ProductHandler) handlePayments(ctx context.Context,
 
 		previousStatus := mapPreviousStatus[item.Metadata]
 
-		switch {
-		case previousStatus != statuses.ConvertToIntStatus(item.Status) && statuses.IsStatusPaymentSuccessful(item.Status):
-			err = p.service.AddPremium(ctx,
-				item.Metadata.ProductID, item.Metadata.UserID, item.Metadata.PeriodCode)
-			if err != nil {
-				err = fmt.Errorf(myerrors.ErrTemplate, err)
-				logger.Errorln(err)
+		if previousStatus != statuses.ConvertToIntStatus(item.Status) {
+			switch {
+			case statuses.IsStatusPaymentSuccessful(item.Status):
+				err = p.service.AddPremium(ctx,
+					item.Metadata.ProductID, item.Metadata.UserID, item.Metadata.PeriodCode)
+				if err != nil {
+					err = fmt.Errorf(myerrors.ErrTemplate, err)
+					logger.Errorln(err)
 
-				return err
+					return err
+				}
+
+				mapPreviousStatus[item.Metadata] = statuses.ConvertToIntStatus(item.Status)
+				logger.Infof("Successful addPremium metadata:%+v", item.Metadata)
+			case item.Status == statuses.StatusPaymentCanceled ||
+				item.Status == statuses.StatusPaymentPending:
+				err := p.service.UpdateStatusPremium(ctx, statuses.ConvertToIntStatus(item.Status),
+					item.Metadata.ProductID, item.Metadata.UserID)
+				if err != nil {
+					return fmt.Errorf(myerrors.ErrTemplate, err)
+				}
+
+				mapPreviousStatus[item.Metadata] = statuses.ConvertToIntStatus(item.Status)
+				logger.Infof("Successful update status to:%v metadata:%+v", item.Status, item.Metadata)
+			default:
+				logger.Errorln(ErrResponseWrongStatusAPIYoomany)
+
+				return fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
 			}
-
-			mapPreviousStatus[item.Metadata] = statuses.ConvertToIntStatus(item.Status)
-			logger.Infof("Successful addPremium metadata:%+v", item.Metadata)
-		case previousStatus != statuses.ConvertToIntStatus(item.Status) && (item.Status == statuses.StatusPaymentCanceled ||
-			item.Status == statuses.StatusPaymentPending):
-			err := p.service.UpdateStatusPremium(ctx, statuses.ConvertToIntStatus(item.Status),
-				item.Metadata.ProductID, item.Metadata.UserID)
-			if err != nil {
-				return fmt.Errorf(myerrors.ErrTemplate, err)
-			}
-
-			mapPreviousStatus[item.Metadata] = statuses.ConvertToIntStatus(item.Status)
-			logger.Infof("Successful update status to:%v metadata:%+v", item.Status, item.Metadata)
-		default:
-			logger.Errorln(ErrResponseWrongStatusAPIYoomany)
-
-			return fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
 		}
 	}
 
