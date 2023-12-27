@@ -178,7 +178,7 @@ jobs:
                 script: |
                     cd /var/share/rabotyagi
                     docker compose pull backend backend-fs backend-auth
-                    docker compose up -d --force-recreate backend backend-fs backend-auth
+                    docker compose up -d --force-recreate backend backend-fs backend-auth nginx
 
     notify-deploy-good:
         runs-on: ubuntu-latest

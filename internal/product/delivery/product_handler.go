@@ -56,7 +56,8 @@ type ProductHandler struct {
 	logger                *mylogger.MyLogger
 }
 
-func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey, pathCertFile string,
+func NewProductHandler(ctx context.Context, frontendURL,
+	premiumShopID, premiumShopSecretKey, pathCertFile string,
 	productService IProductService, sessionManagerClient auth.SessionMangerClient,
 ) (*ProductHandler, error) {
 	logger, err := mylogger.Get()
@@ -90,7 +91,7 @@ func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey, pathCer
 		}
 	}
 
-	return &ProductHandler{
+	productHandler := &ProductHandler{
 		frontendPaymentURL:    frontendURL,
 		premiumShopID:         premiumShopID,
 		premiumShopSecretKey:  premiumShopSecretKey,
@@ -100,7 +101,14 @@ func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey, pathCer
 		service:               productService,
 		logger:                logger,
 		sessionManagerClient:  sessionManagerClient,
-	}, nil
+	}
+
+	// chClose yet not used
+	chClose := make(chan struct{})
+
+	productHandler.waitPayments(ctx, chClose, periodRequestAPIYoumany)
+
+	return productHandler, nil
 }
 
 // AddProductHandler godoc
@@ -156,7 +164,7 @@ func (p *ProductHandler) AddProductHandler(w http.ResponseWriter, r *http.Reques
 //	@Success    200  {object} ProductResponse
 //	@Failure    405  {string} string
 //	@Failure    500  {string} string
-//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
+//	@Failure    222  {object} responses.ErrorResponse "Error" Это Http ответ 200, внутри body статус может быть, badContent(4400), badFormat(4000)//nolint:lll
 //	@Router      /product/get [get]
 func (p *ProductHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -672,5 +680,4 @@ func (p *ProductHandler) GetSearchProductFeedHandler(w http.ResponseWriter, r *h
 	}
 
 	responses.SendResponse(w, logger, NewProductListResponse(products))
-	logger.Infof("in GetProductListHandler: get product list: %+v", products)
 }

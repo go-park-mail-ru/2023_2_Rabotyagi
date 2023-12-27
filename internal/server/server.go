@@ -26,9 +26,6 @@ import (
 )
 
 const (
-	pathCertFile = "/etc/ssl/goods-galaxy.ru.crt"
-	pathKeyFile  = "/etc/ssl/goods-galaxy.ru.key"
-
 	basicTimeout = 10 * time.Second
 )
 
@@ -140,7 +137,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 
 	handler, err := mux.NewMux(baseCtx, mux.NewConfigMux(config.AllowOrigin,
 		config.Schema, config.PortServer, config.MainServiceName,
-		config.PremiumShopID, config.PremiumShopSecret, pathCertFile),
+		config.PremiumShopID, config.PremiumShopSecret, config.PathCertFile),
 		userService, productService, categoryService, cityService, authGrpcService, logger)
 	if err != nil {
 		return err //nolint:wrapcheck
@@ -157,7 +154,7 @@ func (s *Server) Run(config *config.Config) error { //nolint:cyclop
 	logger.Infof("Start server:%s", config.PortServer)
 
 	if config.ProductionMode {
-		return s.httpServer.ListenAndServeTLS(pathCertFile, pathKeyFile) //nolint:wrapcheck
+		return s.httpServer.ListenAndServeTLS(config.PathCertFile, config.PathKeyFile) //nolint:wrapcheck
 	}
 
 	return s.httpServer.ListenAndServe() //nolint:wrapcheck

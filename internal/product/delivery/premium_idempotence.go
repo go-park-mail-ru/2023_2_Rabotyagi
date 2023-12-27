@@ -1,8 +1,7 @@
 package delivery
 
 import (
-	"math/rand"
-	"strconv"
+	"fmt"
 	"sync"
 )
 
@@ -12,11 +11,12 @@ const (
 )
 
 func generateString() string {
-	randInt := rand.Int() //nolint:gosec
 	resultString := ""
 
 	for len(resultString) < maxLenKeyIdempotencyPayment {
-		resultString += strconv.Itoa(randInt)
+		a := new(int8)
+
+		resultString += fmt.Sprintf("%v", a)
 	}
 
 	return resultString[:maxLenKeyIdempotencyPayment]
@@ -37,19 +37,17 @@ func NewMapIdempotence() *MapIdempotencePayment {
 }
 
 func (m *MapIdempotencePayment) AddPayment(metadata *MetadataPayment) KeyIdempotencyPayment {
-	m.mu.RLock()
+	m.mu.Lock()
 
 	keyIdempotencyPayment, ok := m.mapIdempotence[*metadata]
 	if ok {
 		return keyIdempotencyPayment
 	}
 
-	m.mu.RUnlock()
-
 	keyIdempotencyPayment = KeyIdempotencyPayment(generateString())
 
-	m.mu.Lock()
 	m.mapIdempotence[*metadata] = keyIdempotencyPayment
+
 	m.mu.Unlock()
 
 	return keyIdempotencyPayment

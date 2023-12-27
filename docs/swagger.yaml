@@ -242,7 +242,8 @@ definitions:
         $ref: '#/definitions/sql.NullString'
       birthday:
         $ref: '#/definitions/sql.NullTime'
-      email:
+      email_with_rus:
+        description: nolint
         type: string
       name:
         allOf:
@@ -266,7 +267,8 @@ definitions:
         type: string
       created_at:
         type: string
-      email:
+      email_with_rus:
+        description: nolint
         type: string
       id:
         type: integer
@@ -1070,6 +1072,45 @@ paths:
       summary: add premium for product
       tags:
       - premium
+  /premium/check:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        check status of premium using product id from query and user id from cookies\jwt.
+        premium_status = 0 not premium
+        premium_status = 1 pending
+        premium_status = 2 waiting_for_capture
+        premium_status = 3 succeeded
+        premium_status = 4 canceled
+      parameters:
+      - description: product id
+        in: query
+        name: product_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ResponseSuccessful'
+        "222":
+          description: Error". Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
+          schema:
+            $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: check status of premium
+      tags:
+      - premium
   /product/activate:
     patch:
       consumes:
@@ -1264,7 +1305,8 @@ paths:
           schema:
             $ref: '#/definitions/internal_product_delivery.ProductResponse'
         "222":
-          description: Error" Это Http ответ 200, внутри body статус может быть badFormat(4000)//nolint:lll
+          description: Error" Это Http ответ 200, внутри body статус может быть, badContent(4400),
+            badFormat(4000)//nolint:lll
           schema:
             $ref: '#/definitions/github_com_go-park-mail-ru_2023_2_Rabotyagi_pkg_responses.ErrorResponse'
         "405":

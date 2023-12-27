@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/services/auth/internal/jwt"
 )
 
@@ -27,30 +28,21 @@ func TestGenerateJwtToken(t *testing.T) {
 	testCases := [...]TestCase{
 		{
 			name:                "test basic work",
-			inputUserJwtPayload: &jwt.UserJwtPayload{UserID: 1, Expire: expire, Email: "example@mail.ru"},
+			inputUserJwtPayload: &jwt.UserJwtPayload{UserID: 1, Expire: expire},
 			expectedJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-				"eyJlbWFpbCI6ImV4YW1wbGVAbWFpbC5ydSIsImV4cGlyZSI6MCwidXNlcklEIjoxfQ." +
-				"GBCEb3XJ6aHTsyl8jC3lxSWK6byjbYN0kg2e3NH2i9s",
+				"eyJleHBpcmUiOjAsInVzZXJJRCI6MX0." +
+				"AxRUwsu1l_QGC2guNzeTYYOdIglczlCEyO2WUDKwfFw",
 			expectedError: nil,
 		},
 		{
-			name:                "test empty UserJwtPayload",
-			inputUserJwtPayload: &jwt.UserJwtPayload{UserID: 0, Expire: expire, Email: ""},
-			expectedJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IiIsImV4cGlyZSI6MCwidXNlcklEIjowfQ." +
-				"s4EqX-V9Q3pWejqJe0x8Z65PZFVtzeu3ByV8txPboTo",
-			expectedError: nil,
-		},
-		{
-			name: "test long email and big userID",
+			name: "test big userID",
 			inputUserJwtPayload: &jwt.UserJwtPayload{
 				UserID: 100000,
 				Expire: expire,
-				Email:  "exampleaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@mail.ru",
 			},
 			expectedJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-				"eyJlbWFpbCI6ImV4YW1wbGVhYWFhYWFhYWFhYWFhYWF" +
-				"hYWFhYWFhYWFhYWFhYWFhYWFhYWFhQG1haWwucnUiLCJleHBpcmUiOjAsInVzZXJJRCI6MTAwMDAwfQ." +
-				"CQIXkeDEW3Y0ffLm9efgsozkWvLK1sg4ArmYBReHjsE",
+				"eyJleHBpcmUiOjAsInVzZXJJRCI6MTAwMDAwfQ." +
+				"TzJp8AoDA8hX1vQGc-m6OSAGO_w_n2gXu5J0ePJkK_k",
 			expectedError: nil,
 		},
 		{
@@ -98,14 +90,7 @@ func TestNewUserJwtPayload(t *testing.T) {
 			inputRawJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
 				"eyJlbWFpbCI6ImV4YW1wbGVAbWFpbC5ydSIsImV4cGlyZSI6MCwidXNlcklEIjoxfQ." +
 				"GBCEb3XJ6aHTsyl8jC3lxSWK6byjbYN0kg2e3NH2i9s",
-			expectedUserJwtPayload: &jwt.UserJwtPayload{UserID: 1, Expire: 0, Email: "example@mail.ru"},
-			expectedError:          nil,
-		},
-		{
-			name: "test empty UserJwtPayload",
-			inputRawJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IiIsImV4cGlyZSI6MCwidXNlcklEIjowfQ." +
-				"s4EqX-V9Q3pWejqJe0x8Z65PZFVtzeu3ByV8txPboTo",
-			expectedUserJwtPayload: &jwt.UserJwtPayload{UserID: 0, Expire: 0, Email: ""},
+			expectedUserJwtPayload: &jwt.UserJwtPayload{UserID: 1, Expire: 0},
 			expectedError:          nil,
 		},
 		{
@@ -117,7 +102,6 @@ func TestNewUserJwtPayload(t *testing.T) {
 			expectedUserJwtPayload: &jwt.UserJwtPayload{
 				UserID: 100000,
 				Expire: 0,
-				Email:  "exampleaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@mail.ru",
 			},
 			expectedError: nil,
 		},
@@ -155,7 +139,12 @@ func TestSetSecret(t *testing.T) {
 
 	jwt.SetSecret(secret)
 
-	if string(jwt.GetSecret()) != string(secret) {
-		t.Error("Глобальный секрет не был установлен корректно")
+	receivedSecret, err := jwt.GetSecret()
+	if err != nil {
+		t.Errorf("неожиданная ошибка %+v", err)
+	}
+
+	if err := utils.CompareSameType(string(receivedSecret), string(secret)); err != nil {
+		t.Errorf("ошибка сравнения секретов %+v", err)
 	}
 }

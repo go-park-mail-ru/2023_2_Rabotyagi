@@ -68,7 +68,6 @@ func (c *CityHandler) GetFullCitiesHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	responses.SendResponse(w, logger, NewCityListResponse(cities))
-	logger.Infof("in GetFullCities: get all cities: %+v\n", cities)
 }
 
 // SearchCityHandler godoc

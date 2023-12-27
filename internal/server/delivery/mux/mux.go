@@ -68,7 +68,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		return nil, err //nolint:wrapcheck
 	}
 
-	productHandler, err := productdelivery.NewProductHandler(configMux.addrOrigin,
+	productHandler, err := productdelivery.NewProductHandler(ctx, configMux.addrOrigin,
 		configMux.premiumShopID, configMux.premiumShopSecret, configMux.pathCertFile, productService, authGrpcService)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
@@ -117,6 +117,8 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 
 	router.Handle("/premium/add",
 		middleware.SetupCORS(productHandler.AddPremiumHandler, configMux.addrOrigin, configMux.schema))
+	router.Handle("/premium/check",
+		middleware.SetupCORS(productHandler.CheckPremiumStatus, configMux.addrOrigin, configMux.schema))
 
 	router.Handle("/order/add",
 		middleware.SetupCORS(productHandler.AddOrderHandler, configMux.addrOrigin, configMux.schema))

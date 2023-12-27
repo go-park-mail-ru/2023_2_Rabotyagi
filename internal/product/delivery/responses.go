@@ -17,7 +17,6 @@ const (
 	ResponseSuccessfulCloseProduct      = "Объявление успешно закрыто"
 	ResponseSuccessfulDeleteProduct     = "Объявление успешно удалено"
 	ResponseSuccessfulActivateProduct   = "Объявление успешно активировано"
-	ResponseSuccessfulAddPremium        = "У объявления успешно акитвирован премиум"
 	ResponseSuccessfulDeleteComment     = "Комментарий успешно удалено"
 	ResponseSuccessfulUpdateComment     = "Комментарий успешно изменен"
 )
@@ -223,4 +222,22 @@ func (r *ResponseGetPaymentsAPIYoomany) MarshalJSON() ([]byte, error) {
 	}
 
 	return body, nil
+}
+
+//easyjson:json
+type PremiumStatus struct {
+	PremiumStatus uint8 `json:"premium_status"`
+}
+
+//easyjson:json
+type PremiumStatusResponse struct {
+	Status int           `json:"status"`
+	Body   PremiumStatus `json:"body"`
+}
+
+func NewPremiumStatusResponse(premiumStatus uint8) *PremiumStatusResponse {
+	return &PremiumStatusResponse{
+		Status: statuses.StatusResponseSuccessful,
+		Body:   PremiumStatus{PremiumStatus: premiumStatus},
+	}
 }
