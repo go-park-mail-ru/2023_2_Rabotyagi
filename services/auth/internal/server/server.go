@@ -4,7 +4,6 @@ import (
 	"context"
 	"net"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/auth"
@@ -31,13 +30,7 @@ type Server struct {
 }
 
 // RunFull chErrHTTP - chan from which error can be read if the http server exits with an error
-func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error { //nolint:funlen
-	logger, err := mylogger.New(strings.Split(config.OutputLogPath, " "),
-		strings.Split(config.ErrorOutputLogPath, " "))
-	if err != nil {
-		return err //nolint:wrapcheck
-	}
-
+func (s *Server) RunFull(config *config.Config, logger *mylogger.MyLogger, chErrHTTP chan<- error) error { //nolint:funlen
 	baseCtx := context.Background()
 
 	handler, err := deliverymux.NewMux(baseCtx, config.AuthServiceName, logger)
@@ -104,7 +97,10 @@ func (s *Server) RunFull(config *config.Config, chErrHTTP chan<- error) error { 
 	chCloseRefreshing := make(chan struct{})
 
 	// don`t want use chCloseRefreshing secret now
-	jwt.StartRefreshingSecret(jwt.TimeTokenLife, chCloseRefreshing)
+	err = jwt.StartRefreshingSecret(jwt.TimeTokenLife, chCloseRefreshing)
+	if err != nil {
+		return err //nolint:wrapcheck
+	}
 
 	s.grpcServer = server
 

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"reflect"
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/product/usecases"
@@ -35,24 +34,19 @@ var (
 	ErrUnmarshallAPIYoomany          = myerrors.NewErrorInternal("Ошибка в unmarshall от yoomany")
 	ErrResponseAPIYoomany            = myerrors.NewErrorInternal("Ошибка проверки ответа от yoomany")
 	ErrResponseWrongStatusAPIYoomany = myerrors.NewErrorBadContentRequest("Ошибка оплаты платежа от yoomany")
-	ErrDidntWaitPaymentAPIYoomany    = myerrors.NewErrorBadContentRequest("Не дождались оплаты")
-	ErrValidationPaymentAPIYoomany   = myerrors.NewErrorInternal("Оплата не прошла валидацию")
 )
 
 const (
 	headerKeyIdempotency     = "Idempotence-Key"
 	paymentsURLAPIYoomany    = "https://api.yookassa.ru/v3/payments"
 	paramCreatedAtAPIYoomany = "created_at.gte="
-	maxTimeoutAPIYoumany     = time.Minute * 20
 	periodRequestAPIYoumany  = time.Second * 30
 )
 
 // parsePayments. True in return argument means successful handle payment
-//
-//nolint:funlen,cyclop
-func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment,
-	reader io.Reader, previousStatus string,
-) (bool, string, error) {
+func (p *ProductHandler) parsePayments(ctx context.Context,
+	reader io.Reader,
+) error {
 	logger := p.logger.LogReqID(ctx)
 
 	body, err := io.ReadAll(reader)
@@ -60,7 +54,7 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment,
 		err = fmt.Errorf("%w %+v", ErrReadAllAPIYoomany, err) //nolint:errorlint
 		logger.Errorln(err)
 
-		return false, previousStatus, err
+		return err
 	}
 
 	logger.Infof("body:%s", body)
@@ -72,99 +66,72 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment,
 		err = fmt.Errorf("%w %+v", ErrUnmarshallAPIYoomany, err) //nolint:errorlint
 		logger.Errorln(err)
 
-		return false, previousStatus, err
+		return err
 	}
 
 	for _, item := range responseGetPayments.Items {
-		logger.Infof("%+v\n%+v", item, payment)
+		logger.Infof("item:%+v\n", item)
 
-		if item.Metadata.UserID == payment.Metadata.UserID &&
-			item.Metadata.ProductID == payment.Metadata.ProductID &&
-			item.Metadata.PeriodCode == payment.Metadata.PeriodCode {
-			switch {
-			case previousStatus != item.Status && item.Status == statuses.StatusPaymentPending:
-				previousStatus = statuses.StatusPaymentPending
+		switch {
+		case statuses.IsStatusPaymentSuccessful(item.Status):
+			err = p.service.AddPremium(ctx,
+				item.Metadata.ProductID, item.Metadata.UserID, item.Metadata.PeriodCode)
+			if err != nil {
+				err = fmt.Errorf(myerrors.ErrTemplate, err)
+				logger.Errorln(err)
 
-				return false, previousStatus, nil
-			case previousStatus != item.Status && statuses.IsStatusPaymentSuccessful(item.Status):
-				if !reflect.DeepEqual(item.Amount, payment.Amount) {
-					err = fmt.Errorf("%w received: %+v != requested: %+v",
-						ErrValidationPaymentAPIYoomany, item.Amount, payment.Amount)
-
-					logger.Errorln(err)
-
-					return false, previousStatus, err
-				}
-
-				err = p.service.AddPremium(ctx,
-					payment.Metadata.ProductID, payment.Metadata.UserID, payment.Metadata.PeriodCode)
-				if err != nil {
-					err = fmt.Errorf(myerrors.ErrTemplate, err)
-					logger.Errorln(err)
-
-					return false, previousStatus, err
-				}
-
-				logger.Infof("Successful addPremium metadata:%+v", payment.Metadata)
-
-				previousStatus = statuses.StatusPaymentSucceeded
-
-				return true, previousStatus, nil
-			case previousStatus != item.Status && item.Status == statuses.StatusPaymentCanceled:
-				err := p.service.UpdateStatusPremium(ctx, statuses.IntStatusPremiumCanceled,
-					item.Metadata.ProductID, item.Metadata.UserID)
-				if err != nil {
-					return false, previousStatus, fmt.Errorf(myerrors.ErrTemplate, err)
-				}
-
-				previousStatus = statuses.StatusPaymentCanceled
-
-				return false, previousStatus, nil
-			default:
-				logger.Errorln(ErrResponseWrongStatusAPIYoomany)
-
-				return false, previousStatus, fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
+				return err
 			}
+
+			logger.Infof("Successful addPremium metadata:%+v", item.Metadata)
+
+			return nil
+		case item.Status == statuses.StatusPaymentCanceled || item.Status == statuses.StatusPaymentPending:
+			err := p.service.UpdateStatusPremium(ctx, statuses.IntStatusPremiumCanceled,
+				item.Metadata.ProductID, item.Metadata.UserID)
+			if err != nil {
+				return fmt.Errorf(myerrors.ErrTemplate, err)
+			}
+
+			return nil
+		default:
+			logger.Errorln(ErrResponseWrongStatusAPIYoomany)
+
+			return fmt.Errorf(myerrors.ErrTemplate, ErrResponseWrongStatusAPIYoomany)
 		}
 	}
 
-	logger.Infof("not found payment with productID=%d userID=%d periodCode=%d",
-		payment.Metadata.ProductID, payment.Metadata.UserID, payment.Metadata.PeriodCode)
-
-	return false, previousStatus, nil
+	return nil
 }
 
-//nolint:funlen
-func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
-	payment *Payment, timeStart time.Time, periodRequest time.Duration,
+func (p *ProductHandler) waitPayments(ctx context.Context,
+	chClose <-chan struct{}, periodRequest time.Duration,
 ) {
 	logger := p.logger.LogReqID(ctx)
-	timer := time.NewTimer(maxTimeoutAPIYoumany)
-	timeStartRFC := timeStart.Format(time.RFC3339)
+
+	var timeRequestRFC string
 
 	go func() {
-		previousStatus := ""
-
 		for {
 			select {
-			case <-timer.C:
-				err := fmt.Errorf("%w для %+v", ErrDidntWaitPaymentAPIYoomany, payment)
-
-				logger.Errorln(err)
-				chError <- err
+			case <-chClose:
+				logger.Infof("успешно отключили ожидание платежей")
 			default:
 				time.Sleep(periodRequest)
 
+				timeBeforeRequestRFC := time.Now().Format(time.RFC3339)
+
 				request, err := http.NewRequestWithContext(ctx,
 					http.MethodGet,
-					fmt.Sprintf("%s?%s%s", paymentsURLAPIYoomany, paramCreatedAtAPIYoomany, timeStartRFC),
+					fmt.Sprintf("%s?%s%s", paymentsURLAPIYoomany, paramCreatedAtAPIYoomany, timeRequestRFC),
 					nil,
 				)
 				if err != nil {
 					err = fmt.Errorf("%w %+v", ErrCreationRequestAPIYooMany, err) //nolint:errorlint
 					logger.Errorln(err)
-					chError <- err
 				}
+
+				timeRequestRFC = timeBeforeRequestRFC
 
 				request.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
 				logger.Infof("req:%+v", request)
@@ -173,28 +140,17 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 				if err != nil {
 					err = fmt.Errorf("%w %+v", ErrRequestAPIYoomany, err) //nolint:errorlint
 					logger.Errorln(err)
-					chError <- err
 				}
 
-				isSuccessfully, previousStatusReturn, errPayments := p.parsePayments(ctx, payment, response.Body, previousStatus)
-
-				previousStatus = previousStatusReturn
+				errPayments := p.parsePayments(ctx, response.Body)
+				if errPayments != nil {
+					logger.Errorf("error parse payments with req: %+v\n error is: %+v", request, errPayments)
+				}
 
 				errBodyClose := response.Body.Close()
 				if errBodyClose != nil {
 					err = fmt.Errorf("%w %+v", ErrClosingResponseBody, err) //nolint:errorlint
 					logger.Errorln(err)
-					chError <- err
-				}
-
-				if errPayments != nil {
-					chError <- err
-
-					return
-				}
-
-				if errPayments == nil && isSuccessfully {
-					return
 				}
 			}
 		}
@@ -238,8 +194,6 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 	req.SetBasicAuth(p.premiumShopID, p.premiumShopSecretKey)
 	req.Header.Set("Content-Type", "application/json")
 	logger.Infof("%+v", req)
-
-	timeStart := time.Now()
 
 	response, err := p.httpClient.Do(req)
 	if err != nil {
@@ -291,12 +245,6 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 
 	p.logger.Infof("status pending for premium with productID=%d userID=%d periodCode=%d",
 		productID, userID, periodCode)
-
-	//nolint:godox
-	// TODO chErr just don`t handle yet
-	chErr := make(chan error)
-	p.waitPayment(ctx, chErr,
-		payment, timeStart, periodRequestAPIYoumany)
 
 	return responsePayment.Confirmation.ConfirmationURL, nil
 }

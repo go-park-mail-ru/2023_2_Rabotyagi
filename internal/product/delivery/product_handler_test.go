@@ -1,6 +1,7 @@
 package delivery_test
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -37,7 +38,9 @@ func NewProductHandler(ctrl *gomock.Controller,
 	behaviorSessionManagerClientCheck(mockSessionManagerClient)
 	behaviorProductService(mockProductService)
 
-	productHandler, err := delivery.NewProductHandler("test",
+	baseCtx := context.Background()
+
+	productHandler, err := delivery.NewProductHandler(baseCtx, "test",
 		"test", "test", "test",
 		mockProductService, mockSessionManagerClient)
 	if err != nil {
@@ -568,13 +571,7 @@ func TestGetListProductOfAnotherSaler(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler("test",
-				"test", "test", "test", mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
@@ -974,14 +971,7 @@ func TestSearchProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockProductService := mocks.NewMockIProductService(ctrl)
-			mockSessionManagerClient := mocksauth.NewMockSessionMangerClient(ctrl)
-
-			testCase.behaviorProductService(mockProductService)
-
-			productHandler, err := delivery.NewProductHandler("test",
-				"test", "test", "test",
-				mockProductService, mockSessionManagerClient)
+			productHandler, err := NewProductHandler(ctrl, testCase.behaviorProductService)
 			if err != nil {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}

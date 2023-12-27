@@ -61,10 +61,14 @@ func (a *AuthService) LoginUser(ctx context.Context, email string, password stri
 	jwtPayload := jwt.UserJwtPayload{} //nolint:exhaustruct
 
 	jwtPayload.UserID = user.ID
-	jwtPayload.Email = user.Email
 	jwtPayload.Expire = time.Now().Add(jwt.TimeTokenLife).Unix()
 
-	rawJwt, err := jwt.GenerateJwtToken(&jwtPayload, jwt.GetSecret())
+	secret, err := jwt.GetSecret()
+	if err != nil {
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rawJwt, err := jwt.GenerateJwtToken(&jwtPayload, secret)
 	if err != nil {
 		logger.Errorln(err)
 
@@ -94,10 +98,14 @@ func (a *AuthService) AddUser(ctx context.Context, email string, password string
 	jwtPayload := jwt.UserJwtPayload{} //nolint:exhaustruct
 
 	jwtPayload.UserID = user.ID
-	jwtPayload.Email = user.Email
 	jwtPayload.Expire = time.Now().Add(jwt.TimeTokenLife).Unix()
 
-	rawJwt, err := jwt.GenerateJwtToken(&jwtPayload, jwt.GetSecret())
+	secret, err := jwt.GetSecret()
+	if err != nil {
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	rawJwt, err := jwt.GenerateJwtToken(&jwtPayload, secret)
 	if err != nil {
 		logger.Errorln(err)
 
@@ -110,7 +118,12 @@ func (a *AuthService) AddUser(ctx context.Context, email string, password string
 func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error) {
 	logger := a.logger.LogReqID(ctx)
 
-	jwtPayload, err := jwt.NewUserJwtPayload(rawJwt, jwt.GetSecret())
+	secret, err := jwt.GetSecret()
+	if err != nil {
+		return "", fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	jwtPayload, err := jwt.NewUserJwtPayload(rawJwt, secret)
 	if err != nil {
 		logger.Errorln(err)
 
@@ -119,7 +132,7 @@ func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error)
 
 	jwtPayload.Expire = time.Now().Unix()
 
-	newRawJwt, err := jwt.GenerateJwtToken(jwtPayload, jwt.GetSecret())
+	newRawJwt, err := jwt.GenerateJwtToken(jwtPayload, secret)
 	if err != nil {
 		logger.Errorln(err)
 
@@ -130,7 +143,12 @@ func (a *AuthService) Delete(ctx context.Context, rawJwt string) (string, error)
 }
 
 func (a *AuthService) Check(_ context.Context, rawJwt string) (uint64, error) {
-	userPayload, err := jwt.NewUserJwtPayload(rawJwt, jwt.GetSecret())
+	secret, err := jwt.GetSecret()
+	if err != nil {
+		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
+	}
+
+	userPayload, err := jwt.NewUserJwtPayload(rawJwt, secret)
 	if err != nil {
 		return 0, fmt.Errorf(myerrors.ErrTemplate, err)
 	}

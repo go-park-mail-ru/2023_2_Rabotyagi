@@ -68,7 +68,7 @@ func NewMux(ctx context.Context, configMux *ConfigMux, userService userdelivery.
 		return nil, err //nolint:wrapcheck
 	}
 
-	productHandler, err := productdelivery.NewProductHandler(configMux.addrOrigin,
+	productHandler, err := productdelivery.NewProductHandler(ctx, configMux.addrOrigin,
 		configMux.premiumShopID, configMux.premiumShopSecret, configMux.pathCertFile, productService, authGrpcService)
 	if err != nil {
 		return nil, err //nolint:wrapcheck

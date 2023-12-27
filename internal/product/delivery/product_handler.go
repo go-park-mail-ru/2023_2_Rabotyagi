@@ -56,7 +56,8 @@ type ProductHandler struct {
 	logger                *mylogger.MyLogger
 }
 
-func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey, pathCertFile string,
+func NewProductHandler(ctx context.Context, frontendURL,
+	premiumShopID, premiumShopSecretKey, pathCertFile string,
 	productService IProductService, sessionManagerClient auth.SessionMangerClient,
 ) (*ProductHandler, error) {
 	logger, err := mylogger.Get()
@@ -90,7 +91,7 @@ func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey, pathCer
 		}
 	}
 
-	return &ProductHandler{
+	productHandler := &ProductHandler{
 		frontendPaymentURL:    frontendURL,
 		premiumShopID:         premiumShopID,
 		premiumShopSecretKey:  premiumShopSecretKey,
@@ -100,7 +101,14 @@ func NewProductHandler(frontendURL, premiumShopID, premiumShopSecretKey, pathCer
 		service:               productService,
 		logger:                logger,
 		sessionManagerClient:  sessionManagerClient,
-	}, nil
+	}
+
+	// chClose yet not used
+	chClose := make(chan struct{})
+
+	productHandler.waitPayments(ctx, chClose, periodRequestAPIYoumany)
+
+	return productHandler, nil
 }
 
 // AddProductHandler godoc
