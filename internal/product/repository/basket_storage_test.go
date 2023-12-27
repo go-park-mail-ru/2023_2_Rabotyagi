@@ -422,21 +422,17 @@ func TestGetOrdersInBasket(t *testing.T) {
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		userID                 uint64
+		expectedResponse       []*models.OrderInBasket
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
@@ -462,6 +458,96 @@ func TestGetOrdersInBasket(t *testing.T) {
 				mockPool.ExpectRollback()
 			},
 			userID: 1,
+			expectedResponse: []*models.OrderInBasket{
+				{
+					ID: 1, OwnerID: 1, ProductID: 1, Title: "Car",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "safsafddasf"}},
+				},
+			},
+		},
+		{
+			name: "test empty",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
+        "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
+        "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
+    INNER JOIN "product"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{}))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			userID:           1,
+			expectedResponse: nil,
+		},
+		{
+			name: "test more data",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
+        "product".title, "product".price, "product".city_id, "order".count, "product".available_count,
+        "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
+    INNER JOIN "product"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "owner_id", "product_id", "title", "price",
+						"city_id", "count", "available_count", "delivery", "safe_deal", "saler_id",
+					}).
+						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
+							uint64(1), uint32(1), uint32(1), true, true, uint64(1)).
+						AddRow(uint64(2), uint64(1), uint64(1), "Jacket", uint64(111),
+							uint64(1), uint32(1), uint32(1), true, true, uint64(1)).
+						AddRow(uint64(3), uint64(1), uint64(1), "Sofa", uint64(111),
+							uint64(1), uint32(1), uint32(1), true, true, uint64(1)))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("safsafddasf"))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("safsafddasf"))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("safsafddasf"))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			userID: 1,
+			expectedResponse: []*models.OrderInBasket{
+				{
+					ID: 1, OwnerID: 1, ProductID: 1, Title: "Car",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "safsafddasf"}},
+				},
+				{
+					ID: 2, OwnerID: 1, ProductID: 1, Title: "Jacket",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "safsafddasf"}},
+				},
+				{
+					ID: 3, OwnerID: 1, ProductID: 1, Title: "Sofa",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "safsafddasf"}},
+				},
+			},
 		},
 	}
 
@@ -473,20 +559,30 @@ func TestGetOrdersInBasket(t *testing.T) {
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			basketStorage, err := repository.NewProductStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(basketStorage)
+			testCase.behaviorProductStorage(basketStorage, mockPool)
 
-			_, err = basketStorage.GetOrdersInBasketByUserID(ctx, testCase.userID)
+			response, err := basketStorage.GetOrdersInBasketByUserID(ctx, testCase.userID)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			if err := mockPool.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+
+			err = utils.EqualTest(response, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
@@ -497,21 +593,17 @@ func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		userID                 uint64
+		expectedResponse       []*models.OrderNotInBasket
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
@@ -538,6 +630,98 @@ func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
 				mockPool.ExpectRollback()
 			},
 			userID: 1,
+			expectedResponse: []*models.OrderNotInBasket{
+				{OrderInBasket: models.OrderInBasket{
+					ID: 1, OwnerID: 1, ProductID: 1, Title: "Car",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "testurl"}},
+				}, Status: 1},
+			},
+		},
+		{
+			name: "test empty",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
+        "product".title, "product".price, "product".city_id, "order".count, "order".status,
+		"product".available_count, "product".delivery, "product".safe_deal, "product".saler_id 
+		FROM public."order" INNER JOIN "product" ON "order".product_id = "product".id
+		WHERE owner_id=\$1 AND status > 0 AND status < 255`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{}))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			userID:           1,
+			expectedResponse: nil,
+		},
+		{
+			name: "test more data",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
+        "product".title, "product".price, "product".city_id, "order".count, "order".status,
+		"product".available_count, "product".delivery, "product".safe_deal, "product".saler_id 
+		FROM public."order" INNER JOIN "product" ON "order".product_id = "product".id
+		WHERE owner_id=\$1 AND status > 0 AND status < 255`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "owner_id", "product_id", "title", "price",
+						"city_id", "count", "status", "available_count", "delivery", "safe_deal", "saler_id",
+					}).
+						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
+							uint64(1), uint32(1), 1, uint32(1), true, true, uint64(1)).
+						AddRow(uint64(2), uint64(1), uint64(1), "Jacket", uint64(111),
+							uint64(1), uint32(1), 1, uint32(1), true, true, uint64(1)).
+						AddRow(uint64(3), uint64(1), uint64(1), "Sofa", uint64(111),
+							uint64(1), uint32(1), 1, uint32(1), true, true, uint64(1)))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("testurl"))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("testurl"))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("testurl"))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			userID: 1,
+			expectedResponse: []*models.OrderNotInBasket{
+				{OrderInBasket: models.OrderInBasket{
+					ID: 1, OwnerID: 1, ProductID: 1, Title: "Car",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "testurl"}},
+				}, Status: 1},
+				{OrderInBasket: models.OrderInBasket{
+					ID: 2, OwnerID: 1, ProductID: 1, Title: "Jacket",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "testurl"}},
+				}, Status: 1},
+				{OrderInBasket: models.OrderInBasket{
+					ID: 3, OwnerID: 1, ProductID: 1, Title: "Sofa",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "testurl"}},
+				}, Status: 1},
+			},
 		},
 	}
 
@@ -549,20 +733,30 @@ func TestGetOrdersNotInBasket(t *testing.T) { //nolint:dupl
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			basketStorage, err := repository.NewProductStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(basketStorage)
+			testCase.behaviorProductStorage(basketStorage, mockPool)
 
-			_, err = basketStorage.GetOrdersNotInBasketByUserID(ctx, testCase.userID)
+			response, err := basketStorage.GetOrdersNotInBasketByUserID(ctx, testCase.userID)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			if err := mockPool.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+
+			err = utils.EqualTest(response, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
@@ -573,21 +767,17 @@ func TestGetOrdersSold(t *testing.T) { //nolint:dupl
 
 	_ = mylogger.NewNop()
 
-	mockPool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	type TestCase struct {
 		name                   string
-		behaviorProductStorage func(m *repository.ProductStorage)
+		behaviorProductStorage func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface)
 		userID                 uint64
+		expectedResponse       []*models.OrderNotInBasket
 	}
 
 	testCases := [...]TestCase{
 		{
 			name: "test basic work",
-			behaviorProductStorage: func(m *repository.ProductStorage) {
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
 				mockPool.ExpectBegin()
 
 				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
@@ -613,6 +803,96 @@ func TestGetOrdersSold(t *testing.T) { //nolint:dupl
 				mockPool.ExpectRollback()
 			},
 			userID: 1,
+			expectedResponse: []*models.OrderNotInBasket{
+				{OrderInBasket: models.OrderInBasket{
+					ID: 1, OwnerID: 1, ProductID: 1, Title: "Car",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "safsafddasf"}},
+				}, Status: 1},
+			},
+		},
+		{
+			name: "test empty",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
+        "product".title, "product".price, "product".city_id, "order".count, "order".status, "product".available_count,
+        "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
+    INNER JOIN "product"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{}))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			userID:           1,
+			expectedResponse: nil,
+		},
+		{
+			name: "test basic work",
+			behaviorProductStorage: func(m *repository.ProductStorage, mockPool pgxmock.PgxPoolIface) {
+				mockPool.ExpectBegin()
+
+				mockPool.ExpectQuery(`SELECT "order".id, "order".owner_id, "order".product_id,
+        "product".title, "product".price, "product".city_id, "order".count, "order".status, "product".available_count,
+        "product".delivery, "product".safe_deal, "product".saler_id FROM public."order"
+    INNER JOIN "product"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{
+						"id", "owner_id", "product_id", "title", "price",
+						"city_id", "count", "status", "available_count", "delivery", "safe_deal", "saler_id",
+					}).
+						AddRow(uint64(1), uint64(1), uint64(1), "Car", uint64(111),
+							uint64(1), uint32(1), 1, uint32(1), true, true, uint64(1)).
+						AddRow(uint64(2), uint64(1), uint64(1), "Jacket", uint64(111),
+							uint64(1), uint32(1), 1, uint32(1), true, true, uint64(1)).
+						AddRow(uint64(3), uint64(1), uint64(1), "Sofa", uint64(111),
+							uint64(1), uint32(1), 1, uint32(1), true, true, uint64(1)))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("safsafddasf"))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("safsafddasf"))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectQuery(`SELECT url FROM public."image"`).WithArgs(uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"url"}).
+						AddRow("safsafddasf"))
+
+				mockPool.ExpectQuery(`SELECT id FROM public.favourite`).WithArgs(uint64(1), uint64(1)).
+					WillReturnRows(pgxmock.NewRows([]string{"id"}).
+						AddRow("1"))
+
+				mockPool.ExpectCommit()
+				mockPool.ExpectRollback()
+			},
+			userID: 1,
+			expectedResponse: []*models.OrderNotInBasket{
+				{OrderInBasket: models.OrderInBasket{
+					ID: 1, OwnerID: 1, ProductID: 1, Title: "Car",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "safsafddasf"}},
+				}, Status: 1},
+				{OrderInBasket: models.OrderInBasket{
+					ID: 2, OwnerID: 1, ProductID: 1, Title: "Jacket",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "safsafddasf"}},
+				}, Status: 1},
+				{OrderInBasket: models.OrderInBasket{
+					ID: 3, OwnerID: 1, ProductID: 1, Title: "Sofa",
+					Price: 111, CityID: 1, Count: 1, AvailableCount: 1, Delivery: true,
+					SafeDeal: true, InFavourites: true, SalerID: 1, Images: []models.Image{{URL: "safsafddasf"}},
+				}, Status: 1},
+			},
 		},
 	}
 
@@ -624,20 +904,30 @@ func TestGetOrdersSold(t *testing.T) { //nolint:dupl
 
 			ctx := context.Background()
 
+			mockPool, err := pgxmock.NewPool()
+			if err != nil {
+				t.Fatalf("%v", err)
+			}
+
 			basketStorage, err := repository.NewProductStorage(mockPool)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 
-			testCase.behaviorProductStorage(basketStorage)
+			testCase.behaviorProductStorage(basketStorage, mockPool)
 
-			_, err = basketStorage.GetOrdersSoldByUserID(ctx, testCase.userID)
+			response, err := basketStorage.GetOrdersSoldByUserID(ctx, testCase.userID)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			if err := mockPool.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+
+			err = utils.EqualTest(response, testCase.expectedResponse)
+			if err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
