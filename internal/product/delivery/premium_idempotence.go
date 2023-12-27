@@ -38,6 +38,7 @@ func NewMapIdempotence() *MapIdempotencePayment {
 
 func (m *MapIdempotencePayment) AddPayment(metadata *MetadataPayment) KeyIdempotencyPayment {
 	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	keyIdempotencyPayment, ok := m.mapIdempotence[*metadata]
 	if ok {
@@ -47,8 +48,6 @@ func (m *MapIdempotencePayment) AddPayment(metadata *MetadataPayment) KeyIdempot
 	keyIdempotencyPayment = KeyIdempotencyPayment(generateString())
 
 	m.mapIdempotence[*metadata] = keyIdempotencyPayment
-
-	m.mu.Unlock()
 
 	return keyIdempotencyPayment
 }
