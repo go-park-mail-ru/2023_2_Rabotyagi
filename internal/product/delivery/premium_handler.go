@@ -134,12 +134,13 @@ func (p *ProductHandler) parsePayments(ctx context.Context, payment *Payment,
 	return false, previousStatus, nil
 }
 
+//nolint:funlen
 func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
-	payment *Payment, periodRequest time.Duration,
+	payment *Payment, timeStart time.Time, periodRequest time.Duration,
 ) {
 	logger := p.logger.LogReqID(ctx)
 	timer := time.NewTimer(maxTimeoutAPIYoumany)
-	timeStart := time.Now().Add(-100 * time.Second).Format(time.RFC3339)
+	timeStartRFC := timeStart.Format(time.RFC3339)
 
 	go func() {
 		previousStatus := ""
@@ -155,7 +156,10 @@ func (p *ProductHandler) waitPayment(ctx context.Context, chError chan<- error,
 				time.Sleep(periodRequest)
 
 				request, err := http.NewRequestWithContext(ctx,
-					http.MethodGet, fmt.Sprintf("%s?%s%s", paymentsURLAPIYoomany, paramCreatedAtAPIYoomany, timeStart), nil)
+					http.MethodGet,
+					fmt.Sprintf("%s?%s%s", paymentsURLAPIYoomany, paramCreatedAtAPIYoomany, timeStartRFC),
+					nil,
+				)
 				if err != nil {
 					err = fmt.Errorf("%w %+v", ErrCreationRequestAPIYooMany, err) //nolint:errorlint
 					logger.Errorln(err)
@@ -235,6 +239,8 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 	req.Header.Set("Content-Type", "application/json")
 	logger.Infof("%+v", req)
 
+	timeStart := time.Now()
+
 	response, err := p.httpClient.Do(req)
 	if err != nil {
 		err = fmt.Errorf("%w error:%v", ErrRequestAPIYoomany, err.Error())
@@ -290,7 +296,7 @@ func (p *ProductHandler) createPayment(ctx context.Context,
 	// TODO chErr just don`t handle yet
 	chErr := make(chan error)
 	p.waitPayment(ctx, chErr,
-		payment, periodRequestAPIYoumany)
+		payment, timeStart, periodRequestAPIYoumany)
 
 	return responsePayment.Confirmation.ConfirmationURL, nil
 }
