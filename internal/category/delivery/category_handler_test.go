@@ -9,7 +9,9 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/delivery"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/internal/category/mocks"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/models"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/myerrors"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/mylogger"
+	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/responses/statuses"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils"
 	"github.com/go-park-mail-ru/2023_2_Rabotyagi/pkg/utils/test"
@@ -21,11 +23,13 @@ func TestGetFullCategories(t *testing.T) {
 
 	_ = mylogger.NewNop()
 
+	testErr := myerrors.NewErrorInternal("test error")
+
 	type TestCase struct {
 		name             string
 		method           string
 		behavior         func(m *mocks.MockICategoryService)
-		expectedResponse delivery.CategoryListResponse
+		expectedResponse any
 	}
 
 	testCases := [...]TestCase{
@@ -58,6 +62,20 @@ func TestGetFullCategories(t *testing.T) {
 				Status: statuses.StatusResponseSuccessful,
 				Body:   []*models.Category{},
 			},
+		},
+		{
+			name:   "test internal error",
+			method: http.MethodGet,
+			behavior: func(m *mocks.MockICategoryService) {
+				m.EXPECT().GetFullCategories(gomock.Any()).Return(nil, testErr)
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name:             "test wrong method",
+			method:           http.MethodDelete,
+			behavior:         func(m *mocks.MockICategoryService) {},
+			expectedResponse: "Method not allowed\n",
 		},
 		{
 			name:   "test repeated names a lot",
@@ -105,7 +123,7 @@ func TestGetFullCategories(t *testing.T) {
 				t.Fatalf("UnExpected err=%+v\n", err)
 			}
 
-			req := httptest.NewRequest(http.MethodGet, "/api/v1/category/get_full", nil)
+			req := httptest.NewRequest(testCase.method, "/api/v1/category/get_full", nil)
 
 			w := httptest.NewRecorder()
 
@@ -124,12 +142,14 @@ func TestSearchCategoryHandler(t *testing.T) {
 
 	_ = mylogger.NewNop()
 
+	testErr := myerrors.NewErrorInternal("test error")
+
 	type TestCase struct {
 		name             string
 		searchInput      string
 		method           string
 		behavior         func(m *mocks.MockICategoryService)
-		expectedResponse delivery.CategoryListResponse
+		expectedResponse any
 	}
 
 	testCases := [...]TestCase{
@@ -162,6 +182,22 @@ func TestSearchCategoryHandler(t *testing.T) {
 				Status: statuses.StatusResponseSuccessful,
 				Body:   []*models.Category{},
 			},
+		},
+		{
+			name:        "test internal error",
+			method:      http.MethodGet,
+			searchInput: "",
+			behavior: func(m *mocks.MockICategoryService) {
+				m.EXPECT().SearchCategory(gomock.Any(), "").Return(nil, testErr)
+			},
+			expectedResponse: responses.NewErrResponse(statuses.StatusInternalServer, responses.ErrInternalServer),
+		},
+		{
+			name:             "test wrong method",
+			method:           http.MethodDelete,
+			searchInput:      "",
+			behavior:         func(m *mocks.MockICategoryService) {},
+			expectedResponse: "Method not allowed\n",
 		},
 		{
 			name:        "test special symbols query",
