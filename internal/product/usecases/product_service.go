@@ -22,6 +22,19 @@ var (
 	ErrCheckFiles     = myerrors.NewErrorBadFormatRequest("Ошибка поиска файлов: ")
 )
 
+var (
+	regexSearch    = regexp.MustCompile(`[^a-zA-Zа-яА-Я0-9\s]+`)
+	regexSeparator = regexp.MustCompile(`\s+`)
+)
+
+func ClearSearchInput(searchInput string) string {
+	result := regexSearch.ReplaceAllString(searchInput, "")
+	result = regexSeparator.ReplaceAllString(result, " ")
+	result = strings.TrimSpace(result)
+
+	return result
+}
+
 var _ IProductStorage = (*productrepo.ProductStorage)(nil)
 
 type IProductStorage interface { //nolint:interfacebloat
@@ -243,12 +256,7 @@ func (p *ProductService) DeleteProduct(ctx context.Context, productID uint64, us
 }
 
 func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) ([]string, error) {
-	regex := regexp.MustCompile(`[^a-zA-Zа-яА-Я0-9\s]+`)
-	searchInput = regex.ReplaceAllString(searchInput, "")
-	regex = regexp.MustCompile(`\s+`)
-	searchInput = regex.ReplaceAllString(searchInput, " ")
-
-	searchInput = strings.TrimSpace(searchInput)
+	searchInput = ClearSearchInput(searchInput)
 
 	products, err := p.storage.SearchProduct(ctx, searchInput)
 	if err != nil {
@@ -267,12 +275,7 @@ func (p *ProductService) SearchProduct(ctx context.Context, searchInput string) 
 func (p *ProductService) GetSearchProductFeed(ctx context.Context,
 	searchInput string, lastNumber uint64, limit uint64, userID uint64,
 ) ([]*models.ProductInFeed, error) {
-	regex := regexp.MustCompile(`[^a-zA-Zа-яА-Я0-9\s]+`)
-	searchInput = regex.ReplaceAllString(searchInput, "")
-	regex = regexp.MustCompile(`\s+`)
-	searchInput = regex.ReplaceAllString(searchInput, " ")
-
-	searchInput = strings.TrimSpace(searchInput)
+	searchInput = ClearSearchInput(searchInput)
 
 	products, err := p.storage.GetSearchProductFeed(ctx, searchInput, lastNumber, limit, userID)
 	if err != nil {
